@@ -160,6 +160,23 @@ class HTMLTreeBuilderSmokeTest(object):
     def test_nested_formatting_elements(self):
         self.assertSoupEquals("<em><em></em></em>")
 
+    def test_double_head(self):
+        html = '''<!DOCTYPE html>
+<html>
+<head>
+<title>Ordinary HEAD element test</title>
+</head>
+<script type="text/javascript">
+alert("Help!");
+</script>
+<body>
+Hello, world!
+</body>
+</html>
+'''
+        soup = self.soup(html)
+        self.assertEqual("text/javascript", soup.find('script')['type'])
+
     def test_comment(self):
         # Comments are represented as Comment objects.
         markup = "<p>foo<!--foobar-->baz</p>"

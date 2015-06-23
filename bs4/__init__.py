@@ -310,6 +310,34 @@ class BeautifulSoup(Tag):
         self._most_recent_element = o
         parent.contents.append(o)
 
+        if parent.next_sibling:
+            # This node is being inserted into an element that has
+            # already been parsed. Deal with any dangling references.
+            index = parent.contents.index(o)
+            if index == 0:
+                previous_element = parent
+                previous_sibling = None
+            else:
+                previous_element = previous_sibling = parent.contents[index-1]
+            if index == len(parent.contents)-1:
+                next_element = parent.next_sibling
+                next_sibling = None
+            else:
+                next_element = next_sibling = parent.contents[index+1]
+
+            o.previous_element = previous_element
+            if previous_element:
+                previous_element.next_element = o
+            o.next_element = next_element
+            if next_element:
+                next_element.previous_element = o
+            o.next_sibling = next_sibling
+            if next_sibling:
+                next_sibling.previous_sibling = o
+            o.previous_sibling = previous_sibling
+            if previous_sibling:
+                previous_sibling.next_sibling = o
+
     def _popToTag(self, name, nsprefix=None, inclusivePop=True):
         """Pops the tag stack up to and including the most recent
         instance of the given tag. If inclusivePop is false, pops the tag

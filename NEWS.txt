@@ -29,6 +29,9 @@
   displayed correctly even if the filename or URL is a Unicode
   string. [bug=1268888]
 
+* Force object_was_parsed() to keep the tree intact even when an element
+  from later in the document is moved into place. [bug=1430633]
+
 = 4.3.2 (20131002) =
 
 * Fixed a bug in which short Unicode input was improperly encoded to

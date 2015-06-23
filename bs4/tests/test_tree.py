@@ -70,6 +70,12 @@ class TestFind(TreeTest):
         soup = self.soup(u'<h1>Räksmörgås</h1>')
         self.assertEqual(soup.find(text=u'Räksmörgås'), u'Räksmörgås')
 
+    def test_unicode_attribute_find(self):
+        soup = self.soup(u'<h1 id="Räksmörgås">here it is</h1>')
+        str(soup)
+        self.assertEqual("here it is", soup.find(id=u'Räksmörgås').text)
+
+
     def test_find_everything(self):
         """Test an optimization that finds all tags."""
         soup = self.soup("<a>foo</a><b>bar</b>")
