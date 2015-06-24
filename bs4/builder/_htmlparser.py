@@ -4,10 +4,16 @@ __all__ = [
     'HTMLParserTreeBuilder',
     ]
 
-from HTMLParser import (
-    HTMLParser,
-    HTMLParseError,
-    )
+from HTMLParser import HTMLParser
+
+try:
+    from HTMLParser import HTMLParseError
+except ImportError, e:
+    # HTMLParseError is removed in Python 3.5. Since it can never be
+    # thrown in 3.5, we can just define our own class as a placeholder.
+    class HTMLParseError(Exception):
+        pass
+
 import sys
 import warnings
 

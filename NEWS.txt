@@ -44,6 +44,9 @@
   'class', the html5lib tree builder will now turn its value into a
   list, as it would with any other tag. [bug=1296481]
 
+* Fixed an import error in Python 3.5 caused by the removal of the
+  HTMLParseError class. [bug=1420063]
+
 * Improved docstring for encode_contents() and
   decode_contents(). [bug=1441543]
 
