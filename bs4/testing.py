@@ -286,6 +286,24 @@ Hello, world!
         soup = self.soup(content)
         self.assertNotEqual(None, soup.html.body)
 
+    def test_multiple_copies_of_a_tag(self):
+        "Prevent recurrence of a bug in the html5lib treebuilder."
+        content = """<!DOCTYPE html>
+<html>
+ <body>
+   <article id="a" >
+   <div><a href="1"></div>
+   <footer>
+     <a href="2"></a>
+   </footer>
+  </article>
+  </body>
+</html>
+"""
+        soup = self.soup(content)
+        [x for x in soup.article.descendants]
+
+
     def test_basic_namespaces(self):
         """Parsers don't need to *understand* namespaces, but at the
         very least they should not choke on namespaces or lose

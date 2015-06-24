@@ -303,7 +303,24 @@ class BeautifulSoup(Tag):
         """Add an object to the parse tree."""
         parent = parent or self.currentTag
         most_recent_element = most_recent_element or self._most_recent_element
+
+        if isinstance(o, Tag):
+            next_element = o.next_element
+            next_sibling = o.next_sibling
+            previous_sibling = o.previous_sibling
+            previous_element = o.previous_element
+
         o.setup(parent, most_recent_element)
+
+        if isinstance(o, Tag):
+            if next_element:
+                o.next_element = next_element
+            if next_sibling:
+                o.next_sibling = next_sibling
+            if previous_sibling:
+                o.previous_sibling = previous_sibling
+            if previous_element:
+                o.previous_element = previous_element
 
         if most_recent_element is not None:
             most_recent_element.next_element = o
