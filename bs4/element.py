@@ -1115,12 +1115,18 @@ class Tag(PageElement):
                        formatter="minimal"):
         """Renders the contents of this tag as a Unicode string.
 
+        :param indent_level: Each line of the rendering will be
+           indented this many spaces.
+
         :param eventual_encoding: The tag is destined to be
            encoded into this encoding. This method is _not_
            responsible for performing that encoding. This information
            is passed in so that it can be substituted in if the
            document contains a <META> tag that mentions the document's
            encoding.
+
+        :param formatter: The output formatter responsible for converting
+           entities to Unicode characters.
         """
         # First off, turn a string formatter into a function. This
         # will stop the lookup from happening over and over again.
@@ -1149,7 +1155,17 @@ class Tag(PageElement):
     def encode_contents(
         self, indent_level=None, encoding=DEFAULT_OUTPUT_ENCODING,
         formatter="minimal"):
-        """Renders the contents of this tag as a bytestring."""
+        """Renders the contents of this tag as a bytestring.
+
+        :param indent_level: Each line of the rendering will be
+           indented this many spaces.
+
+        :param eventual_encoding: The bytestring will be in this encoding.
+
+        :param formatter: The output formatter responsible for converting
+           entities to Unicode characters.
+        """
+
         contents = self.decode_contents(indent_level, encoding, formatter)
         return contents.encode(encoding)
 

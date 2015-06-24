@@ -7,6 +7,12 @@
 * Fixed yet another problem that caused the html5lib tree builder to
   create a disconnected parse tree. [bug=1237763]
 
+* Force object_was_parsed() to keep the tree intact even when an element
+  from later in the document is moved into place. [bug=1430633]
+
+* Fixed yet another bug that caused a disconnected tree when html5lib
+  copied an element from one part of the tree to another. [bug=1270611]
+
 * The select() method now supports selector grouping. Patch by
   Francisco Canas [bug=1191917]
 
@@ -31,11 +37,8 @@
   displayed correctly even if the filename or URL is a Unicode
   string. [bug=1268888]
 
-* Force object_was_parsed() to keep the tree intact even when an element
-  from later in the document is moved into place. [bug=1430633]
-
-* Fixed yet another bug that caused a disconnected tree when html5lib
-  copied an element from one part of the tree to another. [bug=1270611]
+* Improved docstring for encode_contents() and
+  decode_contents(). [bug=1441543]
 
 = 4.3.2 (20131002) =
 
