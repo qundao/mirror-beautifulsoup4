@@ -9,7 +9,10 @@ from bs4.builder import (
     HTML_5,
     HTMLTreeBuilder,
     )
-from bs4.element import NamespacedAttribute
+from bs4.element import (
+    NamespacedAttribute,
+    whitespace_re,
+)
 import html5lib
 from html5lib.constants import namespaces
 from bs4.element import (
@@ -103,7 +106,13 @@ class AttrList(object):
     def __iter__(self):
         return list(self.attrs.items()).__iter__()
     def __setitem__(self, name, value):
-        "set attr", name, value
+        # If this attribute is a multi-valued attribute for this element,
+        # turn its value into a list.
+        list_attr = HTML5TreeBuilder.cdata_list_attributes
+        if (name in list_attr['*']
+            or (self.element.name in list_attr
+                and name in list_attr[self.element.name])):
+            value = whitespace_re.split(value)
         self.element[name] = value
     def items(self):
         return list(self.attrs.items())
@@ -180,6 +189,7 @@ class Element(html5lib.treebuilders._base.Node):
         return AttrList(self.element)
 
     def setAttributes(self, attributes):
+
         if attributes is not None and len(attributes) > 0:
 
             converted_attributes = []

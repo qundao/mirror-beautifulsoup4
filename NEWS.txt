@@ -40,6 +40,10 @@
   displayed correctly even if the filename or URL is a Unicode
   string. [bug=1268888]
 
+* If the initial <html> tag contains a CDATA list attribute such as
+  'class', the html5lib tree builder will now turn its value into a
+  list, as it would with any other tag. [bug=1296481]
+
 * Improved docstring for encode_contents() and
   decode_contents(). [bug=1441543]
 
