@@ -1,4 +1,6 @@
-= 4.3.3 (Unreleased) =
+= 4.4.0 (Unreleased) =
+
+* Started using a standard MIT license. [bug=1294662]
 
 * Added a Chinese translation of the documentation by Delong .w.
 
