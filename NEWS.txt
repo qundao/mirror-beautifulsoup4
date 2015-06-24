@@ -17,7 +17,10 @@
   Francisco Canas [bug=1191917]
 
 * The select() method can now find tags whose names contain
-  dashes. Patch by Francisco Canas [bug=1276211]
+  dashes. Patch by Francisco Canas. [bug=1276211]
+
+* The select() method can now find tags with attributes whose names
+  contain dashes. Patch by Marek Kapolka. [bug=1304007]
 
 * Improved the lxml tree builder's handling of processing
   instructions. [bug=1294645]

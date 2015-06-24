@@ -570,7 +570,7 @@ class PageElement(object):
     #     |                           Attribute
     #    Tag
     attribselect_re = re.compile(
-        r'^(?P<tag>[a-zA-Z0-9][-.a-zA-Z0-9:_]*)?\[(?P<attribute>\w+)(?P<operator>[=~\|\^\$\*]?)' +
+        r'^(?P<tag>[a-zA-Z0-9][-.a-zA-Z0-9:_]*)?\[(?P<attribute>[\w-]+)(?P<operator>[=~\|\^\$\*]?)' +
         r'=?"?(?P<value>[^\]"]*)"?\]$'
         )
 

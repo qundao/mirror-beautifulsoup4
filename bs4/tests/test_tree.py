@@ -1559,6 +1559,7 @@ class TestSoupSelector(TreeTest):
 </span>
 <span class="span3"></span>
 <custom-dashed-tag class="dashed" id="dash2"/>
+<div data-tag="dashedvalue" id="data1"/>
 </span>
 </div>
 <x id="xid">
@@ -1606,17 +1607,17 @@ class TestSoupSelector(TreeTest):
 
     def test_one_tag_many(self):
         els = self.soup.select('div')
-        self.assertEqual(len(els), 3)
+        self.assertEqual(len(els), 4)
         for div in els:
             self.assertEqual(div.name, 'div')
 
     def test_tag_in_tag_one(self):
         els = self.soup.select('div div')
-        self.assertSelects('div div', ['inner'])
+        self.assertSelects('div div', ['inner', 'data1'])
 
     def test_tag_in_tag_many(self):
         for selector in ('html div', 'html body div', 'body div'):
-            self.assertSelects(selector, ['main', 'inner', 'footer'])
+            self.assertSelects(selector, ['data1', 'main', 'inner', 'footer'])
 
     def test_tag_no_match(self):
         self.assertEqual(len(self.soup.select('del')), 0)
@@ -1738,6 +1739,7 @@ class TestSoupSelector(TreeTest):
             ('[id^="m"]', ['me', 'main']),
             ('div[id^="m"]', ['main']),
             ('a[id^="m"]', ['me']),
+            ('div[data-tag^="dashed"]', ['data1'])
         )
 
     def test_attribute_endswith(self):
@@ -1745,8 +1747,8 @@ class TestSoupSelector(TreeTest):
             ('[href$=".css"]', ['l1']),
             ('link[href$=".css"]', ['l1']),
             ('link[id$="1"]', ['l1']),
-            ('[id$="1"]', ['l1', 'p1', 'header1', 's1a1', 's2a1', 's1a2s1', 'dash1']),
-            ('div[id$="1"]', []),
+            ('[id$="1"]', ['data1', 'l1', 'p1', 'header1', 's1a1', 's2a1', 's1a2s1', 'dash1']),
+            ('div[id$="1"]', ['data1']),
             ('[id$="noending"]', []),
         )
 
@@ -1767,8 +1769,8 @@ class TestSoupSelector(TreeTest):
             ('[href*=".css"]', ['l1']),
             ('link[href*=".css"]', ['l1']),
             ('link[id*="1"]', ['l1']),
-            ('[id*="1"]', ['l1', 'p1', 'header1', 's1a1', 's1a2', 's2a1', 's1a2s1', 'dash1']),
-            ('div[id*="1"]', []),
+            ('[id*="1"]', ['data1', 'l1', 'p1', 'header1', 's1a1', 's1a2', 's2a1', 's1a2s1', 'dash1']),
+            ('div[id*="1"]', ['data1']),
             ('[id*="noending"]', []),
             # New for this test
             ('[href*="."]', ['bob', 'me', 'l1']),
@@ -1776,6 +1778,7 @@ class TestSoupSelector(TreeTest):
             ('link[href*="."]', ['l1']),
             ('div[id*="n"]', ['main', 'inner']),
             ('div[id*="nn"]', ['inner']),
+            ('div[data-tag*="edval"]', ['data1'])
         )
 
     def test_attribute_exact_or_hypen(self):
@@ -1795,6 +1798,7 @@ class TestSoupSelector(TreeTest):
             ('p[class]', ['p1', 'pmulti']),
             ('[blah]', []),
             ('p[blah]', []),
+            ('div[data-tag]', ['data1'])
         )
 
     def test_nth_of_type(self):
@@ -1831,7 +1835,7 @@ class TestSoupSelector(TreeTest):
         selected = inner.select("div")
         # The <div id="inner"> tag was selected. The <div id="footer">
         # tag was not.
-        self.assertSelectsIDs(selected, ['inner'])
+        self.assertSelectsIDs(selected, ['inner', 'data1'])
 
     def test_overspecified_child_id(self):
         self.assertSelects(".fancy #inner", ['inner'])
