@@ -1,5 +1,10 @@
 = 4.4.0 (Unreleased) =
 
+* __repr__ now returns an ASCII bytestring in Python 2, and a Unicode
+  string in Python 3, instead of a UTF8-encoded bytestring in both
+  versions. In Python 3, __str__ now returns a Unicode string instead
+  of a bytestring. [bug=1420131]
+
 * Started using a standard MIT license. [bug=1294662]
 
 * Added a Chinese translation of the documentation by Delong .w.
@@ -12,10 +17,6 @@
 
 * Fixed yet another bug that caused a disconnected tree when html5lib
   copied an element from one part of the tree to another. [bug=1270611]
-
-* __repr__ now returns an ASCII bytestring in Python 2, and a Unicode
-  string in Python 3, instead of a UTF8-encoded bytestring in both
-  versions. [bug=1420131]
 
 * The select() method now supports selector grouping. Patch by
   Francisco Canas [bug=1191917]
