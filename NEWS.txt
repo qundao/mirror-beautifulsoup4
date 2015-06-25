@@ -50,6 +50,9 @@
 * Improved docstring for encode_contents() and
   decode_contents(). [bug=1441543]
 
+* Fixed a crash in Unicode, Dammit's encoding detector when the name
+  of the encoding itself contained invalid bytes. [bug=1360913]
+
 = 4.3.2 (20131002) =
 
 * Fixed a bug in which short Unicode input was improperly encoded to

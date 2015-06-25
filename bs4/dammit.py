@@ -306,7 +306,7 @@ class EncodingDetector:
             declared_encoding_match = html_meta_re.search(markup, endpos=html_endpos)
         if declared_encoding_match is not None:
             declared_encoding = declared_encoding_match.groups()[0].decode(
-                'ascii')
+                'ascii', 'replace')
         if declared_encoding:
             return declared_encoding.lower()
         return None

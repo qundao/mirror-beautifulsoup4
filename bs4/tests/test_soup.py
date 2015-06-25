@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests of Beautiful Soup as a whole."""
 
+from pdb import set_trace
 import logging
 import unittest
 import sys
@@ -20,6 +21,7 @@ import bs4.dammit
 from bs4.dammit import (
     EntitySubstitution,
     UnicodeDammit,
+    EncodingDetector,
 )
 from bs4.testing import (
     SoupTest,
@@ -319,6 +321,12 @@ class TestUnicodeDammit(unittest.TestCase):
         for bad_encoding in ['.utf8', '...', 'utF---16.!']:
             dammit = UnicodeDammit(utf8_data, [bad_encoding])
             self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
+
+    def test_encoding_detector_replaces_junk_in_encoding_name_with_replacement_character(self):
+        detected = EncodingDetector(
+            b'<?xml version="1.0" encoding="UTF-\xdb" ?>')
+        encodings = list(detected.encodings)
+        assert u'utf-\N{REPLACEMENT CHARACTER}' in encodings
 
     def test_detect_html5_style_meta_tag(self):
 
