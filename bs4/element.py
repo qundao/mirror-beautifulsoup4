@@ -983,15 +983,25 @@ class Tag(PageElement):
         as defined in __eq__."""
         return not self == other
 
-    def __repr__(self, encoding=DEFAULT_OUTPUT_ENCODING):
+    def __repr__(self, encoding="unicode-escape"):
         """Renders this tag as a string."""
-        return self.encode(encoding)
+        if PY3K:
+            # "The return value must be a string object", i.e. Unicode
+            return self.decode()
+        else:
+            # "The return value must be a string object", i.e. a bytestring.
+            # By convention, the return value of __repr__ should also be
+            # an ASCII string.
+            return self.encode(encoding)
 
     def __unicode__(self):
         return self.decode()
 
     def __str__(self):
-        return self.encode()
+        if PY3K:
+            return self.decode()
+        else:
+            return self.encode()
 
     if PY3K:
         __str__ = __repr__ = __unicode__

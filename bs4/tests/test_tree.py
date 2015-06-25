@@ -19,6 +19,7 @@ from bs4.builder import (
     HTMLParserTreeBuilder,
 )
 from bs4.element import (
+    PY3K,
     CData,
     Comment,
     Doctype,
@@ -1489,6 +1490,14 @@ class TestEncoding(SoupTest):
         soup = self.soup(html)
         self.assertEqual(
             u"\N{SNOWMAN}".encode("utf8"), soup.b.renderContents())
+
+    def test_repr(self):
+        html = u"<b>\N{SNOWMAN}</b>"
+        soup = self.soup(html)
+        if PY3K:
+            self.assertEqual(html, repr(soup))
+        else:
+            self.assertEqual(b'<b>\\u2603</b>', repr(soup))
 
 class TestNavigableStringSubclasses(SoupTest):
 
