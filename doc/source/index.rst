@@ -270,7 +270,7 @@ This table summarizes the advantages and disadvantages of each parser library:
 | lxml's HTML parser   | ``BeautifulSoup(markup, "lxml")``          | * Very fast                    | * External C dependency  |
 |                      |                                            | * Lenient                      |                          |
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
-| lxml's XML parser    | ``BeautifulSoup(markup, "lxml-xml")`` | * Very fast                    | * External C dependency  |
+| lxml's XML parser    | ``BeautifulSoup(markup, "lxml-xml")``      | * Very fast                    | * External C dependency  |
 |                      | ``BeautifulSoup(markup, "xml")``           | * The only currently supported |                          |
 |                      |                                            |   XML parser                   |                          |
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
@@ -2577,7 +2577,7 @@ constructor. Beautiful Soup assumes that a document has a single
 encoding, whatever it might be. If you pass it a document that
 contains both UTF-8 and Windows-1252, it's likely to think the whole
 document is Windows-1252, and the document will come out looking like
-` â˜ƒâ˜ƒâ˜ƒ“I like snowmen!”`.
+``â˜ƒâ˜ƒâ˜ƒ“I like snowmen!”``.
 
 ``UnicodeDammit.detwingle()`` is new in Beautiful Soup 4.1.0.
 
