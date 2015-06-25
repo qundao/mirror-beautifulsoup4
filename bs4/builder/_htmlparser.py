@@ -4,10 +4,16 @@ __all__ = [
     'HTMLParserTreeBuilder',
     ]
 
-from HTMLParser import (
-    HTMLParser,
-    HTMLParseError,
-    )
+from HTMLParser import HTMLParser
+
+try:
+    from HTMLParser import HTMLParseError
+except ImportError, e:
+    # HTMLParseError is removed in Python 3.5. Since it can never be
+    # thrown in 3.5, we can just define our own class as a placeholder.
+    class HTMLParseError(Exception):
+        pass
+
 import sys
 import warnings
 
@@ -20,7 +26,9 @@ import warnings
 # strict=True works well on Python 3.2.2.
 major, minor, release = sys.version_info[:3]
 CONSTRUCTOR_TAKES_STRICT = major == 3 and minor == 2 and release >= 3
+CONSTRUCTOR_STRICT_IS_DEPRECATED = major == 3 and minor == 3
 CONSTRUCTOR_TAKES_CONVERT_CHARREFS = major == 3 and minor >= 4
+
 
 from bs4.element import (
     CData,
@@ -123,7 +131,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
     features = [NAME, HTML, STRICT]
 
     def __init__(self, *args, **kwargs):
-        if CONSTRUCTOR_TAKES_STRICT:
+        if CONSTRUCTOR_TAKES_STRICT and not CONSTRUCTOR_STRICT_IS_DEPRECATED:
             kwargs['strict'] = False
         if CONSTRUCTOR_TAKES_CONVERT_CHARREFS:
             kwargs['convert_charrefs'] = False

@@ -243,6 +243,14 @@ Hello, world!
         soup = self.soup(markup)
         self.assertEqual(["css"], soup.div.div['class'])
 
+    def test_multivalued_attribute_on_html(self):
+        # html5lib uses a different API to set the attributes ot the
+        # <html> tag. This has caused problems with multivalued
+        # attributes.
+        markup = '<html class="a b"></html>'
+        soup = self.soup(markup)
+        self.assertEqual(["a", "b"], soup.html['class'])
+
     def test_angle_brackets_in_attribute_values_are_escaped(self):
         self.assertSoupEquals('<a b="<a>"></a>', '<a b="&lt;a&gt;"></a>')
 
