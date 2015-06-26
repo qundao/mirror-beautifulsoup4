@@ -1803,17 +1803,17 @@ like calling ``.append()`` on a Python list::
    soup.a.contents
    # [u'Foo', u'Bar']
 
-``BeautifulSoup.new_string()`` and ``.new_tag()``
+``NavigableString()`` and ``.new_tag()``
 -------------------------------------------------
 
 If you need to add a string to a document, no problem--you can pass a
-Python string in to ``append()``, or you can call the factory method
-``BeautifulSoup.new_string()``::
+Python string in to ``append()``, or you can call the ``NavigableString``
+constructor::
 
    soup = BeautifulSoup("<b></b>")
    tag = soup.b
    tag.append("Hello")
-   new_string = soup.new_string(" there")
+   new_string = NavigableString(" there")
    tag.append(new_string)
    tag
    # <b>Hello there.</b>
@@ -1821,18 +1821,17 @@ Python string in to ``append()``, or you can call the factory method
    # [u'Hello', u' there']
 
 If you want to create a comment or some other subclass of
-``NavigableString``, pass that class as the second argument to
-``new_string()``::
+``NavigableString``, just call the constructor::
 
    from bs4 import Comment
-   new_comment = soup.new_string("Nice to see you.", Comment)
+   new_comment = Comment("Nice to see you.")
    tag.append(new_comment)
    tag
    # <b>Hello there<!--Nice to see you.--></b>
    tag.contents
    # [u'Hello', u' there', u'Nice to see you.']
 
-(This is a new feature in Beautiful Soup 4.2.1.)
+(This is a new feature in Beautiful Soup 4.4.0.)
 
 What if you need to create a whole new tag?  The best solution is to
 call the factory method ``BeautifulSoup.new_tag()``::

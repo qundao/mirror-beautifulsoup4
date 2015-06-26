@@ -61,6 +61,9 @@
 * Improved the exception raised when you call .unwrap() or
   .replace_with() on an element that's not attached to a tree.
 
+* You can now create a NavigableString or a subclass just by invoking
+  the constructor. [bug=1294315]
+
 = 4.3.2 (20131002) =
 
 * Fixed a bug in which short Unicode input was improperly encoded to

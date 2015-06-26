@@ -674,9 +674,11 @@ class NavigableString(unicode, PageElement):
         how to handle non-ASCII characters.
         """
         if isinstance(value, unicode):
-            return unicode.__new__(cls, value)
-        u = unicode.__new__(cls, value, DEFAULT_OUTPUT_ENCODING)
+            u = unicode.__new__(cls, value)
+        else:
+            u = unicode.__new__(cls, value, DEFAULT_OUTPUT_ENCODING)
         u.setup()
+        return u
 
     def __copy__(self):
         return self

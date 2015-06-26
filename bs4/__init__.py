@@ -241,9 +241,7 @@ class BeautifulSoup(Tag):
 
     def new_string(self, s, subclass=NavigableString):
         """Create a new NavigableString associated with this soup."""
-        navigable = subclass(s)
-        navigable.setup()
-        return navigable
+        return subclass(s)
 
     def insert_before(self, successor):
         raise NotImplementedError("BeautifulSoup objects don't support insert_before().")
