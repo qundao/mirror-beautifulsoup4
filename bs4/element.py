@@ -1,3 +1,4 @@
+from pdb import set_trace
 import collections
 import re
 import sys
@@ -497,6 +498,10 @@ class PageElement(object):
 
     def _find_all(self, name, attrs, text, limit, generator, **kwargs):
         "Iterates over a generator looking for things that match."
+
+        if text is None and 'string' in kwargs:
+            text = kwargs['string']
+            del kwargs['string']
 
         if isinstance(name, SoupStrainer):
             strainer = name

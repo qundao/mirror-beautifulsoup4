@@ -70,7 +70,7 @@ class TestFind(TreeTest):
 
     def test_unicode_text_find(self):
         soup = self.soup(u'<h1>Räksmörgås</h1>')
-        self.assertEqual(soup.find(text=u'Räksmörgås'), u'Räksmörgås')
+        self.assertEqual(soup.find(string=u'Räksmörgås'), u'Räksmörgås')
 
     def test_unicode_attribute_find(self):
         soup = self.soup(u'<h1 id="Räksmörgås">here it is</h1>')
@@ -95,6 +95,7 @@ class TestFindAll(TreeTest):
         """You can search the tree for text nodes."""
         soup = self.soup("<html>Foo<b>bar</b>\xbb</html>")
         # Exact match.
+        self.assertEqual(soup.find_all(string="bar"), [u"bar"])
         self.assertEqual(soup.find_all(text="bar"), [u"bar"])
         # Match any of a number of strings.
         self.assertEqual(

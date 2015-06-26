@@ -1149,7 +1149,7 @@ Now we're ready to look at the search methods in detail.
 --------------
 
 Signature: find_all(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`recursive
-<recursive>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+<recursive>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
 The ``find_all()`` method looks through a tag's descendants and
 retrieves `all` descendants that match your filters. I gave several
@@ -1170,11 +1170,11 @@ examples in `Kinds of filters`_, but here are a few more::
  # [<a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>]
 
  import re
- soup.find(text=re.compile("sisters"))
+ soup.find(string=re.compile("sisters"))
  # u'Once upon a time there were three little sisters; and their names were\n'
 
 Some of these should look familiar, but others are new. What does it
-mean to pass in a value for ``text``, or ``id``? Why does
+mean to pass in a value for ``string``, or ``id``? Why does
 ``find_all("p", "title")`` find a <p> tag with the CSS class "title"?
 Let's look at the arguments to ``find_all()``.
 
@@ -1313,38 +1313,38 @@ expression, or whatever) you want to search for::
  #  <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
-.. _text:
+.. _string:
 
-The ``text`` argument
-^^^^^^^^^^^^^^^^^^^^^
+The ``string`` argument
+^^^^^^^^^^^^^^^^^^^^^^^
 
-With ``text`` you can search for strings instead of tags. As with
+With ``string`` you can search for strings instead of tags. As with
 ``name`` and the keyword arguments, you can pass in `a string`_, `a
 regular expression`_, `a list`_, `a function`_, or `the value True`_.
 Here are some examples::
 
- soup.find_all(text="Elsie")
+ soup.find_all(string="Elsie")
  # [u'Elsie']
 
- soup.find_all(text=["Tillie", "Elsie", "Lacie"])
+ soup.find_all(string=["Tillie", "Elsie", "Lacie"])
  # [u'Elsie', u'Lacie', u'Tillie']
 
- soup.find_all(text=re.compile("Dormouse"))
+ soup.find_all(string=re.compile("Dormouse"))
  [u"The Dormouse's story", u"The Dormouse's story"]
 
  def is_the_only_string_within_a_tag(s):
      """Return True if this string is the only child of its parent tag."""
      return (s == s.parent.string)
 
- soup.find_all(text=is_the_only_string_within_a_tag)
+ soup.find_all(string=is_the_only_string_within_a_tag)
  # [u"The Dormouse's story", u"The Dormouse's story", u'Elsie', u'Lacie', u'Tillie', u'...']
 
-Although ``text`` is for finding strings, you can combine it with
+Although ``string`` is for finding strings, you can combine it with
 arguments that find tags: Beautiful Soup will find all tags whose
-``.string`` matches your value for ``text``. This code finds the <a>
+``.string`` matches your value for ``string``. This code finds the <a>
 tags whose ``.string`` is "Elsie"::
 
- soup.find_all("a", text="Elsie")
+ soup.find_all("a", string="Elsie")
  # [<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>]
 
 .. _limit:
@@ -1399,7 +1399,7 @@ the <html> tag, but when ``recursive=False`` restricts it to the
 
 Beautiful Soup offers a lot of tree-searching methods (covered below),
 and they mostly take the same arguments as ``find_all()``: ``name``,
-``attrs``, ``text``, ``limit``, and the keyword arguments. But the
+``attrs``, ``string``, ``limit``, and the keyword arguments. But the
 ``recursive`` argument is different: ``find_all()`` and ``find()`` are
 the only methods that support it. Passing ``recursive=False`` into a
 method like ``find_parents()`` wouldn't be very useful.
@@ -1418,14 +1418,14 @@ object. These two lines of code are equivalent::
 
 These two lines are also equivalent::
 
- soup.title.find_all(text=True)
- soup.title(text=True)
+ soup.title.find_all(string=True)
+ soup.title(string=True)
 
 ``find()``
 ----------
 
 Signature: find(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`recursive
-<recursive>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+<recursive>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 The ``find_all()`` method scans the entire document looking for
 results, but sometimes you only want to find one result. If you know a
@@ -1461,9 +1461,9 @@ names`_? That trick works by repeatedly calling ``find()``::
 ``find_parents()`` and ``find_parent()``
 ----------------------------------------
 
-Signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+Signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 I spent a lot of time above covering ``find_all()`` and
 ``find()``. The Beautiful Soup API defines ten other methods for
@@ -1479,7 +1479,7 @@ do the opposite: they work their way `up` the tree, looking at a tag's
 (or a string's) parents. Let's try them out, starting from a string
 buried deep in the "three daughters" document::
 
-  a_string = soup.find(text="Lacie")
+  a_string = soup.find(string="Lacie")
   a_string
   # u'Lacie'
 
@@ -1512,9 +1512,9 @@ each one against the provided filter to see if it matches.
 ``find_next_siblings()`` and ``find_next_sibling()``
 ----------------------------------------------------
 
-Signature: find_next_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Signature: find_next_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Signature: find_next_sibling(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+Signature: find_next_sibling(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 These methods use :ref:`.next_siblings <sibling-generators>` to
 iterate over the rest of an element's siblings in the tree. The
@@ -1536,9 +1536,9 @@ and ``find_next_sibling()`` only returns the first one::
 ``find_previous_siblings()`` and ``find_previous_sibling()``
 ------------------------------------------------------------
 
-Signature: find_previous_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Signature: find_previous_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Signature: find_previous_sibling(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+Signature: find_previous_sibling(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 These methods use :ref:`.previous_siblings <sibling-generators>` to iterate over an element's
 siblings that precede it in the tree. The ``find_previous_siblings()``
@@ -1561,9 +1561,9 @@ method returns all the siblings that match, and
 ``find_all_next()`` and ``find_next()``
 ---------------------------------------
 
-Signature: find_all_next(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Signature: find_all_next(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Signature: find_next(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+Signature: find_next(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 These methods use :ref:`.next_elements <element-generators>` to
 iterate over whatever tags and strings that come after it in the
@@ -1574,7 +1574,7 @@ document. The ``find_all_next()`` method returns all matches, and
  first_link
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
- first_link.find_all_next(text=True)
+ first_link.find_all_next(string=True)
  # [u'Elsie', u',\n', u'Lacie', u' and\n', u'Tillie',
  #  u';\nand they lived at the bottom of a well.', u'\n\n', u'...', u'\n']
 
@@ -1591,9 +1591,9 @@ show up later in the document than the starting element.
 ``find_all_previous()`` and ``find_previous()``
 -----------------------------------------------
 
-Signature: find_all_previous(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Signature: find_all_previous(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Signature: find_previous(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`text <text>`, :ref:`**kwargs <kwargs>`)
+Signature: find_previous(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 These methods use :ref:`.previous_elements <element-generators>` to
 iterate over the tags and strings that came before it in the
@@ -2604,7 +2604,7 @@ built-in parser.)
 
 The ``SoupStrainer`` class takes the same arguments as a typical
 method from `Searching the tree`_: :ref:`name <name>`, :ref:`attrs
-<attrs>`, :ref:`text <text>`, and :ref:`**kwargs <kwargs>`. Here are
+<attrs>`, :ref:`string <string>`, and :ref:`**kwargs <kwargs>`. Here are
 three ``SoupStrainer`` objects::
 
  from bs4 import SoupStrainer
@@ -2616,7 +2616,7 @@ three ``SoupStrainer`` objects::
  def is_short_string(string):
      return len(string) < 10
 
- only_short_strings = SoupStrainer(text=is_short_string)
+ only_short_strings = SoupStrainer(string=is_short_string)
 
 I'm going to bring back the "three sisters" document one more time,
 and we'll see what the document looks like when it's parsed with these
