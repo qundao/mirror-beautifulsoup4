@@ -215,6 +215,10 @@ class PageElement(object):
     previousSibling = _alias("previous_sibling")  # BS3
 
     def replace_with(self, replace_with):
+        if not self.parent:
+            raise ValueError(
+                "Cannot replace one element with another when the"
+                "element to be replaced is not part of a tree.")
         if replace_with is self:
             return
         if replace_with is self.parent:
@@ -228,6 +232,10 @@ class PageElement(object):
 
     def unwrap(self):
         my_parent = self.parent
+        if not self.parent:
+            raise ValueError(
+                "Cannot replace an element with its contents when that"
+                "element is not part of a tree.")
         my_index = self.parent.index(self)
         self.extract()
         for child in reversed(self.contents[:]):
@@ -667,7 +675,8 @@ class NavigableString(unicode, PageElement):
         """
         if isinstance(value, unicode):
             return unicode.__new__(cls, value)
-        return unicode.__new__(cls, value, DEFAULT_OUTPUT_ENCODING)
+        u = unicode.__new__(cls, value, DEFAULT_OUTPUT_ENCODING)
+        u.setup()
 
     def __copy__(self):
         return self

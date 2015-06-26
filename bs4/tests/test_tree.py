@@ -9,6 +9,7 @@ same markup, but all Beautiful Soup trees can be traversed with the
 methods tested here.
 """
 
+from pdb import set_trace
 import copy
 import pickle
 import re
@@ -779,6 +780,14 @@ class TestTreeModification(SoupTest):
         a = soup.a
         new_a = a.unwrap()
         self.assertEqual(a, new_a)
+
+    def test_replace_with_and_unwrap_give_useful_exception_when_tag_has_no_parent(self):
+        soup = self.soup("<a><b>Foo</b></a><c>Bar</c>")
+        a = soup.a
+        a.extract()
+        self.assertEqual(None, a.parent)
+        self.assertRaises(ValueError, a.unwrap)
+        self.assertRaises(ValueError, a.replace_with, soup.c)
 
     def test_replace_tag_with_itself(self):
         text = "<a><b></b><c>Foo<d></d></c></a><a><e></e></a>"
