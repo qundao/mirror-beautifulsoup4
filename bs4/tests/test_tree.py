@@ -1630,6 +1630,14 @@ class TestSoupSelector(TreeTest):
         for div in els:
             self.assertEqual(div.name, 'div')
 
+        el = self.soup.select_one('div')
+        self.assertEqual('main', el['id'])
+
+    def test_select_one_returns_none_if_no_match(self):
+        match = self.soup.select_one('nonexistenttag')
+        self.assertEqual(None, match)
+
+
     def test_tag_in_tag_one(self):
         els = self.soup.select('div div')
         self.assertSelects('div div', ['inner', 'data1'])

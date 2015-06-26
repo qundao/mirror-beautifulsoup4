@@ -1735,6 +1735,10 @@ Match language codes::
  #  <p lang="en-us">Howdy, y'all</p>,
  #  <p lang="en-gb">Pip-pip, old fruit</p>]
 
+Find only the first tag that matches a selector::
+
+ soup.select_one(".sister")
+ # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
 This is all a convenience for users who know the CSS selector syntax. You
 can do all this stuff with the Beautiful Soup API. And if CSS

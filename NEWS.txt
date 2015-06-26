@@ -5,6 +5,10 @@
   versions. In Python 3, __str__ now returns a Unicode string instead
   of a bytestring. [bug=1420131]
 
+* Introduced the select_one() method, which uses a CSS selector but
+  only returns the first match, instead of a list of
+  matches. [bug=1349367]
+
 * Started using a standard MIT license. [bug=1294662]
 
 * Added a Chinese translation of the documentation by Delong .w.

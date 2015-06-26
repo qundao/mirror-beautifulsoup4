@@ -1258,7 +1258,14 @@ class Tag(PageElement):
 
     _selector_combinators = ['>', '+', '~']
     _select_debug = False
-    def select(self, selector, _candidate_generator=None):
+    def select_one(self, selector):
+        """Perform a CSS selection operation on the current element."""
+        value = self.select(selector, limit=1)
+        if value:
+            return value[0]
+        return None
+
+    def select(self, selector, _candidate_generator=None, limit=None):
         """Perform a CSS selection operation on the current element."""
 
         # Remove whitespace directly after the grouping operator ','
@@ -1433,6 +1440,7 @@ class Tag(PageElement):
                 else:
                     _use_candidate_generator = _candidate_generator
 
+                count = 0
                 for tag in current_context:
                     if self._select_debug:
                         print "    Running candidate generator on %s %s" % (
@@ -1457,6 +1465,8 @@ class Tag(PageElement):
                                 # don't include it in the context more than once.
                                 new_context.append(candidate)
                                 new_context_ids.add(id(candidate))
+                                if limit and len(new_context) >= limit:
+                                    break
                         elif self._select_debug:
                             print "     FAILURE %s %s" % (candidate.name, repr(candidate.attrs))
 
