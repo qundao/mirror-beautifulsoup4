@@ -43,6 +43,16 @@ class SoupTest(unittest.TestCase):
 
         self.assertEqual(obj.decode(), self.document_for(compare_parsed_to))
 
+    def assertConnectedness(self, element):
+        """Ensure that next_element and previous_element are properly
+        set for all descendants of the given element.
+        """
+        earlier = None
+        for e in element.descendants:
+            if earlier:
+                self.assertEqual(e, earlier.next_element)
+                self.assertEqual(earlier, e.previous_element)
+            earlier = e
 
 class HTMLTreeBuilderSmokeTest(object):
 
@@ -283,6 +293,7 @@ Hello, world!
         soup = self.soup("<html><h2>\nfoo</h2><p></p></html>")
         self.assertEqual("p", soup.h2.string.next_element.name)
         self.assertEqual("p", soup.p.name)
+        self.assertConnectedness(soup)
 
     def test_head_tag_between_head_and_body(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."
@@ -293,6 +304,7 @@ Hello, world!
 """
         soup = self.soup(content)
         self.assertNotEqual(None, soup.html.body)
+        self.assertConnectedness(soup)
 
     def test_multiple_copies_of_a_tag(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."
@@ -309,8 +321,7 @@ Hello, world!
 </html>
 """
         soup = self.soup(content)
-        [x for x in soup.article.descendants]
-
+        self.assertConnectedness(soup.article)
 
     def test_basic_namespaces(self):
         """Parsers don't need to *understand* namespaces, but at the

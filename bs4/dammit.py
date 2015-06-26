@@ -3,10 +3,11 @@
 
 This library converts a bytestream to Unicode through any means
 necessary. It is heavily based on code from Mark Pilgrim's Universal
-Feed Parser. It works best on XML and XML, but it does not rewrite the
+Feed Parser. It works best on XML and HTML, but it does not rewrite the
 XML or HTML to reflect a new encoding; that's the tree builder's job.
 """
 
+from pdb import set_trace
 import codecs
 from htmlentitydefs import codepoint2name
 import re
