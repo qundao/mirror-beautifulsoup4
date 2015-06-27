@@ -1127,6 +1127,17 @@ tags, because those tags define both "class" and "id". It doesn't pick
 up tags like <html> and <title>, because those tags don't define
 "class".
 
+If you pass in a function to filter on a specific attribute like
+``href``, the argument passed into the function will be the attribute
+value, not the whole tag. Here's a function that finds all ``a`` tags
+whose ``href`` attribute _does not_ match a regular expression::
+
+ def not_lacie(href):
+     return href and not re.compile("lacie").search(href)
+ soup.find_all(href=not_lacie)
+ # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
+ #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
+
 Here's a function that returns ``True`` if a tag is surrounded by
 string objects::
 
