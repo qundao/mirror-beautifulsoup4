@@ -50,6 +50,11 @@ class TestConstructor(SoupTest):
         soup = self.soup(data)
         self.assertEqual(u"foo\0bar", soup.h1.string)
 
+    def test_exclude_encodings(self):
+        utf8_data = u"Räksmörgås".encode("utf-8")
+        soup = self.soup(utf8_data, exclude_encodings=["utf-8"])
+        self.assertEqual("windows-1252", soup.original_encoding)
+
 
 class TestWarnings(SoupTest):
 
@@ -321,6 +326,20 @@ class TestUnicodeDammit(unittest.TestCase):
         for bad_encoding in ['.utf8', '...', 'utF---16.!']:
             dammit = UnicodeDammit(utf8_data, [bad_encoding])
             self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
+
+    def test_exclude_encodings(self):
+        # This is UTF-8.
+        utf8_data = u"Räksmörgås".encode("utf-8")
+
+        # But if we exclude UTF-8 from consideration, the guess is
+        # Windows-1252.
+        dammit = UnicodeDammit(utf8_data, exclude_encodings=["utf-8"])
+        self.assertEqual(dammit.original_encoding.lower(), 'windows-1252')
+
+        # And if we exclude that, there is no valid guess at all.
+        dammit = UnicodeDammit(
+            utf8_data, exclude_encodings=["utf-8", "windows-1252"])
+        self.assertEqual(dammit.original_encoding, None)
 
     def test_encoding_detector_replaces_junk_in_encoding_name_with_replacement_character(self):
         detected = EncodingDetector(

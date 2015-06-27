@@ -213,8 +213,11 @@ class EncodingDetector:
 
     5. Windows-1252.
     """
-    def __init__(self, markup, override_encodings=None, is_html=False):
+    def __init__(self, markup, override_encodings=None, is_html=False,
+                 exclude_encodings=None):
         self.override_encodings = override_encodings or []
+        exclude_encodings = exclude_encodings or []
+        self.exclude_encodings = set([x.lower() for x in exclude_encodings])
         self.chardet_encoding = None
         self.is_html = is_html
         self.declared_encoding = None
@@ -225,6 +228,8 @@ class EncodingDetector:
     def _usable(self, encoding, tried):
         if encoding is not None:
             encoding = encoding.lower()
+            if encoding in self.exclude_encodings:
+                return False
             if encoding not in tried:
                 tried.add(encoding)
                 return True
@@ -332,13 +337,14 @@ class UnicodeDammit:
         ]
 
     def __init__(self, markup, override_encodings=[],
-                 smart_quotes_to=None, is_html=False):
+                 smart_quotes_to=None, is_html=False, exclude_encodings=[]):
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings = []
         self.contains_replacement_characters = False
         self.is_html = is_html
 
-        self.detector = EncodingDetector(markup, override_encodings, is_html)
+        self.detector = EncodingDetector(
+            markup, override_encodings, is_html, exclude_encodings)
 
         # Short-circuit if the data is in Unicode to begin with.
         if isinstance(markup, unicode) or markup == '':

@@ -18,6 +18,10 @@
   argument described in the documentation. `text` may eventually
   change its meaning, but not for a very long time. [bug=1366856]
 
+* Added an `exclude_encodings` argument to UnicodeDammit and to the
+  Beautiful Soup constructor, which lets you prohibit the detection of
+  an encoding that you know is wrong. [bug=1469408]
+
 * Fixed yet another problem that caused the html5lib tree builder to
   create a disconnected parse tree. [bug=1237763]
 

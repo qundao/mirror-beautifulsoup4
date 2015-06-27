@@ -2397,6 +2397,19 @@ We can fix this by passing in the correct ``from_encoding``::
  soup.original_encoding
  'iso8859-8'
 
+If you don't know what the correct encoding is, but you know that
+Unicode, Dammit is guessing wrong, you can pass the wrong guesses in
+as ``exclude_encodings``::
+
+ soup = BeautifulSoup(markup, exclude_encodings=["ISO-8859-7"])
+ soup.h1
+ <h1>םולש</h1>
+ soup.original_encoding
+ 'WINDOWS-1255'
+
+(This isn't 100% correct, but Windows-1255 is a compatible superset of
+ISO-8859-8, so it's close enough.)
+
 In rare cases (usually when a UTF-8 document contains text written in
 a completely different encoding), the only way to get Unicode may be
 to replace some characters with the special Unicode character

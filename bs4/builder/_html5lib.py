@@ -29,9 +29,16 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     features = [NAME, PERMISSIVE, HTML_5, HTML]
 
-    def prepare_markup(self, markup, user_specified_encoding):
+    def prepare_markup(self, markup, user_specified_encoding,
+                       document_declared_encoding=None, exclude_encodings=None):
         # Store the user-specified encoding for use later on.
         self.user_specified_encoding = user_specified_encoding
+
+        # document_declared_encoding and exclude_encodings aren't used
+        # ATM because the html5lib TreeBuilder doesn't use
+        # UnicodeDammit.
+        if exclude_encodings:
+            warnings.warn("You provided a value for exclude_encoding, but the html5lib tree builder doesn't support exclude_encoding.")
         yield (markup, None, None, False)
 
     # These methods are defined by Beautiful Soup.

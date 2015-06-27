@@ -80,7 +80,8 @@ class BeautifulSoup(Tag):
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nTo get rid of this warning, change this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
 
     def __init__(self, markup="", features=None, builder=None,
-                 parse_only=None, from_encoding=None, **kwargs):
+                 parse_only=None, from_encoding=None, exclude_encodings=None,
+                 **kwargs):
         """The Soup object is initialized as the 'root tag', and the
         provided markup (which can be a string or a file-like object)
         is fed into the underlying parser."""
@@ -202,7 +203,8 @@ class BeautifulSoup(Tag):
 
         for (self.markup, self.original_encoding, self.declared_html_encoding,
          self.contains_replacement_characters) in (
-            self.builder.prepare_markup(markup, from_encoding)):
+             self.builder.prepare_markup(
+                 markup, from_encoding, exclude_encodings=exclude_encodings)):
             self.reset()
             try:
                 self._feed()

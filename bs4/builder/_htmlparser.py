@@ -138,7 +138,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         self.parser_args = (args, kwargs)
 
     def prepare_markup(self, markup, user_specified_encoding=None,
-                       document_declared_encoding=None):
+                       document_declared_encoding=None, exclude_encodings=None):
         """
         :return: A 4-tuple (markup, original encoding, encoding
         declared within markup, whether any characters had to be
@@ -149,7 +149,8 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             return
 
         try_encodings = [user_specified_encoding, document_declared_encoding]
-        dammit = UnicodeDammit(markup, try_encodings, is_html=True)
+        dammit = UnicodeDammit(markup, try_encodings, is_html=True,
+                               exclude_encodings=exclude_encodings)
         yield (dammit.markup, dammit.original_encoding,
                dammit.declared_html_encoding,
                dammit.contains_replacement_characters)
