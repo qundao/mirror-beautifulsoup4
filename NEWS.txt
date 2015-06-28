@@ -37,6 +37,9 @@
 * Fixed yet another bug that caused a disconnected tree when html5lib
   copied an element from one part of the tree to another. [bug=1270611]
 
+* Fixed a bug where Element.extract() could create an infinite loop in
+  the remaining tree.
+
 * The select() method now supports selector grouping. Patch by
   Francisco Canas [bug=1191917]
 
