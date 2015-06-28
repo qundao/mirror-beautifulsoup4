@@ -1,5 +1,6 @@
 """Helper classes for tests."""
 
+import pickle
 import copy
 import functools
 import unittest
@@ -63,6 +64,15 @@ class HTMLTreeBuilderSmokeTest(object):
     and different parsers can handle it differently. But with the
     markup in these tests, there's not much room for interpretation.
     """
+
+    def test_pickle_and_unpickle_identity(self):
+        # Pickling a tree, then unpickling it, yields a tree identical
+        # to the original.
+        tree = self.soup("<a><b>foo</a>")
+        dumped = pickle.dumps(tree, 2)
+        loaded = pickle.loads(dumped)
+        self.assertEqual(loaded.__class__, BeautifulSoup)
+        self.assertEqual(loaded.decode(), tree.decode())
 
     def assertDoctypeHandled(self, doctype_fragment):
         """Assert that a given doctype string is handled correctly."""
@@ -531,6 +541,15 @@ Hello, world!
         self.assertEqual('<a foo="bar">text</a>', data.a.decode())
 
 class XMLTreeBuilderSmokeTest(object):
+
+    def test_pickle_and_unpickle_identity(self):
+        # Pickling a tree, then unpickling it, yields a tree identical
+        # to the original.
+        tree = self.soup("<a><b>foo</a>")
+        dumped = pickle.dumps(tree, 2)
+        loaded = pickle.loads(dumped)
+        self.assertEqual(loaded.__class__, BeautifulSoup)
+        self.assertEqual(loaded.decode(), tree.decode())
 
     def test_docstring_generated(self):
         soup = self.soup("<root/>")

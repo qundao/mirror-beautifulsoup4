@@ -79,9 +79,6 @@ class BeautifulSoup(Tag):
 
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nTo get rid of this warning, change this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
 
-    def __copy__(self):
-        return type(self)(self.encode(), builder=self.builder)
-
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
                  **kwargs):
@@ -224,6 +221,16 @@ class BeautifulSoup(Tag):
         # reference to this object.
         self.markup = None
         self.builder.soup = None
+
+    def __copy__(self):
+        return type(self)(self.encode(), builder=self.builder)
+
+    def __getstate__(self):
+        # Frequently a tree builder can't be pickled.
+        d = dict(self.__dict__)
+        if 'builder' in d and not self.builder.picklable:
+            del d['builder']
+        return d
 
     def _feed(self):
         # Convert the document to Unicode.

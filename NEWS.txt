@@ -98,6 +98,12 @@ Bug fixes:
   is used in select(). Previously some cases did not result in a
   NotImplementedError.
 
+* It's now possible to pickle a BeautifulSoup object no matter which
+  tree builder was used to create it. However, the only tree builder
+  that survives the pickling process is the HTMLParserTreeBuilder
+  ('html.parser'). If you unpickle a BeautifulSoup object created with
+  some other tree builder, soup.builder will be None. [bug=1231545]
+
 = 4.3.2 (20131002) =
 
 * Fixed a bug in which short Unicode input was improperly encoded to
