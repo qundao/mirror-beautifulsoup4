@@ -17,8 +17,8 @@ http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.3.2"
-__copyright__ = "Copyright (c) 2004-2013 Leonard Richardson"
+__version__ = "4.3.9b1"
+__copyright__ = "Copyright (c) 2004-2015 Leonard Richardson"
 __license__ = "MIT"
 
 __all__ = ['BeautifulSoup']
