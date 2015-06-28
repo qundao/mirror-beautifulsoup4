@@ -77,7 +77,7 @@ class BeautifulSoup(Tag):
 
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
-    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nTo get rid of this warning, change this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
+    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nTo get rid of this warning, change this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
 
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
@@ -157,8 +157,13 @@ class BeautifulSoup(Tag):
             builder = builder_class()
             if not (original_features == builder.NAME or
                     original_features in builder.ALTERNATE_NAMES):
+                if builder.is_xml:
+                    markup_type = "XML"
+                else:
+                    markup_type = "HTML"
                 warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % dict(
-                    parser=builder.NAME))
+                    parser=builder.NAME,
+                    markup_type=markup_type))
 
         self.builder = builder
         self.is_xml = builder.is_xml

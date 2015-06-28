@@ -31,6 +31,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     is_xml = True
 
     NAME = "lxml-xml"
+    ALTERNATE_NAMES = ["xml"]
 
     # Well, it's permissive by XML parser standards.
     features = [NAME, LXML, XML, FAST, PERMISSIVE]
