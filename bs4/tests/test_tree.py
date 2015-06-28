@@ -1310,6 +1310,25 @@ class TestPersistence(SoupTest):
         loaded = pickle.loads(dumped)
         self.assertEqual(loaded.decode(), soup.decode())
 
+    def test_copy_navigablestring_is_not_attached_to_tree(self):
+        html = u"<b>Foo<a></a></b><b>Bar</b>"
+        soup = self.soup(html)
+        s1 = soup.find(string="Foo")
+        s2 = copy.copy(s1)
+        self.assertEqual(s1, s2)
+        self.assertEqual(None, s2.parent)
+        self.assertEqual(None, s2.next_element)
+        self.assertNotEqual(None, s1.next_sibling)
+        self.assertEqual(None, s2.next_sibling)
+        self.assertEqual(None, s2.previous_element)
+
+    def test_copy_navigablestring_subclass_has_same_type(self):
+        html = u"<b><!--Foo--></b>"
+        soup = self.soup(html)
+        s1 = soup.string
+        s2 = copy.copy(s1)
+        self.assertEqual(s1, s2)
+        self.assertTrue(isinstance(s2, Comment))
 
 class TestSubstitutions(SoupTest):
 

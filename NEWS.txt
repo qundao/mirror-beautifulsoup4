@@ -15,6 +15,10 @@ Especially important changes:
   argument described in the documentation. `text` may eventually
   change its meaning, but not for a very long time. [bug=1366856]
 
+* Changed the way soup objects work under copy.copy() and
+  copy.deepcopy(). Copying a NavigableString will give you a new
+  NavigableString that is not connected to the parse tree.
+
 * Started using a standard MIT license. [bug=1294662]
 
 * Added a Chinese translation of the documentation by Delong .w.

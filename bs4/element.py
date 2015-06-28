@@ -689,7 +689,10 @@ class NavigableString(unicode, PageElement):
         return u
 
     def __copy__(self):
-        return self
+        """A copy of a NavigableString has the same contents and class
+        as the original, but it is not connected to the parse tree.
+        """
+        return type(self)(self)
 
     def __getnewargs__(self):
         return (unicode(self),)
