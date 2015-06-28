@@ -244,9 +244,9 @@ class Element(html5lib.treebuilders._base.Node):
 
     def reparentChildren(self, new_parent):
         """Move all of this tag's children into another tag."""
-        print "MOVE", self.element.contents
-        print "FROM", self.element
-        print "TO", new_parent.element
+        # print "MOVE", self.element.contents
+        # print "FROM", self.element
+        # print "TO", new_parent.element
         element = self.element
         new_parent_element = new_parent.element
         # Determine what this tag's next_element will be once all the children
@@ -297,9 +297,9 @@ class Element(html5lib.treebuilders._base.Node):
         element.contents = []
         element.next_element = final_next_element
 
-        print "DONE WITH MOVE"
-        print "FROM", self.element
-        print "TO", new_parent_element
+        # print "DONE WITH MOVE"
+        # print "FROM", self.element
+        # print "TO", new_parent_element
 
     def cloneNode(self):
         tag = self.soup.new_tag(self.element.name, self.namespace)

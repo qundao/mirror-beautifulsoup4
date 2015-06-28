@@ -1787,7 +1787,6 @@ attributes, and delete attributes::
  tag
  # <blockquote>Extremely bold</blockquote>
 
-
 Modifying ``.string``
 ---------------------
 
@@ -2419,8 +2418,9 @@ as ``exclude_encodings``::
  soup.original_encoding
  'WINDOWS-1255'
 
-(This isn't 100% correct, but Windows-1255 is a compatible superset of
-ISO-8859-8, so it's close enough.)
+Windows-1255 isn't 100% correct, but that encoding is a compatible
+superset of ISO-8859-8, so it's close enough. (``exclude_encodings``
+is a new feature in Beautiful Soup 4.4.0.)
 
 In rare cases (usually when a UTF-8 document contains text written in
 a completely different encoding), the only way to get Unicode may be
@@ -2608,6 +2608,62 @@ document is Windows-1252, and the document will come out looking like
 ``â˜ƒâ˜ƒâ˜ƒ“I like snowmen!”``.
 
 ``UnicodeDammit.detwingle()`` is new in Beautiful Soup 4.1.0.
+
+
+Comparing objects for equality
+==============================
+
+Beautiful Soup says that two ``NavigableString`` or ``Tag`` objects
+are equal when they represent the same HTML or XML markup. In this
+example, the two <b> tags are treated as equal, even though they live
+in different parts of the object tree, because they both look like
+"<b>pizza</b>"::
+
+ markup = "<p>I want <b>pizza</b> and more <b>pizza</b>!</p>"
+ soup = BeautifulSoup(markup, 'html.parser')
+ first_b, second_b = soup.find_all('b')
+ print first_b == second_b
+ # True
+
+ print first_b.previous_element == second_b.previous_element
+ # False
+
+If you want to see whether two variables refer to exactly the same
+object, use `is`::
+
+ print first_b is second_b
+ # False
+
+Copying Beautiful Soup objects
+==============================
+
+You can use ``copy.copy()`` to create a copy of any ``Tag`` or
+``NavigableString``::
+
+ import copy
+ p_copy = copy.copy(soup.p)
+ print p_copy
+ # <p>I want <b>pizza</b> and more <b>pizza</b>!</p>
+
+The copy is considered equal to the original, since it represents the
+same markup as the original, but it's not the same object::
+
+ print soup.p == p_copy
+ # True
+
+ print soup.p is p_copy
+ # False
+
+The only real difference is that the copy is completely detached from
+the original Beautiful Soup object tree, just as if ``extract()`` had
+been called on it::
+
+ print p_copy.parent
+ # None
+
+This is because two different ``Tag`` objects can't occupy the same
+space at the same time.
+
 
 Parsing only part of a document
 ===============================

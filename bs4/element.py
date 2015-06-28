@@ -815,6 +815,18 @@ class Tag(PageElement):
 
     parserClass = _alias("parser_class")  # BS3
 
+    def __copy__(self):
+        """A copy of a Tag is a new Tag, unconnected to the parse tree.
+        Its contents are a copy of the old Tag's contents.
+        """
+        clone = type(self)(None, self.builder, self.name, self.namespace,
+                           self.nsprefix, self.attrs)
+        for attr in ('can_be_empty_element', 'hidden'):
+            setattr(clone, attr, getattr(self, attr))
+        for child in self.contents:
+            clone.append(child.__copy__())
+        return clone
+
     @property
     def is_empty_element(self):
         """Is this tag an empty-element tag? (aka a self-closing tag)

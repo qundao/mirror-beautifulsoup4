@@ -1330,6 +1330,32 @@ class TestPersistence(SoupTest):
         self.assertEqual(s1, s2)
         self.assertTrue(isinstance(s2, Comment))
 
+    def test_copy_entire_soup(self):
+        html = u"<div><b>Foo<a></a></b><b>Bar</b></div>end"
+        soup = self.soup(html)
+        soup_copy = copy.copy(soup)
+        self.assertEqual(soup, soup_copy)
+
+    def test_copy_tag_copies_contents(self):
+        html = u"<div><b>Foo<a></a></b><b>Bar</b></div>end"
+        soup = self.soup(html)
+        div = soup.div
+        div_copy = copy.copy(div)
+
+        # The two tags look the same, and evaluate to equal.
+        self.assertEqual(unicode(div), unicode(div_copy))
+        self.assertEqual(div, div_copy)
+
+        # But they're not the same object.
+        self.assertFalse(div is div_copy)
+
+        # And they don't have the same relation to the parse tree. The
+        # copy is not associated with a parse tree at all.
+        self.assertEqual(None, div_copy.parent)
+        self.assertEqual(None, div_copy.previous_element)
+        self.assertEqual(None, div_copy.find(string='Bar').next_element)
+        self.assertNotEqual(None, div.find(string='Bar').next_element)
+
 class TestSubstitutions(SoupTest):
 
     def test_default_formatter_is_minimal(self):
