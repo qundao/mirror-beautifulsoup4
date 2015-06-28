@@ -1336,35 +1336,38 @@ class Tag(PageElement):
                             "A pseudo-class must be prefixed with a tag name.")
                     pseudo_attributes = re.match('([a-zA-Z\d-]+)\(([a-zA-Z\d]+)\)', pseudo)
                     found = []
-                    if pseudo_attributes is not None:
+                    if pseudo_attributes is None:
+                        pseudo_type = pseudo
+                        pseudo_value = None
+                    else:
                         pseudo_type, pseudo_value = pseudo_attributes.groups()
-                        if pseudo_type == 'nth-of-type':
-                            try:
-                                pseudo_value = int(pseudo_value)
-                            except:
-                                raise NotImplementedError(
-                                    'Only numeric values are currently supported for the nth-of-type pseudo-class.')
-                            if pseudo_value < 1:
-                                raise ValueError(
-                                    'nth-of-type pseudo-class value must be at least 1.')
-                            class Counter(object):
-                                def __init__(self, destination):
-                                    self.count = 0
-                                    self.destination = destination
-
-                                def nth_child_of_type(self, tag):
-                                    self.count += 1
-                                    if self.count == self.destination:
-                                        return True
-                                    if self.count > self.destination:
-                                        # Stop the generator that's sending us
-                                        # these things.
-                                        raise StopIteration()
-                                    return False
-                            checker = Counter(pseudo_value).nth_child_of_type
-                        else:
+                    if pseudo_type == 'nth-of-type':
+                        try:
+                            pseudo_value = int(pseudo_value)
+                        except:
                             raise NotImplementedError(
-                                'Only the following pseudo-classes are implemented: nth-of-type.')
+                                'Only numeric values are currently supported for the nth-of-type pseudo-class.')
+                        if pseudo_value < 1:
+                            raise ValueError(
+                                'nth-of-type pseudo-class value must be at least 1.')
+                        class Counter(object):
+                            def __init__(self, destination):
+                                self.count = 0
+                                self.destination = destination
+
+                            def nth_child_of_type(self, tag):
+                                self.count += 1
+                                if self.count == self.destination:
+                                    return True
+                                if self.count > self.destination:
+                                    # Stop the generator that's sending us
+                                    # these things.
+                                    raise StopIteration()
+                                return False
+                        checker = Counter(pseudo_value).nth_child_of_type
+                    else:
+                        raise NotImplementedError(
+                            'Only the following pseudo-classes are implemented: nth-of-type.')
 
                 elif token == '*':
                     # Star selector -- matches everything

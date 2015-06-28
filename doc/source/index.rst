@@ -1138,8 +1138,9 @@ whose ``href`` attribute _does not_ match a regular expression::
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
-Here's a function that returns ``True`` if a tag is surrounded by
-string objects::
+The function can be as complicated as you need it to be. Here's a
+function that returns ``True`` if a tag is surrounded by string
+objects::
 
  from bs4 import NavigableString
  def surrounded_by_strings(tag):

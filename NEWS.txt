@@ -9,6 +9,12 @@
   only returns the first match, instead of a list of
   matches. [bug=1349367]
 
+* You can now create a Tag object without specifying a
+  TreeBuilder. Patch by Martijn Pieters. [bug=1307471]
+
+* You can now create a NavigableString or a subclass just by invoking
+  the constructor. [bug=1294315]
+
 * Started using a standard MIT license. [bug=1294662]
 
 * Added a Chinese translation of the documentation by Delong .w.
@@ -74,11 +80,9 @@
 * Improved the exception raised when you call .unwrap() or
   .replace_with() on an element that's not attached to a tree.
 
-* You can now create a Tag object without specifying a
-  TreeBuilder. Patch by Martijn Pieters. [bug=1307471]
-
-* You can now create a NavigableString or a subclass just by invoking
-  the constructor. [bug=1294315]
+* Raise a NotImplementedError whenever an unsupported CSS pseudoclass
+  is used in select(). Previously some cases did not result in a
+  NotImplementedError.
 
 = 4.3.2 (20131002) =
 

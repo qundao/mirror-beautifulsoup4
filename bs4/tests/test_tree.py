@@ -1828,6 +1828,14 @@ class TestSoupSelector(TreeTest):
             ('div[data-tag]', ['data1'])
         )
 
+    def test_unsupported_pseudoclass(self):
+        self.assertRaises(
+            NotImplementedError, self.soup.select, "a:no-such-pseudoclass")
+
+        self.assertRaises(
+            NotImplementedError, self.soup.select, "a:nth-of-type(a)")
+
+
     def test_nth_of_type(self):
         # Try to select first paragraph
         els = self.soup.select('div#inner p:nth-of-type(1)')
