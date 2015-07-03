@@ -1,30 +1,33 @@
-from distutils.core import setup
+from setuptools import (
+    setup,
+    find_packages,
+)
 
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    # 2.x
-    from distutils.command.build_py import build_py
-
-setup(name="beautifulsoup4",
-      version = "4.3.9b1",
-      author="Leonard Richardson",
-      author_email='leonardr@segfault.org',
-      url="http://www.crummy.com/software/BeautifulSoup/bs4/",
-      download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
-      long_description="""Beautiful Soup sits atop an HTML or XML parser, providing Pythonic idioms for iterating, searching, and modifying the parse tree.""",
-      license="MIT",
-      packages=['bs4', 'bs4.builder', 'bs4.tests'],
-      install_requires=["lxml"],
-      cmdclass = {'build_py':build_py},
-      classifiers=["Development Status :: 4 - Beta",
-                   "Intended Audience :: Developers",
-                   "License :: OSI Approved :: MIT License",
-                   "Programming Language :: Python",
-                   'Programming Language :: Python :: 3',
-                   "Topic :: Text Processing :: Markup :: HTML",
-                   "Topic :: Text Processing :: Markup :: XML",
-                   "Topic :: Text Processing :: Markup :: SGML",
-                   "Topic :: Software Development :: Libraries :: Python Modules",
-                   ],
+setup(
+    name="beautifulsoup4",
+    version = "4.4.0",
+    author="Leonard Richardson",
+    author_email='leonardr@segfault.org',
+    url="http://www.crummy.com/software/BeautifulSoup/bs4/",
+    download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
+    long_description="""Beautiful Soup sits atop an HTML or XML parser, providing Pythonic idioms for iterating, searching, and modifying the parse tree.""",
+    license="MIT",
+    packages=find_packages(exclude=['tests*']),
+    install_requires = ['lxml'],
+    extras_require = {
+        'lxml' : [ 'lxml'],
+        'html5lib' : ['html5lib'],
+    },
+    use_2to3 = True,
+    classifiers=["Development Status :: 5 - Production/Stable",
+                 "Intended Audience :: Developers",
+                 "License :: OSI Approved :: MIT License",
+                 "Programming Language :: Python",
+                 "Programming Language :: Python :: 2",
+                 'Programming Language :: Python :: 3',
+                 "Topic :: Text Processing :: Markup :: HTML",
+                 "Topic :: Text Processing :: Markup :: XML",
+                 "Topic :: Text Processing :: Markup :: SGML",
+                 "Topic :: Software Development :: Libraries :: Python Modules",
+             ],
 )

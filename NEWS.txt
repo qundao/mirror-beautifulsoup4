@@ -1,6 +1,16 @@
-= 4.4.0 (Unreleased) =
+= 4.4.0 (20150703) =
 
 Especially important changes:
+
+* Currently lxml is a mandatory dependency of Beautiful Soup when
+  installed via pip. In the near future, lxml will become an optional
+  dependency. Requiring lxml makes it more difficult to install
+  Beautiful Soup, and recent improvements to Python's built-in HTML
+  parser make it good enough to serve as the default.
+
+  If you install Beautiful Soup via a requirements.txt file and you
+  still want Beautiful Soup to use lxml as its parser (you probably
+  do), you should add 'lxml' to the list of requirements.
 
 * Added a warning when you instantiate a BeautifulSoup object without
   explicitly naming a parser. [bug=1398866]
