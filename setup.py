@@ -10,10 +10,10 @@ setup(
     author_email='leonardr@segfault.org',
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
     download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
+    description="Screen-scraping library",
     long_description="""Beautiful Soup sits atop an HTML or XML parser, providing Pythonic idioms for iterating, searching, and modifying the parse tree.""",
     license="MIT",
     packages=find_packages(exclude=['tests*']),
-    install_requires = ['lxml'],
     extras_require = {
         'lxml' : [ 'lxml'],
         'html5lib' : ['html5lib'],
