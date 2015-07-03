@@ -105,7 +105,27 @@ echo "EXPECT HTML ON LINE BELOW"
 deactivate
 rm -rf ../py3-install-test-virtualenv
 
+################
+
+To test, after release:
+
+rm -rf ../py2-install-test-virtualenv
+virtualenv -p /usr/bin/python2.7 ../py2-install-test-virtualenv
+source ../py2-install-test-virtualenv/bin/activate
+pip install beautifulsoup4
+echo "EXPECT HTML ON LINE BELOW"
+(cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
+# That should print '<a>foo</a>'
+deactivate
+rm -rf ../py2-install-test-virtualenv
 
 
-
-pip install -i https://testpypi.python.org/pypi beautifulsoup4
+rm -rf ../py3-install-test-virtualenv
+virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
+source ../py3-install-test-virtualenv/bin/activate
+pip install beautifulsoup4
+echo "EXPECT HTML ON LINE BELOW"
+(cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
+# That should print '<a>foo</a>'
+deactivate
+rm -rf ../py3-install-test-virtualenv
