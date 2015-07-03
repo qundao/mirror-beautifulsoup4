@@ -272,6 +272,9 @@ class EncodingDetector:
     def strip_byte_order_mark(cls, data):
         """If a byte-order mark is present, strip it and return the encoding it implies."""
         encoding = None
+        if isinstance(data, unicode):
+            # Unicode data cannot have a byte-order mark.
+            return data, encoding
         if (len(data) >= 4) and (data[:2] == b'\xfe\xff') \
                and (data[2:4] != '\x00\x00'):
             encoding = 'utf-16be'
