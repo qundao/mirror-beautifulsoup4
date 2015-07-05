@@ -1130,7 +1130,7 @@ up tags like <html> and <title>, because those tags don't define
 If you pass in a function to filter on a specific attribute like
 ``href``, the argument passed into the function will be the attribute
 value, not the whole tag. Here's a function that finds all ``a`` tags
-whose ``href`` attribute _does not_ match a regular expression::
+whose ``href`` attribute *does not* match a regular expression::
 
  def not_lacie(href):
      return href and not re.compile("lacie").search(href)
@@ -1357,6 +1357,12 @@ arguments that find tags: Beautiful Soup will find all tags whose
 tags whose ``.string`` is "Elsie"::
 
  soup.find_all("a", string="Elsie")
+ # [<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>]
+
+The ``string`` argument is new in Beautiful Soup 4.4.0. In earlier
+versions it was called ``text``::
+
+ soup.find_all("a", text="Elsie")
  # [<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>]
 
 .. _limit:
@@ -3120,11 +3126,11 @@ B.string. (Previously, it was None.)
 their values, not strings. This may affect the way you search by CSS
 class.
 
-If you pass one of the ``find*`` methods both :ref:`text <text>` `and`
+If you pass one of the ``find*`` methods both :ref:`string <string>` `and`
 a tag-specific argument like :ref:`name <name>`, Beautiful Soup will
 search for tags that match your tag-specific criteria and whose
-:ref:`Tag.string <.string>` matches your value for :ref:`text
-<text>`. It will `not` find the strings themselves. Previously,
+:ref:`Tag.string <.string>` matches your value for :ref:`string
+<string>`. It will `not` find the strings themselves. Previously,
 Beautiful Soup ignored the tag-specific arguments and looked for
 strings.
 
