@@ -1,3 +1,8 @@
+= Unreleased
+
+* Fixed the test_detect_utf8 test so that it works when chardet is
+  installed. [bug=1471359]
+
 = 4.4.0 (20150703) =
 
 Especially important changes:

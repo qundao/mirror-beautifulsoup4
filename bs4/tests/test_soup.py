@@ -299,10 +299,11 @@ class TestUnicodeDammit(unittest.TestCase):
             dammit.unicode_markup, """<foo>''""</foo>""")
 
     def test_detect_utf8(self):
-        utf8 = b"\xc3\xa9"
+        utf8 = b"Sacr\xc3\xa9 bleu! \xe2\x98\x83"
         dammit = UnicodeDammit(utf8)
-        self.assertEqual(dammit.unicode_markup, u'\xe9')
         self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
+        self.assertEqual(dammit.unicode_markup, u'Sacr\xe9 bleu! \N{SNOWMAN}')
+
 
     def test_convert_hebrew(self):
         hebrew = b"\xed\xe5\xec\xf9"
