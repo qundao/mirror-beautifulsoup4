@@ -89,3 +89,10 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
         markup = b"""<?PITarget PIContent?>"""
         soup = self.soup(markup)
         assert str(soup).startswith("<!--?PITarget PIContent?-->")
+
+    def test_cloned_multivalue_node(self):
+        markup = b"""<a class="my_class"><p></a>"""
+        soup = self.soup(markup)
+        a1, a2 = soup.find_all('a')
+        self.assertEqual(a1, a2)
+        assert a1 is not a2

@@ -4,6 +4,9 @@
   removed. Thanks to Eric Weiser for the patch and John Wiseman for a
   test. [bug=1481520]
 
+* Fixed a parse bug with the html5lib tree-builder. Thanks to Roel
+  Kramer for the patch. [bug=1483781]
+
 * Improved the implementation of CSS selector grouping. Thanks to
   Orangain for the patch. [bug=1484543]
 
