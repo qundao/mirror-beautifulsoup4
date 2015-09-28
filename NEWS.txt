@@ -4,10 +4,14 @@
   removed. Thanks to Eric Weiser for the patch and John Wiseman for a
   test. [bug=1481520]
 
+* Improved the implementation of CSS selector grouping. Thanks to
+  Orangain for the patch. [bug=1484543]
+
 * Fixed the test_detect_utf8 test so that it works when chardet is
   installed. [bug=1471359]
 
 * Corrected the output of Declaration objects. [bug=1477847]
+
 
 = 4.4.0 (20150703) =
 

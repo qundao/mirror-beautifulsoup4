@@ -1971,22 +1971,25 @@ class TestSoupSelector(TreeTest):
 
     # Test the selector grouping operator (the comma)
     def test_multiple_select(self):
-        self.assertSelects('x, y',['xid','yid'])
+        self.assertSelects('x, y', ['xid', 'yid'])
 
     def test_multiple_select_with_no_space(self):
-        self.assertSelects('x,y',['xid','yid'])
+        self.assertSelects('x,y', ['xid', 'yid'])
 
     def test_multiple_select_with_more_space(self):
-        self.assertSelects('x,    y',['xid', 'yid'])
+        self.assertSelects('x,    y', ['xid', 'yid'])
+
+    def test_multiple_select_duplicated(self):
+        self.assertSelects('x, x', ['xid'])
 
     def test_multiple_select_sibling(self):
-        self.assertSelects('x, y ~ p[lang=fr]',['lang-fr'])
+        self.assertSelects('x, y ~ p[lang=fr]', ['xid', 'lang-fr'])
 
-    def test_multiple_select(self):
-        self.assertSelects('x, y > z', ['zida', 'zidb', 'zidab', 'zidac'])
+    def test_multiple_select_tag_and_direct_descendant(self):
+        self.assertSelects('x, y > z', ['xid', 'zidb'])
 
-    def test_multiple_select_direct_descendant(self):
-        self.assertSelects('div > x, y, z', ['xid', 'yid'])
+    def test_multiple_select_direct_descendant_and_tags(self):
+        self.assertSelects('div > x, y, z', ['xid', 'yid', 'zida', 'zidb', 'zidab', 'zidac'])
 
     def test_multiple_select_indirect_descendant(self):
         self.assertSelects('div x,y,  z', ['xid', 'yid', 'zida', 'zidb', 'zidab', 'zidac'])
@@ -1995,14 +1998,14 @@ class TestSoupSelector(TreeTest):
         self.assertRaises(ValueError, self.soup.select, ',x, y')
         self.assertRaises(ValueError, self.soup.select, 'x,,y')
 
-    def test_multiple_select(self):
-        self.assertSelects('p[lang=en], p[lang=en-gb]',['lang-en','lang-en-gb'])
+    def test_multiple_select_attrs(self):
+        self.assertSelects('p[lang=en], p[lang=en-gb]', ['lang-en', 'lang-en-gb'])
 
     def test_multiple_select_ids(self):
-        self.assertSelects('x, y > z[id=zida], z[id=zidab], z[id=zidb]', ['zida', 'zidb','zidab'])
+        self.assertSelects('x, y > z[id=zida], z[id=zidab], z[id=zidb]', ['xid', 'zidb', 'zidab'])
 
     def test_multiple_select_nested(self):
-        self.assertSelects('body > div > x, y > z', ['zida', 'zidb', 'zidab', 'zidac'])
+        self.assertSelects('body > div > x, y > z', ['xid', 'zidb'])
 
 
 
