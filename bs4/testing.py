@@ -556,6 +556,11 @@ class XMLTreeBuilderSmokeTest(object):
         self.assertEqual(
             soup.encode(), b'<?xml version="1.0" encoding="utf-8"?>\n<root/>')
 
+    def test_xml_declaration(self):
+        markup = b"""<?xml version="1.0" encoding="utf8"?>\n<foo/>"""
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.encode("utf8"))
+
     def test_real_xhtml_document(self):
         """A real XHTML document should come out *exactly* the same as it went in."""
         markup = b"""<?xml version="1.0" encoding="utf-8"?>

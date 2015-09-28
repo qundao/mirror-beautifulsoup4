@@ -752,8 +752,8 @@ class Comment(PreformattedString):
 
 
 class Declaration(PreformattedString):
-    PREFIX = u'<!'
-    SUFFIX = u'!>'
+    PREFIX = u'<?'
+    SUFFIX = u'?>'
 
 
 class Doctype(PreformattedString):

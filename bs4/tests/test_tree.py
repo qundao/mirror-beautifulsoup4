@@ -23,6 +23,7 @@ from bs4.element import (
     PY3K,
     CData,
     Comment,
+    Declaration,
     Doctype,
     NavigableString,
     SoupStrainer,
@@ -1617,6 +1618,9 @@ class TestNavigableStringSubclasses(SoupTest):
         soup.insert(1, doctype)
         self.assertEqual(soup.encode(), b"<!DOCTYPE foo>\n")
 
+    def test_declaration(self):
+        d = Declaration("foo")
+        self.assertEqual("<?foo?>", d.output_ready())
 
 class TestSoupSelector(TreeTest):
 
