@@ -1084,6 +1084,31 @@ class TestTreeModification(SoupTest):
         self.assertEqual(foo_2, soup.a.string)
         self.assertEqual(bar_2, soup.b.string)
 
+    def test_extract_multiples_of_same_tag(self):
+        soup = self.soup("""
+<html>
+<head>
+<script>foo</script>
+</head>
+<body>
+ <script>bar</script>
+ <a></a>
+</body>
+<script>baz</script>
+</html>""")
+        [soup.script.extract() for i in soup.find_all("script")]
+        self.assertEqual("<body>\n\n<a></a>\n</body>", unicode(soup.body))
+
+
+    def test_extract_works_when_element_is_surrounded_by_identical_strings(self):
+        soup = self.soup(
+ '<html>\n'
+ '<body>hi</body>\n'
+ '</html>')
+        soup.find('body').extract()
+        self.assertEqual(None, soup.find('body'))
+
+
     def test_clear(self):
         """Tag.clear()"""
         soup = self.soup("<p><a>String <em>Italicized</em></a> and another</p>")

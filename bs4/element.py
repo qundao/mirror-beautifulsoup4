@@ -262,19 +262,19 @@ class PageElement(object):
         next_element = last_child.next_element
 
         if (self.previous_element is not None and
-            self.previous_element != next_element):
+            self.previous_element is not next_element):
             self.previous_element.next_element = next_element
-        if next_element is not None and next_element != self.previous_element:
+        if next_element is not None and next_element is not self.previous_element:
             next_element.previous_element = self.previous_element
         self.previous_element = None
         last_child.next_element = None
 
         self.parent = None
         if (self.previous_sibling is not None
-            and self.previous_sibling != self.next_sibling):
+            and self.previous_sibling is not self.next_sibling):
             self.previous_sibling.next_sibling = self.next_sibling
         if (self.next_sibling is not None
-            and self.next_sibling != self.previous_sibling):
+            and self.next_sibling is not self.previous_sibling):
             self.next_sibling.previous_sibling = self.previous_sibling
         self.previous_sibling = self.next_sibling = None
         return self
@@ -287,7 +287,7 @@ class PageElement(object):
             last_child = self
             while isinstance(last_child, Tag) and last_child.contents:
                 last_child = last_child.contents[-1]
-        if not accept_self and last_child == self:
+        if not accept_self and last_child is self:
             last_child = None
         return last_child
     # BS3: Not part of the API!

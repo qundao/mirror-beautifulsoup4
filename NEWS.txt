@@ -1,7 +1,11 @@
-= Unreleased
+= 4.4.1 (20150928) =
 
 * Fixed the test_detect_utf8 test so that it works when chardet is
   installed. [bug=1471359]
+
+* Fixed a bug that deranged the tree when part of it was
+  removed. Thanks to Eric Weiser for the patch and John Wiseman for a
+  test. [bug=1481520]
 
 = 4.4.0 (20150703) =
 
