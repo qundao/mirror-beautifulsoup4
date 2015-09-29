@@ -1,5 +1,7 @@
 """Helper classes for tests."""
 
+__license__ = "MIT"
+
 import pickle
 import copy
 import functools
