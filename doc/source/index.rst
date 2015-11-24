@@ -1649,7 +1649,7 @@ You can find tags::
  soup.select("title")
  # [<title>The Dormouse's story</title>]
 
- soup.select("p nth-of-type(3)")
+ soup.select("p:nth-of-type(3)")
  # [<p class="story">...</p>]
 
 Find tags beneath other tags::
