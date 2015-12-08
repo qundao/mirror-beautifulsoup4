@@ -217,8 +217,10 @@ class Element(html5lib.treebuilders._base.Node):
             child = node
         elif node.element.__class__ == NavigableString:
             string_child = child = node.element
+            node.parent = self
         else:
             child = node.element
+            node.parent = self
 
         if not isinstance(child, basestring) and child.parent is not None:
             node.element.extract()
@@ -283,11 +285,11 @@ class Element(html5lib.treebuilders._base.Node):
     attributes = property(getAttributes, setAttributes)
 
     def insertText(self, data, insertBefore=None):
+        text = TextNode(self.soup.new_string(data), self.soup)
         if insertBefore:
-            text = TextNode(self.soup.new_string(data), self.soup)
-            self.insertBefore(data, insertBefore)
+            self.insertBefore(text, insertBefore)
         else:
-            self.appendChild(data)
+            self.appendChild(text)
 
     def insertBefore(self, node, refNode):
         index = self.element.index(refNode.element)
