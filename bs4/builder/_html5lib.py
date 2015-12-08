@@ -4,6 +4,7 @@ __all__ = [
 
 from pdb import set_trace
 import warnings
+import re
 from bs4.builder import (
     PERMISSIVE,
     HTML,
@@ -15,7 +16,10 @@ from bs4.element import (
     whitespace_re,
 )
 import html5lib
-from html5lib.constants import namespaces
+from html5lib.constants import (
+    namespaces,
+    prefixes,
+    )
 from bs4.element import (
     Comment,
     Doctype,
@@ -59,7 +63,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     def create_treebuilder(self, namespaceHTMLElements):
         self.underlying_builder = TreeBuilderForHtml5lib(
-            self.soup, namespaceHTMLElements)
+            namespaceHTMLElements, self.soup)
         return self.underlying_builder
 
     def test_fragment_to_document(self, fragment):
@@ -69,8 +73,12 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
 class TreeBuilderForHtml5lib(html5lib.treebuilders._base.TreeBuilder):
 
-    def __init__(self, soup, namespaceHTMLElements):
-        self.soup = soup
+    def __init__(self, namespaceHTMLElements, soup=None):
+        if soup:
+            self.soup = soup
+        else:
+            from bs4 import BeautifulSoup
+            self.soup = BeautifulSoup("", "html.parser")
         super(TreeBuilderForHtml5lib, self).__init__(namespaceHTMLElements)
 
     def documentClass(self):
@@ -93,7 +101,8 @@ class TreeBuilderForHtml5lib(html5lib.treebuilders._base.TreeBuilder):
         return TextNode(Comment(data), self.soup)
 
     def fragmentClass(self):
-        self.soup = BeautifulSoup("")
+        from bs4 import BeautifulSoup
+        self.soup = BeautifulSoup("", "html.parser")
         self.soup.name = "[document_fragment]"
         return Element(self.soup, self.soup, None)
 
@@ -106,6 +115,56 @@ class TreeBuilderForHtml5lib(html5lib.treebuilders._base.TreeBuilder):
 
     def getFragment(self):
         return html5lib.treebuilders._base.TreeBuilder.getFragment(self).element
+
+    def testSerializer(self, element):
+        from bs4 import BeautifulSoup
+        rv = []
+        doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
+
+        def serializeElement(element, indent=0):
+            if isinstance(element, BeautifulSoup):
+                pass
+            if isinstance(element, Doctype):
+                m = doctype_re.match(element)
+                if m:
+                    name = m.group(1)
+                    if m.lastindex > 1:
+                        publicId = m.group(2) or ""
+                        systemId = m.group(3) or m.group(4) or ""
+                        rv.append("""|%s<!DOCTYPE %s "%s" "%s">""" %
+                                  (' ' * indent, name, publicId, systemId))
+                    else:
+                        rv.append("|%s<!DOCTYPE %s>" % (' ' * indent, name))
+                else:
+                    rv.append("|%s<!DOCTYPE >" % (' ' * indent,))
+            elif isinstance(element, Comment):
+                rv.append("|%s<!-- %s -->" % (' ' * indent, element))
+            elif isinstance(element, NavigableString):
+                rv.append("|%s\"%s\"" % (' ' * indent, element))
+            else:
+                if element.namespace:
+                    name = "%s %s" % (prefixes[element.namespace],
+                                      element.name)
+                else:
+                    name = element.name
+                rv.append("|%s<%s>" % (' ' * indent, name))
+                if element.attrs:
+                    attributes = []
+                    for name, value in element.attrs.items():
+                        if isinstance(name, NamespacedAttribute):
+                            name = "%s %s" % (prefixes[name.namespace], name.name)
+                        if isinstance(value, list):
+                            value = " ".join(value)
+                        attributes.append((name, value))
+
+                    for name, value in sorted(attributes):
+                        rv.append('|%s%s="%s"' % (' ' * (indent + 2), name, value))
+                indent += 2
+                for child in element.children:
+                    serializeElement(child, indent)
+        serializeElement(element, 0)
+
+        return "\n".join(rv)
 
 class AttrList(object):
     def __init__(self, element):
