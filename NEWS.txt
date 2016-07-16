@@ -1,3 +1,11 @@
+= 4.5.0 () =
+
+* Corrected handling of XML processing instructions. [bug=1504393]
+
+* Fixed a Python 3 ByteWarning when a URL was passed in as though it
+  were markup. Thanks to James Salter for a patch and
+  test. [bug=1533762]
+
 = 4.4.1 (20150928) =
 
 * Fixed a bug that deranged the tree when part of it was

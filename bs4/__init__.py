@@ -198,16 +198,10 @@ class BeautifulSoup(Tag):
                 if isinstance(markup, unicode):
                     markup = markup.encode("utf8")
                 warnings.warn(
-                    '"%s" looks like a filename, not markup. You should probably open this file and pass the filehandle into Beautiful Soup.' % markup)
-            if markup[:5] == "http:" or markup[:6] == "https:":
-                # TODO: This is ugly but I couldn't get it to work in
-                # Python 3 otherwise.
-                if ((isinstance(markup, bytes) and not b' ' in markup)
-                    or (isinstance(markup, unicode) and not u' ' in markup)):
-                    if isinstance(markup, unicode):
-                        markup = markup.encode("utf8")
-                    warnings.warn(
-                        '"%s" looks like a URL. Beautiful Soup is not an HTTP client. You should probably use an HTTP client to get the document behind the URL, and feed that document to Beautiful Soup.' % markup)
+                    '"%s" looks like a filename, not markup. You should'
+                    'probably open this file and pass the filehandle into'
+                    'Beautiful Soup.' % markup)
+            self._check_markup_is_url(markup)
 
         for (self.markup, self.original_encoding, self.declared_html_encoding,
          self.contains_replacement_characters) in (
@@ -234,6 +228,34 @@ class BeautifulSoup(Tag):
         if 'builder' in d and not self.builder.picklable:
             del d['builder']
         return d
+
+    @staticmethod
+    def _check_markup_is_url(markup):
+        """ 
+        Check if markup looks like it's actually a url and raise a warning 
+        if so. Markup can be unicode or str (py2) / bytes (py3).
+        """
+        if isinstance(markup, bytes):
+            space = b' '
+            cant_start_with = (b"http:", b"https:")
+        elif isinstance(markup, unicode):
+            space = u' '
+            cant_start_with = (u"http:", u"https:")
+        else:
+            return
+
+        if any(markup.startswith(prefix) for prefix in cant_start_with):
+            if not space in markup:
+                if isinstance(markup, bytes):
+                    decoded_markup = markup.decode('utf-8', 'replace')
+                else:
+                    decoded_markup = markup
+                warnings.warn(
+                    '"%s" looks like a URL. Beautiful Soup is not an'
+                    ' HTTP client. You should probably use an HTTP client like'
+                    ' requests to get the document behind the URL, and feed'
+                    ' that document to Beautiful Soup.' % decoded_markup
+                )
 
     def _feed(self):
         # Convert the document to Unicode.
