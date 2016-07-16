@@ -5,8 +5,8 @@ http://www.crummy.com/software/BeautifulSoup/
 
 Beautiful Soup uses a pluggable XML or HTML parser to parse a
 (possibly invalid) document into a tree representation. Beautiful Soup
-provides provides methods and Pythonic idioms that make it easy to
-navigate, search, and modify the parse tree.
+provides methods and Pythonic idioms that make it easy to navigate,
+search, and modify the parse tree.
 
 Beautiful Soup works with Python 2.6 and up. It works better if lxml
 and/or html5lib is installed.
@@ -14,6 +14,7 @@ and/or html5lib is installed.
 For more than you ever wanted to know about Beautiful Soup, see the
 documentation:
 http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+
 """
 
 # Use of this source code is governed by a BSD-style license that can be
