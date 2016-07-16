@@ -184,7 +184,7 @@ class BeautifulSoup(Tag):
 
         if hasattr(markup, 'read'):        # It's a file-type object.
             markup = markup.read()
-        elif len(markup) <= 256:
+        elif len(markup) <= 256 and not '<' in markup:
             # Print out warnings for a couple beginner problems
             # involving passing non-markup to Beautiful Soup.
             # Beautiful Soup will still parse the input as markup,

@@ -13,6 +13,10 @@
   were markup. Thanks to James Salter for a patch and
   test. [bug=1533762]
 
+* We don't run the check for a filename passed in as markup if the
+  'filename' contains a less-than character; the less-than character
+  indicates it's most likely a very small document. [bug=1577864]
+
 = 4.4.1 (20150928) =
 
 * Fixed a bug that deranged the tree when part of it was
