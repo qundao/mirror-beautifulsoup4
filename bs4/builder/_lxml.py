@@ -5,7 +5,6 @@ __all__ = [
     'LXMLTreeBuilder',
     ]
 
-from pdb import set_trace
 from io import BytesIO
 from StringIO import StringIO
 import collections

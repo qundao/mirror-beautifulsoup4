@@ -2,7 +2,6 @@
 # found in the LICENSE file.
 __license__ = "MIT"
 
-from pdb import set_trace
 import collections
 import re
 import sys

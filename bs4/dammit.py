@@ -10,7 +10,6 @@ XML or HTML to reflect a new encoding; that's the tree builder's job.
 # found in the LICENSE file.
 __license__ = "MIT"
 
-from pdb import set_trace
 import codecs
 from htmlentitydefs import codepoint2name
 import re
