@@ -101,6 +101,8 @@ class HTMLAwareEntitySubstitution(EntitySubstitution):
 
     preformatted_tags = set(["pre"])
 
+    preserve_whitespace_tags = set(['pre', 'textarea'])
+
     @classmethod
     def _substitute_if_appropriate(cls, ns, f):
         if (isinstance(ns, NavigableString)
@@ -1065,10 +1067,18 @@ class Tag(PageElement):
 
     def _should_pretty_print(self, indent_level):
         """Should this tag be pretty-printed?"""
+        if self.builder:
+            preserve_whitespace_tags = self.builder.preserve_whitespace_tags
+        else:
+            if self._is_xml:
+                preserve_whitespace_tags = []
+            else:
+                preserve_whitespace_tags = HTMLAwareEntitySubstitution.preserve_whitespace_tags
+
         return (
-            indent_level is not None and
-            (self.name not in HTMLAwareEntitySubstitution.preformatted_tags
-             or self._is_xml))
+            indent_level is not None
+            and self.name not in preserve_whitespace_tags
+        )
 
     def decode(self, indent_level=None,
                eventual_encoding=DEFAULT_OUTPUT_ENCODING,

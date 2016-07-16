@@ -217,9 +217,22 @@ Hello, world!
         self.assertEqual(comment, baz.previous_element)
 
     def test_preserved_whitespace_in_pre_and_textarea(self):
-        """Whitespace must be preserved in <pre> and <textarea> tags."""
-        self.assertSoupEquals("<pre>   </pre>")
-        self.assertSoupEquals("<textarea> woo  </textarea>")
+        """Whitespace must be preserved in <pre> and <textarea> tags,
+        even if that would mean not prettifying the markup.
+        """
+        pre_markup = "<pre>   </pre>"
+        textarea_markup = "<textarea> woo\nwoo  </textarea>"
+        self.assertSoupEquals(pre_markup)
+        self.assertSoupEquals(textarea_markup)
+
+        soup = self.soup(pre_markup)
+        self.assertEqual(soup.pre.prettify(), pre_markup)
+
+        soup = self.soup(textarea_markup)
+        self.assertEqual(soup.textarea.prettify(), textarea_markup)
+
+        soup = self.soup("<textarea></textarea>")
+        self.assertEqual(soup.textarea.prettify(), "<textarea></textarea>")
 
     def test_nested_inline_elements(self):
         """Inline elements can be nested indefinitely."""

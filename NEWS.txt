@@ -2,6 +2,9 @@
 
 * Corrected handling of XML processing instructions. [bug=1504393]
 
+* The contents of <textarea> tags will no longer be modified when the
+  tree is prettified. [bug=1555829]
+
 * Fixed a Python 3 ByteWarning when a URL was passed in as though it
   were markup. Thanks to James Salter for a patch and
   test. [bug=1533762]
