@@ -8,6 +8,7 @@ __all__ = [
     ]
 
 from HTMLParser import HTMLParser
+from pdb import set_trace
 
 try:
     from HTMLParser import HTMLParseError

@@ -5,6 +5,7 @@ __all__ = [
     'LXMLTreeBuilder',
     ]
 
+from pdb import set_trace
 from io import BytesIO
 from StringIO import StringIO
 import collections
@@ -14,6 +15,7 @@ from bs4.element import (
     Doctype,
     NamespacedAttribute,
     ProcessingInstruction,
+    XMLProcessingInstruction,
 )
 from bs4.builder import (
     FAST,
@@ -105,6 +107,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # iterate over the encodings, and tell lxml to try to parse
         # the document as each one in turn.
         is_html = not self.is_xml
+        if is_html:
+            self.processing_instruction_class = ProcessingInstruction
+        else:
+            self.processing_instruction_class = XMLProcessingInstruction
         try_encodings = [user_specified_encoding, document_declared_encoding]
         detector = EncodingDetector(
             markup, try_encodings, is_html, exclude_encodings)
@@ -203,7 +209,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def pi(self, target, data):
         self.soup.endData()
         self.soup.handle_data(target + ' ' + data)
-        self.soup.endData(ProcessingInstruction)
+        self.soup.endData(self.processing_instruction_class)
 
     def data(self, content):
         self.soup.handle_data(content)

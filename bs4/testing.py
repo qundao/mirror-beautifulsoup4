@@ -565,6 +565,11 @@ class XMLTreeBuilderSmokeTest(object):
         soup = self.soup(markup)
         self.assertEqual(markup, soup.encode("utf8"))
 
+    def test_processing_instruction(self):
+        markup = b"""<?xml version="1.0" encoding="utf8"?>\n<?PITarget PIContent?>"""
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.encode("utf8"))
+
     def test_real_xhtml_document(self):
         """A real XHTML document should come out *exactly* the same as it went in."""
         markup = b"""<?xml version="1.0" encoding="utf-8"?>

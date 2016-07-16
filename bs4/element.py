@@ -745,9 +745,15 @@ class CData(PreformattedString):
     SUFFIX = u']]>'
 
 class ProcessingInstruction(PreformattedString):
+    """A SGML processing instruction."""
 
     PREFIX = u'<?'
     SUFFIX = u'>'
+
+class XMLProcessingInstruction(ProcessingInstruction):
+    """An XML processing instruction."""
+    PREFIX = u'<?'
+    SUFFIX = u'?>'
 
 class Comment(PreformattedString):
 
