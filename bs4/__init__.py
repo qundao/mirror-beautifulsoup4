@@ -28,6 +28,7 @@ __all__ = ['BeautifulSoup']
 
 import os
 import re
+import traceback
 import warnings
 
 from .builder import builder_registry, ParserRejectedMarkup
@@ -80,7 +81,7 @@ class BeautifulSoup(Tag):
 
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
-    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nTo get rid of this warning, change this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
+    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, change code that looks like this:\n\n BeautifulSoup([your markup])\n\nto this:\n\n BeautifulSoup([your markup], \"%(parser)s\")\n"
 
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
@@ -164,7 +165,13 @@ class BeautifulSoup(Tag):
                     markup_type = "XML"
                 else:
                     markup_type = "HTML"
+
+                caller = traceback.extract_stack()[0]
+                filename = caller[0]
+                line_number = caller[1]
                 warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % dict(
+                    filename=filename,
+                    line_number=line_number,
                     parser=builder.NAME,
                     markup_type=markup_type))
 

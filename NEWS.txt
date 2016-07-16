@@ -5,6 +5,10 @@
 * The contents of <textarea> tags will no longer be modified when the
   tree is prettified. [bug=1555829]
 
+* Specify the file and line number when warning about a
+  BeautifulSoup object being instantiated without a parser being
+  specified. [bug=1574647]
+
 * Fixed a Python 3 ByteWarning when a URL was passed in as though it
   were markup. Thanks to James Salter for a patch and
   test. [bug=1533762]
