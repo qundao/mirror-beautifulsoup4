@@ -175,6 +175,8 @@ class PageElement(object):
         the contents of <script> and <style> tags, or not). It's
         inefficient, but it should be called very rarely.
         """
+        if self.__is_xml is not None:
+            return self.__is_xml
         if self.parent is None:
             # This is the top-level object. It should have .is_xml set
             # from tree creation. If not, take a guess--BS is usually
@@ -680,6 +682,14 @@ class NavigableString(unicode, PageElement):
     PREFIX = ''
     SUFFIX = ''
 
+    # We can't tell just by looking at a string whether it's contained
+    # in an XML document or an HTML document.
+    __is_xml = None
+
+    @property
+    def _is_xml(self):
+        return None
+
     def __new__(cls, value):
         """Create a new NavigableString.
 
@@ -790,7 +800,8 @@ class Tag(PageElement):
     """Represents a found HTML tag with its attributes and contents."""
 
     def __init__(self, parser=None, builder=None, name=None, namespace=None,
-                 prefix=None, attrs=None, parent=None, previous=None):
+                 prefix=None, attrs=None, parent=None, previous=None,
+                 is_xml=None):
         "Basic constructor."
 
         if parser is None:
@@ -804,6 +815,14 @@ class Tag(PageElement):
         self.name = name
         self.namespace = namespace
         self.prefix = prefix
+        if builder is not None:
+            preserve_whitespace_tags = builder.preserve_whitespace_tags
+        else:
+            if is_xml:
+                preserve_whitespace_tags = []
+            else:
+                preserve_whitespace_tags = HTMLAwareEntitySubstitution.preserve_whitespace_tags
+        self.preserve_whitespace_tags = preserve_whitespace_tags
         if attrs is None:
             attrs = {}
         elif attrs:
@@ -814,6 +833,13 @@ class Tag(PageElement):
                 attrs = dict(attrs)
         else:
             attrs = dict(attrs)
+
+        # If possible, determine ahead of time whether this tag is an
+        # XML tag.
+        if builder:
+            self.__is_xml = builder.is_xml
+        else:
+            self.__is_xml = is_xml
         self.attrs = attrs
         self.contents = []
         self.setup(parent, previous)
@@ -833,7 +859,7 @@ class Tag(PageElement):
         Its contents are a copy of the old Tag's contents.
         """
         clone = type(self)(None, self.builder, self.name, self.namespace,
-                           self.nsprefix, self.attrs)
+                           self.nsprefix, self.attrs, is_xml=self._is_xml)
         for attr in ('can_be_empty_element', 'hidden'):
             setattr(clone, attr, getattr(self, attr))
         for child in self.contents:
@@ -1006,7 +1032,7 @@ class Tag(PageElement):
                     tag_name, tag_name))
             return self.find(tag_name)
         # We special case contents to avoid recursion.
-        elif not tag.startswith("__") and not tag=="contents":
+        elif not tag.startswith("__") and not tag == "contents":
             return self.find(tag)
         raise AttributeError(
             "'%s' object has no attribute '%s'" % (self.__class__, tag))
@@ -1066,17 +1092,10 @@ class Tag(PageElement):
 
     def _should_pretty_print(self, indent_level):
         """Should this tag be pretty-printed?"""
-        if self.builder:
-            preserve_whitespace_tags = self.builder.preserve_whitespace_tags
-        else:
-            if self._is_xml:
-                preserve_whitespace_tags = []
-            else:
-                preserve_whitespace_tags = HTMLAwareEntitySubstitution.preserve_whitespace_tags
 
         return (
             indent_level is not None
-            and self.name not in preserve_whitespace_tags
+            and self.name not in self.preserve_whitespace_tags
         )
 
     def decode(self, indent_level=None,
