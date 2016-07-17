@@ -347,7 +347,7 @@ class UnicodeDammit:
         self.tried_encodings = []
         self.contains_replacement_characters = False
         self.is_html = is_html
-
+        self.log = logging.getLogger(__name__)
         self.detector = EncodingDetector(
             markup, override_encodings, is_html, exclude_encodings)
 
@@ -377,9 +377,10 @@ class UnicodeDammit:
                 if encoding != "ascii":
                     u = self._convert_from(encoding, "replace")
                 if u is not None:
-                    logging.warning(
+                    self.log.warn(
                             "Some characters could not be decoded, and were "
-                            "replaced with REPLACEMENT CHARACTER.")
+                            "replaced with REPLACEMENT CHARACTER."
+                    )
                     self.contains_replacement_characters = True
                     break
 
