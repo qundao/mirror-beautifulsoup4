@@ -383,8 +383,8 @@ class BeautifulSoup(Tag):
                 index -= 1
             else:
                 raise ValueError(
-                    "Error in html5lib tree builder: supposedly %r was "
-                    "inserted into %r, but I don't see it!" % (
+                    "Error building tree: supposedly %r was inserted "
+                    "into %r after the fact, but I don't see it!" % (
                         o, parent
                     )
                 )
