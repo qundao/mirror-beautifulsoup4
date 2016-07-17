@@ -377,7 +377,7 @@ class UnicodeDammit:
                 if encoding != "ascii":
                     u = self._convert_from(encoding, "replace")
                 if u is not None:
-                    self.log.warn(
+                    self.log.warning(
                             "Some characters could not be decoded, and were "
                             "replaced with REPLACEMENT CHARACTER."
                     )
