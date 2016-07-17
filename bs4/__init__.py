@@ -376,7 +376,18 @@ class BeautifulSoup(Tag):
         if parent.next_sibling:
             # This node is being inserted into an element that has
             # already been parsed. Deal with any dangling references.
-            index = parent.contents.index(o)
+            index = len(parent.contents)-1
+            while index >= 0:
+                if parent.contents[index] is o:
+                    break
+                index -= 1
+            else:
+                raise ValueError(
+                    "Error in html5lib tree builder: supposedly %r was "
+                    "inserted into %r, but I don't see it!" % (
+                        o, parent
+                    )
+                )
             if index == 0:
                 previous_element = parent
                 previous_sibling = None

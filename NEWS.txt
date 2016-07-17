@@ -3,6 +3,10 @@
 * Beautiful Soup will now work with versions of html5lib greater than
   0.99999999. [bug=1603299]
 
+* Fixed a bug in the html5lib treebuilder that deranged the tree
+  when a whitespace element was reparented into a tag that contained
+  an identical whitespace element. [bug=1505351]
+
 * Corrected handling of XML processing instructions. [bug=1504393]
 
 * The contents of <textarea> tags will no longer be modified when the
