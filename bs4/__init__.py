@@ -182,6 +182,7 @@ class BeautifulSoup(Tag):
 
         self.builder = builder
         self.is_xml = builder.is_xml
+        self.known_xml = self.is_xml
         self.builder.soup = self
 
         self.parse_only = parse_only

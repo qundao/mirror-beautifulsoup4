@@ -172,13 +172,19 @@ class PageElement(object):
 
         This is used when mapping a formatter name ("minimal") to an
         appropriate function (one that performs entity-substitution on
-        the contents of <script> and <style> tags, or not). It's
+        the contents of <script> and <style> tags, or not). It can be
         inefficient, but it should be called very rarely.
         """
-        if self.__is_xml is not None:
-            return self.__is_xml
+        if self.known_xml is not None:
+            # Most of the time we will have determined this when the
+            # document is parsed.
+            return self.known_xml
+
+        # Otherwise, it's likely that this element was created by
+        # direct invocation of the constructor from within the user's
+        # Python code.
         if self.parent is None:
-            # This is the top-level object. It should have .is_xml set
+            # This is the top-level object. It should have .known_xml set
             # from tree creation. If not, take a guess--BS is usually
             # used on HTML markup.
             return getattr(self, 'is_xml', False)
@@ -684,11 +690,8 @@ class NavigableString(unicode, PageElement):
 
     # We can't tell just by looking at a string whether it's contained
     # in an XML document or an HTML document.
-    __is_xml = None
 
-    @property
-    def _is_xml(self):
-        return None
+    known_xml = None
 
     def __new__(cls, value):
         """Create a new NavigableString.
@@ -837,9 +840,9 @@ class Tag(PageElement):
         # If possible, determine ahead of time whether this tag is an
         # XML tag.
         if builder:
-            self.__is_xml = builder.is_xml
+            self.known_xml = builder.is_xml
         else:
-            self.__is_xml = is_xml
+            self.known_xml = is_xml
         self.attrs = attrs
         self.contents = []
         self.setup(parent, previous)
