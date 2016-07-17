@@ -1,5 +1,8 @@
 = 4.5.0 () =
 
+* Beautiful Soup will now work with versions of html5lib greater than
+  0.99999999. [bug=1603299]
+
 * Corrected handling of XML processing instructions. [bug=1504393]
 
 * The contents of <textarea> tags will no longer be modified when the

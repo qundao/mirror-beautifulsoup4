@@ -495,7 +495,9 @@ Hello, world!
         hebrew_document = b'<html><head><title>Hebrew (ISO 8859-8) in Visual Directionality</title></head><body><h1>Hebrew (ISO 8859-8) in Visual Directionality</h1>\xed\xe5\xec\xf9</body></html>'
         soup = self.soup(
             hebrew_document, from_encoding="iso8859-8")
-        self.assertEqual(soup.original_encoding, 'iso8859-8')
+        # Some tree builders call it iso8859-8, others call it iso-8859-9.
+        # That's not a difference we really care about.
+        assert soup.original_encoding in ('iso8859-8', 'iso-8859-8')
         self.assertEqual(
             soup.encode('utf-8'),
             hebrew_document.decode("iso8859-8").encode("utf-8"))
