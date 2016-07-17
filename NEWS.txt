@@ -12,6 +12,11 @@
 * The contents of <textarea> tags will no longer be modified when the
   tree is prettified. [bug=1555829]
 
+* When a BeautifulSoup object is pickled but its tree builder cannot
+  be pickled, its .builder attribute is set to None instead of being
+  destroyed. This avoids a performance problem once the object is
+  unpickled. [bug=1523629]
+
 * Specify the file and line number when warning about a
   BeautifulSoup object being instantiated without a parser being
   specified. [bug=1574647]

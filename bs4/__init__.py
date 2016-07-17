@@ -242,7 +242,7 @@ class BeautifulSoup(Tag):
         # Frequently a tree builder can't be pickled.
         d = dict(self.__dict__)
         if 'builder' in d and not self.builder.picklable:
-            del d['builder']
+            d['builder'] = None
         return d
 
     @staticmethod
