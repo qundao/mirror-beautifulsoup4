@@ -1909,6 +1909,14 @@ class TestSoupSelector(TreeTest):
             ('div[data-tag]', ['data1'])
         )
 
+    def test_quoted_space_in_selector_name(self):
+        html = """<div style="display: wrong">nope</div>
+        <div style="display: right">yes</div>
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+        [chosen] = soup.select('div[style="display: right"]')
+        self.assertEqual("yes", chosen.string)
+
     def test_unsupported_pseudoclass(self):
         self.assertRaises(
             NotImplementedError, self.soup.select, "a:no-such-pseudoclass")

@@ -7,6 +7,9 @@
   reparented into a tag that contained an identical whitespace
   element. [bug=1505351]
 
+* Added support for CSS selector values that contain quoted spaces,
+  such as tag[style="display: foo"]. [bug=1540588]
+
 * Corrected handling of XML processing instructions. [bug=1504393]
 
 * The contents of <textarea> tags will no longer be modified when the

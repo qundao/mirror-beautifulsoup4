@@ -4,6 +4,7 @@ __license__ = "MIT"
 
 import collections
 import re
+import shlex
 import sys
 import warnings
 from bs4.dammit import EntitySubstitution
@@ -1319,6 +1320,7 @@ class Tag(PageElement):
 
     _selector_combinators = ['>', '+', '~']
     _select_debug = False
+    quoted_colon = re.compile('"[^"]*:[^"]*"')
     def select_one(self, selector):
         """Perform a CSS selection operation on the current element."""
         value = self.select(selector, limit=1)
@@ -1344,8 +1346,7 @@ class Tag(PageElement):
                 if limit and len(context) >= limit:
                     break
             return context
-
-        tokens = selector.split()
+        tokens = shlex.split(selector)
         current_context = [self]
 
         if tokens[-1] in self._selector_combinators:
@@ -1397,7 +1398,7 @@ class Tag(PageElement):
                     return classes.issubset(candidate.get('class', []))
                 checker = classes_match
 
-            elif ':' in token:
+            elif ':' in token and not self.quoted_colon.search(token):
                 # Pseudo-class
                 tag_name, pseudo = token.split(':', 1)
                 if tag_name == '':
@@ -1428,11 +1429,8 @@ class Tag(PageElement):
                             self.count += 1
                             if self.count == self.destination:
                                 return True
-                            if self.count > self.destination:
-                                # Stop the generator that's sending us
-                                # these things.
-                                raise StopIteration()
-                            return False
+                            else:
+                                return False
                     checker = Counter(pseudo_value).nth_child_of_type
                 else:
                     raise NotImplementedError(
