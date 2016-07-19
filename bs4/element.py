@@ -1704,21 +1704,15 @@ class SoupStrainer(object):
         if isinstance(markup, list) or isinstance(markup, tuple):
             # This should only happen when searching a multi-valued attribute
             # like 'class'.
-            if (isinstance(match_against, unicode)
-                and ' ' in match_against):
-                # A bit of a special case. If they try to match "foo
-                # bar" on a multivalue attribute's value, only accept
-                # the literal value "foo bar"
-                #
-                # XXX This is going to be pretty slow because we keep
-                # splitting match_against. But it shouldn't come up
-                # too often.
-                return (whitespace_re.split(match_against) == markup)
-            else:
-                for item in markup:
-                    if self._matches(item, match_against):
-                        return True
-                return False
+            for item in markup:
+                if self._matches(item, match_against):
+                    return True
+            # We didn't match any particular value of the multivalue
+            # attribute, but maybe we match the attribute value when
+            # considered as a string.
+            if self._matches(' '.join(markup), match_against):
+                return True
+            return False
 
         if match_against is True:
             # True matches any non-None value.

@@ -3,6 +3,16 @@
 * Beautiful Soup will now work with versions of html5lib greater than
   0.99999999. [bug=1603299]
 
+* If a search against each individual value of a multi-valued
+  attribute fails, the search will be run one final time against the
+  complete attribute value considered as a single string. That is, if
+  a tag has class="foo bar" and neither "foo" nor "bar" matches, but
+  "foo bar" does, the tag is now considered a match.
+
+  This happened in previous versions, but only when the value being
+  searched for was a string. Now it also works when searching for
+  regular expressions, lists of values, etc. [bug=1476868]
+
 * Fixed a bug that deranged the tree when a whitespace element was
   reparented into a tag that contained an identical whitespace
   element. [bug=1505351]

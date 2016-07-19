@@ -222,6 +222,17 @@ class TestFindAllByName(TreeTest):
         self.assertSelects(
             tree.find_all(id_matches_name), ["Match 1.", "Match 2."])
 
+    def test_find_with_multi_valued_attribute(self):
+        soup = self.soup(
+            "<div class='a b'>1</div><div class='a c'>2</div><div class='a d'>3</div>"
+        )
+        r1 = soup.find('div', 'a d');
+        r2 = soup.find('div', re.compile(r'a d'));
+        r3, r4 = soup.find_all('div', ['a b', 'a d']);
+        self.assertEqual('3', r1.string)
+        self.assertEqual('3', r2.string)
+        self.assertEqual('1', r3.string)
+        self.assertEqual('3', r4.string)
 
 class TestFindAllByAttribute(TreeTest):
 
@@ -294,10 +305,10 @@ class TestFindAllByAttribute(TreeTest):
         f = tree.find_all("gar", class_=re.compile("a"))
         self.assertSelects(f, ["Found it"])
 
-        # Since the class is not the string "foo bar", but the two
-        # strings "foo" and "bar", this will not find anything.
+        # If the search fails to match the individual strings "foo" and "bar",
+        # it will be tried against the combined string "foo bar".
         f = tree.find_all("gar", class_=re.compile("o b"))
-        self.assertSelects(f, [])
+        self.assertSelects(f, ["Found it"])
 
     def test_find_all_with_non_dictionary_for_attrs_finds_by_class(self):
         soup = self.soup("<a class='bar'>Found it</a>")
