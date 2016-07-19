@@ -1537,13 +1537,12 @@ class Tag(PageElement):
                             # don't include it in the context more than once.
                             new_context.append(candidate)
                             new_context_ids.add(id(candidate))
-                            if limit and len(new_context) >= limit:
-                                break
                     elif self._select_debug:
                         print "     FAILURE %s %s" % (candidate.name, repr(candidate.attrs))
 
-
             current_context = new_context
+        if limit and len(current_context) >= limit:
+            current_context = current_context[:limit]
 
         if self._select_debug:
             print "Final verdict:"

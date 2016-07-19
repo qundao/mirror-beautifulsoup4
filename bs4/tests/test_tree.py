@@ -1676,8 +1676,8 @@ class TestSoupSelector(TreeTest):
     def setUp(self):
         self.soup = BeautifulSoup(self.HTML, 'html.parser')
 
-    def assertSelects(self, selector, expected_ids):
-        el_ids = [el['id'] for el in self.soup.select(selector)]
+    def assertSelects(self, selector, expected_ids, **kwargs):
+        el_ids = [el['id'] for el in self.soup.select(selector, **kwargs)]
         el_ids.sort()
         expected_ids.sort()
         self.assertEqual(expected_ids, el_ids,
@@ -1719,6 +1719,13 @@ class TestSoupSelector(TreeTest):
     def test_tag_in_tag_many(self):
         for selector in ('html div', 'html body div', 'body div'):
             self.assertSelects(selector, ['data1', 'main', 'inner', 'footer'])
+
+
+    def test_limit(self):
+        self.assertSelects('html div', ['main'], limit=1)
+        self.assertSelects('html body div', ['inner', 'main'], limit=2)
+        self.assertSelects('body div', ['data1', 'main', 'inner', 'footer'],
+                           limit=10)
 
     def test_tag_no_match(self):
         self.assertEqual(len(self.soup.select('del')), 0)

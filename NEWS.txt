@@ -21,6 +21,9 @@
   BeautifulSoup object being instantiated without a parser being
   specified. [bug=1574647]
 
+* The `limit` argument to `select()` now works correctly, though it's
+  not implemented very efficiently. [bug=1520530]
+
 * Fixed a Python 3 ByteWarning when a URL was passed in as though it
   were markup. Thanks to James Salter for a patch and
   test. [bug=1533762]
