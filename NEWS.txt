@@ -12,6 +12,9 @@
 
 * Corrected handling of XML processing instructions. [bug=1504393]
 
+* Corrected an encoding error that happened when a BeautifulSoup
+  object was copied. [bug=1554439]
+
 * The contents of <textarea> tags will no longer be modified when the
   tree is prettified. [bug=1555829]
 

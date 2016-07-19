@@ -236,7 +236,16 @@ class BeautifulSoup(Tag):
         self.builder.soup = None
 
     def __copy__(self):
-        return type(self)(self.encode(), builder=self.builder)
+        copy = type(self)(
+            self.encode('utf-8'), builder=self.builder, from_encoding='utf-8'
+        )
+
+        # Although we encoded the tree to UTF-8, that may not have
+        # been the encoding of the original markup. Set the copy's
+        # .original_encoding to reflect the original object's
+        # .original_encoding.
+        copy.original_encoding = self.original_encoding
+        return copy
 
     def __getstate__(self):
         # Frequently a tree builder can't be pickled.

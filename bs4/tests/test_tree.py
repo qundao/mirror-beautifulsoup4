@@ -1328,6 +1328,13 @@ class TestPersistence(SoupTest):
         copied = copy.deepcopy(self.tree)
         self.assertEqual(copied.decode(), self.tree.decode())
 
+    def test_copy_preserves_encoding(self):
+        soup = BeautifulSoup('<p>&nbsp;</p>', 'html.parser')
+        self.assertEqual('ascii', soup.original_encoding)
+        copy = soup.__copy__()
+        self.assertEqual(u"<p> </p>", unicode(copy))
+        self.assertEqual('ascii', copy.original_encoding)
+
     def test_unicode_pickle(self):
         # A tree containing Unicode characters can be pickled.
         html = u"<b>\N{SNOWMAN}</b>"
