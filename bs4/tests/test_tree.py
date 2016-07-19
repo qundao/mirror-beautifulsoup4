@@ -1340,7 +1340,7 @@ class TestPersistence(SoupTest):
         self.assertEqual(copied.decode(), self.tree.decode())
 
     def test_copy_preserves_encoding(self):
-        soup = BeautifulSoup('<p>&nbsp;</p>', 'html.parser')
+        soup = BeautifulSoup(b'<p>&nbsp;</p>', 'html.parser')
         self.assertEqual('ascii', soup.original_encoding)
         copy = soup.__copy__()
         self.assertEqual(u"<p> </p>", unicode(copy))
