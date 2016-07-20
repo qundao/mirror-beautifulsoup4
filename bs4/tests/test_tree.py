@@ -1341,10 +1341,10 @@ class TestPersistence(SoupTest):
 
     def test_copy_preserves_encoding(self):
         soup = BeautifulSoup(b'<p>&nbsp;</p>', 'html.parser')
-        self.assertEqual('ascii', soup.original_encoding)
+        encoding = soup.original_encoding
         copy = soup.__copy__()
         self.assertEqual(u"<p> </p>", unicode(copy))
-        self.assertEqual('ascii', copy.original_encoding)
+        self.assertEqual(encoding, copy.original_encoding)
 
     def test_unicode_pickle(self):
         # A tree containing Unicode characters can be pickled.

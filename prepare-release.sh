@@ -12,9 +12,9 @@
 ./test-all-versions
 
 # Make sure nothing broke on 2.6
-source ../virtualenv-2.6/bin/activate
-nosetests
-deactivate
+#source ../virtualenv-2.6/bin/activate
+#nosetests
+#deactivate
 
 rm -rf dist
 
