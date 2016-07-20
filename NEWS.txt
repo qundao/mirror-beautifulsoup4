@@ -1,4 +1,7 @@
-= 4.5.0 () =
+= 4.5.0 (20160719) =
+
+* Beautiful Soup is no longer compatible with Python 2.6. This
+  actually happened a few releases ago, but it's now official.
 
 * Beautiful Soup will now work with versions of html5lib greater than
   0.99999999. [bug=1603299]
@@ -10,8 +13,8 @@
   "foo bar" does, the tag is now considered a match.
 
   This happened in previous versions, but only when the value being
-  searched for was a string. Now it also works when searching for
-  regular expressions, lists of values, etc. [bug=1476868]
+  searched for was a string. Now it also works when that value is
+  a regular expression, a list of strings, etc. [bug=1476868]
 
 * Fixed a bug that deranged the tree when a whitespace element was
   reparented into a tag that contained an identical whitespace
