@@ -346,7 +346,7 @@ class TestFindAllByAttribute(TreeTest):
         strainer = SoupStrainer(attrs={'id' : 'first'})
         self.assertSelects(tree.find_all(strainer), ['Match.'])
 
-    def test_find_all_with_missing_atribute(self):
+    def test_find_all_with_missing_attribute(self):
         # You can pass in None as the value of an attribute to find_all.
         # This will match tags that do not have that attribute set.
         tree = self.soup("""<a id="1">ID present.</a>

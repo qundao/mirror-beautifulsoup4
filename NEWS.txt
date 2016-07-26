@@ -508,7 +508,7 @@ Bug fixes:
 * Renamed Tag.nsprefix to Tag.prefix, for consistency with
   NamespacedAttribute.
 
-* Fixed a test failure that occured on Python 3.x when chardet was
+* Fixed a test failure that occurred on Python 3.x when chardet was
   installed.
 
 * Made prettify() return Unicode by default, so it will look nice on
@@ -542,7 +542,7 @@ Bug fixes:
 
 * Restored compatibility with Python 2.6.
 
-* The install process no longer installs docs or auxillary text files.
+* The install process no longer installs docs or auxiliary text files.
 
 * It's now possible to deepcopy a BeautifulSoup object created with
   Python's built-in HTML parser.
@@ -781,7 +781,7 @@ Added an import that makes BS work in Python 2.3.
 Fixed a UnicodeDecodeError when unpickling documents that contain
 non-ASCII characters.
 
-Fixed a TypeError that occured in some circumstances when a tag
+Fixed a TypeError that occurred in some circumstances when a tag
 contained no text.
 
 Jump through hoops to avoid the use of chardet, which can be extremely
