@@ -77,7 +77,7 @@ class TestWarnings(SoupTest):
     def test_no_warning_if_explicit_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
             soup = self.soup("<a><b></b></a>", "html.parser")
-        self.assertEquals([], w)
+        self.assertEqual([], w)
 
     def test_parseOnlyThese_renamed_to_parse_only(self):
         with warnings.catch_warnings(record=True) as w:
