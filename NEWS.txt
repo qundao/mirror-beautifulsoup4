@@ -1,3 +1,8 @@
+= Unreleased =
+
+* Fixed a reported (but not duplicated) bug involving processing
+  instructions fed into the lxml HTML parser.
+
 = 4.5.0 (20160719) =
 
 * Beautiful Soup is no longer compatible with Python 2.6. This

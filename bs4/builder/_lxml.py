@@ -107,7 +107,8 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # the document as each one in turn.
         is_html = not self.is_xml
         if is_html:
-            self.processing_instruction_class = ProcessingInstruction
+            pass
+            # self.processing_instruction_class = ProcessingInstruction
         else:
             self.processing_instruction_class = XMLProcessingInstruction
         try_encodings = [user_specified_encoding, document_declared_encoding]
@@ -235,6 +236,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     ALTERNATE_NAMES = ["lxml-html"]
 
     features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
+    processing_instruction_class = ProcessingInstruction
     is_xml = False
 
     def default_parser(self, encoding):
