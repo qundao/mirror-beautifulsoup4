@@ -649,7 +649,7 @@ class PageElement(object):
             return lambda el: el._attr_value_as_string(
                 attribute, '').startswith(value)
         elif operator == '$':
-            # string represenation of `attribute` ends with `value`
+            # string representation of `attribute` ends with `value`
             return lambda el: el._attr_value_as_string(
                 attribute, '').endswith(value)
         elif operator == '*':
