@@ -11,52 +11,42 @@
 # Make sure tests pass
 ./test-all-versions
 
-# Make sure nothing broke on 2.6
-#source ../virtualenv-2.6/bin/activate
-#nosetests
-#deactivate
-
-rm -rf dist
+rm -rf build dist
 
 # Create the 2.x source distro and wheel
 python setup.py sdist bdist_wheel
 
-# Create the 3.x wheel
-source ../virtualenv-3/bin/activate
-python setup.py bdist_wheel
-deactivate
-
-# Upload to pypi test
+# Upload the 2.x source distro and wheel to pypi test
 python setup.py register -r test
 python setup.py sdist bdist_wheel upload -r test
-
-source ../virtualenv-3/bin/activate
-python setup.py bdist_wheel upload -r test
-deactivate
 
 # Try 2.x install from pypi test
 rm -rf ../py2-install-test-virtualenv
 virtualenv -p /usr/bin/python2.7 ../py2-install-test-virtualenv
 source ../py2-install-test-virtualenv/bin/activate
-pip install -i https://testpypi.python.org/pypi beautifulsoup4
+pip install --pre -i https://pypi.python.org/pypi beautifulsoup4
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
 # That should print '<a>foo</a>'
 deactivate
 rm -rf ../py2-install-test-virtualenv
 
-# Try 3.x install from pypi test
-rm -rf ../py3-install-test-virtualenv
-virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
-source ../py3-install-test-virtualenv/bin/activate
+# Try 3.x source install from pypi test
+rm -rf ../py3-source-install
+virtualenv -p /usr/bin/python3 ../py3-source-install
+source ../py3-source-install/bin/activate
 pip install -i https://testpypi.python.org/pypi beautifulsoup4
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
 # That should print '<a>foo</a>'
+
+# Create and upload a Python 3 wheel from within a virtual environment
+# that has the Python 3 version of the code.
+pip install wheel
+python3 setup.py bdist_wheel upload -r test
+
 deactivate
-rm -rf ../py3-install-test-virtualenv
-
-
+rm -rf ../py3-source-install
 
 # Make sure setup.py works on 2.x
 rm -rf ../py2-install-test-virtualenv
@@ -86,6 +76,7 @@ echo
 rm -rf ../py2-install-test-virtualenv
 virtualenv -p /usr/bin/python2.7 ../py2-install-test-virtualenv
 source ../py2-install-test-virtualenv/bin/activate
+pip install --upgrade setuptools
 pip install dist/beautifulsoup4-4.*-py2-none-any.whl -e .[html5lib]
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html5lib'))")
@@ -98,12 +89,41 @@ echo
 rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
+pip install --upgrade setuptools
 pip install dist/beautifulsoup4-4.*-py3-none-any.whl -e .[html5lib]
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html5lib'))")
 # That should print '<html><head></head><body><a>foo</a></body></html>'
 deactivate
 rm -rf ../py3-install-test-virtualenv
+
+################
+
+Do the release for real.
+
+# Register the project and upload the source distribution and Python 2 wheel.
+python setup.py register -r test
+python setup.py sdist bdist_wheel upload -r test
+
+# Create a Python 3 environment and install Beautiful Soup
+# from the source distribution that was just uploaded
+rm -rf ../py3-source-install
+virtualenv -p /usr/bin/python3 ../py3-source-install
+source ../py3-source-install/bin/activate
+pip install -i https://pypi.python.org/pypi beautifulsoup4
+echo "EXPECT HTML ON LINE BELOW"
+(cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
+# That should print '<a>foo</a>'
+
+# Create and upload a Python 3 wheel from within a virtual environment
+# that has the Python 3 version of the code.
+pip install wheel
+python3 setup.py bdist_wheel upload -r test
+
+# Remove the Python 3 virtual environment.
+deactivate
+rm -rf ../py3-source-install
+
 
 ################
 
