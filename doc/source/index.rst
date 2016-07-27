@@ -298,7 +298,8 @@ constructor. You can pass in a string or an open filehandle::
 
  from bs4 import BeautifulSoup
 
- soup = BeautifulSoup(open("index.html"))
+ with open("index.html") as fp:
+     soup = BeautifulSoup(fp)
 
  soup = BeautifulSoup("<html>data</html>")
 
@@ -2776,7 +2777,8 @@ you how different parsers handle the document, and tell you if you're
 missing a parser that Beautiful Soup could be using::
 
  from bs4.diagnose import diagnose
- data = open("bad.html").read()
+ with open("bad.html") as fp:
+     data = fp.read()
  diagnose(data)
 
  # Diagnostic running on Beautiful Soup 4.2.0
