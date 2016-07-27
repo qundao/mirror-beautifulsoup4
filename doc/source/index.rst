@@ -166,12 +166,16 @@ Installing Beautiful Soup
 If you're using a recent version of Debian or Ubuntu Linux, you can
 install Beautiful Soup with the system package manager:
 
-:kbd:`$ apt-get install python-bs4`
+:kbd:`$ apt-get install python-bs4` (for Python 2)
+
+:kbd:`$ apt-get install python3-bs4` (for Python 3)
 
 Beautiful Soup 4 is published through PyPi, so if you can't install it
 with the system packager, you can install it with ``easy_install`` or
 ``pip``. The package name is ``beautifulsoup4``, and the same package
-works on Python 2 and Python 3.
+works on Python 2 and Python 3. Make sure you use the right version of
+``pip`` or ``easy_install`` for your Python version (these may be named
+``pip3`` and ``easy_install3`` respectively if you're using Python 3).
 
 :kbd:`$ easy_install beautifulsoup4`
 
