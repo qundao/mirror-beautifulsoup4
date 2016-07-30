@@ -139,6 +139,14 @@ class HTMLTreeBuilderSmokeTest(object):
             markup.replace(b"\n", b""))
 
     def test_processing_instruction(self):
+        # We test both Unicode and bytestring to verify that
+        # process_markup correctly sets processing_instruction_class
+        # even when the markup is already Unicode and there is no
+        # need to process anything.
+        markup = u"""<?PITarget PIContent?>"""
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.decode())
+
         markup = b"""<?PITarget PIContent?>"""
         soup = self.soup(markup)
         self.assertEqual(markup, soup.encode("utf8"))

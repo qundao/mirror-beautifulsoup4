@@ -1,7 +1,8 @@
-= Unreleased =
+= 4.5.1 (Unreleased) =
 
-* Fixed a reported (but not duplicated) bug involving processing
-  instructions fed into the lxml HTML parser.
+* Fixed a crash when passing Unicode markup that contained a
+  processing instruction into the lxml HTML parser on Python
+  3. [bug=1608048]
 
 = 4.5.0 (20160719) =
 

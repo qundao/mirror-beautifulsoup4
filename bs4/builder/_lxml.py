@@ -32,6 +32,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     DEFAULT_PARSER_CLASS = etree.XMLParser
 
     is_xml = True
+    processing_instruction_class = XMLProcessingInstruction
 
     NAME = "lxml-xml"
     ALTERNATE_NAMES = ["xml"]
@@ -90,6 +91,16 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
         Each 4-tuple represents a strategy for parsing the document.
         """
+        # Instead of using UnicodeDammit to convert the bytestring to
+        # Unicode using different encodings, use EncodingDetector to
+        # iterate over the encodings, and tell lxml to try to parse
+        # the document as each one in turn.
+        is_html = not self.is_xml
+        if is_html:
+            self.processing_instruction_class = ProcessingInstruction
+        else:
+            self.processing_instruction_class = XMLProcessingInstruction
+
         if isinstance(markup, unicode):
             # We were given Unicode. Maybe lxml can parse Unicode on
             # this system?
@@ -101,16 +112,6 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             yield (markup.encode("utf8"), "utf8",
                    document_declared_encoding, False)
 
-        # Instead of using UnicodeDammit to convert the bytestring to
-        # Unicode using different encodings, use EncodingDetector to
-        # iterate over the encodings, and tell lxml to try to parse
-        # the document as each one in turn.
-        is_html = not self.is_xml
-        if is_html:
-            pass
-            # self.processing_instruction_class = ProcessingInstruction
-        else:
-            self.processing_instruction_class = XMLProcessingInstruction
         try_encodings = [user_specified_encoding, document_declared_encoding]
         detector = EncodingDetector(
             markup, try_encodings, is_html, exclude_encodings)
@@ -236,8 +237,8 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     ALTERNATE_NAMES = ["lxml-html"]
 
     features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
-    processing_instruction_class = ProcessingInstruction
     is_xml = False
+    processing_instruction_class = ProcessingInstruction
 
     def default_parser(self, encoding):
         return etree.HTMLParser
