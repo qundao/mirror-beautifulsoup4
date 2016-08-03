@@ -1,4 +1,4 @@
-= 4.5.1 (Unreleased) =
+= 4.5.1 (20160802) =
 
 * Fixed a crash when passing Unicode markup that contained a
   processing instruction into the lxml HTML parser on Python
