@@ -360,34 +360,34 @@ Attributes
 ^^^^^^^^^^
 
 A tag may have any number of attributes. The tag ``<b
-class="boldest">`` has an attribute "class" whose value is
+id="boldest">`` has an attribute "id" whose value is
 "boldest". You can access a tag's attributes by treating the tag like
 a dictionary::
 
- tag['class']
+ tag['id']
  # u'boldest'
 
 You can access that dictionary directly as ``.attrs``::
 
  tag.attrs
- # {u'class': u'boldest'}
+ # {u'id': 'boldest'}
 
 You can add, remove, and modify a tag's attributes. Again, this is
 done by treating the tag as a dictionary::
 
- tag['class'] = 'verybold'
- tag['id'] = 1
+ tag['id'] = 'verybold'
+ tag['another-attribute'] = 1
  tag
- # <blockquote class="verybold" id="1">Extremely bold</blockquote>
+ # <b another-attribute="1" id="verybold"></b>
 
- del tag['class']
  del tag['id']
+ del tag['another-attribute']
  tag
- # <blockquote>Extremely bold</blockquote>
+ # <b></b>
 
- tag['class']
- # KeyError: 'class'
- print(tag.get('class'))
+ tag['id']
+ # KeyError: 'id'
+ print(tag.get('id'))
  # None
 
 .. _multivalue:
