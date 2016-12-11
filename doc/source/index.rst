@@ -1262,6 +1262,16 @@ dictionary and passing the dictionary into ``find_all()`` as the
  data_soup.find_all(attrs={"data-foo": "value"})
  # [<div data-foo="value">foo!</div>]
 
+Similarly for HTML's 'name' attribute, which you can't use as a
+keyword argument because Beautiful Soup uses the ``name`` argument to
+contain the name of the tag itself.
+
+ name_soup = BeautifulSoup('<input name="email"/>')
+ name_soup.find_all(name="email")
+ # []
+ name_soup.find_all(attrs={"name": "email"})
+ # [<input name="email"/>]
+
 .. _attrs:
 
 Searching by CSS class
