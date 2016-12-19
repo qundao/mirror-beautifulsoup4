@@ -1050,7 +1050,7 @@ A regular expression
 ^^^^^^^^^^^^^^^^^^^^
 
 If you pass in a regular expression object, Beautiful Soup will filter
-against that regular expression using its ``match()`` method. This code
+against that regular expression using its ``search()`` method. This code
 finds all the tags whose names start with the letter "b"; in this
 case, the <body> tag and the <b> tag::
 
@@ -1262,9 +1262,10 @@ dictionary and passing the dictionary into ``find_all()`` as the
  data_soup.find_all(attrs={"data-foo": "value"})
  # [<div data-foo="value">foo!</div>]
 
-Similarly for HTML's 'name' attribute, which you can't use as a
-keyword argument because Beautiful Soup uses the ``name`` argument to
-contain the name of the tag itself.
+You can't use a keyword argument to search for HTML's 'name' element,
+because Beautiful Soup uses the ``name`` argument to contain the name
+of the tag itself. Instead, you can give a value to 'name' in the
+``attrs`` argument.
 
  name_soup = BeautifulSoup('<input name="email"/>')
  name_soup.find_all(name="email")
