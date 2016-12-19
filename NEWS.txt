@@ -1,3 +1,8 @@
+= Unreleased =
+
+* Fixed yet another problem that caused the html5lib tree builder to
+  create a disconnected parse tree. [bug=1629825]
+
 = 4.5.1 (20160802) =
 
 * Fixed a crash when passing Unicode markup that contained a

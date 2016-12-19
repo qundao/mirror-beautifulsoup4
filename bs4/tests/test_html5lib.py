@@ -95,6 +95,23 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
         assert space1.next_element is tbody1
         assert tbody2.next_element is space2
 
+    def test_reparented_markup_containing_children(self):
+        markup = '<div><a>aftermath<p><noscript>target</noscript>aftermath</a></p></div>'
+        soup = self.soup(markup)
+        noscript = soup.noscript
+        self.assertEqual("target", noscript.next_element)
+        target = soup.find(string='target')
+
+        # The 'aftermath' string was duplicated; we want the second one.
+        final_aftermath = soup.find_all(string='aftermath')[-1]
+        import pdb; pdb.set_trace()
+
+        # The <noscript> tag was moved beneath a copy of the <a> tag,
+        # but the 'target' string within is still connected to the
+        # (second) 'aftermath' string.
+        self.assertEqual(final_aftermath, target.next_element)
+        self.assertEqual(target, final_aftermath.previous_element)
+        
     def test_processing_instruction(self):
         """Processing instructions become comments."""
         markup = b"""<?PITarget PIContent?>"""

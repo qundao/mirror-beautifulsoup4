@@ -221,6 +221,8 @@ class Element(treebuilder_base.Node):
                 most_recent_element=most_recent_element)
 
     def getAttributes(self):
+        if isinstance(self.element, Comment):
+            return {}
         return AttrList(self.element)
 
     def setAttributes(self, attributes):
@@ -274,6 +276,7 @@ class Element(treebuilder_base.Node):
         # print "MOVE", self.element.contents
         # print "FROM", self.element
         # print "TO", new_parent.element
+
         element = self.element
         new_parent_element = new_parent.element
         # Determine what this tag's next_element will be once all the children
@@ -292,7 +295,6 @@ class Element(treebuilder_base.Node):
             new_parents_last_descendant_next_element = new_parent_element.next_element
 
         to_append = element.contents
-        append_after = new_parent_element.contents
         if len(to_append) > 0:
             # Set the first child's previous_element and previous_sibling
             # to elements within the new parent
@@ -309,12 +311,19 @@ class Element(treebuilder_base.Node):
             if new_parents_last_child:
                 new_parents_last_child.next_sibling = first_child
 
-            # Fix the last child's next_element and next_sibling
-            last_child = to_append[-1]
-            last_child.next_element = new_parents_last_descendant_next_element
+            # Find the very last element being moved. It is now the
+            # parent's last descendant. It has no .next_sibling and
+            # its .next_element is whatever the previous last
+            # descendant had.
+            last_childs_last_descendant = to_append[-1]._last_descendant(False, True)
+
+            last_childs_last_descendant.next_element = new_parents_last_descendant_next_element
             if new_parents_last_descendant_next_element:
-                new_parents_last_descendant_next_element.previous_element = last_child
-            last_child.next_sibling = None
+                # TODO: This code has no test coverage and I'm not sure
+                # how to get html5lib to go through this path, but it's
+                # just the other side of the previous line.
+                new_parents_last_descendant_next_element.previous_element = last_childs_last_descendant
+            last_childs_last_descendant.next_sibling = None
 
         for child in to_append:
             child.parent = new_parent_element
