@@ -104,7 +104,6 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
 
         # The 'aftermath' string was duplicated; we want the second one.
         final_aftermath = soup.find_all(string='aftermath')[-1]
-        import pdb; pdb.set_trace()
 
         # The <noscript> tag was moved beneath a copy of the <a> tag,
         # but the 'target' string within is still connected to the
