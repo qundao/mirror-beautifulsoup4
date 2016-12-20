@@ -123,3 +123,8 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
         a1, a2 = soup.find_all('a')
         self.assertEqual(a1, a2)
         assert a1 is not a2
+
+    def test_foster_parenting(self):
+        markup = b"""<table><td></tbody>A"""
+        soup = self.soup(markup)
+        self.assertEqual(u"<body>A<table><tbody><tr><td></td></tr></tbody></table></body>", soup.body.decode())

@@ -1,5 +1,8 @@
 = Unreleased =
 
+* Fixed foster parenting when html5lib is the tree builder. Thanks to
+  Geoffrey Sneddon for a patch and test.
+
 * Fixed yet another problem that caused the html5lib tree builder to
   create a disconnected parse tree. [bug=1629825]
 
