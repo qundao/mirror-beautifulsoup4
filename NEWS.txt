@@ -1,4 +1,4 @@
-= Unreleased =
+= 4.5.2 (20170102) =
 
 * Fixed foster parenting when html5lib is the tree builder. Thanks to
   Geoffrey Sneddon for a patch and test.
