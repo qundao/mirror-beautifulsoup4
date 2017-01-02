@@ -102,8 +102,8 @@ rm -rf ../py3-install-test-virtualenv
 Do the release for real.
 
 # Register the project and upload the source distribution and Python 2 wheel.
-python setup.py register -r test
-python setup.py sdist bdist_wheel upload -r test
+python setup.py register
+python setup.py sdist bdist_wheel upload
 
 # Create a Python 3 environment and install Beautiful Soup
 # from the source distribution that was just uploaded
@@ -118,7 +118,7 @@ echo "EXPECT HTML ON LINE BELOW"
 # Create and upload a Python 3 wheel from within a virtual environment
 # that has the Python 3 version of the code.
 pip install wheel
-python3 setup.py bdist_wheel upload -r test
+python3 setup.py bdist_wheel upload
 
 # Remove the Python 3 virtual environment.
 deactivate

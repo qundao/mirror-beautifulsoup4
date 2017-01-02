@@ -1,10 +1,16 @@
-= 4.5.2 (20170102) =
+= 4.5.3 (20170102) =
 
 * Fixed foster parenting when html5lib is the tree builder. Thanks to
   Geoffrey Sneddon for a patch and test.
-
+  
 * Fixed yet another problem that caused the html5lib tree builder to
   create a disconnected parse tree. [bug=1629825]
+
+= 4.5.2 (20170102) =
+
+* Apart from the version number, this release is identical to
+  4.5.3. Due to user error, it could not be completely uploaded to
+  PyPI. Use 4.5.3 instead.
 
 = 4.5.1 (20160802) =
 
