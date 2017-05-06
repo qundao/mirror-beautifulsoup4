@@ -992,7 +992,7 @@ class Tag(PageElement):
         attribute."""
         return self.attrs.get(key, default)
 
-    def string_attr(self, key, default=None):
+    def get_attribute_text(self, key, default=None):
         """The same as get(), but converts lists of values to strings."""
         value = self.get(key, default)
         if isinstance(value, list):

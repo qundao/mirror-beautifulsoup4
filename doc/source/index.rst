@@ -428,10 +428,10 @@ consolidated::
  print(rel_soup.p)
  # <p>Back to the <a rel="index contents">homepage</a></p>
 
-You can use ```string_attr`` to get the value of any attribute as a
+You can use ```get_attribute_text`` to get the value of any attribute as a
 string, whether or not it's a multi-valued atribute::
 
-  css_soup.p.string_attr('class')
+  css_soup.p.get_attribute_text('class')
   # "body strikeout"
  
 If you parse a document as XML, there are no multi-valued attributes::

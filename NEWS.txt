@@ -1,6 +1,6 @@
 = 4.6.0 (Unreleased) =
 
-* Added the `Tag.stringattr` method, which acts like `Tag.get` for
+* Added the `Tag.get_attribute_text` method, which acts like `Tag.get` for
   getting the value of an attribute, but which joins attribute
   multi-values into a single string value. [bug=1678589]
 

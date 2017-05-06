@@ -1288,7 +1288,7 @@ class TestCDAtaListAttributes(SoupTest):
 
     def test_attribute_values_joined_into_string_through_string_attr(self):
         soup = self.soup("<a class='foo\tbar'>")
-        self.assertEqual(b'foo bar', soup.a.string_attr('class'))
+        self.assertEqual('foo bar', soup.a.get_attribute_text('class'))
         
     def test_accept_charset(self):
         soup = self.soup('<form accept-charset="ISO-8859-1 UTF-8">')
