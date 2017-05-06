@@ -1753,3 +1753,8 @@ class ResultSet(list):
     def __init__(self, source, result=()):
         super(ResultSet, self).__init__(result)
         self.source = source
+
+    def __getattr__(self, key):
+        raise AttributeError(
+            "ResultSet object has no attribute '%s'. You're probably treating a list of items like a single item. Did you call find_all() when you meant to call find()?" % key
+        )
