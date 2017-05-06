@@ -69,6 +69,18 @@ class HTMLTreeBuilderSmokeTest(object):
     markup in these tests, there's not much room for interpretation.
     """
 
+    def test_empty_element_tags(self):
+        """Verify that all HTML4 and HTML5 empty element (aka void element) tags
+        are handled correctly.
+        """
+        for name in [
+                'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr',
+                'spacer', 'frame'
+        ]:
+            soup = self.soup("")
+            new_tag = soup.new_tag(name)
+            self.assertEqual(True, new_tag.is_empty_element)
+    
     def test_pickle_and_unpickle_identity(self):
         # Pickling a tree, then unpickling it, yields a tree identical
         # to the original.

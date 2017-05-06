@@ -1,7 +1,10 @@
 = 4.5.4 (Unreleased) =
 
-* It's now possible to use a tag's namespace prefix when searching for
-  it, e.g. soup.find('namespace:tag') [bug=1655332]
+* It's now possible to use a tag's namespace prefix when searching,
+  e.g. soup.find('namespace:tag') [bug=1655332]
+
+* HTML parsers treat all HTML4 and HTML5 empty element tags (aka void
+  element tags) correctly. [bug=1656909]
 
 = 4.5.3 (20170102) =
 
