@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """Tests for Beautiful Soup's tree traversal methods.
 
@@ -234,6 +235,7 @@ class TestFindAllByName(TreeTest):
         self.assertEqual('1', r3.string)
         self.assertEqual('3', r4.string)
 
+        
 class TestFindAllByAttribute(TreeTest):
 
     def test_find_all_by_attribute_name(self):

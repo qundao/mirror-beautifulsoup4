@@ -669,6 +669,30 @@ class XMLTreeBuilderSmokeTest(object):
         soup = self.soup(markup)
         self.assertEqual(unicode(soup.foo), markup)
 
+    def test_find_by_prefixed_name(self):
+        doc = """<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns="http://example.com/ns0"
+    xmlns:ns1="http://example.com/ns1"
+    xmlns:ns2="http://example.com/ns2"
+    <ns1:tag>foo</ns1:tag>
+    <ns1:tag>bar</ns1:tag>
+    <ns2:tag key="value">baz</ns2:tag>
+</Document>
+"""
+        soup = self.soup(doc)
+
+        # There are three <tag> tags.
+        self.assertEqual(3, len(soup.find_all('tag')))
+
+        # But two of them are ns1:tag and one of them is ns2:tag.
+        self.assertEqual(2, len(soup.find_all('ns1:tag')))
+        self.assertEqual(1, len(soup.find_all('ns2:tag')))
+        
+        self.assertEqual(1, len(soup.find_all('ns2:tag', key='value')))
+        self.assertEqual(3, len(soup.find_all(['ns1:tag', 'ns2:tag'])))
+        
+
+        
 class HTML5TreeBuilderSmokeTest(HTMLTreeBuilderSmokeTest):
     """Smoke test for a tree builder that supports HTML5."""
 

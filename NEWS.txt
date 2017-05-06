@@ -1,3 +1,8 @@
+= 4.5.4 (Unreleased) =
+
+* It's now possible to use a tag's namespace prefix when searching for
+  it, e.g. soup.find('namespace:tag') [bug=1655332]
+
 = 4.5.3 (20170102) =
 
 * Fixed foster parenting when html5lib is the tree builder. Thanks to
