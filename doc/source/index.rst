@@ -402,13 +402,13 @@ one CSS class). Others include ``rel``, ``rev``, ``accept-charset``,
 ``headers``, and ``accesskey``. Beautiful Soup presents the value(s)
 of a multi-valued attribute as a list::
 
- css_soup = BeautifulSoup('<p class="body strikeout"></p>')
- css_soup.p['class']
- # ["body", "strikeout"]
-
  css_soup = BeautifulSoup('<p class="body"></p>')
  css_soup.p['class']
  # ["body"]
+  
+ css_soup = BeautifulSoup('<p class="body strikeout"></p>')
+ css_soup.p['class']
+ # ["body", "strikeout"]
 
 If an attribute `looks` like it has more than one value, but it's not
 a multi-valued attribute as defined by any version of the HTML
@@ -428,6 +428,12 @@ consolidated::
  print(rel_soup.p)
  # <p>Back to the <a rel="index contents">homepage</a></p>
 
+You can use ```string_attr`` to get the value of any attribute as a
+string, whether or not it's a multi-valued atribute::
+
+  css_soup.p.string_attr('class')
+  # "body strikeout"
+ 
 If you parse a document as XML, there are no multi-valued attributes::
 
  xml_soup = BeautifulSoup('<p class="body strikeout"></p>', 'xml')

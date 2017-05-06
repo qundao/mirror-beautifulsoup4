@@ -131,8 +131,8 @@ class PageElement(object):
     # to methods like encode() and prettify():
     #
     # "html" - All Unicode characters with corresponding HTML entities
-    #   are converted to those entities on output.
-    # "minimal" - Bare ampersands and angle brackets are converted to
+    #   are converted to those entities on output. 
+   # "minimal" - Bare ampersands and angle brackets are converted to
     #   XML entities: &amp; &lt; &gt;
     # None - The null formatter. Unicode characters are never
     #   converted to entities.  This is not recommended, but it's
@@ -992,6 +992,13 @@ class Tag(PageElement):
         attribute."""
         return self.attrs.get(key, default)
 
+    def string_attr(self, key, default=None):
+        """The same as get(), but converts lists of values to strings."""
+        value = self.get(key, default)
+        if isinstance(value, list):
+            value = " ".join(value)
+        return value
+    
     def has_attr(self, key):
         return key in self.attrs
 
