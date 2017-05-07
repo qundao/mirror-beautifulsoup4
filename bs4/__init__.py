@@ -215,8 +215,8 @@ class BeautifulSoup(Tag):
                     markup = markup.encode("utf8")
                 warnings.warn(
                     '"%s" looks like a filename, not markup. You should'
-                    'probably open this file and pass the filehandle into'
-                    'Beautiful Soup.' % markup)
+                    ' probably open this file and pass the filehandle into'
+                    ' Beautiful Soup.' % markup)
             self._check_markup_is_url(markup)
 
         for (self.markup, self.original_encoding, self.declared_html_encoding,
