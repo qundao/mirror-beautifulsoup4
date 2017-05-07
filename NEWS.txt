@@ -13,6 +13,9 @@
 * HTML parsers treat all HTML4 and HTML5 empty element tags (aka void
   element tags) correctly. [bug=1656909]
 
+* Namespace prefix is preserved when an XML tag is copied. Thanks
+  to Vikas for a patch and test. [bug=1685172]
+
 = 4.5.3 (20170102) =
 
 * Fixed foster parenting when html5lib is the tree builder. Thanks to

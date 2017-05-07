@@ -710,8 +710,18 @@ class XMLTreeBuilderSmokeTest(object):
         self.assertEqual(1, len(soup.find_all('ns2:tag', key='value')))
         self.assertEqual(3, len(soup.find_all(['ns1:tag', 'ns2:tag'])))
         
+    def test_copy_tag_preserves_namespace(self):
+        xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://example.com/ns0"/>"""
+    
+        soup = self.soup(xml)
+        tag = soup.document
+        duplicate = copy.copy(tag)
 
-        
+        # The two tags have the same namespace prefix.
+        self.assertEqual(tag.prefix, duplicate.prefix)
+
+
 class HTML5TreeBuilderSmokeTest(HTMLTreeBuilderSmokeTest):
     """Smoke test for a tree builder that supports HTML5."""
 
