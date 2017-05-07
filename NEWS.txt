@@ -1,8 +1,8 @@
 = 4.6.0 (Unreleased) =
 
-* Added the `Tag.get_attribute_text` method, which acts like `Tag.get` for
-  getting the value of an attribute, but which joins attribute
-  multi-values into a single string value. [bug=1678589]
+* Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for
+  getting the value of an attribute, but which always returns a list,
+  whether or not the attribute is a multi-value attribute. [bug=1678589]
 
 * It's now possible to use a tag's namespace prefix when searching,
   e.g. soup.find('namespace:tag') [bug=1655332]
