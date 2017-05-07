@@ -342,6 +342,13 @@ Hello, world!
         self.assertEqual("p", soup.p.name)
         self.assertConnectedness(soup)
 
+    def test_empty_element_tags(self):
+        """Verify consistent handling of empty-element tags,
+        no matter how they come in through the markup.
+        """
+        self.assertSoupEquals('<br/><br/><br/>', "<br/><br/><br/>")
+        self.assertSoupEquals('<br /><br /><br />', "<br/><br/><br/>")
+        
     def test_head_tag_between_head_and_body(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."
         content = """<html><head></head>

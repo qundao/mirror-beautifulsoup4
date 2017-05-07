@@ -7,6 +7,9 @@
 * It's now possible to use a tag's namespace prefix when searching,
   e.g. soup.find('namespace:tag') [bug=1655332]
 
+* Improved the handling of empty-element tags like <br> when using the
+  html.parser parser. [bug=1676935]
+
 * HTML parsers treat all HTML4 and HTML5 empty element tags (aka void
   element tags) correctly. [bug=1656909]
 
