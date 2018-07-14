@@ -82,14 +82,46 @@ class BeautifulSoup(Tag):
 
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
-    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, change code that looks like this:\n\n BeautifulSoup(YOUR_MARKUP})\n\nto this:\n\n BeautifulSoup(YOUR_MARKUP, \"%(parser)s\")\n"
+    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
                  **kwargs):
-        """The Soup object is initialized as the 'root tag', and the
-        provided markup (which can be a string or a file-like object)
-        is fed into the underlying parser."""
+        """Constructor.
+
+        :param markup: A string or a file-like object representing
+        markup to be parsed.
+
+        :param features: Desirable features of the parser to be used. This
+        may be the name of a specific parser ("lxml", "lxml-xml",
+        "html.parser", or "html5lib") or it may be the type of markup
+        to be used ("html", "html5", "xml"). It's recommended that you
+        name a specific parser, so that Beautiful Soup gives you the
+        same results across platforms and virtual environments.
+
+        :param builder: A specific TreeBuilder to use instead of looking one
+        up based on `features`. You shouldn't need to use this.
+
+        :param parse_only: A SoupStrainer. Only parts of the document
+        matching the SoupStrainer will be considered. This is useful
+        when parsing part of a document that would otherwise be too
+        large to fit into memory.
+
+        :param from_encoding: A string indicating the encoding of the
+        document to be parsed. Pass this in if Beautiful Soup is
+        guessing wrongly about the document's encoding.
+
+        :param exclude_encodings: A list of strings indicating
+        encodings known to be wrong. Pass this in if you don't know
+        the document's encoding but you know Beautiful Soup's guess is
+        wrong.
+
+        :param kwargs: For backwards compatibility purposes, the
+        constructor accepts certain keyword arguments used in
+        Beautiful Soup 3. None of these arguments do anything in
+        Beautiful Soup 4 and there's no need to actually pass keyword
+        arguments into the constructor.
+        """
 
         if 'convertEntities' in kwargs:
             warnings.warn(
@@ -174,11 +206,13 @@ class BeautifulSoup(Tag):
                 caller = traceback.extract_stack()[0]
                 filename = caller[0]
                 line_number = caller[1]
-                warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % dict(
+                values = dict(
                     filename=filename,
                     line_number=line_number,
                     parser=builder.NAME,
-                    markup_type=markup_type))
+                    markup_type=markup_type
+                )
+                warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % values, stacklevel=2)
 
         self.builder = builder
         self.is_xml = builder.is_xml

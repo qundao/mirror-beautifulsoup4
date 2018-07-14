@@ -1,3 +1,7 @@
+= Unreleased
+
+* Improved the warning given when no parser is specified.
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for
