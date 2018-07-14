@@ -64,7 +64,18 @@ class BeautifulSoupHTMLParser(HTMLParser):
         # order. It's a list of closing tags we've already handled and
         # will ignore, assuming they ever show up.
         self.already_closed_empty_element = []
-    
+
+    def error(self, msg):
+        """In Python 3, HTMLParser subclasses must implement error(), although this
+        requirement doesn't appear to be documented.
+
+        In Python 2, HTMLParser implements error() as raising an exception.
+
+        In any event, this method is called only on very strange markup and our best strategy
+        is to pretend it didn't happen and keep going.
+        """
+        warnings.warn(msg)
+        
     def handle_startendtag(self, name, attrs):
         # This is only called when the markup looks like
         # <tag/>.

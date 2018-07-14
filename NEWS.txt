@@ -8,6 +8,9 @@
 * Fixed a Windows crash in diagnose() when checking whether a long
   markup string is a filename. [bug=1737121]
 
+* Stopped HTMLParser from raising an exception in very rare cases of
+  bad markup. [bug=1708831]
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for
