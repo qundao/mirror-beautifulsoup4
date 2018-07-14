@@ -5,6 +5,9 @@
 * Fixed code that was causing deprecation warnings in recent Python 3
   versions. Includes a patch from Ville Skyttä. [bug=1778909] [bug=1689496]
 
+* Fixed a Windows crash in diagnose() when checking whether a long
+  markup string is a filename. [bug=1737121]
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for
