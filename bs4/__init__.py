@@ -216,6 +216,10 @@ class BeautifulSoup(Tag):
                     globals = caller.f_globals
                     line_number = caller.f_lineno
                 filename = globals.get('__file__')
+                if filename:
+                    fnl = filename.lower()
+                    if fnl.endswith((".pyc", ".pyo")):
+                        filename = filename[:-1]
                 values = dict(
                     filename=filename,
                     line_number=line_number,
