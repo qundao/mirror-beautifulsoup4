@@ -1,6 +1,9 @@
 = Unreleased
 
-* Improved the warning given when no parser is specified.
+* Improved the warning given when no parser is specified. [bug=1780571]
+
+* Fixed code that was causing deprecation warnings in recent Python 3
+  versions. Includes a patch from Ville Skyttä. [bug=1778909] [bug=1689496]
 
 = 4.6.0 (20170507) =
 
