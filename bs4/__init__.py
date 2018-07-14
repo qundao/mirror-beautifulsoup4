@@ -29,6 +29,7 @@ __all__ = ['BeautifulSoup']
 
 import os
 import re
+import sys
 import traceback
 import warnings
 
@@ -203,9 +204,18 @@ class BeautifulSoup(Tag):
                 else:
                     markup_type = "HTML"
 
-                caller = traceback.extract_stack()[0]
-                filename = caller[0]
-                line_number = caller[1]
+                # This code taken from warnings.py so that we get the same line
+                # of code as our warnings.warn() call gets, even if the answer is wrong
+                # (as it may be in a multithreading situation).
+                try:
+                    caller = sys._getframe(2)
+                except ValueError:
+                    globals = sys.__dict__
+                    lineno = 1
+                else:
+                    globals = caller.f_globals
+                    line_number = caller.f_lineno
+                filename = globals.get('__file__')
                 values = dict(
                     filename=filename,
                     line_number=line_number,
