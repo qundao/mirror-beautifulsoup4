@@ -821,6 +821,26 @@ class TestTreeModification(SoupTest):
         soup = self.soup(text)
         self.assertRaises(ValueError, soup.a.insert, 0, soup.a)
 
+    def test_insert_beautifulsoup_object_inserts_children(self):
+        """Inserting one BeautifulSoup object into another actually inserts all
+        of its children -- you'll never combine BeautifulSoup objects.
+        """
+        soup = self.soup("<p>And now, a word:</p><p>And we're back.</p>")
+        
+        text = "<p>p2</p><p>p3</p>"
+        to_insert = self.soup(text)
+        soup.insert(1, to_insert)
+
+        for i in soup.descendants:
+            assert not isinstance(i, BeautifulSoup)
+        
+        p1, p2, p3, p4 = list(soup.children)
+        self.assertEquals("And now, a word:", p1.string)
+        self.assertEquals("p2", p2.string)
+        self.assertEquals("p3", p3.string)
+        self.assertEquals("And we're back.", p4.string)
+        
+        
     def test_replace_with_maintains_next_element_throughout(self):
         soup = self.soup('<p><a>one</a><b>three</b></p>')
         a = soup.a

@@ -319,6 +319,14 @@ class PageElement(object):
             and not isinstance(new_child, NavigableString)):
             new_child = NavigableString(new_child)
 
+        from bs4 import BeautifulSoup
+        if isinstance(new_child, BeautifulSoup):
+            # We don't want to end up with a situation where one BeautifulSoup
+            # object contains another. Insert the children one at a time.
+            for subchild in list(new_child.contents):
+                self.insert(position, subchild)
+                position += 1
+            return
         position = min(position, len(self.contents))
         if hasattr(new_child, 'parent') and new_child.parent is not None:
             # We're 'inserting' an element that's already one
