@@ -1271,7 +1271,7 @@ dictionary and passing the dictionary into ``find_all()`` as the
 You can't use a keyword argument to search for HTML's 'name' element,
 because Beautiful Soup uses the ``name`` argument to contain the name
 of the tag itself. Instead, you can give a value to 'name' in the
-``attrs`` argument.
+``attrs`` argument::
 
  name_soup = BeautifulSoup('<input name="email"/>')
  name_soup.find_all(name="email")
@@ -1732,7 +1732,7 @@ Find tags by ID::
  soup.select("a#link2")
  # [<a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>]
 
-Find tags that match any selector from a list of selectors:
+Find tags that match any selector from a list of selectors::
 
  soup.select("#link1,#link2")
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
