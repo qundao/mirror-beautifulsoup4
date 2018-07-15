@@ -871,9 +871,11 @@ class Tag(PageElement):
         if builder is not None:
             builder.set_up_substitutions(self)
             self.can_be_empty_element = builder.can_be_empty_element(name)
+            self.void_element_close_prefix = builder.void_element_close_prefix or ""
         else:
             self.can_be_empty_element = False
-
+            self.void_element_close_prefix = '/'
+            
     parserClass = _alias("parser_class")  # BS3
 
     def __copy__(self):
@@ -1173,7 +1175,7 @@ class Tag(PageElement):
             prefix = self.prefix + ":"
 
         if self.is_empty_element:
-            close = '/'
+            close = self.void_element_close_prefix
         else:
             closeTag = '</%s%s>' % (prefix, self.name)
 

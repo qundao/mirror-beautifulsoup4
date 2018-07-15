@@ -14,6 +14,11 @@
 * Stopped HTMLParser from raising an exception in very rare cases of
   bad markup. [bug=1708831]
 
+* It's possible for a TreeBuilder subclass to specify that void
+  elements should be represented as "<element>" rather than
+  "<element/>", by setting TreeBuilder.void_element_close_prefix to
+  the empty string. [bug=1716272]
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for
