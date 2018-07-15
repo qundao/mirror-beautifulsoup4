@@ -2145,7 +2145,7 @@ invalid HTML or XML::
 
 You can change this behavior by providing a value for the
 ``formatter`` argument to ``prettify()``, ``encode()``, or
-``decode()``. Beautiful Soup recognizes four possible values for
+``decode()``. Beautiful Soup recognizes six possible values for
 ``formatter``.
 
 The default is ``formatter="minimal"``. Strings will only be processed
@@ -2174,6 +2174,18 @@ Unicode characters to HTML entities whenever possible::
  #  </body>
  # </html>
 
+ If you pass in ``formatter="html5"``, it's the same as
+``formatter="html5"``, but Beautiful Soup will
+omit the closing slash in HTML void tags like "br"::
+
+ soup = BeautifulSoup("<br>")
+ 
+ print(soup.encode(formatter="html"))
+ # <html><body><br/></body></html>
+ 
+ print(soup.encode(formatter="html5"))
+ # <html><body><br></body></html>
+ 
 If you pass in ``formatter=None``, Beautiful Soup will not modify
 strings at all on output. This is the fastest option, but it may lead
 to Beautiful Soup generating invalid HTML/XML, as in these examples::

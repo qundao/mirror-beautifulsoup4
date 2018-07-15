@@ -93,14 +93,6 @@ class TreeBuilder(object):
     preserve_whitespace_tags = set()
     empty_element_tags = None # A tag will be considered an empty-element
                               # tag when and only when it has no contents.
-    void_tags = None # There are no void tags.
-
-    # This string goes just before the end of the start tag for an
-    # void element.
-    #
-    # Leave this alone and you'll get tags like "<br/>". Change it to the
-    # empty string and you'll get tags like "<br>".
-    void_element_close_prefix = '/'
     
     # A value for these tag/attribute combinations is a space- or
     # comma-separated list of CDATA, rather than a single CDATA.
@@ -133,17 +125,6 @@ class TreeBuilder(object):
         if self.empty_element_tags is None:
             return True
         return tag_name in self.empty_element_tags
-
-    def is_void(self, tag_name):
-        """Must a tag with this name be a void tag?
-
-        A void tag cannot have contents and is presented with neither
-        a a closing tag or a closing slash, e.g.:
-            <link href="foo">
-        """
-        if self.void_tags is None:
-            return False
-        return tag_name in self.void_tags
         
     def feed(self, markup):
         raise NotImplementedError()
@@ -255,8 +236,8 @@ class HTMLTreeBuilder(TreeBuilder):
         # These are from HTML5.
         'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr',
         
-        # These are from HTML4, removed in HTML5.
-        'spacer', 'frame'
+        # These are from earlier versions of HTML and are removed in HTML5.
+        'basefont', 'bgsound', 'command', 'frame', 'image', 'isindex', 'nextid', 'spacer'
     ])
     
     # The HTML standard defines these attributes as containing a

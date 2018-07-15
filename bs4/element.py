@@ -126,6 +126,41 @@ class HTMLAwareEntitySubstitution(EntitySubstitution):
         return cls._substitute_if_appropriate(
             ns, EntitySubstitution.substitute_xml)
 
+class Formatter(object):
+    """Contains information about how to format a parse tree."""
+    
+    # By default, represent void elements as <tag/> rather than <tag>
+    void_element_close_prefix = '/'
+
+    def substitute_entities(self, *args, **kwargs):
+        """Transform certain characters into named entities."""
+        raise NotImplementedError()
+
+class HTMLFormatter(Formatter):
+    """The default HTML formatter."""
+    def substitute(self, *args, **kwargs):
+        return HTMLAwareEntitySubstitution.substitute_html(*args, **kwargs)
+
+class MinimalHTMLFormatter(Formatter):
+    """A minimal HTML formatter."""
+    def substitute(self, *args, **kwargs):
+        return HTMLAwareEntitySubstitution.substitute_xml(*args, **kwargs)
+    
+class HTML5Formatter(HTMLFormatter):
+    """An HTML formatter that omits the slash in a void tag."""
+    void_element_close_prefix = None
+
+class XMLFormatter(Formatter):
+    """Substitute only the essential XML entities."""
+    def substitute(self, *args, **kwargs):
+        return EntitySubstitution.substitute_xml(*args, **kwargs)
+
+class HTMLXMLFormatter(Formatter):
+    """Format XML using HTML rules."""
+    def substitute(self, *args, **kwargs):
+        return HTMLAwareEntitySubstitution.substitute_html(*args, **kwargs)
+
+    
 class PageElement(object):
     """Contains the navigational information for some part of the page
     (either a tag or a piece of text)"""
@@ -134,40 +169,49 @@ class PageElement(object):
     # to methods like encode() and prettify():
     #
     # "html" - All Unicode characters with corresponding HTML entities
-    #   are converted to those entities on output. 
-   # "minimal" - Bare ampersands and angle brackets are converted to
+    #   are converted to those entities on output.
+    # "html5" - The same as "html", but empty void tags are represented as
+    #   <tag> rather than <tag/>
+    # "minimal" - Bare ampersands and angle brackets are converted to
     #   XML entities: &amp; &lt; &gt;
     # None - The null formatter. Unicode characters are never
     #   converted to entities.  This is not recommended, but it's
     #   faster than "minimal".
-    # A function - This function will be called on every string that
+    # A callable function - it will be called on every string that needs to undergo entity substitution.
+    # A Formatter instance - Formatter.substitute(string) will be called on every string that
     #  needs to undergo entity substitution.
     #
 
-    # In an HTML document, the default "html" and "minimal" functions
-    # will leave the contents of <script> and <style> tags alone. For
-    # an XML document, all tags will be given the same treatment.
+    # In an HTML document, the default "html", "html5", and "minimal"
+    # functions will leave the contents of <script> and <style> tags
+    # alone. For an XML document, all tags will be given the same
+    # treatment.
 
     HTML_FORMATTERS = {
-        "html" : HTMLAwareEntitySubstitution.substitute_html,
-        "minimal" : HTMLAwareEntitySubstitution.substitute_xml,
+        "html" : HTMLFormatter(),
+        "html5" : HTML5Formatter(),
+        "minimal" : MinimalHTMLFormatter(),
         None : None
         }
 
     XML_FORMATTERS = {
-        "html" : EntitySubstitution.substitute_html,
-        "minimal" : EntitySubstitution.substitute_xml,
+        "html" : HTMLXMLFormatter(),
+        "minimal" : XMLFormatter(),
         None : None
         }
 
     def format_string(self, s, formatter='minimal'):
         """Format the given string using the given formatter."""
-        if not callable(formatter):
+        if isinstance(formatter, basestring):
             formatter = self._formatter_for_name(formatter)
         if formatter is None:
             output = s
         else:
-            output = formatter(s)
+            if callable(formatter):
+                # Backwards compatibility -- you used to pass in a formatting method.
+                output = formatter(s)
+            else:
+                output = formatter.substitute(s)
         return output
 
     @property
@@ -197,11 +241,9 @@ class PageElement(object):
     def _formatter_for_name(self, name):
         "Look up a formatter function based on its name and the tree."
         if self._is_xml:
-            return self.XML_FORMATTERS.get(
-                name, EntitySubstitution.substitute_xml)
+            return self.XML_FORMATTERS.get(name, XMLFormatter())
         else:
-            return self.HTML_FORMATTERS.get(
-                name, HTMLAwareEntitySubstitution.substitute_xml)
+            return self.HTML_FORMATTERS.get(name, HTMLFormatter())
 
     def setup(self, parent=None, previous_element=None, next_element=None,
               previous_sibling=None, next_sibling=None):
@@ -871,10 +913,8 @@ class Tag(PageElement):
         if builder is not None:
             builder.set_up_substitutions(self)
             self.can_be_empty_element = builder.can_be_empty_element(name)
-            self.void_element_close_prefix = builder.void_element_close_prefix or ""
         else:
             self.can_be_empty_element = False
-            self.void_element_close_prefix = '/'
             
     parserClass = _alias("parser_class")  # BS3
 
@@ -1142,11 +1182,10 @@ class Tag(PageElement):
            encoding.
         """
 
-        # First off, turn a string formatter into a function. This
+        # First off, turn a string formatter into a Formatter object. This
         # will stop the lookup from happening over and over again.
-        if not callable(formatter):
+        if not isinstance(formatter, Formatter) and not callable(formatter):
             formatter = self._formatter_for_name(formatter)
-
         attrs = []
         if self.attrs:
             for key, val in sorted(self.attrs.items()):
@@ -1175,7 +1214,7 @@ class Tag(PageElement):
             prefix = self.prefix + ":"
 
         if self.is_empty_element:
-            close = self.void_element_close_prefix
+            close = formatter.void_element_close_prefix or ''
         else:
             closeTag = '</%s%s>' % (prefix, self.name)
 
@@ -1246,9 +1285,9 @@ class Tag(PageElement):
         :param formatter: The output formatter responsible for converting
            entities to Unicode characters.
         """
-        # First off, turn a string formatter into a function. This
+        # First off, turn a string formatter into a Formatter object. This
         # will stop the lookup from happening over and over again.
-        if not callable(formatter):
+        if not isinstance(formatter, Formatter) and not callable(formatter):
             formatter = self._formatter_for_name(formatter)
 
         pretty_print = (indent_level is not None)

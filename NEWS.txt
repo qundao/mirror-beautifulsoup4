@@ -14,10 +14,12 @@
 * Stopped HTMLParser from raising an exception in very rare cases of
   bad markup. [bug=1708831]
 
-* It's possible for a TreeBuilder subclass to specify that void
-  elements should be represented as "<element>" rather than
-  "<element/>", by setting TreeBuilder.void_element_close_prefix to
-  the empty string. [bug=1716272]
+* Added a new formatter, "html5", which represents void elements
+  elements as "<element>" rather than "<element/>".  [bug=1716272]
+
+* You can get finer control over formatting by subclassing
+  bs4.element.Formatter and passing a Formatter instance into (e.g.)
+  encode(). [bug=1716272]
 
 = 4.6.0 (20170507) =
 

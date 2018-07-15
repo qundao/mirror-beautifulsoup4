@@ -1439,13 +1439,21 @@ class TestSubstitutions(SoupTest):
                 u"<b>&lt;&lt;Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</b>"))
 
     def test_formatter_html(self):
-        markup = u"<b>&lt;&lt;Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</b>"
+        markup = u"<br><b>&lt;&lt;Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</b>"
         soup = self.soup(markup)
         decoded = soup.decode(formatter="html")
         self.assertEqual(
             decoded,
-            self.document_for("<b>&lt;&lt;Sacr&eacute; bleu!&gt;&gt;</b>"))
+            self.document_for("<br/><b>&lt;&lt;Sacr&eacute; bleu!&gt;&gt;</b>"))
 
+    def test_formatter_html5(self):
+        markup = u"<br><b>&lt;&lt;Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</b>"
+        soup = self.soup(markup)
+        decoded = soup.decode(formatter="html5")
+        self.assertEqual(
+            decoded,
+            self.document_for("<br><b>&lt;&lt;Sacr&eacute; bleu!&gt;&gt;</b>"))
+        
     def test_formatter_minimal(self):
         markup = u"<b>&lt;&lt;Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!&gt;&gt;</b>"
         soup = self.soup(markup)
@@ -1518,7 +1526,7 @@ class TestSubstitutions(SoupTest):
             u'<div>\n foo\n <pre>  \tbar\n  \n  </pre>\n baz\n</div>',
             soup.div.prettify())
 
-    def test_prettify_accepts_formatter(self):
+    def test_prettify_accepts_formatter_function(self):
         soup = BeautifulSoup("<html><body>foo</body></html>", 'html.parser')
         pretty = soup.prettify(formatter = lambda x: x.upper())
         self.assertTrue("FOO" in pretty)
