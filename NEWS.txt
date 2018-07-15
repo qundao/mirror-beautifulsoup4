@@ -1,5 +1,8 @@
 = Unreleased
 
+* Stop data loss when encountering an empty numeric entity, and
+  possibly in other cases.  Thanks to tos.kamiya for the fix. [bug=1698503]
+
 * Improved the warning given when no parser is specified. [bug=1780571]
 
 * Fixed code that was causing deprecation warnings in recent Python 3

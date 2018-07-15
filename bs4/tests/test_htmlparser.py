@@ -34,6 +34,11 @@ class HTMLParserTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         self.assertSoupEquals('<br></br><br></br><br></br>', "<br/><br/><br/>")
         self.assertSoupEquals('</br></br></br>', "")
 
+    def test_empty_element(self):
+        # This verifies that any buffered data present when the parser
+        # finishes working is handled.
+        self.assertSoupEquals("foo &# bar", "foo &amp;# bar")
+
 
 class TestHTMLParserSubclass(SoupTest):
     def test_error(self):
