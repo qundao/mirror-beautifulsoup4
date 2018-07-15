@@ -211,7 +211,7 @@ class BeautifulSoup(Tag):
                     caller = sys._getframe(2)
                 except ValueError:
                     globals = sys.__dict__
-                    lineno = 1
+                    line_number= 1
                 else:
                     globals = caller.f_globals
                     line_number = caller.f_lineno
