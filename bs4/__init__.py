@@ -204,29 +204,35 @@ class BeautifulSoup(Tag):
                 else:
                     markup_type = "HTML"
 
-                # This code taken from warnings.py so that we get the same line
+                # This code adapted from warnings.py so that we get the same line
                 # of code as our warnings.warn() call gets, even if the answer is wrong
                 # (as it may be in a multithreading situation).
+                caller = None
                 try:
-                    caller = sys._getframe(2)
+                    caller = sys._getframe(1)
                 except ValueError:
-                    globals = sys.__dict__
-                    line_number= 1
-                else:
+                    pass
+                if caller:
                     globals = caller.f_globals
                     line_number = caller.f_lineno
+                else:
+                    globals = sys.__dict__
+                    line_number= 1                    
                 filename = globals.get('__file__')
                 if filename:
                     fnl = filename.lower()
                     if fnl.endswith((".pyc", ".pyo")):
                         filename = filename[:-1]
-                values = dict(
-                    filename=filename,
-                    line_number=line_number,
-                    parser=builder.NAME,
-                    markup_type=markup_type
-                )
-                warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % values, stacklevel=2)
+                if filename:
+                    # If there is no filename at all, the user is most likely in a REPL,
+                    # and the warning is not necessary.
+                    values = dict(
+                        filename=filename,
+                        line_number=line_number,
+                        parser=builder.NAME,
+                        markup_type=markup_type
+                    )
+                    warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % values, stacklevel=2)
 
         self.builder = builder
         self.is_xml = builder.is_xml
