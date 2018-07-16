@@ -21,6 +21,11 @@
   bs4.element.Formatter and passing a Formatter instance into (e.g.)
   encode(). [bug=1716272]
 
+* You can pass a dictionary of `attrs` into
+  BeautifulSoup.new_tag. This makes it possible to create a tag with
+  an attribute like 'name' that would otherwise be masked by another
+  argument of new_tag. [bug=1779276]
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for

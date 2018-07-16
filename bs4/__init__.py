@@ -356,9 +356,10 @@ class BeautifulSoup(Tag):
         self.preserve_whitespace_tag_stack = []
         self.pushTag(self)
 
-    def new_tag(self, name, namespace=None, nsprefix=None, **attrs):
+    def new_tag(self, name, namespace=None, nsprefix=None, attrs={}, **kwattrs):
         """Create a new tag associated with this soup."""
-        return Tag(None, self.builder, name, namespace, nsprefix, attrs)
+        kwattrs.update(attrs)
+        return Tag(None, self.builder, name, namespace, nsprefix, kwattrs)
 
     def new_string(self, s, subclass=NavigableString):
         """Create a new NavigableString associated with this soup."""

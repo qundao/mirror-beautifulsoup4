@@ -703,12 +703,12 @@ class TestTagCreation(SoupTest):
     """Test the ability to create new tags."""
     def test_new_tag(self):
         soup = self.soup("")
-        new_tag = soup.new_tag("foo", bar="baz")
+        new_tag = soup.new_tag("foo", bar="baz", attrs={"name": "a name"})
         self.assertTrue(isinstance(new_tag, Tag))
         self.assertEqual("foo", new_tag.name)
-        self.assertEqual(dict(bar="baz"), new_tag.attrs)
+        self.assertEqual(dict(bar="baz", name="a name"), new_tag.attrs)
         self.assertEqual(None, new_tag.parent)
-
+        
     def test_tag_inherits_self_closing_rules_from_builder(self):
         if XML_BUILDER_PRESENT:
             xml_soup = BeautifulSoup("", "lxml-xml")
