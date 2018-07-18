@@ -151,11 +151,11 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         attrs = dict(attrs)
         nsprefix = None
         # Invert each namespace map as it comes in.
-        if len(self.nsmaps) > 1:
-            # There are no new namespaces for this tag, but
-            # non-default namespaces are in play, so we need a
-            # separate tag stack to know when they end.
-            self.nsmaps.append(None)
+        if len(nsmap) == 0 and len(self.nsmaps) > 1:
+                # There are no new namespaces for this tag, but
+                # non-default namespaces are in play, so we need a
+                # separate tag stack to know when they end.
+                self.nsmaps.append(None)
         elif len(nsmap) > 0:
             # A new namespace mapping has come into play.
             inverted_nsmap = dict((value, key) for key, value in nsmap.items())

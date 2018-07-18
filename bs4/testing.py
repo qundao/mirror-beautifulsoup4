@@ -624,6 +624,17 @@ class XMLTreeBuilderSmokeTest(object):
         self.assertEqual(
             soup.encode("utf-8"), markup)
 
+    def test_nested_namespaces(self):
+        doc = """<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<parent xmlns="http://ns1/">
+<child xmlns="http://ns2/" xmlns:ns3="http://ns3/">
+<grandchild ns3:attr="value" xmlns="http://ns4/"/>
+</child>
+</parent>"""
+        soup = BeautifulSoup(doc, "lxml-xml")
+        self.assertEqual(doc, soup.encode())
+        
     def test_formatter_processes_script_tag_for_xml_documents(self):
         doc = """
   <script type="text/javascript">
