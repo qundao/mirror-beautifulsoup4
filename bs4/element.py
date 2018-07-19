@@ -589,14 +589,21 @@ class PageElement(object):
             elif isinstance(name, basestring):
                 # Optimization to find all tags with a given name.
                 if name.count(':') == 1:
-                    # This is a name with a prefix.
-                    prefix, name = name.split(':', 1)
+                    # This is a name with a prefix. If this is a namespace-aware document,
+                    # we need to match the local name against tag.name. If not,
+                    # we need to match the fully-qualified name against tag.name.
+                    prefix, local_name = name.split(':', 1)
                 else:
                     prefix = None
+                    local_name = name
                 result = (element for element in generator
                           if isinstance(element, Tag)
-                            and element.name == name
-                          and (prefix is None or element.prefix == prefix)
+                          and (
+                              element.name == name
+                          ) or (
+                              element.name == local_name
+                              and (prefix is None or element.prefix == prefix)
+                          )
                 )
                 return ResultSet(strainer, result)
         results = ResultSet(strainer)

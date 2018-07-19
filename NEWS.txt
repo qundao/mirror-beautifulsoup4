@@ -6,6 +6,9 @@
 * Preserve XML namespaces introduced inside an XML document, not just
    the ones introduced at the top level. [bug=1718787]
 
+* Added a new formatter, "html5", which represents void elements
+  elements as "<element>" rather than "<element/>".  [bug=1716272]
+
 * Improved the warning given when no parser is specified. [bug=1780571]
 
 * Fixed code that was causing deprecation warnings in recent Python 3
@@ -17,8 +20,9 @@
 * Stopped HTMLParser from raising an exception in very rare cases of
   bad markup. [bug=1708831]
 
-* Added a new formatter, "html5", which represents void elements
-  elements as "<element>" rather than "<element/>".  [bug=1716272]
+* Fixed a bug where find_all() was not working when asked to find a
+  tag with a namespaced name in an XML document that was parsed as
+  HTML. [bug=1723783]
 
 * You can get finer control over formatting by subclassing
   bs4.element.Formatter and passing a Formatter instance into (e.g.)

@@ -150,6 +150,14 @@ class HTMLTreeBuilderSmokeTest(object):
             soup.encode("utf-8").replace(b"\n", b""),
             markup.replace(b"\n", b""))
 
+    def test_namespaced_html(self):
+        """When a namespaced XML document is parsed as HTML it should
+        be treated as HTML with weird tag names.
+        """
+        markup = b"""<ns1:foo>content</ns1:foo><ns1:foo/><ns2:foo/>"""
+        soup = self.soup(markup)
+        self.assertEqual(2, len(soup.find_all("ns1:foo")))
+        
     def test_processing_instruction(self):
         # We test both Unicode and bytestring to verify that
         # process_markup correctly sets processing_instruction_class
@@ -625,14 +633,14 @@ class XMLTreeBuilderSmokeTest(object):
             soup.encode("utf-8"), markup)
 
     def test_nested_namespaces(self):
-        doc = """<?xml version="1.0" encoding="utf-8"?>
+        doc = b"""<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <parent xmlns="http://ns1/">
 <child xmlns="http://ns2/" xmlns:ns3="http://ns3/">
 <grandchild ns3:attr="value" xmlns="http://ns4/"/>
 </child>
 </parent>"""
-        soup = BeautifulSoup(doc, "lxml-xml")
+        soup = self.soup(doc)
         self.assertEqual(doc, soup.encode())
         
     def test_formatter_processes_script_tag_for_xml_documents(self):
