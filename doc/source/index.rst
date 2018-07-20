@@ -2430,7 +2430,7 @@ mistakes and delays by passing it to the ``BeautifulSoup`` constructor
 as ``from_encoding``.
 
 Here's a document written in ISO-8859-8. The document is so short that
-Unicode, Dammit can't get a good lock on it, and misidentifies it as
+Unicode, Dammit can't get a lock on it, and misidentifies it as
 ISO-8859-7::
 
  markup = b"<h1>\xed\xe5\xec\xf9</h1>"
