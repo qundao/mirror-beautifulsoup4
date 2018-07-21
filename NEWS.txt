@@ -7,7 +7,10 @@
    the ones introduced at the top level. [bug=1718787]
 
 * Added a new formatter, "html5", which represents void elements
-  elements as "<element>" rather than "<element/>".  [bug=1716272]
+   as "<element>" rather than "<element/>".  [bug=1716272]
+
+* Fixed a problem where the html.parser tree builder interpreted
+  a string like "&foo " as the character entity "&foo;"  [bug=1728706]
 
 * Improved the warning given when no parser is specified. [bug=1780571]
 

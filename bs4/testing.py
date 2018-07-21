@@ -319,6 +319,14 @@ Hello, world!
     def test_angle_brackets_in_attribute_values_are_escaped(self):
         self.assertSoupEquals('<a b="<a>"></a>', '<a b="&lt;a&gt;"></a>')
 
+    def test_strings_resembling_character_entity_references(self):
+        # "&T" and "&p" look like incomplete character entities, but they are
+        # not.
+        self.assertSoupEquals(
+            u"<p>&bull; AT&T is in the s&p 500</p>",
+            u"<p>\u2022 AT&amp;T is in the s&amp;p 500</p>"
+        )
+        
     def test_entities_in_attributes_converted_to_unicode(self):
         expect = u'<p id="pi\N{LATIN SMALL LETTER N WITH TILDE}ata"></p>'
         self.assertSoupEquals('<p id="pi&#241;ata"></p>', expect)

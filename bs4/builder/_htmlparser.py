@@ -152,7 +152,12 @@ class BeautifulSoupHTMLParser(HTMLParser):
         if character is not None:
             data = character
         else:
-            data = "&%s;" % name
+            # If this were XML, it would be ambiguous whether "&foo"
+            # was an character entity reference with a missing
+            # semicolon or the literal string "&foo". Since this is
+            # HTML, we have a complete list of all character entity references,
+            # and this one wasn't found, so assume it's the literal string "&foo".
+            data = "&%s" % name
         self.handle_data(data)
 
     def handle_comment(self, data):
