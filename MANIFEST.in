@@ -1,5 +1,6 @@
 include test-all-versions
 include convert-py3k
+include LICENSE
 include *.txt
 include doc*/Makefile
 include doc*/source/*.py
