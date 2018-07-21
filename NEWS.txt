@@ -36,6 +36,10 @@
   an attribute like 'name' that would otherwise be masked by another
   argument of new_tag. [bug=1779276]
 
+* Clarified the deprecation warning when accessing tag.fooTag, to cover
+  the possibility that you might really have been looking for a tag
+  called 'fooTag'.
+
 = 4.6.0 (20170507) =
 
 * Added the `Tag.get_attribute_list` method, which acts like `Tag.get` for

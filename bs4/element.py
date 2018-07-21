@@ -1106,8 +1106,10 @@ class Tag(PageElement):
             # BS3: soup.aTag -> "soup.find("a")
             tag_name = tag[:-3]
             warnings.warn(
-                '.%sTag is deprecated, use .find("%s") instead.' % (
-                    tag_name, tag_name))
+                '.%(name)sTag is deprecated, use .find("%(name)s") instead. If you really were looking for a tag called %(name)sTag, use .find("%(name)sTag")' % dict(
+                    name=tag_name
+                )
+            )
             return self.find(tag_name)
         # We special case contents to avoid recursion.
         elif not tag.startswith("__") and not tag == "contents":
