@@ -1409,15 +1409,29 @@ class Tag(PageElement):
         # Handle grouping selectors if ',' exists, ie: p,a
         if ',' in selector:
             context = []
-            for partial_selector in selector.split(','):
-                partial_selector = partial_selector.strip()
+            selectors = [x.strip() for x in selector.split(",")]
+
+            # If a selector is mentioned multiple times we don't want
+            # to use it more than once.
+            used_selectors = set()
+
+            # We also don't want to select the same element more than once,
+            # if it's matched by multiple selectors.
+            selected_object_ids = set()
+            for partial_selector in selectors:
                 if partial_selector == '':
                     raise ValueError('Invalid group selection syntax: %s' % selector)
+                if partial_selector in used_selectors:
+                    continue
+                used_selectors.add(partial_selector)
                 candidates = self.select(partial_selector, limit=limit)
                 for candidate in candidates:
-                    if candidate not in context:
+                    # This lets us distinguish between distinct tags that
+                    # represent the same markup.
+                    object_id = id(candidate)
+                    if object_id not in selected_object_ids:
                         context.append(candidate)
-
+                        selected_object_ids.add(object_id)
                 if limit and len(context) >= limit:
                     break
             return context

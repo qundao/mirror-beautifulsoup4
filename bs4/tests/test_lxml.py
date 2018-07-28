@@ -46,7 +46,7 @@ class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         self.assertSoupEquals(
             "<p>foo&#1000000000;bar</p>", "<p>foobar</p>")
 
-    def test_entities_in_original_document_encoding(self):
+    def test_entities_in_foreign_document_encoding(self):
         # We can't implement this case correctly because by the time we
         # hear about markup like "&#147;", it's been (incorrectly) converted into
         # a string like u'\x93'

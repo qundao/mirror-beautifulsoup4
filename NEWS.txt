@@ -20,6 +20,10 @@
 
 * Improved the warning given when no parser is specified. [bug=1780571]
 
+* When markup contains duplicate elements, a select() call that
+  includes multiple match clauses will match all relevant
+  elements. [bug=1770596]
+
 * Fixed code that was causing deprecation warnings in recent Python 3
   versions. Includes a patch from Ville Skyttä. [bug=1778909] [bug=1689496]
 

@@ -2074,5 +2074,17 @@ class TestSoupSelector(TreeTest):
     def test_multiple_select_nested(self):
         self.assertSelects('body > div > x, y > z', ['xid', 'zidb'])
 
+    def test_select_duplicate_elements(self):
+        # When markup contains duplicate elements, a multiple select
+        # will find all of them.
+        markup = '<div class="c1"/><div class="c2"/><div class="c1"/>'
+        soup = BeautifulSoup(markup, 'html.parser')
+        selected = soup.select(".c1, .c2")
+        self.assertEquals(3, len(selected))
 
+        # Verify that find_all finds the same elements, though because
+        # of an implementation detail it finds them in a different
+        # order.
+        for element in soup.find_all(class_=['c1', 'c2']):
+            assert element in selected
 
