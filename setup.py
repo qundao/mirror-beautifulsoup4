@@ -5,7 +5,7 @@ from setuptools import (
 
 setup(
     name="beautifulsoup4",
-    version = "4.6.0",
+    version = "4.6.1",
     author="Leonard Richardson",
     author_email='leonardr@segfault.org',
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",

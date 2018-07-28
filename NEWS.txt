@@ -1,4 +1,4 @@
-= Unreleased
+= 4.6.1 (20180728)
 
 * Stop data loss when encountering an empty numeric entity, and
   possibly in other cases.  Thanks to tos.kamiya for the fix. [bug=1698503]
