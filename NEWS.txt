@@ -12,6 +12,12 @@
 * Fixed a problem where the html.parser tree builder interpreted
   a string like "&foo " as the character entity "&foo;"  [bug=1728706]
 
+* Correctly handle invalid HTML numeric character entities like &#147;
+  which reference code points that are not Unicode code points. Note
+  that this is only fixed when Beautiful Soup is used with the
+  html.parser parser -- html5lib already worked and I couldn't fix it
+  with lxml.  [bug=1782933]
+
 * Improved the warning given when no parser is specified. [bug=1780571]
 
 * Fixed code that was causing deprecation warnings in recent Python 3

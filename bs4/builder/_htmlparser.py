@@ -1,3 +1,4 @@
+# encoding: utf-8
 """Use the HTMLParser library to parse HTML files that aren't too bad."""
 
 # Use of this source code is governed by a BSD-style license that can be
@@ -140,11 +141,26 @@ class BeautifulSoupHTMLParser(HTMLParser):
         else:
             real_name = int(name)
 
-        try:
-            data = unichr(real_name)
-        except (ValueError, OverflowError), e:
-            data = u"\N{REPLACEMENT CHARACTER}"
-
+        data = None
+        if real_name < 256:
+            # HTML numeric entities are supposed to reference Unicode
+            # code points, but sometimes they reference code points in
+            # some other encoding (ahem, Windows-1252). E.g. &#147;
+            # instead of &#201; for LEFT DOUBLE QUOTATION MARK. This
+            # code tries to detect this situation and compensate.
+            for encoding in (self.soup.original_encoding, 'windows-1252'):
+                if not encoding:
+                    continue
+                try:
+                    data = bytearray([real_name]).decode(encoding)
+                except UnicodeDecodeError, e:
+                    pass
+        if not data:
+            try:
+                data = unichr(real_name)
+            except (ValueError, OverflowError), e:
+                pass
+        data = data or u"\N{REPLACEMENT CHARACTER}"
         self.handle_data(data)
 
     def handle_entityref(self, name):

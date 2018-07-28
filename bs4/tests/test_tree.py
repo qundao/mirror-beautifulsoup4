@@ -1206,7 +1206,7 @@ class TestElementObjects(SoupTest):
             tag = soup.bTag
         self.assertEqual(soup.b, tag)
         self.assertEqual(
-            '.bTag is deprecated, use .find("b") instead.',
+            '.bTag is deprecated, use .find("b") instead. If you really were looking for a tag called bTag, use .find("bTag")',
             str(w[0].message))
 
     def test_has_attr(self):

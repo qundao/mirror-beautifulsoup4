@@ -1,3 +1,4 @@
+# encoding: utf-8
 """Helper classes for tests."""
 
 # Use of this source code is governed by a BSD-style license that can be
@@ -326,6 +327,18 @@ Hello, world!
             u"<p>&bull; AT&T is in the s&p 500</p>",
             u"<p>\u2022 AT&amp;T is in the s&amp;p 500</p>"
         )
+
+    def test_entities_in_foreign_document_encoding(self):
+        # &#147; and &#148; are invalid numeric entities referencing
+        # Windows-1252 characters. &#45; references a character common
+        # to Windows-1252 and Unicode, and &#9731; references a
+        # character only found in Unicode.
+        #
+        # All of these entities should be converted to Unicode
+        # characters.
+        markup = "<p>&#147;Hello&#148; &#45;&#9731;</p>"
+        soup = self.soup(markup)
+        self.assertEquals(u"“Hello” -☃", soup.p.string)
         
     def test_entities_in_attributes_converted_to_unicode(self):
         expect = u'<p id="pi\N{LATIN SMALL LETTER N WITH TILDE}ata"></p>'
