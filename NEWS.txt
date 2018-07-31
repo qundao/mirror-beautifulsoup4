@@ -1,3 +1,8 @@
+= 4.6.2 (unreleased)
+
+* Fix an exception when a custom formatter was asked to format a void
+  element. [bug=1784408]
+
 = 4.6.1 (20180728)
 
 * Stop data loss when encountering an empty numeric entity, and
