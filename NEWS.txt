@@ -1,3 +1,8 @@
+= 4.6.3 (20180812)
+
+* Exactly the same as 4.6.2. Re-released to make the README file
+  render properly on PyPI.
+
 = 4.6.2 (20180812)
 
 * Fix an exception when a custom formatter was asked to format a void

@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="beautifulsoup4",
-    version = "4.6.1",
+    version = "4.6.3",
     author="Leonard Richardson",
     author_email='leonardr@segfault.org',
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
