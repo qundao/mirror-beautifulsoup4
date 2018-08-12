@@ -3,6 +3,9 @@ from setuptools import (
     find_packages,
 )
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="beautifulsoup4",
     version = "4.6.1",
@@ -11,7 +14,8 @@ setup(
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
     download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
     description="Screen-scraping library",
-    long_description="""Beautiful Soup sits atop an HTML or XML parser, providing Pythonic idioms for iterating, searching, and modifying the parse tree.""",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT",
     packages=find_packages(exclude=['tests*']),
     extras_require = {

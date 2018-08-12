@@ -1,4 +1,4 @@
-= 4.6.2 (unreleased)
+= 4.6.2 (20180812)
 
 * Fix an exception when a custom formatter was asked to format a void
   element. [bug=1784408]
