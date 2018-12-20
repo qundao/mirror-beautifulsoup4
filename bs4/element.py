@@ -1357,7 +1357,7 @@ class Tag(PageElement):
         if limit is None:
             limit = 0
 
-        return soupsieve.select(selector, self, namespaces, limit)
+        return soupsieve.select(selector, self, namespaces, limit, flags)
 
     # Old names for backwards compatibility
     def childGenerator(self):
