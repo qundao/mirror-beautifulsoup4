@@ -249,7 +249,7 @@ class Element(treebuilder_base.Node):
         if not isinstance(child, basestring) and child.parent is not None:
             node.element.extract()
 
-        if (string_child and self.element.contents
+        if (string_child is not None and self.element.contents
             and self.element.contents[-1].__class__ == NavigableString):
             # We are appending a string onto another string.
             # TODO This has O(n^2) performance, for input like
@@ -360,16 +360,16 @@ class Element(treebuilder_base.Node):
             # Set the first child's previous_element and previous_sibling
             # to elements within the new parent
             first_child = to_append[0]
-            if new_parents_last_descendant:
+            if new_parents_last_descendant is not None:
                 first_child.previous_element = new_parents_last_descendant
             else:
                 first_child.previous_element = new_parent_element
             first_child.previous_sibling = new_parents_last_child
-            if new_parents_last_descendant:
+            if new_parents_last_descendant is not None:
                 new_parents_last_descendant.next_element = first_child
             else:
                 new_parent_element.next_element = first_child
-            if new_parents_last_child:
+            if new_parents_last_child is not None:
                 new_parents_last_child.next_sibling = first_child
 
             # Find the very last element being moved. It is now the
@@ -379,7 +379,7 @@ class Element(treebuilder_base.Node):
             last_childs_last_descendant = to_append[-1]._last_descendant(False, True)
 
             last_childs_last_descendant.next_element = new_parents_last_descendant_next_element
-            if new_parents_last_descendant_next_element:
+            if new_parents_last_descendant_next_element is not None:
                 # TODO: This code has no test coverage and I'm not sure
                 # how to get html5lib to go through this path, but it's
                 # just the other side of the previous line.

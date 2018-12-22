@@ -256,26 +256,26 @@ class PageElement(object):
             self.previous_element.next_element = self
 
         self.next_element = next_element
-        if self.next_element:
+        if self.next_element is not None:
             self.next_element.previous_element = self
 
         self.next_sibling = next_sibling
-        if self.next_sibling:
+        if self.next_sibling is not None:
             self.next_sibling.previous_sibling = self
 
-        if (not previous_sibling
+        if (previous_sibling is None
             and self.parent is not None and self.parent.contents):
             previous_sibling = self.parent.contents[-1]
 
         self.previous_sibling = previous_sibling
-        if previous_sibling:
+        if previous_sibling is not None:
             self.previous_sibling.next_sibling = self
 
     nextSibling = _alias("next_sibling")  # BS3
     previousSibling = _alias("previous_sibling")  # BS3
 
     def replace_with(self, replace_with):
-        if not self.parent:
+        if self.parent is None:
             raise ValueError(
                 "Cannot replace one element with another when the"
                 "element to be replaced is not part of a tree.")
@@ -292,7 +292,7 @@ class PageElement(object):
 
     def unwrap(self):
         my_parent = self.parent
-        if not self.parent:
+        if self.parent is None:
             raise ValueError(
                 "Cannot replace an element with its contents when that"
                 "element is not part of a tree.")
@@ -340,7 +340,7 @@ class PageElement(object):
 
     def _last_descendant(self, is_initialized=True, accept_self=True):
         "Finds the last element beneath this object to be parsed."
-        if is_initialized and self.next_sibling:
+        if is_initialized and self.next_sibling is not None:
             last_child = self.next_sibling.previous_element
         else:
             last_child = self
