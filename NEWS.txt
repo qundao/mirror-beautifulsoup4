@@ -1,3 +1,14 @@
+= 4.7.0 (Unreleased)
+
+* Fix a number of problems with the tree builder that caused
+  trees that were superficially okay, but which fell apart when bits
+  were extracted. Patch by Isaac Muse. [bug=1782928]
+
+* Fixed a problem with the tree builder in which elements that
+  contained no content (such as empty comments and all-whitespace
+  elements) were not being treated as part of the tree. Patch by Isaac
+  Muse. [bug=1798699]
+
 = 4.6.3 (20180812)
 
 * Exactly the same as 4.6.2. Re-released to make the README file

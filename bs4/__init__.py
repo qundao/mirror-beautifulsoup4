@@ -382,7 +382,7 @@ class BeautifulSoup(Tag):
 
     def pushTag(self, tag):
         #print "Push", tag.name
-        if self.currentTag:
+        if self.currentTag is not None:
             self.currentTag.contents.append(tag)
         self.tagStack.append(tag)
         self.currentTag = self.tagStack[-1]
@@ -421,15 +421,19 @@ class BeautifulSoup(Tag):
 
     def object_was_parsed(self, o, parent=None, most_recent_element=None):
         """Add an object to the parse tree."""
-        parent = parent or self.currentTag
-        previous_element = most_recent_element or self._most_recent_element
+        if parent is None:
+            parent = self.currentTag
+        if most_recent_element is not None:
+            previous_element = most_recent_element
+        else:
+            previous_element = self._most_recent_element
 
         next_element = previous_sibling = next_sibling = None
         if isinstance(o, Tag):
             next_element = o.next_element
             next_sibling = o.next_sibling
             previous_sibling = o.previous_sibling
-            if not previous_element:
+            if previous_element is None:
                 previous_element = o.previous_element
 
         o.setup(parent, previous_element, next_element, previous_sibling, next_sibling)
@@ -437,7 +441,7 @@ class BeautifulSoup(Tag):
         self._most_recent_element = o
         parent.contents.append(o)
 
-        if parent.next_sibling:
+        if parent.next_sibling is not None:
             # This node is being inserted into an element that has
             # already been parsed. Deal with any dangling references.
             index = len(parent.contents)-1
@@ -457,6 +461,15 @@ class BeautifulSoup(Tag):
                 previous_sibling = None
             else:
                 previous_element = previous_sibling = parent.contents[index-1]
+                previous = previous_element
+                while isinstance(previous, Tag):
+                    if previous.contents:
+                        previous.next_element = previous.contents[0]
+                        previous = previous.contents[-1]
+                    else:
+                        break
+                previous_element = previous
+
             if index == len(parent.contents)-1:
                 next_element = parent.next_sibling
                 next_sibling = None
@@ -464,16 +477,16 @@ class BeautifulSoup(Tag):
                 next_element = next_sibling = parent.contents[index+1]
 
             o.previous_element = previous_element
-            if previous_element:
+            if previous_element is not None:
                 previous_element.next_element = o
             o.next_element = next_element
-            if next_element:
+            if next_element is not None:
                 next_element.previous_element = o
             o.next_sibling = next_sibling
-            if next_sibling:
+            if next_sibling is not None:
                 next_sibling.previous_sibling = o
             o.previous_sibling = previous_sibling
-            if previous_sibling:
+            if previous_sibling is not None:
                 previous_sibling.next_sibling = o
 
     def _popToTag(self, name, nsprefix=None, inclusivePop=True):
@@ -520,7 +533,7 @@ class BeautifulSoup(Tag):
                   self.currentTag, self._most_recent_element)
         if tag is None:
             return tag
-        if self._most_recent_element:
+        if self._most_recent_element is not None:
             self._most_recent_element.next_element = tag
         self._most_recent_element = tag
         self.pushTag(tag)
