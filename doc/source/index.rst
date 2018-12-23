@@ -1662,9 +1662,10 @@ tag it contains.
 CSS selectors
 -------------
 
-Beautiful Soup supports the most commonly-used CSS selectors. Just
-pass a string into the ``.select()`` method of a ``Tag`` object or the
-``BeautifulSoup`` object itself.
+Beautiful Soup supports a large number of CSS selectors via `Soup Sieve
+<https://github.com/facelessuser/soupsieve>`_, only a small portion will be
+discussed here. To select tags, just pass a string into the ``.select()`` method
+of a ``Tag`` object or the ``BeautifulSoup`` object itself.
 
 You can find tags::
 
@@ -1780,11 +1781,29 @@ Find only the first tag that matches a selector::
  soup.select_one(".sister")
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
+You can also use namespaces as well, provided you define namespaces::
+
+ import bs4
+ xml = """<tag xmlns:xyz=http://namespaceuri.com/namespace">
+     <xyz:el>...</xyz:el>
+ </tag> """
+ namespaces = {"xyz": "http://namespaceuri.com/namespace"}
+ soup = bs4.BeautifulSoup(xml, "lxml-xml")
+ soup.select("xyz|el")
+ # [<el>...</el>]
+
+As Soup Sieve is inlcuded with Beautiful soup, you can also use it directly
+on ``BeautifulSoup``  and ``Tag`` objects. 
+
 This is all a convenience for users who know the CSS selector syntax. You
 can do all this stuff with the Beautiful Soup API. And if CSS
 selectors are all you need, you might as well use lxml directly: it's
-a lot faster, and it supports more CSS selectors. But this lets you
-`combine` simple CSS selectors with the Beautiful Soup API.
+a lot faster. But this lets you `combine` complex CSS selectors with the
+Beautiful Soup API.
+
+To learn more about all the CSS selectors supported, or to learn how to use
+SoupSieve's API directly, checkout its `documentation
+<https://facelessuser.github.io/soupsieve/>`_.
 
 
 Modifying the tree
