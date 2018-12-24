@@ -1781,8 +1781,7 @@ first tag that matches a selector::
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
 If you've parsed XML that defines namespaces, you can use them in CSS
-selectors. You just have to pass a dictionary of the namespace
-mappings into ``select()``::
+selectors.::
 
  from bs4 import BeautifulSoup
  xml = """<tag xmlns:ns1="http://namespace1/" xmlns:ns2="http://namespace2/">
@@ -1794,15 +1793,23 @@ mappings into ``select()``::
  soup.select("child")
  # [<ns1:child>I'm in namespace 1</ns1:child>, <ns2:child>I'm in namespace 2</ns2:child>]
 
- namespaces = dict(ns1="http://namespace1/", ns2="http://namespace2/")
  soup.select("ns1|child", namespaces=namespaces)
  # [<ns1:child>I'm in namespace 1</ns1:child>]
 
-All of this is a convenience for people who know the CSS selector
-syntax. You can do all this stuff with the Beautiful Soup API. And if
-CSS selectors are all you need, you should parse the document
-with lxml: it's a lot faster. But this lets you `combine` CSS
-selectors with the Beautiful Soup API.
+When handling a CSS selector that uses namespaces, Beautiful Soup
+uses the namespace abbreviations it found when parsing the
+document. You can override this by passing in your own dictionary of
+abbreviations::
+
+ namespaces = dict(first="http://namespace1/", second="http://namespace2/")
+ soup.select("second|child", namespaces=namespaces)
+ # [<ns1:child>I'm in namespace 2</ns1:child>]
+ 
+All this CSS selector stuff is a convenience for people who already
+know the CSS selector syntax. You can do all of this with the
+Beautiful Soup API. And if CSS selectors are all you need, you should
+parse the document with lxml: it's a lot faster. But this lets you
+`combine` CSS selectors with the Beautiful Soup API.
 
 Modifying the tree
 ==================

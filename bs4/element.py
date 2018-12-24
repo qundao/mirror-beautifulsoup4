@@ -1318,46 +1318,37 @@ class Tag(PageElement):
             current = current.next_element
 
     # CSS selector code
-    def select_one(self, selector, namespaces=None, flags=0):
-        """Perform a CSS selection operation on the current element"""
-        value = self.select(selector, namespaces, 1, flags)
+    def select_one(self, selector, namespaces=None, **kwargs):
+        """Perform a CSS selection operation on the current element."""
+        value = self.select(selector, namespaces, 1, **kwargs)
         if value:
             return value[0]
         return None
 
-    def select(self, selector, namespaces=None, limit=None, flags=0):
+    def select(self, selector, namespaces=None, limit=None, **kwargs):
+        """Perform a CSS selection operation on the current element.
+
+        This uses the SoupSieve library.
+
+        :param selector: A string containing a CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+        used in the CSS selector to namespace URIs. By default,
+        Beautiful Soup will use the prefixes it encountered while
+        parsing the document.
+
+        :param limit: After finding this number of results, stop looking.
+
+        :param kwargs: Any extra arguments you'd like to pass in to
+        soupsieve.select().
         """
-        Perform a CSS selection operation on the current element.
-
-        A "namespaces" dictionary that provides prefixes with the associated
-        namespaces is requied (along with a parser that accounts for
-        namespaces) in order for namespace syntax to work "prefix|tag".
-
-        The dictionary is akin to using "@namespace" in CSS.
-
-            /* Default namespace */
-            @namespace url(XML-namespace-URL);
-            /* Prefixed namespace */
-            @namespace prefix url(XML-namespace-URL);
-
-        So in a dictionary, the followig would be equivalent
-
-            {
-                # Default namespace
-                "": "XML-namespace-URL",
-
-                # Prefixed namespace
-                "prefix": "XML-namespace-URL"
-            }
-
-        Flags is reserved for if/when soupsieve requires flags for
-        additional feature control.
-        """
-
+        if namespaces is None:
+            namespaces = self._namespaces
+        
         if limit is None:
             limit = 0
 
-        return soupsieve.select(selector, self, namespaces, limit, flags)
+        return soupsieve.select(selector, self, namespaces, limit, **kwargs)
 
     # Old names for backwards compatibility
     def childGenerator(self):

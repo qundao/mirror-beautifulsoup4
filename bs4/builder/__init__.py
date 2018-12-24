@@ -102,6 +102,12 @@ class TreeBuilder(object):
     def __init__(self):
         self.soup = None
 
+    def initialize_soup(self, soup):
+        """The BeautifulSoup object has been initialized and is now
+        being associated with the TreeBuilder.
+        """
+        self.soup = soup
+        
     def reset(self):
         pass
 
