@@ -1662,10 +1662,22 @@ tag it contains.
 CSS selectors
 -------------
 
-Beautiful Soup supports a large number of CSS selectors via `Soup Sieve
-<https://github.com/facelessuser/soupsieve>`_, only a small portion will be
-discussed here. To select tags, just pass a string into the ``.select()`` method
-of a ``Tag`` object or the ``BeautifulSoup`` object itself.
+As of version 4.7.0, Beautiful Soup supports most CSS4 selectors via
+the `SoupSieve <https://facelessuser.github.io/soupsieve/>`_
+project. If you installed Beautiful Soup through ``pip``, SoupSieve
+was installed at the same time, so you don't have to do anything extra.
+
+``BeautifulSoup`` has a ``.select()`` method which uses SoupSieve to
+run a CSS selector against a parsed document and return all the
+matching elements. ``Tag`` has a similar method which runs a CSS
+selector against the contents of a single tag.
+
+(Earlier versions of Beautiful Soup also have the ``.select()``
+method, but only the most commonly-used CSS selectors are supported.)
+
+The SoupSieve `documentation
+<https://facelessuser.github.io/soupsieve/>`_ lists all the currently
+supported CSS selectors, but here are some of the basics:
 
 You can find tags::
 
@@ -1762,49 +1774,35 @@ Find tags by attribute value::
  soup.select('a[href*=".com/el"]')
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>]
 
-Match language codes::
-
- multilingual_markup = """
-  <p lang="en">Hello</p>
-  <p lang="en-us">Howdy, y'all</p>
-  <p lang="en-gb">Pip-pip, old fruit</p>
-  <p lang="fr">Bonjour mes amis</p>
- """
- multilingual_soup = BeautifulSoup(multilingual_markup)
- multilingual_soup.select('p[lang|=en]')
- # [<p lang="en">Hello</p>,
- #  <p lang="en-us">Howdy, y'all</p>,
- #  <p lang="en-gb">Pip-pip, old fruit</p>]
-
-Find only the first tag that matches a selector::
+There's also a method called ``select_one()``, which finds only the
+first tag that matches a selector::
 
  soup.select_one(".sister")
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
-You can also use namespaces as well, provided you define namespaces::
+If you've parsed XML that defines namespaces, you can use them in CSS
+selectors. You just have to pass a dictionary of the namespace
+mappings into ``select()``::
 
- import bs4
- xml = """<tag xmlns:xyz=http://namespaceuri.com/namespace">
-     <xyz:el>...</xyz:el>
+ from bs4 import BeautifulSoup
+ xml = """<tag xmlns:ns1="http://namespace1/" xmlns:ns2="http://namespace2/">
+  <ns1:child>I'm in namespace 1</ns1:child>
+  <ns2:child>I'm in namespace 2</ns2:child>
  </tag> """
- namespaces = {"xyz": "http://namespaceuri.com/namespace"}
- soup = bs4.BeautifulSoup(xml, "lxml-xml")
- soup.select("xyz|el")
- # [<el>...</el>]
+ soup = BeautifulSoup(xml, "xml")
 
-As Soup Sieve is inlcuded with Beautiful soup, you can also use it directly
-on ``BeautifulSoup``  and ``Tag`` objects. 
+ soup.select("child")
+ # [<ns1:child>I'm in namespace 1</ns1:child>, <ns2:child>I'm in namespace 2</ns2:child>]
 
-This is all a convenience for users who know the CSS selector syntax. You
-can do all this stuff with the Beautiful Soup API. And if CSS
-selectors are all you need, you might as well use lxml directly: it's
-a lot faster. But this lets you `combine` complex CSS selectors with the
-Beautiful Soup API.
+ namespaces = dict(ns1="http://namespace1/", ns2="http://namespace2/")
+ soup.select("ns1|child", namespaces=namespaces)
+ # [<ns1:child>I'm in namespace 1</ns1:child>]
 
-To learn more about all the CSS selectors supported, or to learn how to use
-SoupSieve's API directly, checkout its `documentation
-<https://facelessuser.github.io/soupsieve/>`_.
-
+All of this is a convenience for people who know the CSS selector
+syntax. You can do all this stuff with the Beautiful Soup API. And if
+CSS selectors are all you need, you should parse the document
+with lxml: it's a lot faster. But this lets you `combine` CSS
+selectors with the Beautiful Soup API.
 
 Modifying the tree
 ==================
