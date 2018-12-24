@@ -9,7 +9,14 @@ except ImportError , e:
 import re
 import sys
 import warnings
-import soupsieve
+try:
+    import soupsieve
+except ImportError, e:
+    soupsieve = None
+    warnings.warn(
+        'The soupsieve package is not installed. CSS selectors cannot be used.'
+    )
+
 from bs4.dammit import EntitySubstitution
 
 DEFAULT_OUTPUT_ENCODING = "utf-8"
@@ -1347,7 +1354,11 @@ class Tag(PageElement):
         
         if limit is None:
             limit = 0
-
+        if soupsieve is None:
+            raise NotImplementedError(
+                "Cannot execute CSS selectors because the soupsieve package is not installed."
+            )
+            
         return soupsieve.select(selector, self, namespaces, limit, **kwargs)
 
     # Old names for backwards compatibility

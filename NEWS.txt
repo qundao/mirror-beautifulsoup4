@@ -1,5 +1,19 @@
 = 4.7.0 (Unreleased)
 
+* Beautiful Soup's CSS Selector implementation has been replaced by a
+  dependency on Isaac Muse's SoupSieve project (the soupsieve package
+  on PyPI). The good news is that SoupSieve has a much more robust and
+  complete implementation of CSS selectors, resolving a large number
+  of longstanding issues. The bad news is that from this point onward,
+  SoupSieve must be installed if you want to use the select() method.
+
+  You don't have to change anything lf you installed Beautiful Soup
+  through pip (SoupSieve will be automatically installed when you
+  upgrade Beautiful Soup) or if you don't use CSS selectors from
+  within Beautiful Soup.
+
+  SoupSieve documentation: https://facelessuser.github.io/soupsieve/
+
 * Fix a number of problems with the tree builder that caused
   trees that were superficially okay, but which fell apart when bits
   were extracted. Patch by Isaac Muse. [bug=1782928]
