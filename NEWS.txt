@@ -23,6 +23,9 @@
   elements) were not being treated as part of the tree. Patch by Isaac
   Muse. [bug=1798699]
 
+* Clarified ambiguous license statements in the source code. Beautiful
+  Soup is released under the MIT license, and has been for some time.
+
 = 4.6.3 (20180812)
 
 * Exactly the same as 4.6.2. Re-released to make the README file

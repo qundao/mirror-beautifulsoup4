@@ -17,12 +17,10 @@ http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 
 """
 
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
-
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.6.3"
+__version__ = "4.7.0"
 __copyright__ = "Copyright (c) 2004-2018 Leonard Richardson"
+# Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
 __all__ = ['BeautifulSoup']
