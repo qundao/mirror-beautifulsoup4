@@ -211,8 +211,6 @@ class SoupTest(unittest.TestCase):
             # Return the child to the recursive caller
             return child
 
-        return descendant if descendant is not None else child
-
 
 class HTMLTreeBuilderSmokeTest(object):
 
