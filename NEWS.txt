@@ -16,7 +16,7 @@
 
 * Fix a number of problems with the tree builder that caused
   trees that were superficially okay, but which fell apart when bits
-  were extracted. Patch by Isaac Muse. [bug=1782928]
+  were extracted. Patch by Isaac Muse. [bug=1782928,1809910]
 
 * Fixed a problem with the tree builder in which elements that
   contained no content (such as empty comments and all-whitespace
