@@ -452,6 +452,18 @@ Hello, world!
             "<tbody><tr><td>Bar</td></tr></tbody>"
             "<tfoot><tr><td>Baz</td></tr></tfoot></table>")
 
+    def test_multivalued_attribute_with_whitespace(self):
+        # Whitespace separating the values of a multi-valued attribute
+        # should be ignored.
+
+        markup = '<div class=" foo bar	 "></a>'
+        soup = self.soup(markup)
+        self.assertEqual(['foo', 'bar'], soup.div['class'])
+
+        # If you search by the literal name of the class it's like the whitespace
+        # wasn't there.
+        self.assertEqual(soup.div, soup.find('div', class_="foo bar"))
+        
     def test_deeply_nested_multivalued_attribute(self):
         # html5lib can set the attributes of the same tag many times
         # as it rearranges the tree. This has caused problems with

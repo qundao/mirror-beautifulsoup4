@@ -21,6 +21,10 @@ from bs4.dammit import EntitySubstitution
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 PY3K = (sys.version_info[0] > 2)
 
+nonwhitespace_re = re.compile(r"\S+")
+
+# NOTE: This isn't used as of 4.7.0. I'm leaving it for a little bit on
+# the off chance someone imported it for their own use.
 whitespace_re = re.compile(r"\s+")
 
 def _alias(attr):

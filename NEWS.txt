@@ -23,8 +23,12 @@
   elements) were not being treated as part of the tree. Patch by Isaac
   Muse. [bug=1798699]
 
+* Fixed a problem with multi-valued attributes where the value
+  contained whitespace. Thanks to Jens Svalgaard for the
+  fix. [bug=1787453]
+
 * Clarified ambiguous license statements in the source code. Beautiful
-  Soup is released under the MIT license, and has been for some time.
+  Soup is released under the MIT license, and has been since 4.4.0.
 
 = 4.6.3 (20180812)
 

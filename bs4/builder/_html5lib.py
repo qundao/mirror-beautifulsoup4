@@ -15,7 +15,7 @@ from bs4.builder import (
     )
 from bs4.element import (
     NamespacedAttribute,
-    whitespace_re,
+    nonwhitespace_re,
 )
 import html5lib
 from html5lib.constants import (
@@ -206,7 +206,7 @@ class AttrList(object):
             # A node that is being cloned may have already undergone
             # this procedure.
             if not isinstance(value, list):
-                value = whitespace_re.split(value)
+                value = nonwhitespace_re.findall(value)
         self.element[name] = value
     def items(self):
         return list(self.attrs.items())
