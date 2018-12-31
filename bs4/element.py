@@ -440,43 +440,53 @@ class PageElement(object):
         """Appends the given tag to the contents of this tag."""
         self.insert(len(self.contents), tag)
 
-    def insert_before(self, predecessor):
-        """Makes the given element the immediate predecessor of this one.
+    def extend(self, tags):
+        """Appends the given tags to the contents of this tag."""
+        for tag in tags:
+            self.append(tag)
 
-        The two elements will have the same parent, and the given element
+    def insert_before(self, *args):
+        """Makes the given element(s) the immediate predecessor of this one.
+
+        The elements will have the same parent, and the given elements
         will be immediately before this one.
         """
-        if self is predecessor:
-            raise ValueError("Can't insert an element before itself.")
-        parent = self.parent
-        if parent is None:
-            raise ValueError(
-                "Element has no parent, so 'before' has no meaning.")
-        # Extract first so that the index won't be screwed up if they
-        # are siblings.
-        if isinstance(predecessor, PageElement):
-            predecessor.extract()
-        index = parent.index(self)
-        parent.insert(index, predecessor)
+        for predecessor in args:
+            if self is predecessor:
+                raise ValueError("Can't insert an element before itself.")
+            parent = self.parent
+            if parent is None:
+                raise ValueError(
+                    "Element has no parent, so 'before' has no meaning.")
+            # Extract first so that the index won't be screwed up if they
+            # are siblings.
+            if isinstance(predecessor, PageElement):
+                predecessor.extract()
+            index = parent.index(self)
+            parent.insert(index, predecessor)
 
-    def insert_after(self, successor):
-        """Makes the given element the immediate successor of this one.
+    def insert_after(self, *args):
+        """Makes the given element(s) the immediate successor of this one.
 
-        The two elements will have the same parent, and the given element
+        The elements will have the same parent, and the given elements
         will be immediately after this one.
         """
-        if self is successor:
-            raise ValueError("Can't insert an element after itself.")
-        parent = self.parent
-        if parent is None:
-            raise ValueError(
-                "Element has no parent, so 'after' has no meaning.")
-        # Extract first so that the index won't be screwed up if they
-        # are siblings.
-        if isinstance(successor, PageElement):
-            successor.extract()
-        index = parent.index(self)
-        parent.insert(index+1, successor)
+
+        offset = 0
+        for successor in args:
+            if self is successor:
+                raise ValueError("Can't insert an element after itself.")
+            parent = self.parent
+            if parent is None:
+                raise ValueError(
+                    "Element has no parent, so 'after' has no meaning.")
+            # Extract first so that the index won't be screwed up if they
+            # are siblings.
+            if isinstance(successor, PageElement):
+                successor.extract()
+            index = parent.index(self)
+            parent.insert(index+1+offset, successor)
+            offset += 1
 
     def find_next(self, name=None, attrs={}, text=None, **kwargs):
         """Returns the first item that matches the given criteria and
