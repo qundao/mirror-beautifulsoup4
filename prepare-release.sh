@@ -13,6 +13,18 @@
 
 rm -rf build dist
 
+# Run this in a Python 2 env and a Python 3 env to make both sdist and
+# wheels.
+python setup.py sdist bdist_wheel
+
+# Run this in Python 3 env.
+twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+twine upload dist/*
+
+# Old instructions:
+
+
 # Create the 2.x source distro and wheel
 python setup.py sdist bdist_wheel
 

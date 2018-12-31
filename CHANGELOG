@@ -14,6 +14,12 @@
 
   SoupSieve documentation: https://facelessuser.github.io/soupsieve/
 
+* Added the PageElement.extend() method, which works like list.append().
+   [bug=1514970]
+
+* PageElement.insert_before() and insert_after() now take a variable
+   number of arguments. [bug=1514970]
+
 * Fix a number of problems with the tree builder that caused
   trees that were superficially okay, but which fell apart when bits
   were extracted. Patch by Isaac Muse. [bug=1782928,1809910]
