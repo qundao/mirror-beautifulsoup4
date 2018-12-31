@@ -451,13 +451,13 @@ class PageElement(object):
         The elements will have the same parent, and the given elements
         will be immediately before this one.
         """
-        for predecessor in args:
-            if self is predecessor:
+        parent = self.parent
+        if parent is None:
+            raise ValueError(
+                "Element has no parent, so 'before' has no meaning.")
+        if self in args:
                 raise ValueError("Can't insert an element before itself.")
-            parent = self.parent
-            if parent is None:
-                raise ValueError(
-                    "Element has no parent, so 'before' has no meaning.")
+        for predecessor in args:
             # Extract first so that the index won't be screwed up if they
             # are siblings.
             if isinstance(predecessor, PageElement):
@@ -471,15 +471,16 @@ class PageElement(object):
         The elements will have the same parent, and the given elements
         will be immediately after this one.
         """
-
+        # Do all error checking before modifying the tree.
+        parent = self.parent
+        if parent is None:
+            raise ValueError(
+                "Element has no parent, so 'after' has no meaning.")
+        if self in args:
+            raise ValueError("Can't insert an element after itself.")
+        
         offset = 0
         for successor in args:
-            if self is successor:
-                raise ValueError("Can't insert an element after itself.")
-            parent = self.parent
-            if parent is None:
-                raise ValueError(
-                    "Element has no parent, so 'after' has no meaning.")
             # Extract first so that the index won't be screwed up if they
             # are siblings.
             if isinstance(successor, PageElement):

@@ -964,6 +964,14 @@ class TestTreeModification(SoupTest):
         self.assertEqual(
             soup.decode(), self.document_for("QUUX<b>bar</b><a>foo</a>BAZ"))
 
+        # Can't insert an element before itself.
+        b = soup.b
+        self.assertRaises(ValueError, b.insert_before, b)
+
+        # Can't insert before if an element has no parent.
+        b.extract()
+        self.assertRaises(ValueError, b.insert_before, "nope")
+        
     def test_insert_multiple_before(self):
         soup = self.soup("<a>foo</a><b>bar</b>")
         soup.b.insert_before("BAZ", " ", "QUUX")
@@ -985,6 +993,14 @@ class TestTreeModification(SoupTest):
         self.assertEqual(
             soup.decode(), self.document_for("QUUX<b>bar</b><a>foo</a>BAZ"))
 
+        # Can't insert an element after itself.
+        b = soup.b
+        self.assertRaises(ValueError, b.insert_after, b)
+
+        # Can't insert after if an element has no parent.
+        b.extract()
+        self.assertRaises(ValueError, b.insert_after, "nope")
+        
     def test_insert_multiple_after(self):
         soup = self.soup("<a>foo</a><b>bar</b>")
         soup.b.insert_after("BAZ", " ", "QUUX")
