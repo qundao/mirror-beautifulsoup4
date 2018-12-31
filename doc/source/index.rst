@@ -1870,6 +1870,21 @@ like calling ``.append()`` on a Python list::
    soup.a.contents
    # [u'Foo', u'Bar']
 
+``extend()``
+------------
+
+Starting in Beautiful Soup 4.7.0, ``Tag`` also supports a method
+called ``.extend()``, which works just like calling ``.extend()`` on a
+Python list::
+
+   soup = BeautifulSoup("<a>Soup</a>")
+   soup.a.extend(["'s", " ", "on"])
+
+   soup
+   # <html><head></head><body><a>Soup's on</a></body></html>
+   soup.a.contents
+   # [u'Soup', u''s', u' ', u'on']
+   
 ``NavigableString()`` and ``.new_tag()``
 -------------------------------------------------
 
@@ -1938,7 +1953,7 @@ say. It works just like ``.insert()`` on a Python list::
 ``insert_before()`` and ``insert_after()``
 ------------------------------------------
 
-The ``insert_before()`` method inserts a tag or string immediately
+The ``insert_before()`` method inserts tags or strings immediately
 before something else in the parse tree::
 
    soup = BeautifulSoup("<b>stop</b>")
@@ -1948,14 +1963,16 @@ before something else in the parse tree::
    soup.b
    # <b><i>Don't</i>stop</b>
 
-The ``insert_after()`` method moves a tag or string so that it
-immediately follows something else in the parse tree::
+The ``insert_after()`` method inserts tags or strings immediately
+following something else in the parse tree::
 
-   soup.b.i.insert_after(soup.new_string(" ever "))
+   div = soup.new_tag('div')
+   div.string = 'ever'
+   soup.b.i.insert_after(" you ", div)
    soup.b
-   # <b><i>Don't</i> ever stop</b>
+   # <b><i>Don't</i> you <div>ever</div> stop</b>
    soup.b.contents
-   # [<i>Don't</i>, u' ever ', u'stop']
+   # [<i>Don't</i>, u' you', <div>ever</div>, u'stop']
 
 ``clear()``
 -----------
@@ -2085,7 +2102,8 @@ Pretty-printing
 ---------------
 
 The ``prettify()`` method will turn a Beautiful Soup parse tree into a
-nicely formatted Unicode string, with each HTML/XML tag on its own line::
+nicely formatted Unicode string, with a separate line for each
+tag and each string:
 
   markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
   soup = BeautifulSoup(markup)
