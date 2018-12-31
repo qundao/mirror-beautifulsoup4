@@ -1,4 +1,4 @@
-= 4.7.0 (Unreleased)
+= 4.7.0 (20181231)
 
 * Beautiful Soup's CSS Selector implementation has been replaced by a
   dependency on Isaac Muse's SoupSieve project (the soupsieve package
@@ -29,6 +29,8 @@
 
 * Clarified ambiguous license statements in the source code. Beautiful
   Soup is released under the MIT license, and has been since 4.4.0.
+
+* This file has been renamed from NEWS.txt to CHANGELOG.
 
 = 4.6.3 (20180812)
 
