@@ -49,7 +49,7 @@ To go beyond the basics, [comprehensive documentation is available](http://www.c
 * [Discussion group](http://groups.google.com/group/beautifulsoup/)
 * [Development](https://code.launchpad.net/beautifulsoup/)
 * [Bug tracker](https://bugs.launchpad.net/beautifulsoup/)
-* [Complete changelog](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/NEWS.txt)
+* [Complete changelog](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG)
 
 # Building the documentation
 
