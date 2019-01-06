@@ -455,7 +455,7 @@ class PageElement(object):
         if parent is None:
             raise ValueError(
                 "Element has no parent, so 'before' has no meaning.")
-        if self in args:
+        if any(x is self for x in args):
                 raise ValueError("Can't insert an element before itself.")
         for predecessor in args:
             # Extract first so that the index won't be screwed up if they
@@ -476,7 +476,7 @@ class PageElement(object):
         if parent is None:
             raise ValueError(
                 "Element has no parent, so 'after' has no meaning.")
-        if self in args:
+        if any(x is self for x in args):
             raise ValueError("Can't insert an element after itself.")
         
         offset = 0

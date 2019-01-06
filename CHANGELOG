@@ -1,3 +1,13 @@
+= 4.7.1 (Unreleased)
+
+* Fixed a significant performance problem introduced in 4.7.0. [bug=1810617]
+
+* Fixed an incorrectly raised exception when inserting a tag before or
+  after an identical tag. [bug=1810692]
+
+* Beautiful Soup will no longer try to keep track of namespaces that
+  are not defined with a prefix; this can confuse soupselect. [bug=1810680]
+
 = 4.7.0 (20181231)
 
 * Beautiful Soup's CSS Selector implementation has been replaced by a
