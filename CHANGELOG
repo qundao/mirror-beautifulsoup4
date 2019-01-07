@@ -1,4 +1,4 @@
-= 4.7.1 (Unreleased)
+= 4.7.1 (20190106)
 
 * Fixed a significant performance problem introduced in 4.7.0. [bug=1810617]
 
@@ -7,6 +7,9 @@
 
 * Beautiful Soup will no longer try to keep track of namespaces that
   are not defined with a prefix; this can confuse soupselect. [bug=1810680]
+
+* Tried even harder to avoid the deprecation warning originally fixed in
+   4.6.1. [bug=1778909]
 
 = 4.7.0 (20181231)
 
