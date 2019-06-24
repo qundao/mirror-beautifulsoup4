@@ -2103,7 +2103,7 @@ Pretty-printing
 
 The ``prettify()`` method will turn a Beautiful Soup parse tree into a
 nicely formatted Unicode string, with a separate line for each
-tag and each string:
+tag and each string::
 
   markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
   soup = BeautifulSoup(markup)
@@ -2216,7 +2216,7 @@ Unicode characters to HTML entities whenever possible::
  #  </body>
  # </html>
 
- If you pass in ``formatter="html5"``, it's the same as
+If you pass in ``formatter="html5"``, it's the same as
 ``formatter="html5"``, but Beautiful Soup will
 omit the closing slash in HTML void tags like "br"::
 
