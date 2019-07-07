@@ -54,6 +54,41 @@ class TestConstructor(SoupTest):
         soup = self.soup(utf8_data, exclude_encodings=["utf-8"])
         self.assertEqual("windows-1252", soup.original_encoding)
 
+    def test_custom_builder_class(self):
+        # Verify that you can pass in a custom Builder class and
+        # it'll be instantiated with the appropriate keyword arguments.
+        class Mock(object):
+            def __init__(self, **kwargs):
+                self.called_with = kwargs
+                self.is_xml = True
+            def initialize_soup(self, soup):
+                pass
+            def prepare_markup(self, *args, **kwargs):
+                return ''
+                
+        kwargs = dict(
+            var="value",
+            # This is a deprecated BS3-era keyword argument, which
+            # will be stripped out.
+            convertEntities=True,
+        )
+        soup = BeautifulSoup('', builder=Mock, **kwargs)
+        assert isinstance(soup.builder, Mock)
+        self.assertEqual(dict(var="value"), soup.builder.called_with)
+
+        # You can also instantiate the TreeBuilder yourself. In this
+        # case, that specific object is used and any keyword arguments
+        # to the BeautifulSoup constructor are ignored.
+        builder = Mock(**kwargs)
+        with warnings.catch_warnings(record=True) as w:
+            soup = BeautifulSoup(
+                '', builder=builder, ignored_value=True,
+            )
+        msg = str(w[0].message)
+        assert msg.startswith("Keyword arguments to the BeautifulSoup constructor will be ignored.")
+        self.assertEqual(builder, soup.builder)
+        self.assertEqual(kwargs, builder.called_with)
+
 
 class TestWarnings(SoupTest):
 
