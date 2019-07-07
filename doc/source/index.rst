@@ -428,8 +428,15 @@ consolidated::
  print(rel_soup.p)
  # <p>Back to the <a rel="index contents">homepage</a></p>
 
-You can use ```get_attribute_list`` to get a value that's always a list,
-string, whether or not it's a multi-valued atribute
+ You can disable this by passing ``multi_valued_attributes=None`` as a
+keyword argument into the ``BeautifulSoup`` constructor::
+
+  no_list_soup = BeautifulSoup('<p class="body strikeout"></p>', 'html', multi_valued_attributes=None)
+  no_list_soup.p['class']
+  # u'body strikeout'
+
+You can use ```get_attribute_list`` to get a value that's always a
+list, whether or not it's a multi-valued atribute::
 
   id_soup.p.get_attribute_list('id')
   # ["my id"]
@@ -440,8 +447,20 @@ If you parse a document as XML, there are no multi-valued attributes::
  xml_soup.p['class']
  # u'body strikeout'
 
+Again, you can configure this using the ``multi_valued_attributes`` argument::
 
+  class_is_multi= { '*' : 'class'}
+  xml_soup = BeautifulSoup('<p class="body strikeout"></p>', 'xml', multi_valued_attributes=class_is_multi)
+  xml_soup.p['class']
+  # [u'body', u'strikeout']
 
+You probably won't need to do this, but if you do, use the defaults as
+a guide. They implement the rules described in the HTML specification::
+
+  from bs4.builder import builder_registry
+  builder_registry.lookup('html').DEFAULT_CDATA_LIST_ATTRIBUTES
+
+  
 ``NavigableString``
 -------------------
 

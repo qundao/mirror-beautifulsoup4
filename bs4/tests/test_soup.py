@@ -102,16 +102,16 @@ class TestConstructor(SoupTest):
         self.assertEqual(" an id ", a['id'])
         self.assertEqual(["a", "class"], a['class'])
 
-        # TreeBuilder takes an argument called 'cdata_list_attributes'  which lets
+        # TreeBuilder takes an argument called 'mutli_valued_attributes'  which lets
         # you customize or disable this. As always, you can customize the TreeBuilder
         # by passing in a keyword argument to the BeautifulSoup constructor.
-        soup = self.soup(markup, builder=default_builder, cdata_list_attributes=None)
+        soup = self.soup(markup, builder=default_builder, multi_valued_attributes=None)
         self.assertEqual(" a class ", soup.a['class'])
 
-        # Here are two ways of saying that `id` is a CDATA list
-        # attribute and 'class' is not.
+        # Here are two ways of saying that `id` is a multi-valued
+        # attribute in this context, but 'class' is not.
         for switcheroo in ({'*': 'id'}, {'a': 'id'}):
-            soup = self.soup(markup, builder=None, cdata_list_attributes=switcheroo)
+            soup = self.soup(markup, builder=None, multi_valued_attributes=switcheroo)
             a = soup.a
             self.assertEqual(["an", "id"], a['id'])
             self.assertEqual(" a class ", a['class'])

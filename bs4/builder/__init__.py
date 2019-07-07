@@ -100,11 +100,23 @@ class TreeBuilder(object):
 
     USE_DEFAULT = object()
     
-    def __init__(self, cdata_list_attributes=USE_DEFAULT):
+    def __init__(self, multi_valued_attributes=USE_DEFAULT):
+        """Constructor.
+
+        :param multi_valued_attributes: If this is set to None, the
+        TreeBuilder will not turn any values for attributes like
+        'class' into lists. Setting this do a dictionary will
+        customize this behavior; look at DEFAULT_CDATA_LIST_ATTRIBUTES
+        for an example.
+
+        Internally, these are called "CDATA list attributes", but that
+        probably doesn't make sense to an end-use, so the argument ame
+        is `multi_valued_attributes`.
+        """
         self.soup = None
-        if cdata_list_attributes is self.USE_DEFAULT:
-            cdata_list_attributes = self.DEFAULT_CDATA_LIST_ATTRIBUTES
-        self.cdata_list_attributes = cdata_list_attributes
+        if multi_valued_attributes is self.USE_DEFAULT:
+            multi_valued_attributes = self.DEFAULT_CDATA_LIST_ATTRIBUTES
+        self.cdata_list_attributes = multi_valued_attributes
 
     def initialize_soup(self, soup):
         """The BeautifulSoup object has been initialized and is now
