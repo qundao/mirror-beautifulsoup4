@@ -3,7 +3,8 @@
 * It's now possible to customize the TreeBuilder object by passing
    keyword arguments into the BeautifulSoup constructor. The main
    reason to do this right now is to change how multi-valued
-   attributes are treated. [bug=1832978]
+   attributes are treated -- you can do this with the
+   'cdata_list_attributes' argument. [bug=1832978]
 
 = 4.7.1 (20190106)
 

@@ -63,19 +63,19 @@ class SoupTest(unittest.TestCase):
 
     @property
     def default_builder(self):
-        return default_builder()
+        return default_builder
 
     def soup(self, markup, **kwargs):
         """Build a Beautiful Soup object from markup."""
         builder = kwargs.pop('builder', self.default_builder)
         return BeautifulSoup(markup, builder=builder, **kwargs)
 
-    def document_for(self, markup):
+    def document_for(self, markup, **kwargs):
         """Turn an HTML fragment into a document.
 
         The details depend on the builder.
         """
-        return self.default_builder.test_fragment_to_document(markup)
+        return self.default_builder(**kwargs).test_fragment_to_document(markup)
 
     def assertSoupEquals(self, to_parse, compare_parsed_to=None):
         builder = self.default_builder
@@ -232,7 +232,7 @@ class HTMLTreeBuilderSmokeTest(object):
             soup = self.soup("")
             new_tag = soup.new_tag(name)
             self.assertEqual(True, new_tag.is_empty_element)
-    
+
     def test_pickle_and_unpickle_identity(self):
         # Pickling a tree, then unpickling it, yields a tree identical
         # to the original.

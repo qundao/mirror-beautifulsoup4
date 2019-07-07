@@ -24,6 +24,7 @@ from bs4.dammit import (
     EncodingDetector,
 )
 from bs4.testing import (
+    default_builder,
     SoupTest,
     skipIf,
 )
@@ -89,7 +90,33 @@ class TestConstructor(SoupTest):
         self.assertEqual(builder, soup.builder)
         self.assertEqual(kwargs, builder.called_with)
 
+    def test_cdata_list_attributes(self):
+        # Most attribute values are represented as scalars, but the
+        # HTML standard says that some attributes, like 'class' have
+        # space-separated lists as values.
+        markup = '<a id=" an id " class=" a class "></a>'
+        soup = self.soup(markup)
 
+        # Note that the spaces are stripped for 'class' but not for 'id'.
+        a = soup.a
+        self.assertEqual(" an id ", a['id'])
+        self.assertEqual(["a", "class"], a['class'])
+
+        # TreeBuilder takes an argument called 'cdata_list_attributes'  which lets
+        # you customize or disable this. As always, you can customize the TreeBuilder
+        # by passing in a keyword argument to the BeautifulSoup constructor.
+        soup = self.soup(markup, builder=default_builder, cdata_list_attributes=None)
+        self.assertEqual(" a class ", soup.a['class'])
+
+        # Here are two ways of saying that `id` is a CDATA list
+        # attribute and 'class' is not.
+        for switcheroo in ({'*': 'id'}, {'a': 'id'}):
+            soup = self.soup(markup, builder=None, cdata_list_attributes=switcheroo)
+            a = soup.a
+            self.assertEqual(["an", "id"], a['id'])
+            self.assertEqual(" a class ", a['class'])
+
+        
 class TestWarnings(SoupTest):
 
     def _no_parser_specified(self, s, is_there=True):

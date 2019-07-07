@@ -96,11 +96,15 @@ class TreeBuilder(object):
     
     # A value for these tag/attribute combinations is a space- or
     # comma-separated list of CDATA, rather than a single CDATA.
-    cdata_list_attributes = {}
+    DEFAULT_CDATA_LIST_ATTRIBUTES = {}
 
-
-    def __init__(self):
+    USE_DEFAULT = object()
+    
+    def __init__(self, cdata_list_attributes=USE_DEFAULT):
         self.soup = None
+        if cdata_list_attributes is self.USE_DEFAULT:
+            cdata_list_attributes = self.DEFAULT_CDATA_LIST_ATTRIBUTES
+        self.cdata_list_attributes = cdata_list_attributes
 
     def initialize_soup(self, soup):
         """The BeautifulSoup object has been initialized and is now
@@ -131,7 +135,7 @@ class TreeBuilder(object):
         if self.empty_element_tags is None:
             return True
         return tag_name in self.empty_element_tags
-        
+    
     def feed(self, markup):
         raise NotImplementedError()
 
@@ -259,7 +263,7 @@ class HTMLTreeBuilder(TreeBuilder):
     # encounter one of these attributes, we will parse its value into
     # a list of values if possible. Upon output, the list will be
     # converted back into a string.
-    cdata_list_attributes = {
+    DEFAULT_CDATA_LIST_ATTRIBUTES = {
         "*" : ['class', 'accesskey', 'dropzone'],
         "a" : ['rel', 'rev'],
         "link" :  ['rel', 'rev'],
