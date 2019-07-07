@@ -31,7 +31,7 @@ Beautiful Soup users:
 
 * `这篇文档当然还有中文版. <http://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/>`_
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
-* 이 문서는 한국어 번역도 가능합니다. (`외부 링크 <http://coreapython.hosting.paran.com/etc/beautifulsoup4.html>`_)
+* 이 문서는 한국어 번역도 가능합니다. (`외부 링크 <https://web.archive.org/web/20150319200824/http://coreapython.hosting.paran.com/etc/beautifulsoup4.html>`_)
 
 Getting help
 ------------
