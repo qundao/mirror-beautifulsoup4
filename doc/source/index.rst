@@ -3097,6 +3097,7 @@ Method names
 * ``findPrevious`` -> ``find_previous``
 * ``findPreviousSibling`` -> ``find_previous_sibling``
 * ``findPreviousSiblings`` -> ``find_previous_siblings``
+* ``getText`` -> ``get_text``
 * ``nextSibling`` -> ``next_sibling``
 * ``previousSibling`` -> ``previous_sibling``
 
