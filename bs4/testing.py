@@ -491,6 +491,12 @@ Hello, world!
             u"<p>\u2022 AT&amp;T is in the s&amp;p 500</p>"
         )
 
+    def test_apos_entity(self):
+        self.assertSoupEquals(
+            u"<p>Bob&apos;s Bar</p>",
+            u"<p>Bob's Bar</p>",
+        )
+        
     def test_entities_in_foreign_document_encoding(self):
         # &#147; and &#148; are invalid numeric entities referencing
         # Windows-1252 characters. &#45; references a character common

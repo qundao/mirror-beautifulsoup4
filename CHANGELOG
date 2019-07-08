@@ -6,6 +6,9 @@
    attributes are treated -- you can do this with the
    `multi_valued_attributes` argument. [bug=1832978]
 
+* &apos; (which is valid in XML and XHTML, but not HTML 4) is now
+   recognized as a named entity and converted to a single quote. [bug=1818721]
+
 = 4.7.1 (20190106)
 
 * Fixed a significant performance problem introduced in 4.7.0. [bug=1810617]

@@ -279,7 +279,7 @@ class TestEntitySubstitution(unittest.TestCase):
         self.assertEqual(
             self.sub.substitute_xml_containing_entities("&Aacute;T&T"),
             "&Aacute;T&amp;T")
-
+       
     def test_quotes_not_html_substituted(self):
         """There's no need to do this except inside attribute values."""
         text = 'Bob\'s "bar"'
