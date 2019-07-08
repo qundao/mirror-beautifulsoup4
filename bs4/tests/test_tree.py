@@ -24,6 +24,7 @@ from bs4.element import (
     CData,
     Comment,
     Declaration,
+    MinimalHTMLFormatter,
     Doctype,
     NavigableString,
     SoupStrainer,
@@ -1682,6 +1683,27 @@ class TestEncoding(SoupTest):
             self.assertEqual(html, repr(soup))
         else:
             self.assertEqual(b'<b>\\u2603</b>', repr(soup))
+
+class TestFormatter(SoupTest):
+
+    def test_sort_attributes(self):
+        class UnsortedFormatter(MinimalHTMLFormatter):
+            def sort_attributes(self, attributes):
+                self.called_with = attributes
+                for k, v in sorted(attributes.items()):
+                    if k == 'ignore':
+                        continue
+                    yield k,v
+
+        soup = self.soup('<p cval="1" aval="2" ignore="ignored"></p>')
+        formatter = UnsortedFormatter()
+        decoded = soup.decode(formatter=formatter)
+
+        # sort_attributes() was called with all three attributes. It removed one and
+        # sorted the other two.
+        self.assertEquals(formatter.called_with, dict(cval="1", aval="2", ignore="ignored"))
+        self.assertEquals(u'<p aval="2" cval="1"></p>', decoded)
+
 
 class TestNavigableStringSubclasses(SoupTest):
 

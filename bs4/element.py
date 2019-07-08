@@ -142,15 +142,20 @@ class Formatter(object):
     # By default, represent void elements as <tag/> rather than <tag>
     void_element_close_prefix = '/'
 
-    def substitute_entities(self, *args, **kwargs):
+    def substitute(self, *args, **kwargs):
         """Transform certain characters into named entities."""
         raise NotImplementedError()
+    
+    def sort_attributes(self, attributes):
+        """Reorder a tag's attributes however you want."""
+        return sorted(attributes.items())
+
 
 class HTMLFormatter(Formatter):
     """The default HTML formatter."""
     def substitute(self, *args, **kwargs):
         return HTMLAwareEntitySubstitution.substitute_html(*args, **kwargs)
-
+    
 class MinimalHTMLFormatter(Formatter):
     """A minimal HTML formatter."""
     def substitute(self, *args, **kwargs):
@@ -1157,7 +1162,11 @@ class Tag(PageElement):
             formatter = self._formatter_for_name(formatter)
         attrs = []
         if self.attrs:
-            for key, val in sorted(self.attrs.items()):
+            if isinstance(formatter, Formatter):
+                sorted_attrs = formatter.sort_attributes(self.attrs)
+            else:
+                sorted_attrs = self.attrs.items()
+            for key, val in sorted_attrs:
                 if val is None:
                     decoded = key
                 else:

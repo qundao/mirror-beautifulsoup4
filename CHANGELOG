@@ -6,6 +6,9 @@
    attributes are treated -- you can do this with the
    `multi_valued_attributes` argument. [bug=1832978]
 
+* A Formatter can now decide how (or whether) to order the attributes
+   inside a tag. [bug=1812422]
+
 * &apos; (which is valid in XML and XHTML, but not HTML 4) is now
    recognized as a named entity and converted to a single quote. [bug=1818721]
 
