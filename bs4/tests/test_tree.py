@@ -24,8 +24,8 @@ from bs4.element import (
     CData,
     Comment,
     Declaration,
-    MinimalHTMLFormatter,
     Doctype,
+    HTMLFormatter,
     NavigableString,
     SoupStrainer,
     Tag,
@@ -1533,7 +1533,7 @@ class TestSubstitutions(SoupTest):
         # callable is called on every string.
         self.assertEqual(
             decoded,
-            self.document_for(u"<b><FOO></b><b>BAR</b><br>"))
+            self.document_for(u"<b><FOO></b><b>BAR</b><br/>"))
 
     def test_formatter_is_run_on_attribute_values(self):
         markup = u'<a href="http://a.com?a=b&c=é">e</a>'
@@ -1687,10 +1687,10 @@ class TestEncoding(SoupTest):
 class TestFormatter(SoupTest):
 
     def test_sort_attributes(self):
-        class UnsortedFormatter(MinimalHTMLFormatter):
-            def sort_attributes(self, attributes):
-                self.called_with = attributes
-                for k, v in sorted(attributes.items()):
+        class UnsortedFormatter(HTMLFormatter):
+            def attributes(self, tag):
+                self.called_with = tag
+                for k, v in sorted(tag.attrs.items()):
                     if k == 'ignore':
                         continue
                     yield k,v
@@ -1699,9 +1699,9 @@ class TestFormatter(SoupTest):
         formatter = UnsortedFormatter()
         decoded = soup.decode(formatter=formatter)
 
-        # sort_attributes() was called with all three attributes. It removed one and
-        # sorted the other two.
-        self.assertEquals(formatter.called_with, dict(cval="1", aval="2", ignore="ignored"))
+        # sort_attributes() was called on the <p> tag. It filtered out one
+        # attribute and sorted the other two.
+        self.assertEquals(formatter.called_with, soup.p)
         self.assertEquals(u'<p aval="2" cval="1"></p>', decoded)
 
 
