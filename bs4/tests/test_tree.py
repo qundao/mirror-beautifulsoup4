@@ -25,7 +25,7 @@ from bs4.element import (
     Comment,
     Declaration,
     Doctype,
-    HTMLFormatter,
+    Formatter,
     NavigableString,
     SoupStrainer,
     Tag,
@@ -1687,7 +1687,9 @@ class TestEncoding(SoupTest):
 class TestFormatter(SoupTest):
 
     def test_sort_attributes(self):
-        class UnsortedFormatter(HTMLFormatter):
+        # Test the ability to override Formatter.attributes() to,
+        # e.g., disable the normal sorting of attributes.
+        class UnsortedFormatter(Formatter):
             def attributes(self, tag):
                 self.called_with = tag
                 for k, v in sorted(tag.attrs.items()):
@@ -1699,7 +1701,7 @@ class TestFormatter(SoupTest):
         formatter = UnsortedFormatter()
         decoded = soup.decode(formatter=formatter)
 
-        # sort_attributes() was called on the <p> tag. It filtered out one
+        # attributes() was called on the <p> tag. It filtered out one
         # attribute and sorted the other two.
         self.assertEquals(formatter.called_with, soup.p)
         self.assertEquals(u'<p aval="2" cval="1"></p>', decoded)
