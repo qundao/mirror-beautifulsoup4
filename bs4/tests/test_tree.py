@@ -1571,11 +1571,11 @@ class TestSubstitutions(SoupTest):
         self.assertTrue(b"< < hey > >" in encoded)
 
     def test_prettify_leaves_preformatted_text_alone(self):
-        soup = self.soup("<div>  foo  <pre>  \tbar\n  \n  </pre>  baz  ")
+        soup = self.soup("<div>  foo  <pre>  \tbar\n  \n  </pre>  baz  <textarea> eee\nfff\t</textarea></div>")
         # Everything outside the <pre> tag is reformatted, but everything
         # inside is left alone.
         self.assertEqual(
-            u'<div>\n foo\n <pre>  \tbar\n  \n  </pre>\n baz\n</div>',
+            u'<div>\n foo\n <pre>  \tbar\n  \n  </pre>\n baz\n <textarea> eee\nfff\t</textarea>\n</div>',
             soup.div.prettify())
 
     def test_prettify_accepts_formatter_function(self):

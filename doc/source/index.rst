@@ -2264,16 +2264,17 @@ to Beautiful Soup generating invalid HTML/XML, as in these examples::
  print(link_soup.a.encode(formatter=None))
  # <a href="http://example.com/?foo=val1&bar=val2">A link</a>
 
-Finally, if you pass in a function for ``formatter``, Beautiful Soup
-will call that function once for every string and attribute value in
-the document. You can do whatever you want in this function. Here's a
-formatter that converts strings to uppercase and does absolutely
-nothing else::
+If you need more sophisticated control over your output, you can
+use Beautiful Soup's ``Formatter`` class. Here's a formatter that
+converts strings to uppercase, whether they occur in a text node or in an
+attribute value::
 
+ from bs4.formatter import HTMLFormatter
  def uppercase(str):
      return str.upper()
+ formatter = HTMLFormatter(uppercase)
 
- print(soup.prettify(formatter=uppercase))
+ print(soup.prettify(formatter=formatter))
  # <html>
  #  <body>
  #   <p>
@@ -2282,34 +2283,31 @@ nothing else::
  #  </body>
  # </html>
 
- print(link_soup.a.prettify(formatter=uppercase))
+ print(link_soup.a.prettify(formatter=formatter))
  # <a href="HTTP://EXAMPLE.COM/?FOO=VAL1&BAR=VAL2">
  #  A LINK
  # </a>
 
-If you're writing your own function, you should know about the
-``EntitySubstitution`` class in the ``bs4.dammit`` module. This class
-implements Beautiful Soup's standard formatters as class methods: the
-"html" formatter is ``EntitySubstitution.substitute_html``, and the
-"minimal" formatter is ``EntitySubstitution.substitute_xml``. You can
-use these functions to simulate ``formatter=html`` or
-``formatter==minimal``, but then do something extra.
+Subclassing ``HTMLFormatter`` or ``XMLFormatter`` will give you even
+more control over the output. For example, Beautiful Soup sorts the
+attributes in every tag by default::
 
-Here's an example that replaces Unicode characters with HTML entities
-whenever possible, but `also` converts all strings to uppercase::
+ attr_soup = BeautifulSoup('<p z="1" m="2" a="3"></p>')
+ print(attr_soup.p.encode())
+ # <p a="3" m="2" z="1"></p>
 
- from bs4.dammit import EntitySubstitution
- def uppercase_and_substitute_html_entities(str):
-     return EntitySubstitution.substitute_html(str.upper())
+To turn this off, you can subclass the ``Formatter.attributes()``
+method, which controls which attributes are output and in what
+order. This implementation also filters out out one of the attributes.
 
- print(soup.prettify(formatter=uppercase_and_substitute_html_entities))
- # <html>
- #  <body>
- #   <p>
- #    IL A DIT &lt;&lt;SACR&Eacute; BLEU!&gt;&gt;
- #   </p>
- #  </body>
- # </html>
+ class UnsortedAttributes(HTMLFormatter):
+     def attributes(self, tag):
+         for k, v in tag.attrs.items():
+             if k == 'm':
+	         continue
+             yield k, v
+ print(attr_soup.p.encode(formatter=UnsortedAttributes())) 
+ # <p z="1" a="3"></p>
 
 One last caveat: if you create a ``CData`` object, the text inside
 that object is always presented `exactly as it appears, with no

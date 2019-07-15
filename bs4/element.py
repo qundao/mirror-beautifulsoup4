@@ -16,7 +16,11 @@ except ImportError, e:
         'The soupsieve package is not installed. CSS selectors cannot be used.'
     )
 
-from bs4.dammit import EntitySubstitution
+from bs4.formatter import (
+    Formatter,
+    HTMLFormatter,
+    XMLFormatter,
+)
 
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 PY3K = (sys.version_info[0] > 2)
@@ -99,140 +103,11 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
             return match.group(1) + encoding
         return self.CHARSET_RE.sub(rewrite, self.original_value)
 
-
-class Formatter(EntitySubstitution):
-    """Describes a strategy to use when outputting a parse tree to a string.
-
-    Some parts of this strategy come from the distinction between
-    HTML4, HTML5, and XML. Others are configurable by the user.
-    """
-    # Registries of XML and HTML formatters.
-    XML_FORMATTERS = {}
-    HTML_FORMATTERS = {}
-
-    HTML = 'html'
-    XML = 'xml'
-
-    HTML_DEFAULTS = dict(
-        cdata_containing_tags=set(["script", "style"]),
-        preformatted_tags=set(["pre"]),
-    )
-
-    def _default(self, language, value, kwarg):
-        if value is not None:
-            return value
-        if language == self.XML:
-            return set()
-        return self.HTML_DEFAULTS[kwarg]
-
-    def __init__(
-            self, language=None, entity_substitution=None,
-            void_element_close_prefix='/', cdata_containing_tags=None,
-            preformatted_tags=None,
-    ):
-        """
-
-        :param void_element_close_prefix: By default, represent void
-        elements as <tag/> rather than <tag>
-        """
-        self.language = language
-        self.entity_substitution = entity_substitution
-        self.void_element_close_prefix = void_element_close_prefix
-        self.cdata_containing_tags = self._default(
-            language, cdata_containing_tags, 'cdata_containing_tags'
-        )
-            
-    def substitute(self, ns):
-        """Process a string that needs to undergo entity substitution."""
-        if not self.entity_substitution:
-            return ns
-        if (isinstance(ns, NavigableString)
-            and ns.parent is not None
-            and ns.parent.name in self.cdata_containing_tags):
-            # Do nothing.
-            return ns
-        # Substitute.
-        return self.entity_substitution(ns)
-
-    def attribute_value(self, value):
-        """Process the value of an attribute."""
-        return self.substitute(value)
-    
-    def attributes(self, tag):
-        """Reorder a tag's attributes however you want."""
-        return sorted(tag.attrs.items())
-   
-class HTMLFormatter(Formatter):
-    REGISTRY = {}
-    def __init__(self, *args, **kwargs):
-        return super(HTMLFormatter, self).__init__(self.HTML, *args, **kwargs)
-    
-class XMLFormatter(Formatter):
-    REGISTRY = {}
-    def __init__(self, *args, **kwargs):
-        return super(XMLFormatter, self).__init__(self.XML, *args, **kwargs)
-
-# Set up aliases for the default formatters.
-HTMLFormatter.REGISTRY['html'] = HTMLFormatter(
-    entity_substitution=EntitySubstitution.substitute_html
-)
-HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
-    entity_substitution=EntitySubstitution.substitute_html,
-    void_element_close_prefix = None
-)
-HTMLFormatter.REGISTRY["minimal"] = HTMLFormatter(
-    entity_substitution=EntitySubstitution.substitute_xml
-)
-HTMLFormatter.REGISTRY[None] = HTMLFormatter(
-    entity_substitution=None
-)
-XMLFormatter.REGISTRY["html"] =  XMLFormatter(
-    entity_substitution=EntitySubstitution.substitute_html
-)
-XMLFormatter.REGISTRY["minimal"] = XMLFormatter(
-    entity_substitution=EntitySubstitution.substitute_xml
-)
-XMLFormatter.REGISTRY[None] = Formatter(
-    Formatter(Formatter.XML, entity_substitution=None)
-)
     
 class PageElement(object):
     """Contains the navigational information for some part of the page
     (either a tag or a piece of text)"""
    
-    def format_string(self, s, formatter):
-        """Format the given string using the given formatter."""
-        if formatter is None:
-            return s
-        if not isinstance(formatter, Formatter):
-            formatter = self.formatter_by_name(formatter)
-        output = formatter.substitute(s)
-        return output
-
-    @property
-    def _is_xml(self):
-        """Is this element part of an XML tree or an HTML tree?
-
-        This is used when mapping a formatter name ("minimal") to an
-        appropriate function (one that performs entity-substitution on
-        the contents of <script> and <style> tags, or not). It can be
-        inefficient, but it should be called very rarely.
-        """
-        if self.known_xml is not None:
-            # Most of the time we will have determined this when the
-            # document is parsed.
-            return self.known_xml
-
-        # Otherwise, it's likely that this element was created by
-        # direct invocation of the constructor from within the user's
-        # Python code.
-        if self.parent is None:
-            # This is the top-level object. It should have .known_xml set
-            # from tree creation. If not, take a guess--BS is usually
-            # used on HTML markup.
-            return getattr(self, 'is_xml', False)
-        return self.parent._is_xml
-
     def setup(self, parent=None, previous_element=None, next_element=None,
               previous_sibling=None, next_sibling=None):
         """Sets up the initial relations between this element and
@@ -258,6 +133,57 @@ class PageElement(object):
         self.previous_sibling = previous_sibling
         if previous_sibling is not None:
             self.previous_sibling.next_sibling = self
+
+    def format_string(self, s, formatter):
+        """Format the given string using the given formatter."""
+        if formatter is None:
+            return s
+        if not isinstance(formatter, Formatter):
+            formatter = self.formatter_for_name(formatter)
+        output = formatter.substitute(s)
+        return output
+
+    def formatter_for_name(self, formatter):
+        """Look up or create a Formatter for the given identifier,
+        if necessary.
+
+        :param formatter: Can be a Formatter object (used as-is), a
+        function (used as the entity substitution hook for an
+        XMLFormatter or HTMLFormatter), or a string (used to look up
+        an XMLFormatter or HTMLFormatter in the appropriate registry.
+        """
+        if isinstance(formatter, Formatter):
+            return formatter
+        if self._is_xml:
+            c = XMLFormatter
+        else:
+            c = HTMLFormatter
+        if callable(formatter):
+            return c(entity_substitution=formatter)
+        return c.REGISTRY[formatter]
+
+    @property
+    def _is_xml(self):
+        """Is this element part of an XML tree or an HTML tree?
+
+        This is used in formatter_for_name, when deciding whether an
+        XMLFormatter or HTMLFormatter is more appropriate. It can be
+        inefficient, but it should be called very rarely.
+        """
+        if self.known_xml is not None:
+            # Most of the time we will have determined this when the
+            # document is parsed.
+            return self.known_xml
+
+        # Otherwise, it's likely that this element was created by
+        # direct invocation of the constructor from within the user's
+        # Python code.
+        if self.parent is None:
+            # This is the top-level object. It should have .known_xml set
+            # from tree creation. If not, take a guess--BS is usually
+            # used on HTML markup.
+            return getattr(self, 'is_xml', False)
+        return self.parent._is_xml
 
     nextSibling = _alias("next_sibling")  # BS3
     previousSibling = _alias("previous_sibling")  # BS3
@@ -720,6 +646,7 @@ class NavigableString(unicode, PageElement):
                     self.__class__.__name__, attr))
 
     def output_ready(self, formatter="minimal"):
+        """Run the string through the provided formatter."""
         output = self.format_string(self, formatter)
         return self.PREFIX + output + self.SUFFIX
 
@@ -742,8 +669,8 @@ class PreformattedString(NavigableString):
         """CData strings are passed into the formatter, purely
         for any side effects. The return value is ignored.
         """
-        if formatter:
-            self.format_string(self, formatter)
+        if formatter is not None:
+            ignore = self.format_string(self, formatter)
         return self.PREFIX + self + self.SUFFIX
 
 class CData(PreformattedString):
@@ -1119,8 +1046,9 @@ class Tag(PageElement):
            encoding.
         """
 
-        # First off, turn a string formatter into a Formatter object. This
-        # will stop the lookup from happening over and over again.
+        # First off, turn a non-Formatter `formatter` into a Formatter
+        # object. This will stop the lookup from happening over and
+        # over again.
         if not isinstance(formatter, Formatter):
             formatter = self.formatter_for_name(formatter)
         attributes = formatter.attributes(self)
@@ -1142,7 +1070,7 @@ class Tag(PageElement):
                 text = formatter.attribute_value(val)
                 decoded = (
                     unicode(key) + '='
-                    + EntitySubstitution.quoted_attribute_value(text))
+                    + formatter.quoted_attribute_value(text))
             attrs.append(decoded)
         close = ''
         closeTag = ''
@@ -1167,7 +1095,8 @@ class Tag(PageElement):
         else:
             indent_contents = None
         contents = self.decode_contents(
-            indent_contents, eventual_encoding, formatter)
+            indent_contents, eventual_encoding, formatter
+        )
 
         if self.hidden:
             # This is the 'document root' object.
@@ -1221,14 +1150,14 @@ class Tag(PageElement):
            indented this many spaces.
 
         :param eventual_encoding: The tag is destined to be
-           encoded into this encoding. This method is _not_
+           encoded into this encoding. decode_contents() is _not_
            responsible for performing that encoding. This information
            is passed in so that it can be substituted in if the
            document contains a <META> tag that mentions the document's
            encoding.
 
-        :param formatter: The output formatter responsible for converting
-           entities to Unicode characters.
+        :param formatter: A Formatter object, or a string naming one of
+            the standard Formatters.
         """
         # First off, turn a string formatter into a Formatter object. This
         # will stop the lookup from happening over and over again.
@@ -1244,29 +1173,17 @@ class Tag(PageElement):
             elif isinstance(c, Tag):
                 s.append(c.decode(indent_level, eventual_encoding,
                                   formatter))
-            if text and indent_level and not self.name == 'pre':
+            preserve_whitespace = self.name in self.preserve_whitespace_tags
+            if text and indent_level and not preserve_whitespace:
                 text = text.strip()
             if text:
-                if pretty_print and not self.name == 'pre':
+                if pretty_print and not preserve_whitespace:
                     s.append(" " * (indent_level - 1))
                 s.append(text)
-                if pretty_print and not self.name == 'pre':
+                if pretty_print and not preserve_whitespace:
                     s.append("\n")
         return ''.join(s)
-
-    def formatter_for_name(self, formatter):
-        if isinstance(formatter, Formatter):
-            return formatter
-        if self._is_xml:
-            c = XMLFormatter
-        else:
-            c = HTMLFormatter
-        if callable(formatter):
-            formatter = c(entity_substitution=formatter)
-            formatter.custom = True
-            return formatter
-        return c.REGISTRY[formatter]
-        
+       
     def encode_contents(
         self, indent_level=None, encoding=DEFAULT_OUTPUT_ENCODING,
         formatter="minimal"):
