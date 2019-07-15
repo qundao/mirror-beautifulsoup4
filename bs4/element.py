@@ -191,7 +191,7 @@ class PageElement(object):
     def replace_with(self, replace_with):
         if self.parent is None:
             raise ValueError(
-                "Cannot replace one element with another when the"
+                "Cannot replace one element with another when the "
                 "element to be replaced is not part of a tree.")
         if replace_with is self:
             return
@@ -899,6 +899,43 @@ class Tag(PageElement):
             for element in self.contents[:]:
                 element.extract()
 
+    def smooth(self):
+        """Smooth out this element's children by consolidating consecutive strings.
+
+        This makes pretty-printed output look more natural following a
+        lot of operations that modified the tree.
+        """
+        # Mark the first position of every pair of children that need
+        # to be consolidated.  Do this rather than making a copy of
+        # self.contents, since in most cases very few strings will be
+        # affected.
+        marked = []
+        for i, a in enumerate(self.contents):
+            if isinstance(a, Tag):
+                # Recursively smooth children.
+                a.smooth()
+            if i == len(self.contents)-1:
+                # This is the last item in .contents, and it's not a
+                # tag. There's no chance it needs any work.
+                continue
+            b = self.contents[i+1]
+            if (isinstance(a, NavigableString)
+                and isinstance(b, NavigableString)
+                and not isinstance(a, PreformattedString)
+                and not isinstance(b, PreformattedString)
+            ):
+                marked.append(i)
+
+        # Go over the marked positions in reverse order, so that
+        # removing items from .contents won't affect the remaining
+        # positions.
+        for i in reversed(marked):
+            a = self.contents[i]
+            b = self.contents[i+1]
+            b.extract()
+            n = NavigableString(a+b)
+            a.replace_with(n)
+
     def index(self, element):
         """
         Find the index of a child by identity, not value. Avoids issues with
@@ -1173,7 +1210,9 @@ class Tag(PageElement):
             elif isinstance(c, Tag):
                 s.append(c.decode(indent_level, eventual_encoding,
                                   formatter))
-            preserve_whitespace = self.name in self.preserve_whitespace_tags
+            preserve_whitespace = (
+                self.preserve_whitespace_tags and self.name in self.preserve_whitespace_tags
+            )
             if text and indent_level and not preserve_whitespace:
                 text = text.strip()
             if text:

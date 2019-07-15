@@ -2292,7 +2292,7 @@ Subclassing ``HTMLFormatter`` or ``XMLFormatter`` will give you even
 more control over the output. For example, Beautiful Soup sorts the
 attributes in every tag by default::
 
- attr_soup = BeautifulSoup('<p z="1" m="2" a="3"></p>')
+ attr_soup = BeautifulSoup(b'<p z="1" m="2" a="3"></p>')
  print(attr_soup.p.encode())
  # <p a="3" m="2" z="1"></p>
 

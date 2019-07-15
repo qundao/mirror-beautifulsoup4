@@ -417,6 +417,48 @@ class TestFindAllByAttribute(TreeTest):
         self.assertEqual([], soup.find_all(id=1, text="bar"))
 
 
+class TestSmooth(TreeTest):
+    """Test Tag.smooth."""
+
+    def test_smooth(self):
+        soup = self.soup("<div>a</div>")
+        div = soup.div
+        div.append("b")
+        div.append("c")
+        div.append(Comment("Comment 1"))
+        div.append(Comment("Comment 2"))
+        div.append("d")
+        builder = self.default_builder()
+        span = Tag(soup, builder, 'span')
+        span.append('1')
+        span.append('2')
+        div.append(span)
+
+        # At this point the tree has a bunch of adjacent
+        # NavigableStrings. This is normal, but it has no meaning in
+        # terms of HTML, so we may want to smooth things out for
+        # output.
+
+        # Since the <span> tag has two children, its .string is None.
+        self.assertEquals(None, div.span.string)
+
+        self.assertEqual(7, len(div.contents))
+        div.smooth()
+        self.assertEqual(5, len(div.contents))
+
+        # The three strings at the beginning of div.contents have been
+        # merged into on string.
+        #
+        self.assertEqual('abc', div.contents[0])
+
+        # The call is recursive -- the <span> tag was also smoothed.
+        self.assertEqual('12', div.span.string)
+
+        # The two comments have _not_ been merged, even though
+        # comments are strings. Merging comments would change the
+        # meaning of the HTML.
+        self.assertEqual('Comment 1', div.contents[1])
+        self.assertEqual('Comment 2', div.contents[2])
 
 
 class TestIndex(TreeTest):
