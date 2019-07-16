@@ -73,7 +73,8 @@ class TestConstructor(SoupTest):
             # will be stripped out.
             convertEntities=True,
         )
-        soup = BeautifulSoup('', builder=Mock, **kwargs)
+        with warnings.catch_warnings(record=True):
+            soup = BeautifulSoup('', builder=Mock, **kwargs)
         assert isinstance(soup.builder, Mock)
         self.assertEqual(dict(var="value"), soup.builder.called_with)
 
@@ -111,7 +112,10 @@ class TestConstructor(SoupTest):
         # Here are two ways of saying that `id` is a multi-valued
         # attribute in this context, but 'class' is not.
         for switcheroo in ({'*': 'id'}, {'a': 'id'}):
-            soup = self.soup(markup, builder=None, multi_valued_attributes=switcheroo)
+            with warnings.catch_warnings(record=True) as w:
+                # This will create a warning about not explicitly
+                # specifying a parser, but we'll ignore it.
+                soup = self.soup(markup, builder=None, multi_valued_attributes=switcheroo)
             a = soup.a
             self.assertEqual(["an", "id"], a['id'])
             self.assertEqual(" a class ", a['class'])
