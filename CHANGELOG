@@ -1,16 +1,28 @@
-= Unreleased
+= 4.8.0 (Unreleased)
 
 * It's now possible to customize the TreeBuilder object by passing
-   keyword arguments into the BeautifulSoup constructor. The main
-   reason to do this right now is to change how multi-valued
-   attributes are treated -- you can do this with the
-   `multi_valued_attributes` argument. [bug=1832978]
+  keyword arguments into the BeautifulSoup constructor. The main
+  reason to do this right now is to change how multi-valued
+  attributes are treated -- you can do this with the
+  `multi_valued_attributes` argument. [bug=1832978]
 
-* A Formatter can now decide how (or whether) to order the attributes
-   inside a tag. [bug=1812422]
+* The role of Formatter objects has been greatly expanded. It now contains
+  consolidated code for controlling the following:
 
-* &apos; (which is valid in XML and XHTML, but not HTML 4) is now
-   recognized as a named entity and converted to a single quote. [bug=1818721]
+  - The function to call to perform entity substitution. (This was
+    previously Formatter's only job.)
+  - Which tags should be treated as containing CDATA and have their
+    contents exempt from entity substitution.
+  - The order in which a tag's attributes are output. [bug=1812422]
+  - Whether or not to put a '/' inside a void element, e.g. '<br/>' vs '<br>'
+
+  All preexisting code should work as before.
+
+* Added a new method to the API, Tag.smooth(), which consolidates
+  multiple adjacent NavigableString elements.
+
+* &apos; (which is valid in XML, XHTML, and HTML 5, but not HTML 4) is now
+  recognized as a named entity and converted to a single quote. [bug=1818721]
 
 = 4.7.1 (20190106)
 

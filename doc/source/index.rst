@@ -2112,6 +2112,40 @@ whatever's inside that tag. It's good for stripping out markup::
 Like ``replace_with()``, ``unwrap()`` returns the tag
 that was replaced.
 
+``smooth()``
+---------------------------
+
+After calling a bunch of methods that modify the parse tree, you may end up with two or more ``NavigableString`` objects next to each other. Beautiful Soup doesn't have any problems with this, but since it can't happen in a freshly parsed document, you might not expect behavior like the following::
+
+  soup = BeautifulSoup("<p>A one</p>")
+  soup.p.append(", a two")
+
+  soup.p.contents
+  # [u'A one', u', a two']
+
+  print(soup.p.encode())
+  # <p>A one, a two</p>
+
+  print(soup.p.prettify())
+  # <p>
+  #  A one
+  #  , a two
+  # </p>
+
+You can call ``Tag.smooth()`` to clean up the parse tree by consolidating adjacent strings::
+
+ soup.smooth()
+
+ soup.p.contents
+ # [u'A one, a two']
+
+ print(soup.p.prettify())
+ # <p>
+ #  A one, a two
+ # </p>
+
+The ``smooth()`` method is new in Beautiful Soup 4.8.0.
+
 Output
 ======
 
