@@ -1,4 +1,4 @@
-= 4.8.0 (Unreleased)
+= 4.8.0 (20190720)
 
 * It's now possible to customize the TreeBuilder object by passing
   keyword arguments into the BeautifulSoup constructor. The main
@@ -6,8 +6,8 @@
   attributes are treated -- you can do this with the
   `multi_valued_attributes` argument. [bug=1832978]
 
-* The role of Formatter objects has been greatly expanded. It now contains
-  consolidated code for controlling the following:
+* The role of Formatter objects has been greatly expanded. The Formatter
+  class now controls the following:
 
   - The function to call to perform entity substitution. (This was
     previously Formatter's only job.)

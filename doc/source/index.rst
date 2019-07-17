@@ -266,9 +266,9 @@ This table summarizes the advantages and disadvantages of each parser library:
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 | Parser               | Typical usage                              | Advantages                     | Disadvantages            |
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
-| Python's html.parser | ``BeautifulSoup(markup, "html.parser")``   | * Batteries included           | * Not very lenient       |
-|                      |                                            | * Decent speed                 |   (before Python 2.7.3   |
-|                      |                                            | * Lenient (as of Python 2.7.3  |   or 3.2.2)              |
+| Python's html.parser | ``BeautifulSoup(markup, "html.parser")``   | * Batteries included           | * Not as fast as lxml,   |
+|                      |                                            | * Decent speed                 |   less lenient than      |
+|                      |                                            | * Lenient (As of Python 2.7.3  |   html5lib.              |
 |                      |                                            |   and 3.2.)                    |                          |
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 | lxml's HTML parser   | ``BeautifulSoup(markup, "lxml")``          | * Very fast                    | * External C dependency  |
