@@ -1,10 +1,11 @@
-= 4.8.0 (20190720)
+= 4.8.0 (20190720, "One Small Soup")
 
 * It's now possible to customize the TreeBuilder object by passing
   keyword arguments into the BeautifulSoup constructor. The main
-  reason to do this right now is to change how multi-valued
-  attributes are treated -- you can do this with the
-  `multi_valued_attributes` argument. [bug=1832978]
+  reason to do this right now is to change how which attributes are
+  treated as multi-valued attributes (the way 'class' is treated by
+  default). You can do this with the `multi_valued_attributes` argument.
+  [bug=1832978]
 
 * The role of Formatter objects has been greatly expanded. The Formatter
   class now controls the following:
