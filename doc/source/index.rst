@@ -428,7 +428,7 @@ consolidated::
  print(rel_soup.p)
  # <p>Back to the <a rel="index contents">homepage</a></p>
 
- You can disable this by passing ``multi_valued_attributes=None`` as a
+You can disable this by passing ``multi_valued_attributes=None`` as a
 keyword argument into the ``BeautifulSoup`` constructor::
 
   no_list_soup = BeautifulSoup('<p class="body strikeout"></p>', 'html', multi_valued_attributes=None)
@@ -2240,7 +2240,7 @@ invalid HTML or XML::
 
 You can change this behavior by providing a value for the
 ``formatter`` argument to ``prettify()``, ``encode()``, or
-``decode()``. Beautiful Soup recognizes six possible values for
+``decode()``. Beautiful Soup recognizes five possible values for
 ``formatter``.
 
 The default is ``formatter="minimal"``. Strings will only be processed
@@ -2332,7 +2332,8 @@ attributes in every tag by default::
 
 To turn this off, you can subclass the ``Formatter.attributes()``
 method, which controls which attributes are output and in what
-order. This implementation also filters out out one of the attributes.
+order. This implementation also filters out the attribute called "m"
+whenever it appears::
 
  class UnsortedAttributes(HTMLFormatter):
      def attributes(self, tag):
@@ -2345,9 +2346,10 @@ order. This implementation also filters out out one of the attributes.
 
 One last caveat: if you create a ``CData`` object, the text inside
 that object is always presented `exactly as it appears, with no
-formatting`. Beautiful Soup will call the formatter method, just in
-case you've written a custom method that counts all the strings in the
-document or something, but it will ignore the return value::
+formatting`. Beautiful Soup will call your entity substitution
+function, just in case you've written a custom function that counts
+all the strings in the document or something, but it will ignore the
+return value::
 
  from bs4.element import CData
  soup = BeautifulSoup("<a></a>")

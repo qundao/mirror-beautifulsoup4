@@ -1,11 +1,16 @@
 = 4.8.0 (20190720, "One Small Soup")
 
-* It's now possible to customize the TreeBuilder object by passing
-  keyword arguments into the BeautifulSoup constructor. The main
-  reason to do this right now is to change how which attributes are
-  treated as multi-valued attributes (the way 'class' is treated by
-  default). You can do this with the `multi_valued_attributes` argument.
-  [bug=1832978]
+This release focuses on making it easier to customize Beautiful Soup's
+input mechanism (the TreeBuilder) and output mechanism (the Formatter).
+
+* You can customize the TreeBuilder object by passing keyword
+  arguments into the BeautifulSoup constructor. Those keyword
+  arguments will be passed along into the TreeBuilder constructor.
+
+  The main reason to do this right now is to change how which
+  attributes are treated as multi-valued attributes (the way 'class'
+  is treated by default). You can do this with the
+  'multi_valued_attributes' argument. [bug=1832978]
 
 * The role of Formatter objects has been greatly expanded. The Formatter
   class now controls the following:
@@ -20,9 +25,9 @@
   All preexisting code should work as before.
 
 * Added a new method to the API, Tag.smooth(), which consolidates
-  multiple adjacent NavigableString elements.
+  multiple adjacent NavigableString elements. [bug=1697296]
 
-* &apos; (which is valid in XML, XHTML, and HTML 5, but not HTML 4) is now
+* &apos; (which is valid in XML, XHTML, and HTML 5, but not HTML 4) is always
   recognized as a named entity and converted to a single quote. [bug=1818721]
 
 = 4.7.1 (20190106)

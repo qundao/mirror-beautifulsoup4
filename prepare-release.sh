@@ -18,8 +18,16 @@ rm -rf build dist
 python setup.py sdist bdist_wheel
 
 # Run this in Python 3 env.
+
+# Upload to test
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+# Upload for real
 twine upload dist/*
+
+
+# How to install from test PYPI: you need to reference the real server to get the soupstrainer dependency.
+pip install -i https://testpypi.python.org/pypi beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi
 
 # Old instructions:
 
