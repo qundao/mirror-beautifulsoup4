@@ -37,6 +37,17 @@ class HTMLParserTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         # finishes working is handled.
         self.assertSoupEquals("foo &# bar", "foo &amp;# bar")
 
+    def test_tracking_line_numbers(self):
+        # Unlike other TreeBuilders, the html.parser TreeBuilder
+        # keeps track of line number and position of each element.
+        soup = self.soup(
+            "\n   <p>\n\n<lineno>\n<b>text</b></lineno><offset></p>",
+            store_line_numbers=True
+        )
+        self.assertEqual(2, soup.p.lineno)
+        self.assertEqual(3, soup.p.offset)
+        self.assertEqual("lineno", soup.p.find('lineno').name)
+
 
 class TestHTMLParserSubclass(SoupTest):
     def test_error(self):

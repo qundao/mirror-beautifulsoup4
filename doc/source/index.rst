@@ -2495,6 +2495,20 @@ machines, you should specify a parser in the ``BeautifulSoup``
 constructor. That will reduce the chances that your users parse a
 document differently from the way you parse it.
 
+Line numbers
+------------
+
+The html.parser parser will keep track of where in the original
+document it found each Tag. You can access this information as
+``Tag.lineno`` (line number) and ``Tag.offset`` (position of the start
+tag within a line)::
+
+   soup = BeautifulSoup("<p>Paragraph 1</p>\n    <p>Paragraph 2</p>", 'html.parser')
+   for tag in soup.find_all('p'):
+       print(tag.lineno, tag.offset, tag.string)
+   # (1, 0, u'Paragraph 1')
+   # (2, 3, u'Paragraph 2')
+       
 Encodings
 =========
 

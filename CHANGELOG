@@ -1,3 +1,10 @@
+= Unreleased
+
+* When the html.parser is in use, Beautiful Soup will, by default,
+  record the position in the original document where each tag was
+  encountered. This includes line number (Tag.lineno) and position
+  within a line (Tag.position).  Based on code by Chris Mayo.
+
 = 4.8.0 (20190720, "One Small Soup")
 
 This release focuses on making it easier to customize Beautiful Soup's

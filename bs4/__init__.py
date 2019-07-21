@@ -531,7 +531,8 @@ class BeautifulSoup(Tag):
 
         return most_recently_popped
 
-    def handle_starttag(self, name, namespace, nsprefix, attrs):
+    def handle_starttag(self, name, namespace, nsprefix, attrs, lineno=None,
+                        offset=None):
         """Push a start tag on to the stack.
 
         If this method returns None, the tag was rejected by the
@@ -549,7 +550,8 @@ class BeautifulSoup(Tag):
             return None
 
         tag = Tag(self, self.builder, name, namespace, nsprefix, attrs,
-                  self.currentTag, self._most_recent_element)
+                  self.currentTag, self._most_recent_element, lineno=lineno,
+                  offset=offset)
         if tag is None:
             return tag
         if self._most_recent_element is not None:
