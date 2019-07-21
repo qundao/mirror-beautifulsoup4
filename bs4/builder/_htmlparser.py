@@ -99,9 +99,10 @@ class BeautifulSoupHTMLParser(HTMLParser):
             attr_dict[key] = value
             attrvalue = '""'
         #print "START", name
-        lineno, offset = self.getpos()
+        sourceline, sourcepos = self.getpos()
         tag = self.soup.handle_starttag(
-            name, None, None, attr_dict, lineno=lineno, offset=offset
+            name, None, None, attr_dict, sourceline=sourceline,
+            sourcepos=sourcepos
         )
         if tag and tag.is_empty_element and handle_empty_element:
             # Unlike other parsers, html.parser doesn't send separate end tag
@@ -218,7 +219,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
     features = [NAME, HTML, STRICT]
 
     # The html.parser knows which line number and position in the
-    # original file is the source of a document.
+    # original file is the source of an element.
     TRACKS_LINE_NUMBERS = True
     
     def __init__(self, parser_args=None, parser_kwargs=None, **kwargs):

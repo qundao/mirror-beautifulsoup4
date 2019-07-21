@@ -377,10 +377,12 @@ class BeautifulSoup(Tag):
         self.preserve_whitespace_tag_stack = []
         self.pushTag(self)
 
-    def new_tag(self, name, namespace=None, nsprefix=None, attrs={}, **kwattrs):
+    def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
+                sourceline=None, sourcepos=None, **kwattrs):
         """Create a new tag associated with this soup."""
         kwattrs.update(attrs)
-        return Tag(None, self.builder, name, namespace, nsprefix, kwattrs)
+        return Tag(None, self.builder, name, namespace, nsprefix, kwattrs,
+                   sourceline=sourceline, sourcepos=sourcepos)
 
     def new_string(self, s, subclass=NavigableString):
         """Create a new NavigableString associated with this soup."""
@@ -531,8 +533,8 @@ class BeautifulSoup(Tag):
 
         return most_recently_popped
 
-    def handle_starttag(self, name, namespace, nsprefix, attrs, lineno=None,
-                        offset=None):
+    def handle_starttag(self, name, namespace, nsprefix, attrs, sourceline=None,
+                        sourcepos=None):
         """Push a start tag on to the stack.
 
         If this method returns None, the tag was rejected by the
@@ -550,8 +552,8 @@ class BeautifulSoup(Tag):
             return None
 
         tag = Tag(self, self.builder, name, namespace, nsprefix, attrs,
-                  self.currentTag, self._most_recent_element, lineno=lineno,
-                  offset=offset)
+                  self.currentTag, self._most_recent_element,
+                  sourceline=sourceline, sourcepos=sourcepos)
         if tag is None:
             return tag
         if self._most_recent_element is not None:

@@ -790,23 +790,6 @@ Hello, world!
         soup = self.soup(BAD_DOCUMENT)
         self.linkage_validator(soup)
 
-    def test_tracking_line_numbers(self):
-        # In general, TreeBuilders do not keep track of
-        # line numbers from the original markup. Even if you
-        # ask for line numbers, we don't have 'em.
-        #
-        # This means that if you have a tag like <lineno> or <offset>,
-        # tag.lineno will find it rather than giving you a numeric
-        # answer.
-        #
-        # See HTMLParserTreeBuilderSmokeTest for a situation
-        # where the parser _does_ keep track of the line numbers.
-        soup = self.soup(
-            "\n   <p>\n\n<lineno>\n<b>text</b></lineno><offset></p>",
-            store_line_numbers=True
-        )
-        self.assertEqual("lineno", soup.p.lineno.name)
-        self.assertEqual("offset", soup.p.offset.name)
 
 class XMLTreeBuilderSmokeTest(object):
 

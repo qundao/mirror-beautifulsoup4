@@ -2494,21 +2494,7 @@ on distributing your script to other people, or running it on multiple
 machines, you should specify a parser in the ``BeautifulSoup``
 constructor. That will reduce the chances that your users parse a
 document differently from the way you parse it.
-
-Line numbers
-------------
-
-The html.parser parser will keep track of where in the original
-document it found each Tag. You can access this information as
-``Tag.lineno`` (line number) and ``Tag.offset`` (position of the start
-tag within a line)::
-
-   soup = BeautifulSoup("<p>Paragraph 1</p>\n    <p>Paragraph 2</p>", 'html.parser')
-   for tag in soup.find_all('p'):
-       print(tag.lineno, tag.offset, tag.string)
-   # (1, 0, u'Paragraph 1')
-   # (2, 3, u'Paragraph 2')
-       
+   
 Encodings
 =========
 
@@ -2758,6 +2744,42 @@ document is Windows-1252, and the document will come out looking like
 
 ``UnicodeDammit.detwingle()`` is new in Beautiful Soup 4.1.0.
 
+Line numbers
+============
+
+The ``html.parser` and ``html5lib`` parsers can keep track of where in
+the original document each Tag was found. You can access this
+information as ``Tag.sourceline`` (line number) and ``Tag.sourcepos``
+(position of the start tag within a line)::
+
+   markup = "<p\n>Paragraph 1</p>\n    <p>Paragraph 2</p>"
+   soup = BeautifulSoup(markup, 'html.parser')
+   for tag in soup.find_all('p'):
+       print(tag.sourceline, tag.sourcepos, tag.string)
+   # (1, 0, u'Paragraph 1')
+   # (2, 3, u'Paragraph 2')
+
+Note that the two parsers mean slightly different things by
+``sourceline`` and ``sourcepos``. For html.parser, these numbers
+represent the position of the initial less-than sign. For html5lib,
+these numbers represent the position of the final greater-than sign.
+   
+   soup = BeautifulSoup(markup, 'html5lib')
+   for tag in soup.find_all('p'):
+       print(tag.sourceline, tag.sourcepos, tag.string)
+   # (2, 1, u'Paragraph 1')
+   # (3, 7, u'Paragraph 2')
+
+You can shut off this feature by passing ``store_line_numbers=False`
+into the ``BeautifulSoup`` constructor::
+
+   markup = "<p\n>Paragraph 1</p>\n    <p>Paragraph 2</p>"
+   soup = BeautifulSoup(markup, 'html.parser', store_line_numbers=False)
+   soup.p.sourceline
+   # None
+  
+This feature is new in 4.8.1, and the parsers based on lxml don't
+support it.
 
 Comparing objects for equality
 ==============================

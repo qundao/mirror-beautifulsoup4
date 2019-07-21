@@ -724,7 +724,7 @@ class Tag(PageElement):
 
     def __init__(self, parser=None, builder=None, name=None, namespace=None,
                  prefix=None, attrs=None, parent=None, previous=None,
-                 is_xml=None, lineno=None, offset=None):
+                 is_xml=None, sourceline=None, sourcepos=None):
         "Basic constructor."
 
         if parser is None:
@@ -739,9 +739,9 @@ class Tag(PageElement):
         self.namespace = namespace
         self.prefix = prefix
         if ((not builder or builder.store_line_numbers)
-            and (lineno is not None or offset is not None)):
-            self.lineno = lineno
-            self.offset = offset
+            and (sourceline is not None or sourcepos is not None)):
+            self.sourceline = sourceline
+            self.sourcepos = sourcepos
         if attrs is None:
             attrs = {}
         elif attrs:

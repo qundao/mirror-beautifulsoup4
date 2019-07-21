@@ -57,6 +57,12 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
     DEFAULT_NSMAPS_INVERTED = _invert(DEFAULT_NSMAPS)
 
+    # NOTE: If we parsed Element objects and looked at .sourceline,
+    # we'd be able to see the line numbers from the original document.
+    # But instead we build an XMLParser or HTMLParser object to serve
+    # as the target of parse messages, and those messages don't include
+    # line numbers.
+    
     def initialize_soup(self, soup):
         """Let the BeautifulSoup object know about the standard namespace
         mapping.
