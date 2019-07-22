@@ -741,7 +741,7 @@ class Tag(PageElement):
         if ((not builder or builder.store_line_numbers)
             and (sourceline is not None or sourcepos is not None)):
             self.sourceline = sourceline
-            self.sourcepos = sourcepos
+            self.sourcepos = sourcepos        
         if attrs is None:
             attrs = {}
         elif attrs:

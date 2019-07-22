@@ -4,7 +4,7 @@
   will, by default, record the position in the original document where
   each tag was encountered. This includes line number (Tag.sourceline)
   and position within a line (Tag.sourcepos).  Based on code by Chris
-  Mayo.
+  Mayo. [bug=1742921]
 
 = 4.8.0 (20190720, "One Small Soup")
 

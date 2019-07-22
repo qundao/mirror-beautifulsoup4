@@ -51,6 +51,19 @@ To go beyond the basics, [comprehensive documentation is available](http://www.c
 * [Bug tracker](https://bugs.launchpad.net/beautifulsoup/)
 * [Complete changelog](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG)
 
+# Supporting the project
+
+If you use Beautiful Soup as part of your professional work, please consider a
+[Tidelift subscription](https://tidelift.com/subscription/pkg/pypi-beautifulsoup4?utm_source=pypi-beautifulsoup4&utm_medium=referral&utm_campaign=readme).
+This will support many of the free software projects your organization
+depends on, not just Beautiful Soup.
+
+If you use Beautiful Soup for personal projects, the best way to say
+thank you is to read
+[Tool Safety](https://www.crummy.com/software/BeautifulSoup/zine/), a zine I
+wrote about what Beautiful Soup has taught me about software
+development.
+
 # Building the documentation
 
 The bs4/doc/ directory contains full documentation in Sphinx
@@ -73,4 +86,3 @@ If you checked out the source tree, you should see a script in the
 home directory called test-all-versions. This script will run the unit
 tests under Python 2.7, then create a temporary Python 3 conversion of
 the source and run the unit tests again under Python 3.
-
