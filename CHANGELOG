@@ -12,6 +12,11 @@
 * Copying a Tag preserves information that was originally obtained from
    the TreeBuilder used to build the original Tag. [bug=1838903]
 
+* When instantiating a BeautifulSoup object, it's now possible to
+   provide replacement classes to be instantiated for every tag ('tag_class')
+   or string ('string_class') encountered during parsing, rather than
+   using the default Tag and NavigableString objects.
+
 = 4.8.0 (20190720, "One Small Soup")
 
 This release focuses on making it easier to customize Beautiful Soup's

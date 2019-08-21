@@ -63,7 +63,7 @@ class BeautifulSoup(Tag):
       handle_starttag(name, attrs) # See note about return value
       handle_endtag(name)
       handle_data(data) # Appends to the current data node
-      endData(containerClass=NavigableString) # Ends the current data node
+      endData(containerClass) # Ends the current data node
 
     No matter how complicated the underlying parser is, you should be
     able to build a tree using 'start tag' events, 'end tag' events,
@@ -78,14 +78,14 @@ class BeautifulSoup(Tag):
     # If the end-user gives no indication which tree builder they
     # want, look for one with these features.
     DEFAULT_BUILDER_FEATURES = ['html', 'fast']
-
+   
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
-                 **kwargs):
+                 tag_class=Tag, string_class=NavigableString, **kwargs):
         """Constructor.
 
         :param markup: A string or a file-like object representing
@@ -184,6 +184,9 @@ class BeautifulSoup(Tag):
         if from_encoding and isinstance(markup, unicode):
             warnings.warn("You provided Unicode markup but also provided a value for from_encoding. Your from_encoding will be ignored.")
             from_encoding = None
+
+        self.tag_class = tag_class
+        self.string_class = string_class
 
         # We need this information to track whether or not the builder
         # was specified well enough that we can omit the 'you need to
@@ -381,11 +384,14 @@ class BeautifulSoup(Tag):
                 sourceline=None, sourcepos=None, **kwattrs):
         """Create a new tag associated with this soup."""
         kwattrs.update(attrs)
-        return Tag(None, self.builder, name, namespace, nsprefix, kwattrs,
-                   sourceline=sourceline, sourcepos=sourcepos)
+        return self.tag_class(
+            None, self.builder, name, namespace, nsprefix, kwattrs,
+            sourceline=sourceline, sourcepos=sourcepos
+        )
 
-    def new_string(self, s, subclass=NavigableString):
+    def new_string(self, s, subclass=None):
         """Create a new NavigableString associated with this soup."""
+        subclass = subclass or self.string_class
         return subclass(s)
 
     def insert_before(self, successor):
@@ -412,7 +418,8 @@ class BeautifulSoup(Tag):
         if tag.name in self.builder.preserve_whitespace_tags:
             self.preserve_whitespace_tag_stack.append(tag)
 
-    def endData(self, containerClass=NavigableString):
+    def endData(self, containerClass=None):
+        containerClass = containerClass or self.string_class
         if self.current_data:
             current_data = u''.join(self.current_data)
             # If whitespace is not preserved, and this string contains
@@ -551,9 +558,11 @@ class BeautifulSoup(Tag):
                  or not self.parse_only.search_tag(name, attrs))):
             return None
 
-        tag = Tag(self, self.builder, name, namespace, nsprefix, attrs,
-                  self.currentTag, self._most_recent_element,
-                  sourceline=sourceline, sourcepos=sourcepos)
+        tag = self.tag_class(
+            self, self.builder, name, namespace, nsprefix, attrs,
+            self.currentTag, self._most_recent_element,
+            sourceline=sourceline, sourcepos=sourcepos
+        )
         if tag is None:
             return tag
         if self._most_recent_element is not None:
