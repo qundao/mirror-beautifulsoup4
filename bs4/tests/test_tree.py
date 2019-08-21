@@ -1490,6 +1490,31 @@ class TestPersistence(SoupTest):
         self.assertEqual(u"<p> </p>", unicode(copy))
         self.assertEqual(encoding, copy.original_encoding)
 
+    def test_copy_preserves_builder_information(self):
+
+        tag = self.soup('<p></p>').p
+
+        # Simulate a tag obtained from a source file.
+        tag.sourceline = 10
+        tag.sourcepos = 33
+        
+        copied = tag.__copy__()
+
+        # The TreeBuilder object is no longer availble, but information
+        # obtained from it gets copied over to the new Tag object.
+        self.assertEqual(tag.sourceline, copied.sourceline)
+        self.assertEqual(tag.sourcepos, copied.sourcepos)
+        self.assertEqual(
+            tag.can_be_empty_element, copied.can_be_empty_element
+        )
+        self.assertEqual(
+            tag.cdata_list_attributes, copied.cdata_list_attributes
+        )
+        self.assertEqual(
+            tag.preserve_whitespace_tags, copied.preserve_whitespace_tags
+        )
+        
+        
     def test_unicode_pickle(self):
         # A tree containing Unicode characters can be pickled.
         html = u"<b>\N{SNOWMAN}</b>"
