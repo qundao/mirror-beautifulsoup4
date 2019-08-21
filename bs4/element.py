@@ -769,6 +769,7 @@ class Tag(PageElement):
             # special.
             self.can_be_empty_element = False
             self.cdata_list_attributes = None
+            self.preserve_whitespace_tags = None
         else:
             # Set up any substitutions for this tag, such as the charset in a META tag.
             builder.set_up_substitutions(self)
