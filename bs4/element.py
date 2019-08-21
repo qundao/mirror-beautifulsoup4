@@ -1173,7 +1173,10 @@ class Tag(PageElement):
         """Should this tag be pretty-printed?"""
         return (
             indent_level is not None
-            and self.name not in self.preserve_whitespace_tags
+            and (
+                not self.preserve_whitespace_tags
+                or self.name not in self.preserve_whitespace_tags
+            )
         )
 
     def prettify(self, encoding=None, formatter="minimal"):

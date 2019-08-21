@@ -741,6 +741,30 @@ class TestPreviousSibling(SiblingTest):
         self.assertEqual(start.find_previous_sibling(text="nonesuch"), None)
 
 
+class TestTag(SoupTest):
+
+    # Test various methods of Tag.
+
+    def test__should_pretty_print(self):
+        # Test the rules about when a tag should be pretty-printed.
+        tag = self.soup("").new_tag("a_tag")
+
+        # No list of whitespace-preserving tags -> pretty-print
+        tag._preserve_whitespace_tags = None
+        self.assertEquals(True, tag._should_pretty_print(0))
+
+        # List exists but tag is not on the list -> pretty-print
+        tag.preserve_whitespace_tags = ["some_other_tag"]
+        self.assertEquals(True, tag._should_pretty_print(1))
+
+        # Indent level is None -> don't pretty-print
+        self.assertEquals(False, tag._should_pretty_print(None))
+        
+        # Tag is on the whitespace-preserving list -> don't pretty-print
+        tag.preserve_whitespace_tags = ["some_other_tag", "a_tag"]
+        self.assertEquals(False, tag._should_pretty_print(1))
+
+        
 class TestTagCreation(SoupTest):
     """Test the ability to create new tags."""
     def test_new_tag(self):

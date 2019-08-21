@@ -6,6 +6,9 @@
   and position within a line (Tag.sourcepos).  Based on code by Chris
   Mayo. [bug=1742921]
 
+* Fixed a bug that made it impossible to pretty-print tags that were not
+   created during initial parsing. [bug=1838903]
+
 = 4.8.0 (20190720, "One Small Soup")
 
 This release focuses on making it easier to customize Beautiful Soup's
