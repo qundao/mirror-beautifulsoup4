@@ -16,6 +16,8 @@ from bs4.element import (
     ContentMetaAttributeValue,
     SoupStrainer,
     NamespacedAttribute,
+    Tag,
+    NavigableString,
     )
 import bs4.dammit
 from bs4.dammit import (
@@ -120,6 +122,27 @@ class TestConstructor(SoupTest):
             self.assertEqual(["an", "id"], a['id'])
             self.assertEqual(" a class ", a['class'])
 
+    def test_replacement_classes(self):
+        # Test the ability to pass in replacements for the Tag and
+        # NavigableString class, which will be used when building
+        # the tree.
+        class TagPlus(Tag):
+            pass
+
+        class StringPlus(NavigableString):
+            pass
+
+        soup = self.soup(
+            "<a><b>foo</b>bar</a>",
+            tag_class=TagPlus, string_class=StringPlus
+        )
+
+        # The tree was built with TagPlus and StringPlus objects,
+        # rather than Tag and String objects.
+        assert all(
+            isinstance(x, (TagPlus, StringPlus))
+            for x in soup.recursiveChildGenerator()
+        )
         
 class TestWarnings(SoupTest):
 
