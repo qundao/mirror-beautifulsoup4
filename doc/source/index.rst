@@ -505,10 +505,22 @@ done using Beautiful Soup. This is a big waste of memory.
 ``BeautifulSoup``
 -----------------
 
-The ``BeautifulSoup`` object itself represents the document as a
+The ``BeautifulSoup`` object represents the parsed document as a
 whole. For most purposes, you can treat it as a :ref:`Tag`
 object. This means it supports most of the methods described in
 `Navigating the tree`_ and `Searching the tree`_.
+
+You can also pass a ``BeautifulSoup`` object into one of the methods
+defined in `Modifying the tree`_, just as you would a :ref:`Tag`. This
+lets you do things like combine two parsed documents::
+
+  doc = BeautifulSoup("<document><content/>INSERT FOOTER HERE</document", "xml")
+  footer = BeautifulSoup("<footer>Here's the footer</footer>", "xml")
+  doc.find(text="INSERT FOOTER HERE").replace_with(footer)
+  # u'INSERT FOOTER HERE'
+  print(doc)
+  # <?xml version="1.0" encoding="utf-8"?>
+  # <document><content/><footer>Here's the footer</footer></document>
 
 Since the ``BeautifulSoup`` object doesn't correspond to an actual
 HTML or XML tag, it has no name and no attributes. But sometimes it's
@@ -1861,8 +1873,8 @@ attributes, and delete attributes::
 Modifying ``.string``
 ---------------------
 
-If you set a tag's ``.string`` attribute, the tag's contents are
-replaced with the string you give::
+If you set a tag's ``.string`` attribute to a new string, the tag's contents are
+replaced with that string::
 
   markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
   soup = BeautifulSoup(markup)
@@ -1871,9 +1883,9 @@ replaced with the string you give::
   tag.string = "New link text."
   tag
   # <a href="http://example.com/">New link text.</a>
-
+  
 Be careful: if the tag contained other tags, they and all their
-contents will be destroyed.
+contents will be destroyed.  
 
 ``append()``
 ------------
