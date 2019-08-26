@@ -46,6 +46,11 @@ def _alias(attr):
 class NamespacedAttribute(unicode):
 
     def __new__(cls, prefix, name, namespace=None):
+        if not name:
+            # This is the default namespace. Its name "has no value"
+            # per https://www.w3.org/TR/xml-names/#defaulting
+            name = None
+
         if name is None:
             obj = unicode.__new__(cls, prefix)
         elif prefix is None:

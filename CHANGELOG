@@ -6,6 +6,9 @@
   and position within a line (Tag.sourcepos).  Based on code by Chris
   Mayo. [bug=1742921]
 
+* Fixed the definition of the default XML namespace when using
+   lxml 4.4. Patch by Isaac Muse. [bug=1840141]
+
 * Fixed a crash when pretty-printing tags that were not created
    during initial parsing. [bug=1838903]
 
