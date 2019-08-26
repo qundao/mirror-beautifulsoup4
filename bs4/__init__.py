@@ -85,7 +85,7 @@ class BeautifulSoup(Tag):
 
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
-                 tag_class=Tag, string_class=NavigableString, **kwargs):
+                 element_classes=None, **kwargs):
         """Constructor.
 
         :param markup: A string or a file-like object representing
@@ -116,6 +116,12 @@ class BeautifulSoup(Tag):
         encodings known to be wrong. Pass this in if you don't know
         the document's encoding but you know Beautiful Soup's guess is
         wrong.
+
+        :param element_classes: A dictionary mapping BeautifulSoup
+        classes like Tag and NavigableString to other classes you'd
+        like to be instantiated instead as the parse tree is
+        built. This is useful for using subclasses to modify the
+        default behavior of Tag or NavigableString.
 
         :param kwargs: For backwards compatibility purposes, the
         constructor accepts certain keyword arguments used in
@@ -185,8 +191,7 @@ class BeautifulSoup(Tag):
             warnings.warn("You provided Unicode markup but also provided a value for from_encoding. Your from_encoding will be ignored.")
             from_encoding = None
 
-        self.tag_class = tag_class
-        self.string_class = string_class
+        self.element_classes = element_classes or dict()
 
         # We need this information to track whether or not the builder
         # was specified well enough that we can omit the 'you need to
@@ -384,14 +389,16 @@ class BeautifulSoup(Tag):
                 sourceline=None, sourcepos=None, **kwattrs):
         """Create a new tag associated with this soup."""
         kwattrs.update(attrs)
-        return self.tag_class(
+        return self.element_classes.get(Tag, Tag)(
             None, self.builder, name, namespace, nsprefix, kwattrs,
             sourceline=sourceline, sourcepos=sourcepos
         )
 
     def new_string(self, s, subclass=None):
         """Create a new NavigableString associated with this soup."""
-        subclass = subclass or self.string_class
+        subclass = subclass or self.element_classes.get(
+            NavigableString, NavigableString
+        )
         return subclass(s)
 
     def insert_before(self, successor):
@@ -419,7 +426,16 @@ class BeautifulSoup(Tag):
             self.preserve_whitespace_tag_stack.append(tag)
 
     def endData(self, containerClass=None):
-        containerClass = containerClass or self.string_class
+
+        # Default container is NavigableString.
+        containerClass = containerClass or NavigableString
+
+        # The user may want us to instantiate some alias for the
+        # container class.
+        containerClass = self.element_classes.get(
+            containerClass, containerClass
+        )
+        
         if self.current_data:
             current_data = u''.join(self.current_data)
             # If whitespace is not preserved, and this string contains
@@ -558,7 +574,7 @@ class BeautifulSoup(Tag):
                  or not self.parse_only.search_tag(name, attrs))):
             return None
 
-        tag = self.tag_class(
+        tag = self.element_classes.get(Tag, Tag)(
             self, self.builder, name, namespace, nsprefix, attrs,
             self.currentTag, self._most_recent_element,
             sourceline=sourceline, sourcepos=sourcepos

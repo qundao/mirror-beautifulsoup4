@@ -13,6 +13,7 @@ from bs4 import (
 )
 from bs4.element import (
     CharsetMetaAttributeValue,
+    Comment,
     ContentMetaAttributeValue,
     SoupStrainer,
     NamespacedAttribute,
@@ -123,24 +124,30 @@ class TestConstructor(SoupTest):
             self.assertEqual(" a class ", a['class'])
 
     def test_replacement_classes(self):
-        # Test the ability to pass in replacements for the Tag and
-        # NavigableString class, which will be used when building
-        # the tree.
+        # Test the ability to pass in replacements for element classes
+        # which will be used when building the tree.
         class TagPlus(Tag):
             pass
 
         class StringPlus(NavigableString):
             pass
 
+        class CommentPlus(Comment):
+            pass
+        
         soup = self.soup(
-            "<a><b>foo</b>bar</a>",
-            tag_class=TagPlus, string_class=StringPlus
+            "<a><b>foo</b>bar</a><!--whee-->",
+            element_classes = {
+                Tag: TagPlus,
+                NavigableString: StringPlus,
+                Comment: CommentPlus,
+            }
         )
 
-        # The tree was built with TagPlus and StringPlus objects,
-        # rather than Tag and String objects.
+        # The tree was built with TagPlus, StringPlus, and CommentPlus objects,
+        # rather than Tag, String, and Comment objects.
         assert all(
-            isinstance(x, (TagPlus, StringPlus))
+            isinstance(x, (TagPlus, StringPlus, CommentPlus))
             for x in soup.recursiveChildGenerator()
         )
         
