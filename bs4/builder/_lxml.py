@@ -175,7 +175,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                     self.parser.feed(data)
             self.parser.close()
         except (UnicodeDecodeError, LookupError, etree.ParserError), e:
-            raise ParserRejectedMarkup(str(e))
+            raise ParserRejectedMarkup(e)
 
     def close(self):
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
@@ -294,7 +294,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
             self.parser.feed(markup)
             self.parser.close()
         except (UnicodeDecodeError, LookupError, etree.ParserError), e:
-            raise ParserRejectedMarkup(str(e))
+            raise ParserRejectedMarkup(e)
 
 
     def test_fragment_to_document(self, fragment):

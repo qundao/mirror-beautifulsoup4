@@ -175,8 +175,8 @@ class TreeBuilder(object):
         raise NotImplementedError()
 
     def prepare_markup(self, markup, user_specified_encoding=None,
-                       document_declared_encoding=None):
-        return markup, None, None, False
+                       document_declared_encoding=None, exclude_encodings=None):
+        yield markup, None, None, False
 
     def test_fragment_to_document(self, fragment):
         """Wrap an HTML fragment to make it look like a document.
@@ -363,8 +363,15 @@ def register_treebuilders_from(module):
             this_module.builder_registry.register(obj)
 
 class ParserRejectedMarkup(Exception):
-    pass
-
+    def __init__(self, message_or_exception):
+        """Explain why the parser rejected the given markup, either
+        with a textual explanation or another exception.
+        """
+        if isinstance(message_or_exception, Exception):
+            e = message_or_exception
+            message_or_exception = "%s: %s" % (e.__class__.__name__, unicode(e))
+        super(ParserRejectedMarkup, self).__init__(message_or_exception)
+            
 # Builders are registered in reverse order of priority, so that custom
 # builder registrations will take precedence. In general, we want lxml
 # to take precedence over html5lib, because it's faster. And we only

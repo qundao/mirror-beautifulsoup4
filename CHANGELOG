@@ -20,6 +20,12 @@
    or string ('string_class') encountered during parsing, rather than
    using the default Tag and NavigableString objects.
 
+* Raise an explanatory exception when the underlying parser
+   completely rejects the incoming markup. [bug=1838877]
+
+* Avoid a crash when trying to detect the declared encoding of a
+   Unicode document. [bug=1838877]
+
 = 4.8.0 (20190720, "One Small Soup")
 
 This release focuses on making it easier to customize Beautiful Soup's

@@ -11,6 +11,10 @@ from bs4 import (
     BeautifulSoup,
     BeautifulStoneSoup,
 )
+from bs4.builder import (
+    TreeBuilder,
+    ParserRejectedMarkup,
+)
 from bs4.element import (
     CharsetMetaAttributeValue,
     Comment,
@@ -20,6 +24,7 @@ from bs4.element import (
     Tag,
     NavigableString,
     )
+
 import bs4.dammit
 from bs4.dammit import (
     EntitySubstitution,
@@ -36,7 +41,7 @@ import warnings
 try:
     from bs4.builder import LXMLTreeBuilder, LXMLTreeBuilderForXML
     LXML_PRESENT = True
-except ImportError, e:
+except ImportError as e:
     LXML_PRESENT = False
 
 PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
@@ -65,10 +70,20 @@ class TestConstructor(SoupTest):
             def __init__(self, **kwargs):
                 self.called_with = kwargs
                 self.is_xml = True
+                self.store_line_numbers = False
+                self.cdata_list_attributes = []
+                self.preserve_whitespace_tags = []
             def initialize_soup(self, soup):
                 pass
+            def feed(self, markup):
+                self.fed = markup
+            def reset(self):
+                pass
+            def ignore(self, ignore):
+                pass
+            set_up_substitutions = can_be_empty_element = ignore
             def prepare_markup(self, *args, **kwargs):
-                return ''
+                yield "prepared markup", "original encoding", "declared encoding", "contains replacement characters"
                 
         kwargs = dict(
             var="value",
@@ -80,7 +95,8 @@ class TestConstructor(SoupTest):
             soup = BeautifulSoup('', builder=Mock, **kwargs)
         assert isinstance(soup.builder, Mock)
         self.assertEqual(dict(var="value"), soup.builder.called_with)
-
+        self.assertEqual("prepared markup", soup.builder.fed)
+        
         # You can also instantiate the TreeBuilder yourself. In this
         # case, that specific object is used and any keyword arguments
         # to the BeautifulSoup constructor are ignored.
@@ -94,6 +110,26 @@ class TestConstructor(SoupTest):
         self.assertEqual(builder, soup.builder)
         self.assertEqual(kwargs, builder.called_with)
 
+    def test_parser_markup_rejection(self):
+        # If markup is completely rejected by the parser, an
+        # explanatory ParserRejectedMarkup exception is raised.
+        class Mock(TreeBuilder):
+            def feed(self, *args, **kwargs):
+                raise ParserRejectedMarkup("Nope.")
+
+        def prepare_markup(self, *args, **kwargs):
+            # We're going to try two different ways of preparing this markup,
+            # but feed() will reject both of them.
+            yield markup, None, None, False
+            yield markup, None, None, False
+            
+        import re
+        self.assertRaisesRegexp(
+            ParserRejectedMarkup,
+            "The markup you provided was rejected by the parser. Trying a different parser or a different encoding may help.",
+            BeautifulSoup, '', builder=Mock,
+        )
+        
     def test_cdata_list_attributes(self):
         # Most attribute values are represented as scalars, but the
         # HTML standard says that some attributes, like 'class' have
@@ -554,6 +590,52 @@ class TestUnicodeDammit(unittest.TestCase):
             output = UnicodeDammit.detwingle(input)
             self.assertEqual(output, input)
 
+    def test_find_declared_encoding(self):
+        # Test our ability to find a declared encoding inside an
+        # XML or HTML document.
+        #
+        # Even if the document comes in as Unicode, it may be
+        # interesting to know what encoding was claimed
+        # originally.
+
+        html_unicode = u'<html><head><meta charset="utf-8"></head></html>'
+        html_bytes = html_unicode.encode("ascii")
+
+        xml_unicode= u'<?xml version="1.0" encoding="ISO-8859-1" ?>'
+        xml_bytes = xml_unicode.encode("ascii")
+
+        m = EncodingDetector.find_declared_encoding
+        self.assertEquals(None, m(html_unicode, is_html=False))
+        self.assertEquals("utf-8", m(html_unicode, is_html=True))
+        self.assertEquals("utf-8", m(html_bytes, is_html=True))
+
+        self.assertEquals("iso-8859-1", m(xml_unicode))
+        self.assertEquals("iso-8859-1", m(xml_bytes))
+
+        # Normally, only the first few kilobytes of a document are checked for
+        # an encoding.
+        spacer = b' ' * 5000
+        self.assertEquals(None, m(spacer + html_bytes))
+        self.assertEquals(None, m(spacer + xml_bytes))
+
+        # But you can tell find_declared_encoding to search an entire
+        # HTML document.
+        self.assertEquals(
+            "utf-8",
+            m(spacer + html_bytes, is_html=True, search_entire_document=True)
+        )
+
+        # The XML encoding declaration has to be the very first thing
+        # in the document. We'll allow whitespace before the document
+        # starts, but nothing else.
+        self.assertEquals(
+            "iso-8859-1",
+            m(xml_bytes, search_entire_document=True)
+        )
+        self.assertEquals(
+            None, m(b'a' + xml_bytes, search_entire_document=True)
+        )
+            
 class TestNamedspacedAttribute(SoupTest):
 
     def test_name_may_be_none(self):

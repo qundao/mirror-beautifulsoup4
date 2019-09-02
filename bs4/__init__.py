@@ -302,6 +302,8 @@ class BeautifulSoup(Tag):
                     ' Beautiful Soup.' % markup)
             self._check_markup_is_url(markup)
 
+        rejections = []
+        success = False
         for (self.markup, self.original_encoding, self.declared_html_encoding,
          self.contains_replacement_characters) in (
              self.builder.prepare_markup(
@@ -309,9 +311,17 @@ class BeautifulSoup(Tag):
             self.reset()
             try:
                 self._feed()
+                success = True
                 break
-            except ParserRejectedMarkup:
+            except ParserRejectedMarkup as e:
+                rejections.append(e)
                 pass
+
+        if not success:
+            other_exceptions = [unicode(e) for e in rejections]
+            raise ParserRejectedMarkup(
+                u"The markup you provided was rejected by the parser. Trying a different parser or a different encoding may help.\n\nOriginal exception(s) from parser:\n " + "\n ".join(other_exceptions)
+            )
 
         # Clear out the markup and remove the builder's circular
         # reference to this object.
