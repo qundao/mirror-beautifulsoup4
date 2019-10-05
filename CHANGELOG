@@ -6,6 +6,11 @@
   and position within a line (Tag.sourcepos).  Based on code by Chris
   Mayo. [bug=1742921]
 
+* When instantiating a BeautifulSoup object, it's now possible to
+   provide replacement classes to be instantiated for every tag ('tag_class')
+   or string ('string_class') encountered during parsing, rather than
+   using the default Tag and NavigableString objects.
+
 * Fixed the definition of the default XML namespace when using
    lxml 4.4. Patch by Isaac Muse. [bug=1840141]
 
@@ -15,16 +20,14 @@
 * Copying a Tag preserves information that was originally obtained from
    the TreeBuilder used to build the original Tag. [bug=1838903]
 
-* When instantiating a BeautifulSoup object, it's now possible to
-   provide replacement classes to be instantiated for every tag ('tag_class')
-   or string ('string_class') encountered during parsing, rather than
-   using the default Tag and NavigableString objects.
-
 * Raise an explanatory exception when the underlying parser
    completely rejects the incoming markup. [bug=1838877]
 
 * Avoid a crash when trying to detect the declared encoding of a
    Unicode document. [bug=1838877]
+
+* Avoid a crash when unpickling certain parse trees generated
+   using html5lib on Python 3. [bug=1843545]
 
 = 4.8.0 (20190720, "One Small Soup")
 

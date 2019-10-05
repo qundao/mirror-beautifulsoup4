@@ -638,10 +638,13 @@ class TestUnicodeDammit(unittest.TestCase):
             
 class TestNamedspacedAttribute(SoupTest):
 
-    def test_name_may_be_none(self):
+    def test_name_may_be_none_or_missing(self):
         a = NamespacedAttribute("xmlns", None)
         self.assertEqual(a, "xmlns")
 
+        a = NamespacedAttribute("xmlns")
+        self.assertEqual(a, "xmlns")
+        
     def test_attribute_is_equivalent_to_colon_separated_string(self):
         a = NamespacedAttribute("a", "b")
         self.assertEqual("a:b", a)
