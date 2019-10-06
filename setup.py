@@ -3,12 +3,14 @@ from setuptools import (
     find_packages,
 )
 
+from bs4 import __version__
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="beautifulsoup4",
-    version = "4.8.0",
+    version = __version__,
     author="Leonard Richardson",
     author_email='leonardr@segfault.org',
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",

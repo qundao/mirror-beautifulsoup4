@@ -51,6 +51,20 @@ To go beyond the basics, [comprehensive documentation is available](http://www.c
 * [Bug tracker](https://bugs.launchpad.net/beautifulsoup/)
 * [Complete changelog](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG)
 
+# Note on Python 2 sunsetting
+
+Since 2012, Beautiful Soup has been developed as a Python 2 library
+which is automatically converted to Python 3 code as necessary. This
+makes it impossible to take advantages of some features of Python
+3.
+
+For this reason, I plan to discontinue Beautiful Soup's Python 2
+support at some point after January 1, 2021: one year after the sunset
+date for Python 2 itself. Beyond that point, new Beautiful Soup
+development will exclusively target Python 3. Of course, older
+releases of Beautiful Soup, which support both versions, will continue
+to be available.
+
 # Supporting the project
 
 If you use Beautiful Soup as part of your professional work, please consider a
@@ -79,10 +93,10 @@ Beautiful Soup supports unit test discovery from the project root directory:
 ```
 
 ```
- $ python -m unittest discover -s bs4 # Python 2.7 and up
+ $ python -m unittest discover -s bs4
 ```
 
 If you checked out the source tree, you should see a script in the
 home directory called test-all-versions. This script will run the unit
-tests under Python 2.7, then create a temporary Python 3 conversion of
+tests under Python 2, then create a temporary Python 3 conversion of
 the source and run the unit tests again under Python 3.

@@ -1,4 +1,4 @@
-= 4.8.1 (Unreleased)
+= 4.8.1 (20191006)
 
 * When the html.parser or html5lib parsers are in use, Beautiful Soup
   will, by default, record the position in the original document where
@@ -7,9 +7,8 @@
   Mayo. [bug=1742921]
 
 * When instantiating a BeautifulSoup object, it's now possible to
-   provide replacement classes to be instantiated for every tag ('tag_class')
-   or string ('string_class') encountered during parsing, rather than
-   using the default Tag and NavigableString objects.
+   provide a dictionary ('element_classes') of the classes you'd like to be
+   instantiated instead of Tag, NavigableString, etc.
 
 * Fixed the definition of the default XML namespace when using
    lxml 4.4. Patch by Isaac Muse. [bug=1840141]
