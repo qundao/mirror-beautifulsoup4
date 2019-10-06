@@ -55,7 +55,7 @@ To go beyond the basics, [comprehensive documentation is available](http://www.c
 
 Since 2012, Beautiful Soup has been developed as a Python 2 library
 which is automatically converted to Python 3 code as necessary. This
-makes it impossible to take advantages of some features of Python
+makes it impossible to take advantage of some features of Python
 3.
 
 For this reason, I plan to discontinue Beautiful Soup's Python 2
