@@ -5,39 +5,39 @@ idioms for iterating, searching, and modifying the parse tree.
 # Quick start
 
 ```
-  >>> from bs4 import BeautifulSoup
-  >>> soup = BeautifulSoup("<p>Some<b>bad<i>HTML")
-  >>> print soup.prettify()
-  <html>
-   <body>
-    <p>
-     Some
-     <b>
-      bad
-      <i>
-       HTML
-      </i>
-     </b>
-    </p>
-   </body>
-  </html>
-  >>> soup.find(text="bad")
-  u'bad'
-
-  >>> soup.i
-  <i>HTML</i>
-
-  >>> soup = BeautifulSoup("<tag1>Some<tag2/>bad<tag3>XML", "xml")
-  >>> print soup.prettify()
-  <?xml version="1.0" encoding="utf-8">
-  <tag1>
-   Some
-   <tag2 />
-   bad
-   <tag3>
-    XML
-   </tag3>
-  </tag1>
+>>> from bs4 import BeautifulSoup
+>>> soup = BeautifulSoup("<p>Some<b>bad<i>HTML")
+>>> print soup.prettify()
+<html>
+<body>
+<p>
+Some
+<b>
+bad
+<i>
+HTML
+</i>
+</b>
+</p>
+</body>
+</html>
+>>> soup.find(text="bad")
+u'bad'
+>>> soup.i
+<i>HTML</i>
+#
+>>> soup = BeautifulSoup("<tag1>Some<tag2/>bad<tag3>XML", "xml")
+#
+>>> print soup.prettify()
+<?xml version="1.0" encoding="utf-8">
+<tag1>
+Some
+<tag2 />
+bad
+<tag3>
+XML
+</tag3>
+</tag1>
 ```
 
 To go beyond the basics, [comprehensive documentation is available](http://www.crummy.com/software/BeautifulSoup/bs4/doc/).
@@ -89,11 +89,11 @@ documentation.
 Beautiful Soup supports unit test discovery from the project root directory:
 
 ```
- $ nosetests
+$ nosetests
 ```
 
 ```
- $ python -m unittest discover -s bs4
+$ python -m unittest discover -s bs4
 ```
 
 If you checked out the source tree, you should see a script in the
