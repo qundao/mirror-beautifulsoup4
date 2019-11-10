@@ -163,7 +163,7 @@ class PageElement(object):
             c = XMLFormatter
         else:
             c = HTMLFormatter
-        if callable(formatter):
+        if isinstance(formatter, Callable):
             return c(entity_substitution=formatter)
         return c.REGISTRY[formatter]
 
