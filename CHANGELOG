@@ -1,3 +1,11 @@
+= Unreleased
+
+* Fixed a deprecation warning on Python 3.7. Patch by Colin
+  Watson. [bug=1847592]
+
+* Added a Chinese translation by Deron Wang and a Brazilian Portuguese
+  translation by Cezar Peixeiro to the repository.
+
 = 4.8.1 (20191006)
 
 * When the html.parser or html5lib parsers are in use, Beautiful Soup
