@@ -3114,6 +3114,27 @@ You can speed up encoding detection significantly by installing the
 the document, but it can save a lot of memory, and it'll make
 `searching` the document much faster.
 
+Translating this documentation
+==============================
+
+New translations of the Beautiful Soup documentation are greatly
+appreciated. Translations should be licensed under the MIT license,
+just like Beautiful Soup and its English documentation are.
+
+There are two ways of getting your translation into the main code base
+and onto the Beautiful Soup website:
+
+1. Create a branch of the Beautiful Soup repository, add your
+   translation, and propose a merge with the main branch, the same
+   as you would do with a proposed change to the source code.
+2. Send a message to the Beautiful Soup discussion group with a link to
+   your translation, or attach your translation to the message.
+
+Use the Chinese or Brazilian Portuguese translations as your model. In
+particular, please translate ``doc/source/index.rst`` file, rather
+than the HTML version of the documentation. This makes it possible to
+publish the documentation in a variety of formats, not just HTML.
+
 Beautiful Soup 3
 ================
 
