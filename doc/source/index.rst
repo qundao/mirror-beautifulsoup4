@@ -29,10 +29,11 @@ Soup 3 and Beautiful Soup 4, see `Porting code to BS4`_.
 This documentation has been translated into other languages by
 Beautiful Soup users:
 
-* `这篇文档当然还有中文版. <http://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/>`_
+* `这篇文档当然还有中文版. <https://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html>`_
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
 * 이 문서는 한국어 번역도 가능합니다. (`외부 링크 <https://web.archive.org/web/20150319200824/http://coreapython.hosting.paran.com/etc/beautifulsoup4.html>`_)
-
+* `Este documento também está disponível em Português do Brasil.` <https://www.crummy.com/software/BeautifulSoup/bs4/doc/index.ptbr.html>`
+  
 Getting help
 ------------
 
@@ -484,7 +485,7 @@ the tree`_ and `Searching the tree`_. You can convert a
  # <type 'unicode'>
 
 You can't edit a string in place, but you can replace one string with
-another, using :ref:`replace_with`::
+another, using :ref:`replace_with()`::
 
  tag.string.replace_with("No longer bold")
  tag
@@ -2070,7 +2071,7 @@ destroys it and its contents`::
   # <a href="http://example.com/">I linked to</a>
 
 
-.. _replace_with:
+.. _replace_with():
 
 ``replace_with()``
 ------------------
@@ -2774,7 +2775,7 @@ information as ``Tag.sourceline`` (line number) and ``Tag.sourcepos``
 Note that the two parsers mean slightly different things by
 ``sourceline`` and ``sourcepos``. For html.parser, these numbers
 represent the position of the initial less-than sign. For html5lib,
-these numbers represent the position of the final greater-than sign.
+these numbers represent the position of the final greater-than sign::
    
    soup = BeautifulSoup(markup, 'html5lib')
    for tag in soup.find_all('p'):
