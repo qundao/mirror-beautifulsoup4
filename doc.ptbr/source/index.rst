@@ -286,7 +286,8 @@ anterior a 3.2.2, é `essencial` que você instale o lxml ou o html5lib. O parse
 HTML nativo do Python não é muito bom para versões mais antigas.
 
 Note que se um documento é inválido, diferentes parsers irão gerar
-diferentes árvores BeautifulSoup para isso. Veja :ref:`Diferenças entre os interpretadores (parsers)`
+diferentes árvores BeautifulSoup para isso. Veja
+:ref:`Diferenças entre os interpretadores (parsers) <differences-between-parsers>`
 para detalhes.
 
 
@@ -311,7 +312,7 @@ são convertidas para caracteres Unicode::
 
 O Beautiful Soup então interpreta o documento usando o melhor parser disponível.
 Ele irá utilizar um parser HTML ao menos que você indique a ele que utilize um
-parser XML.(Veja `Interpretando XML`_.)
+parser XML. (Veja `Analisando um XML`_.)
 
 Tipos de objetos
 ================
@@ -1116,8 +1117,8 @@ mas nenhuma das strings::
 
 .. _a function:
 
-Uma function
-^^^^^^^^^^^^
+Uma função
+^^^^^^^^^^
 
 Se nenhuma das opções anteriores funcionar para você, defina uma
 função que pegará um elemento como seu único argumento. A função
@@ -1221,8 +1222,8 @@ Este é o uso mais simples::
  # [<title>The Dormouse's story</title>]
 
 Lembre-se de `Tipos de filtros`_ que o valor para ``name`` pode ser `uma
-string`_, `uma expressão regular`_, `uma lista`_, `uma função`_, ou `o valor
-True`_.
+string`_, `uma expressão regular`_, `uma lista`_, `uma função`_, ou
+:ref:`o valor True <the value True>`.
 
 .. _kwargs:
 
@@ -1243,8 +1244,9 @@ em cada tag que possua o atributo ``href``::
  soup.find_all(href=re.compile("elsie"))
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>]
 
-Você pode filtrar um atributo baseado em `uma string`_, `uma regular
-expression`_, `uma lista`_, `uma função`_, ou `no valor True`_.
+Você pode filtrar um atributo baseado em `uma string`_,
+`uma expressão regular`_, `uma lista`_, `uma função`_, ou
+:ref:`o valor True <the value True>`.
 
 Este código encontra todas as tags em que o atributo ``id``
 possuem um valor, independente de qual valor seja::
@@ -1360,8 +1362,8 @@ O argumento ``string``
 
 Com ``string`` você pode buscar por strings ao invés de tags. Assim como
 ``name`` e os argumentos palavras-chave, você pode passar `uma string`_, `uma
-expressão regular`_, `uma lista`_, `uma função`_, ou `o valor True`_.
-Aqui estão alguns exemplos::
+expressão regular`_, `uma lista`_, `uma função`_, ou
+:ref:`o valor True <the value True>`. Aqui estão alguns exemplos::
 
  soup.find_all(string="Elsie")
  # [u'Elsie']
@@ -1588,7 +1590,8 @@ Signature: find_previous_sibling(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:
 
 Estes métodos utilizam :ref:`.previous_siblings <sibling-generators>` para iterar sobre os filhos de um elemento que
 o precede na árvore. O método ``find_previous_siblings()``
-retorna todos os filhos que atendem o requisito e ``find_previous_sibling()``retorna apenas o primeiro::
+retorna todos os filhos que atendem o requisito e
+``find_previous_sibling()`` retorna apenas o primeiro::
 
  last_link = soup.find("a", id="link3")
  last_link
@@ -1680,7 +1683,7 @@ sobre o conteúdo de uma única tag.
 
 A `documentação <https://facelessuser.github.io/soupsieve/>`_ SoupSieve
 lista todos os seletores suportados atualmente, mas aqui estão alguns dos
-básicos::
+básicos:
 
 Você pode encontrar tags::
 
@@ -1822,7 +1825,7 @@ pode também modificar a árvore e escrever suas modificações como um novo
 documento HTML ou XML.
 
 Alterando nomes de tags e atributos
----------------------------------
+-----------------------------------
 
 Cobri este assunto anteriormente em `Atributos`_, mas vale a pena repetir. Você
 pode renomear uma tag, alterar o valor de algum de seus atributos, adicionar novos
@@ -2183,7 +2186,7 @@ dentro dele::
  # u'<a href="http://example.com/">I linked to <i>example.com</i></a>'
 
 A função ``str()`` retorna uma string codificada em UTF-8. Veja
-`Encodings`_ para outras opções.
+`Codificação (Encoding)`_ para outras opções.
 
 Você também pode chamar ``encode()`` para ter uma bytestring, e ``decode()``
 para ter Unicode.
@@ -2320,7 +2323,7 @@ implementação também filtra o atributido chamado "m" quando ele aparece::
  print(attr_soup.p.encode(formatter=UnsortedAttributes())) 
  # <p z="1" a="3"></p>
 
-Um último conselho: se você criar um objeto ``CDATA'', o texto dentro deste objeto
+Um último conselho: se você criar um objeto ``CDATA``, o texto dentro deste objeto
 sempre estará presente `exatamente como aparenta, com nenhuma formatação`.
 O Beautiful Soup irá chamar sua função de substituição da entidade, apenas
 no caso de você ter escrito uma função personalizada que conta todas as strings
@@ -2387,17 +2390,20 @@ com as seguintes características:
 * O tipo de marcação que você quer analisar. Atualmente são suportados
   "html", "xml", and "html5".
 * O nome do parser que você quer utilizar. Atualmente são suportadas
-as opções "lxml", "html5lib", e "html.parser" (parser nativo do Python).
+  as opções "lxml", "html5lib", e "html.parser" (parser nativo do Python).
 
-A seção `Instalando um interpretador (parser)`_ compara os parsers suportados.
+A seção `Instalando um interpretador (parser)` compara os parsers suportados.
 
 Se você não tem um parser apropriado instalado, o Beautiful Soup irá
 ignorar sua solicitação e escolher um diferente. Atualmente, o único parser
 XML suportado é o lxml. Se você não possui o lxml instalado, pedir um parser
 XML não trará um e pedir por "lxml" não funcionará também.
 
+
+.. _differences-between-parsers:
+
 Diferenças entre os interpretadores (parsers)
-------------------------------------------
+---------------------------------------------
 
 O Beautiful Soup apresenta a mesma interface para diferentes parsers,
 mas cada um é diferente. Diferentes parsers irão criar diferentes análises da árvore
@@ -2743,7 +2749,7 @@ Esta característica é nova no 4.8.1 e os analisadores baseados no lxml
 não a suportam.
 
 Comparando objetos por igualdade
-==============================
+================================
 
 O Beautiful Soup diz que dois objetos ``NavigableString`` ou ``Tag`` são
 iguais quando eles apresentam as mesma marcação HTML ou XML. No exemplo
@@ -2833,7 +2839,7 @@ A classe ``SoupStrainer`` recebe os mesmos argumentos que qualquer método em `B
  only_short_strings = SoupStrainer(string=is_short_string)
 
 Irei trazer de volta o documento "three sisters" mais uma vez e veremos
-como o documento se parece quando é analisado com estes três objetos ``SoupStrainer`
+como o documento se parece quando é analisado com estes três objetos ``SoupStrainer``
 diferentes::
 
  html_doc = """
@@ -2928,10 +2934,9 @@ porque o Beautiful Soup é maravilhosamente um software bem escrito. É
 porque o Beautiful Soup não inclui nenhum código de análise. Ao invés disso,
 ele depende de analisadores externos. Se um analisador não funciona com
 certo documento, a melhor solução é tentar um analisador diferente. Veja 
-`Instalando um analisador`_ para detalhes e uma comparação entre eles.
+:ref:`Instalando um interpretador <parser-installation>` para detalhes e uma comparação entre eles.
 
 Os erros de interpretação mais comuns são ``HTMLParser.HTMLParseError:
-
 malformed start tag`` e ``HTMLParser.HTMLParseError: bad end
 tag``. Existem dois parsers gerados para o parser built in do Python
 e a solução é  :ref:`install lxml ou html5lib. <parser-installation>`
@@ -2985,7 +2990,7 @@ Outros problemas com analisadores
   possuem bibliotecas de analisadores difererentes. Por exemplo, você pode
   ter desenvolvido um script em um computador que possui lxml instalado,
   e então estar tentando rodá-lo no seu computador que possui apenas html5lib
-  instalado. Veja :ref:`Diferenças entre os interpretadores (parsers)` para entender porque isso importa,
+  instalado. Veja :ref:`Diferenças entre os interpretadores (parsers) <differences-between-parsers>` para entender porque isso importa,
   e corrija o problema mencionando uma biblioteca específica no construtor ``BeautifulSoup``.
 
 * Por tags `HTML e atributos serem case-insensitive
@@ -3050,7 +3055,7 @@ utilizando o lxml do que usando o html.parser ou html5lib.
 Você pode acelerar a detecção da codificação significativamente instalando
 a biblioteca `cchardet <http://pypi.python.org/pypi/cchardet/>`_ .
 
-`Analisando apenas parte do documento`_ não irá lhe poupar muito tempo de
+`Analisando apenas parte de um documento`_ não irá lhe poupar muito tempo de
 análise, mas irá poupar muita memória e fará a `busca` no documento muito
 mais rápida.
 
@@ -3113,7 +3118,7 @@ Você precisa de um interpretador (parser)
 O Beautiful Soup 3 utilizava o ``SGMLParser`` do Python, um módulo que
 foi depreciado e removido no Python 3.0. O Beautiful Soup 4 utiliza o
 ``html.parser`` por padrão, mas você pode adicionar o lxml ou html5lib 
-e utilizá-los como alternativa. Veja `Instalando um interpretador (parser)`_ para 
+e utilizá-los como alternativa. Veja :ref:`Instalando um interpretador <parser-installation>` para 
 comparação.
 
 Como o ``html.parser`` não é o mesmo analisador que ``SGMLParser``, é possível
