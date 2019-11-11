@@ -16,14 +16,15 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-The examples in this documentation should work the same way in Python
-2.7 and Python 3.2.
+This document covers Beautiful Soup version 4.8.1. The examples in
+this documentation should work the same way in Python 2.7 and Python
+3.2.
 
 You might be looking for the documentation for `Beautiful Soup 3
 <http://www.crummy.com/software/BeautifulSoup/bs3/documentation.html>`_.
 If so, you should know that Beautiful Soup 3 is no longer being
-developed, and that Beautiful Soup 4 is recommended for all new
-projects. If you want to learn about the differences between Beautiful
+developed and that support for it will be dropped on or after December
+31, 2020. If you want to learn about the differences between Beautiful
 Soup 3 and Beautiful Soup 4, see `Porting code to BS4`_.
 
 This documentation has been translated into other languages by
@@ -31,8 +32,8 @@ Beautiful Soup users:
 
 * `这篇文档当然还有中文版. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/>`_
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
-* `이 문서는 한국어 번역도 가능합니다. https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
-* `Este documento também está disponível em Português do Brasil.` <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr/>`
+* `이 문서는 한국어 번역도 가능합니다. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
+* `Este documento também está disponível em Português do Brasil. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr/>`_
   
 Getting help
 ------------
@@ -3131,9 +3132,10 @@ and onto the Beautiful Soup website:
    your translation, or attach your translation to the message.
 
 Use the Chinese or Brazilian Portuguese translations as your model. In
-particular, please translate ``doc/source/index.rst`` file, rather
-than the HTML version of the documentation. This makes it possible to
-publish the documentation in a variety of formats, not just HTML.
+particular, please translate the source file ``doc/source/index.rst``,
+rather than the HTML version of the documentation. This makes it
+possible to publish the documentation in a variety of formats, not
+just HTML.
 
 Beautiful Soup 3
 ================
