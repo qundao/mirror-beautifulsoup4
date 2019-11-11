@@ -5,11 +5,10 @@ I keep a copy of all translations in this repository so that it's easy
 to host translations on the Beautiful Soup website. These are
 generally not the canonical versions of the translations, though.
 
-doc.html/index.jp.html is a copy of the 2013 Japanese translation hosted at
-http://kondou.com/BS4/. I don't know who to credit for the
-translation.
+doc.jp/index.html is a copy of the 2013 Japanese translation hosted at
+http://kondou.com/BS4/. Translation credit goes to "shige".
 
-doc.html/index.kr.html is a copy of the 2012 Korean translation formerly hosted
+doc.ko/index.html is a copy of the 2012 Korean translation formerly hosted
 at http://coreapython.hosting.paran.com/etc/beautifulsoup4.html. I
 retrieved this copy from the Wayback Machine. I'm not sure who wrote
 the translation but I believe the credit goes to "Johnsonj".

@@ -16,9 +16,10 @@ Beautiful Soup 4.4.0 文档
 
 这篇帮助文档已经被翻译成了其它语言:
 
-* `这篇文档当然还有中文版. <http://www.crummy.com/software/BeautifulSoup/bs4/doc/index.cn.html>`_
+* `这篇文档当然还有中文版. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/>`_
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
-* 이 문서는 한국어 번역도 가능합니다. (`외부 링크 <http://coreapython.hosting.paran.com/etc/beautifulsoup4.html>`_)
+* `이 문서는 한국어 번역도 가능합니다. https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
+* `Este documento também está disponível em Português do Brasil.` <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr/>`
 
 
 寻求帮助
