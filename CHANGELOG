@@ -3,11 +3,16 @@
 * Fixed a deprecation warning on Python 3.7. Patch by Colin
   Watson. [bug=1847592]
 
+* Added Python docstrings to most public methods.
+
 * The html.parser tree builder now correctly handles DOCTYPEs that are
   not uppercase. [bug=1848401]
 
 * Added a Chinese translation by Deron Wang and a Brazilian Portuguese
   translation by Cezar Peixeiro to the repository.
+
+* PageElement.select() now returns a ResultSet rather than a regular list,
+  making it consistent with methods like find_all().
 
 = 4.8.1 (20191006)
 
