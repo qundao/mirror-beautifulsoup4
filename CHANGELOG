@@ -1,6 +1,7 @@
 = 4.8.2 (20191224)
 
-* Added Python docstrings to most public methods.
+* Added Python docstrings to all public methods of the most commonly
+  used classes.
 
 * Added a Chinese translation by Deron Wang and a Brazilian Portuguese
   translation by Cezar Peixeiro to the repository.
