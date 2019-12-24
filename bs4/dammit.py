@@ -53,7 +53,7 @@ except ImportError:
 
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
-xml_encoding = u'^\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
+xml_encoding = u'^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
 html_meta = u'<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]'
 encoding_res = dict()
 encoding_res[bytes] = {
