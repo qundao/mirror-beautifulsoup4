@@ -1165,7 +1165,7 @@ tags::
 
  soup.find_all(has_class_but_no_id)
  # [<p class="title"><b>The Dormouse's story</b></p>,
- #  <p class="story">Once upon a time there were...</p>,
+ #  <p class="story">Once upon a time there were…bottom of a well.</p>,
  #  <p class="story">...</p>]
 
 This function only picks up the <p> tags. It doesn't pick up the <a>
