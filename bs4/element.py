@@ -1784,8 +1784,9 @@ class Tag(PageElement):
 
     def has_key(self, key):
         """Deprecated method. This was kind of misleading because has_key()
-        (attributes) was different from __in__ (contents). has_key()
-        is gone in Python 3, anyway.
+        (attributes) was different from __in__ (contents).
+
+        has_key() is gone in Python 3, anyway.
         """
         warnings.warn('has_key is deprecated. Use has_attr("%s") instead.' % (
                 key))
@@ -1794,7 +1795,13 @@ class Tag(PageElement):
 # Next, a couple classes to represent queries and their results.
 class SoupStrainer(object):
     """Encapsulates a number of ways of matching a markup element (tag or
-    text)."""
+    string).
+
+    This is primarily used to underpin the find_* methods, but you can
+    create one yourself and pass it in as `parse_only` to the
+    `BeautifulSoup` constructor, to parse a subset of a large
+    document.
+    """
 
     def __init__(self, name=None, attrs={}, text=None, **kwargs):
         """Constructor.
@@ -1865,7 +1872,7 @@ class SoupStrainer(object):
         return unicode(str(value))
 
     def __str__(self):
-        """A string representation of this SoupStrainer."""
+        """A human-readable representation of this SoupStrainer."""
         if self.text:
             return self.text
         else:
@@ -2055,7 +2062,7 @@ class ResultSet(list):
         self.source = source
 
     def __getattr__(self, key):
-        """Raise a helpful exception."""
+        """Raise a helpful exception to explain a common code fix."""
         raise AttributeError(
             "ResultSet object has no attribute '%s'. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?" % key
         )

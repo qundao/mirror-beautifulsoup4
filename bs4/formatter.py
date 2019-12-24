@@ -7,7 +7,7 @@ class Formatter(EntitySubstitution):
     HTML4, HTML5, and XML. Others are configurable by the user.
 
     Formatters are passed in as the `formatter` argument to methods
-    like `Element.encode`. Most people won't need to think about
+    like `PageElement.encode`. Most people won't need to think about
     formatters, and most people who need to think about them can pass
     in one of these predefined strings as `formatter` rather than
     making a new Formatter object:
