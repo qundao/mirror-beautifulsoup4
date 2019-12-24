@@ -481,7 +481,7 @@ class PageElement(object):
         :param text: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
-
+        :rtype: bs4.element.PageElement
         """
         return self._find_one(self.find_all_next, name, attrs, text, **kwargs)
     findNext = find_next  # BS3
@@ -517,6 +517,7 @@ class PageElement(object):
         :param text: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self._find_one(self.find_next_siblings, name, attrs, text,
                              **kwargs)
@@ -536,6 +537,7 @@ class PageElement(object):
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
+        :rtype: bs4.element.ResultSet
         """
         return self._find_all(name, attrs, text, limit,
                               self.next_siblings, **kwargs)
@@ -554,6 +556,7 @@ class PageElement(object):
         :param text: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self._find_one(
             self.find_all_previous, name, attrs, text, **kwargs)
@@ -573,6 +576,7 @@ class PageElement(object):
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
+        :rtype: bs4.element.ResultSet
         """
         return self._find_all(name, attrs, text, limit, self.previous_elements,
                            **kwargs)
@@ -591,6 +595,7 @@ class PageElement(object):
         :param text: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self._find_one(self.find_previous_siblings, name, attrs, text,
                              **kwargs)
@@ -610,6 +615,7 @@ class PageElement(object):
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
+        :rtype: bs4.element.ResultSet
         """
         return self._find_all(name, attrs, text, limit,
                               self.previous_siblings, **kwargs)
@@ -628,6 +634,7 @@ class PageElement(object):
         :kwargs: A dictionary of filters on attribute values.
 
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
@@ -650,6 +657,7 @@ class PageElement(object):
         :kwargs: A dictionary of filters on attribute values.
 
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self._find_all(name, attrs, None, limit, self.parents,
                              **kwargs)
@@ -661,6 +669,7 @@ class PageElement(object):
         """The PageElement, if any, that was parsed just after this one.
 
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self.next_element
 
@@ -669,6 +678,7 @@ class PageElement(object):
         """The PageElement, if any, that was parsed just before this one.
 
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         return self.previous_element
 
@@ -1660,6 +1670,7 @@ class Tag(PageElement):
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         r = None
         l = self.find_all(name, attrs, recursive, text, 1, **kwargs)
@@ -1684,6 +1695,7 @@ class Tag(PageElement):
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
+        :rtype: bs4.element.ResultSet
         """
         generator = self.descendants
         if not recursive:
@@ -1732,6 +1744,7 @@ class Tag(PageElement):
            soupsieve.select() method.
 
         :return: A PageElement.
+        :rtype: bs4.element.PageElement
         """
         value = self.select(selector, namespaces, 1, **kwargs)
         if value:
@@ -1756,6 +1769,7 @@ class Tag(PageElement):
            soupsieve.select() method.
 
         :return: A ResultSet of PageElements.
+        :rtype: bs4.element.ResultSet
         """
         if namespaces is None:
             namespaces = self._namespaces
