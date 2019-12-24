@@ -1,4 +1,4 @@
-.. _documentation:
+.. _manual:
 
 Beautiful Soup Documentation
 ============================

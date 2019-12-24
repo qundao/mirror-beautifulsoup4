@@ -1,6 +1,5 @@
-"""Beautiful Soup
-Elixir and Tonic
-"The Screen-Scraper's Friend"
+"""Beautiful Soup Elixir and Tonic - "The Screen-Scraper's Friend".
+
 http://www.crummy.com/software/BeautifulSoup/
 
 Beautiful Soup uses a pluggable XML or HTML parser to parse a
@@ -12,9 +11,7 @@ Beautiful Soup works with Python 2.7 and up. It works better if lxml
 and/or html5lib is installed.
 
 For more than you ever wanted to know about Beautiful Soup, see the
-documentation:
-http://www.crummy.com/software/BeautifulSoup/bs4/doc/
-
+documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
@@ -105,12 +102,13 @@ class BeautifulSoup(Tag):
         :param markup: A string or a file-like object representing
          markup to be parsed.
 
-        :param features: Desirable features of the parser to be used. This
-         may be the name of a specific parser ("lxml", "lxml-xml",
-         "html.parser", or "html5lib") or it may be the type of markup
-         to be used ("html", "html5", "xml"). It's recommended that you
-         name a specific parser, so that Beautiful Soup gives you the
-         same results across platforms and virtual environments.
+        :param features: Desirable features of the parser to be
+         used. This may be the name of a specific parser ("lxml",
+         "lxml-xml", "html.parser", or "html5lib") or it may be the
+         type of markup to be used ("html", "html5", "xml"). It's
+         recommended that you name a specific parser, so that
+         Beautiful Soup gives you the same results across platforms
+         and virtual environments.
 
         :param builder: A TreeBuilder subclass to instantiate (or
          instance to use) instead of looking one up based on
@@ -140,14 +138,15 @@ class BeautifulSoup(Tag):
         :param kwargs: For backwards compatibility purposes, the
          constructor accepts certain keyword arguments used in
          Beautiful Soup 3. None of these arguments do anything in
-         Beautiful Soup 4; they will result in a warning and then be ignored.
+         Beautiful Soup 4; they will result in a warning and then be
+         ignored.
          
-         Apart from this, any keyword arguments passed into the BeautifulSoup
-         constructor are propagated to the TreeBuilder constructor. This
-         makes it possible to configure a TreeBuilder by passing in arguments,
-         not just by saying which one to use.
+         Apart from this, any keyword arguments passed into the
+         BeautifulSoup constructor are propagated to the TreeBuilder
+         constructor. This makes it possible to configure a
+         TreeBuilder by passing in arguments, not just by saying which
+         one to use.
         """
-
         if 'convertEntities' in kwargs:
             del kwargs['convertEntities']
             warnings.warn(
@@ -342,9 +341,7 @@ class BeautifulSoup(Tag):
         self.builder.soup = None
 
     def __copy__(self):
-        """A copy of a BeautifulSoup object is created by converting the
-        document to a string and parsing it again.
-        """
+        """Copy a BeautifulSoup object by converting the document to a string and parsing it again."""
         copy = type(self)(
             self.encode('utf-8'), builder=self.builder, from_encoding='utf-8'
         )
