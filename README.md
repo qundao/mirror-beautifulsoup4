@@ -59,7 +59,7 @@ makes it impossible to take advantage of some features of Python
 3.
 
 For this reason, I plan to discontinue Beautiful Soup's Python 2
-support at some point after December 31, 2021: one year after the
+support at some point after December 31, 2020: one year after the
 sunset date for Python 2 itself. Beyond that point, new Beautiful Soup
 development will exclusively target Python 3. Of course, older
 releases of Beautiful Soup, which support both versions, will continue
