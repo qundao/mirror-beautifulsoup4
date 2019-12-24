@@ -91,9 +91,9 @@ class BeautifulSoup(Tag):
     # want, look for one with these features.
     DEFAULT_BUILDER_FEATURES = ['html', 'fast']
 
-    # A bytestring containing all ASCII whitespace characters, used in
+    # A string containing all ASCII whitespace characters, used in
     # endData() to detect data chunks that seem 'empty'.
-    ASCII_SPACES = b'\x20\x0a\x09\x0c\x0d'
+    ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 

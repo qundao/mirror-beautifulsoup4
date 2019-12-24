@@ -1,3 +1,5 @@
+.. _documentation:
+
 Beautiful Soup Documentation
 ============================
 
