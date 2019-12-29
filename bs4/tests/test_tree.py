@@ -1777,6 +1777,23 @@ class TestEncoding(SoupTest):
 
 class TestFormatter(SoupTest):
 
+    def test_default_attributes(self):
+        # Test the default behavior of Formatter.attributes().
+        formatter = Formatter()
+        tag = Tag(name="tag")
+        tag['b'] = 1
+        tag['a'] = 2
+
+        # Attributes come out sorted by name. In Python 3, attributes
+        # normally come out of a dictionary in the order they were
+        # added.
+        self.assertEquals([('a', 2), ('b', 1)], formatter.attributes(tag))
+
+        # This works even if Tag.attrs is None, though this shouldn't
+        # normally happen.
+        tag.attrs = None
+        self.assertEquals([], formatter.attributes(tag))
+        
     def test_sort_attributes(self):
         # Test the ability to override Formatter.attributes() to,
         # e.g., disable the normal sorting of attributes.
