@@ -1275,6 +1275,23 @@ class TestTreeModification(SoupTest):
         a.clear(decompose=True)
         self.assertEqual(0, len(em.contents))
 
+       
+    def test_decompose(self):
+        # Test PageElement.decompose() and PageElement.decomposed
+        soup = self.soup("<p><a>String <em>Italicized</em></a></p><p>Another para</p>")
+        p1, p2 = soup.find_all('p')
+        a = p1.a
+        text = p1.em.string
+        for i in [p1, p2, a, text]:
+            self.assertEqual(False, i.decomposed)
+
+        # This sets p1 and everything beneath it to decomposed.
+        p1.decompose()
+        for i in [p1, a, text]:
+            self.assertEqual(True, i.decomposed)
+        # p2 is unaffected.
+        self.assertEqual(False, p2.decomposed)
+            
     def test_string_set(self):
         """Tag.string = 'string'"""
         soup = self.soup("<a></a> <b><c></c></b>")

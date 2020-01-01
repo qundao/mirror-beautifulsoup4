@@ -802,6 +802,14 @@ class PageElement(object):
             yield i
             i = i.parent
 
+    @property
+    def decomposed(self):
+        """Check whether a PageElement has been decomposed.
+
+        :rtype: bool
+        """
+        return getattr(self, '_decomposed', False) or False
+            
     # Old non-property versions of the generators, for backwards
     # compatibility with BS3.
     def nextGenerator(self):
@@ -1211,15 +1219,21 @@ class Tag(PageElement):
 
         This element will be removed from the tree and wiped out; so
         will everything beneath it.
+
+        The behavior of a decomposed PageElement is undefined and you
+        should never use one for anything, but if you need to _check_
+        whether an element has been decomposed, you can use the
+        `decomposed` property.
         """
         self.extract()
         i = self
         while i is not None:
-            next = i.next_element
+            n = i.next_element
             i.__dict__.clear()
             i.contents = []
-            i = next
-
+            i._decomposed = True
+            i = n
+           
     def clear(self, decompose=False):
         """Wipe out all children of this PageElement by calling extract()
            on them.

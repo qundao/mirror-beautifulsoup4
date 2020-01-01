@@ -1,4 +1,8 @@
-= Unreleased
+= 4.9.0 (Unreleased)
+
+* Added PageElement.decomposed, a new property which lets you
+  check whether you've already called decompose() on a Tag or
+  NavigableString.
 
 * Fixed an unhandled exception when formatting a Tag that had been
   decomposed.[bug=1857767]

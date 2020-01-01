@@ -97,7 +97,7 @@ data structure::
  #     Lacie
  #    </a>
  #    and
- #    <a class="sister" href="http://example.com/tillie" id="link2">
+ #    <a class="sister" href="http://example.com/tillie" id="link3">
  #     Tillie
  #    </a>
  #    ; and they lived at the bottom of a well.
@@ -2067,11 +2067,22 @@ destroys it and its contents`::
   markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
   soup = BeautifulSoup(markup)
   a_tag = soup.a
+  i_tag = soup.i
 
-  soup.i.decompose()
-
+  i_tag.decompose()
   a_tag
   # <a href="http://example.com/">I linked to</a>
+
+The behavior of a decomposed ``Tag`` or ``NavigableString`` is not
+defined and you should not use it for anything. If you're not sure
+whether something has been decomposed, you can check its
+``.decomposed`` property (new in 4.9.0)::
+
+  i_tag.decomposed
+  # True
+
+  a_tag.decomposed
+  # False
 
 
 .. _replace_with():
