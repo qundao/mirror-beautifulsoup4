@@ -2297,7 +2297,7 @@ Unicode characters to HTML entities whenever possible::
  # </html>
 
 If you pass in ``formatter="html5"``, it's the same as
-``formatter="html5"``, but Beautiful Soup will
+``formatter="html"``, but Beautiful Soup will
 omit the closing slash in HTML void tags like "br"::
 
  soup = BeautifulSoup("<br>")
