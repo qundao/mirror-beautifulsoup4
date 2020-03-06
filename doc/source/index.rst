@@ -2215,6 +2215,11 @@ or on any of its ``Tag`` objects::
   #  </i>
   # </a>
 
+Since it adds whitespace (in the form of newlines), ``prettify()``
+changes the meaning of an HTML document and should not be used to
+reformat one. The goal of ``prettify()`` is to help you visually
+understand the structure of the documents you work with.
+  
 Non-pretty printing
 -------------------
 
