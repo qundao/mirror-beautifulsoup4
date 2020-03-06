@@ -7,6 +7,9 @@
 * Fixed an unhandled exception when formatting a Tag that had been
   decomposed.[bug=1857767]
 
+* Added a performance optimization to PageElement.extract(). Patch by
+  Arthur Darcet.
+
 = 4.8.2 (20191224)
 
 * Added Python docstrings to all public methods of the most commonly
