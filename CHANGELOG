@@ -7,6 +7,10 @@
 * Fixed an unhandled exception when formatting a Tag that had been
   decomposed.[bug=1857767]
 
+* Fixed a bug that happened when passing a Unicode filename containing
+  non-ASCII characters as markup into Beautiful Soup, on a system that
+  allows Unicode filenames. [bug=1866717]
+
 * Added a performance optimization to PageElement.extract(). Patch by
   Arthur Darcet.
 
