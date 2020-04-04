@@ -29,8 +29,8 @@ Esta documentação foi traduzida para outros idiomas pelos usuários do Beautif
 * `这篇文档当然还有中文版. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.zh/>`_
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
 * `이 문서는 한국어 번역도 가능합니다. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
-* `Este documento também está disponível em Português do Brasil. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr/>`_
-  
+* `Эта документация доступна на русском языке. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ru/>`_
+
 Como conseguir ajuda:
 ---------------------
 

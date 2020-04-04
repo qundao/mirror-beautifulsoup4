@@ -4,6 +4,8 @@
   check whether you've already called decompose() on a Tag or
   NavigableString.
 
+* Added a Russian translation by 'authoress' to the repository.
+
 * Fixed an unhandled exception when formatting a Tag that had been
   decomposed.[bug=1857767]
 
