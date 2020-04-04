@@ -1763,8 +1763,8 @@ class Tag(PageElement):
         :param kwargs: Keyword arguments to be passed into SoupSieve's 
            soupsieve.select() method.
 
-        :return: A PageElement.
-        :rtype: Union[bs4.element.Tag, bs4.element.NavigableString]
+        :return: A Tag.
+        :rtype: bs4.element.Tag
         """
         value = self.select(selector, namespaces, 1, **kwargs)
         if value:
@@ -1788,7 +1788,7 @@ class Tag(PageElement):
         :param kwargs: Keyword arguments to be passed into SoupSieve's 
            soupsieve.select() method.
 
-        :return: A ResultSet of PageElements.
+        :return: A ResultSet of Tags.
         :rtype: bs4.element.ResultSet
         """
         if namespaces is None:
