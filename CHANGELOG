@@ -1,8 +1,12 @@
-= 4.9.0 (Unreleased)
+= 4.9.0 (20200405)
 
 * Added PageElement.decomposed, a new property which lets you
   check whether you've already called decompose() on a Tag or
   NavigableString.
+
+* Embedded CSS and Javascript is now stored in distinct Stylesheet and
+  Script tags, which are ignored by methods like get_text(). This
+  feature is not supported by the html5lib treebuilder. [bug=1868861]
 
 * Added a Russian translation by 'authoress' to the repository.
 

@@ -27,8 +27,11 @@ from bs4.element import (
     Doctype,
     Formatter,
     NavigableString,
+    Script,
     SoupStrainer,
+    Stylesheet,
     Tag,
+    TemplateString,
 )
 from bs4.testing import (
     SoupTest,
@@ -1408,7 +1411,7 @@ class TestElementObjects(SoupTest):
         self.assertEqual(soup.a.get_text(","), "a,r, , t ")
         self.assertEqual(soup.a.get_text(",", strip=True), "a,r,t")
 
-    def test_get_text_ignores_comments(self):
+    def test_get_text_ignores_special_string_containers(self):
         soup = self.soup("foo<!--IGNORE-->bar")
         self.assertEqual(soup.get_text(), "foobar")
 
@@ -1417,9 +1420,16 @@ class TestElementObjects(SoupTest):
         self.assertEqual(
             soup.get_text(types=None), "fooIGNOREbar")
 
-    def test_all_strings_ignores_comments(self):
+        soup = self.soup("foo<style>CSS</style><script>Javascript</script>bar")
+        self.assertEqual(soup.get_text(), "foobar")
+        
+    def test_all_strings_ignores_special_string_containers(self):
         soup = self.soup("foo<!--IGNORE-->bar")
         self.assertEqual(['foo', 'bar'], list(soup.strings))
+
+        soup = self.soup("foo<style>CSS</style><script>Javascript</script>bar")
+        self.assertEqual(['foo', 'bar'], list(soup.strings))
+
 
 class TestCDAtaListAttributes(SoupTest):
 
@@ -1873,6 +1883,31 @@ class TestNavigableStringSubclasses(SoupTest):
     def test_declaration(self):
         d = Declaration("foo")
         self.assertEqual("<?foo?>", d.output_ready())
+
+    def test_default_string_containers(self):
+        # In some cases, we use different NavigableString subclasses for
+        # the same text in different tags.
+        soup = self.soup(
+            "<div>text</div><script>text</script><style>text</style>"
+        )
+        self.assertEqual(
+            [NavigableString, Script, Stylesheet],
+            [x.__class__ for x in soup.find_all(text=True)]
+        )
+
+        # The TemplateString is a little unusual because it's generally found
+        # _inside_ children of a <template> element, not a direct child of the
+        # <template> element.
+        soup = self.soup(
+            "<template>Some text<p>In a tag</p></template>Some text outside"
+        )
+        assert all(isinstance(x, TemplateString) for x in soup.template.strings)
+
+        # Once the <template> tag closed, we went back to using
+        # NavigableString.
+        outside = soup.template.next_sibling
+        assert isinstance(outside, NavigableString)
+        assert not isinstance(outside, TemplateString)
 
 class TestSoupSelector(TreeTest):
 

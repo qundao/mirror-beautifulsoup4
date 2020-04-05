@@ -992,6 +992,33 @@ class Doctype(PreformattedString):
     SUFFIX = u'>\n'
 
 
+class Stylesheet(NavigableString):
+    """A NavigableString representing an stylesheet (probably
+    CSS).
+
+    Used to distinguish embedded stylesheets from textual content.
+    """
+    pass
+
+    
+class Script(NavigableString):
+    """A NavigableString representing an executable script (probably
+    Javascript).
+
+    Used to distinguish executable code from textual content.
+    """
+    pass
+
+
+class TemplateString(NavigableString):
+    """A NavigableString representing a string found inside an HTML
+    template embedded in a larger document.
+
+    Used to distinguish such strings from the main body of the document.
+    """
+    pass
+
+
 class Tag(PageElement):
     """Represents an HTML or XML tag that is part of a parse tree, along
     with its attributes and contents.
@@ -1211,7 +1238,7 @@ class Tag(PageElement):
             a subclass not found in this list will be ignored. By
             default, this means only NavigableString and CData objects
             will be considered. So no comments, processing instructions,
-            etc.
+            stylesheets, etc.
 
         :return: A string.
         """

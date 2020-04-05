@@ -540,7 +540,7 @@ Comments and other special strings
 
 ``Tag``, ``NavigableString``, and ``BeautifulSoup`` cover almost
 everything you'll see in an HTML or XML file, but there are a few
-leftover bits. The only one you'll probably ever need to worry about
+leftover bits. The main one you'll probably encounter
 is the comment::
 
  markup = "<b><!--Hey, buddy. Want to buy a used parser?--></b>"
@@ -562,9 +562,19 @@ displayed with special formatting::
  #  <!--Hey, buddy. Want to buy a used parser?-->
  # </b>
 
+Beautiful Soup also defines classes called ``Stylesheet``, ``Script``,
+and ``TemplateString``, for embedded CSS stylesheets (any strings
+found inside a ``<style>`` tag), embedded Javascript (any strings
+found in a ``<script>`` tag), and HTML templates (any strings inside a
+``<template>`` tag). These classes work exactly the same way as
+``NavigableString``; their only purpose is to make it easier to pick
+out the main body of the page, by ignoring strings that represent
+something else. (These classes are new in Beautiful Soup 4.9.0, and
+the html5lib parser doesn't use them.)
+ 
 Beautiful Soup defines classes for anything else that might show up in
 an XML document: ``CData``, ``ProcessingInstruction``,
-``Declaration``, and ``Doctype``. Just like ``Comment``, these classes
+``Declaration``, and ``Doctype``. Like ``Comment``, these classes
 are subclasses of ``NavigableString`` that add something extra to the
 string. Here's an example that replaces the comment with a CDATA
 block::
@@ -577,7 +587,7 @@ block::
  # <b>
  #  <![CDATA[A CDATA block]]>
  # </b>
-
+ 
 
 Navigating the tree
 ===================

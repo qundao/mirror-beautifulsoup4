@@ -15,8 +15,8 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.8.2"
-__copyright__ = "Copyright (c) 2004-2019 Leonard Richardson"
+__version__ = "4.9.0"
+__copyright__ = "Copyright (c) 2004-2020 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
@@ -423,6 +423,7 @@ class BeautifulSoup(Tag):
         self.currentTag = None
         self.tagStack = []
         self.preserve_whitespace_tag_stack = []
+        self.string_container_stack = []
         self.pushTag(self)
 
     def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
@@ -434,14 +435,28 @@ class BeautifulSoup(Tag):
             sourceline=sourceline, sourcepos=sourcepos
         )
 
+    def string_container(self, base_class=None):
+        container = base_class or NavigableString
+        
+        # There may be a general override of NavigableString.
+        container = self.element_classes.get(
+            container, container
+        )
+
+        # On top of that, we may be inside a tag that needs a special
+        # container class.
+        if self.string_container_stack:
+            container = self.builder.string_containers.get(
+                self.string_container_stack[-1].name, container
+            )
+        return container
+        
     def new_string(self, s, subclass=None):
         """Create a new NavigableString associated with this BeautifulSoup
         object.
         """
-        subclass = subclass or self.element_classes.get(
-            NavigableString, NavigableString
-        )
-        return subclass(s)
+        container = self.string_container(subclass)
+        return container(s)
 
     def insert_before(self, successor):
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
@@ -460,6 +475,8 @@ class BeautifulSoup(Tag):
         tag = self.tagStack.pop()
         if self.preserve_whitespace_tag_stack and tag == self.preserve_whitespace_tag_stack[-1]:
             self.preserve_whitespace_tag_stack.pop()
+        if self.string_container_stack and tag == self.string_container_stack[-1]:
+            self.string_container_stack.pop()
         #print "Pop", tag.name
         if self.tagStack:
             self.currentTag = self.tagStack[-1]
@@ -474,19 +491,14 @@ class BeautifulSoup(Tag):
         self.currentTag = self.tagStack[-1]
         if tag.name in self.builder.preserve_whitespace_tags:
             self.preserve_whitespace_tag_stack.append(tag)
+        if tag.name in self.builder.string_containers:
+            self.string_container_stack.append(tag)
 
     def endData(self, containerClass=None):
         """Method called by the TreeBuilder when the end of a data segment
         occurs.
         """
-        # Default container is NavigableString.
-        containerClass = containerClass or NavigableString
-
-        # The user may want us to instantiate some alias for the
-        # container class.
-        containerClass = self.element_classes.get(
-            containerClass, containerClass
-        )
+        containerClass = self.string_container(containerClass)
         
         if self.current_data:
             current_data = u''.join(self.current_data)

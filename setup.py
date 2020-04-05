@@ -11,7 +11,7 @@ setup(
     # NOTE: We can't import __version__ from bs4 because bs4/__init__.py is Python 2 code,
     # and converting it to Python 3 means going through this code to run 2to3.
     # So we have to specify it twice for the time being.
-    version = '4.8.2',
+    version = '4.9.0',
     author="Leonard Richardson",
     author_email='leonardr@segfault.org',
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
