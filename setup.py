@@ -2,10 +2,15 @@ from setuptools import (
     setup,
     find_packages,
 )
+import sys
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+install_requires=["soupsieve>1.2"]
+if sys.version_info.major == 2:
+    install_requires.append("soupsieve<2.0")
+    
 setup(
     name="beautifulsoup4",
     # NOTE: We can't import __version__ from bs4 because bs4/__init__.py is Python 2 code,
@@ -17,7 +22,7 @@ setup(
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
     download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
     description="Screen-scraping library",
-    install_requires=["soupsieve>=1.2"],
+    install_requires=install_requires,
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
