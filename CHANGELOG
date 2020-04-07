@@ -5,7 +5,8 @@
   NavigableString.
 
 * Embedded CSS and Javascript is now stored in distinct Stylesheet and
-  Script tags, which are ignored by methods like get_text(). This
+  Script tags, which are ignored by methods like get_text() since most
+  people don't consider this sort of content to be 'text'. This
   feature is not supported by the html5lib treebuilder. [bug=1868861]
 
 * Added a Russian translation by 'authoress' to the repository.

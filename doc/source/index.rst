@@ -18,7 +18,7 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.8.1. The examples in
+This document covers Beautiful Soup version 4.9.0. The examples in
 this documentation should work the same way in Python 2.7 and Python
 3.2.
 
@@ -1708,18 +1708,17 @@ tag it contains.
 CSS selectors
 -------------
 
-As of version 4.7.0, Beautiful Soup supports most CSS4 selectors via
-the `SoupSieve <https://facelessuser.github.io/soupsieve/>`_
-project. If you installed Beautiful Soup through ``pip``, SoupSieve
-was installed at the same time, so you don't have to do anything extra.
+``BeautifulSoup`` has a ``.select()`` method which uses the `SoupSieve
+<https://facelessuser.github.io/soupsieve/>`_ package to run a CSS
+selector against a parsed document and return all the matching
+elements. ``Tag`` has a similar method which runs a CSS selector
+against the contents of a single tag.
 
-``BeautifulSoup`` has a ``.select()`` method which uses SoupSieve to
-run a CSS selector against a parsed document and return all the
-matching elements. ``Tag`` has a similar method which runs a CSS
-selector against the contents of a single tag.
-
-(Earlier versions of Beautiful Soup also have the ``.select()``
-method, but only the most commonly-used CSS selectors are supported.)
+(The SoupSieve integration was added in Beautiful Soup 4.7.0. Earlier
+versions also have the ``.select()`` method, but only the most
+commonly-used CSS selectors are supported. If you installed Beautiful
+Soup through ``pip``, SoupSieve was installed at the same time, so you
+don't have to do anything extra.)
 
 The SoupSieve `documentation
 <https://facelessuser.github.io/soupsieve/>`_ lists all the currently
@@ -2436,6 +2435,12 @@ generator instead, and process the text yourself::
  [text for text in soup.stripped_strings]
  # [u'I linked to', u'example.com']
 
+*As of Beautiful Soup version 4.9.0, when lxml or html.parser are in
+use, the contents of <script>, <style>, and <template>
+tags are not considered to be 'text', since those tags are not part of
+the human-visible content of the page.*
+
+ 
 Specifying the parser to use
 ============================
 
