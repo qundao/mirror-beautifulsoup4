@@ -40,8 +40,11 @@ from .element import (
     PageElement,
     ProcessingInstruction,
     ResultSet,
+    Script,
+    Stylesheet,
     SoupStrainer,
     Tag,
+    TemplateString,
     )
 
 # The very first thing we do is give a useful error if someone is
