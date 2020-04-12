@@ -1,3 +1,11 @@
+= 4.9.1 (unreleased)
+
+* The new NavigableString subclasses (Stylesheet, Script, and
+  TemplateString) can now be imported directly from the bs4 package.
+
+* Fixed test failures when run against soupselect 2.0. Patch by Tomáš
+  Chvátal. [bug=1872279]
+
 = 4.9.0 (20200405)
 
 * Added PageElement.decomposed, a new property which lets you
