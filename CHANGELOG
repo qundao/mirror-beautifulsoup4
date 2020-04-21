@@ -1,6 +1,6 @@
 = 4.9.1 (unreleased)
 
-* Added a distinct subclass, GuessedAsParserWarning, for the warning
+* Added a distinct subclass, GuessedAtParserWarning, for the warning
   issued when BeautifulSoup is instantiated without a parser being
   specified. [bug=1873787]
 
