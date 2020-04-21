@@ -51,6 +51,19 @@ from .element import (
 # running this code under Python 3 without converting it.
 'You are trying to run the Python 2 version of Beautiful Soup under Python 3. This will not work.'<>'You need to convert the code, either by installing it (`python setup.py install`) or by running 2to3 (`2to3 -w bs4`).'
 
+# Define some custom warnings.
+class GuessedAtParserWarning(UserWarning):
+    """The warning issued when BeautifulSoup has to guess what parser to
+    use -- probably because no parser was specified in the constructor.
+    """
+
+class MarkupResemblesLocatorWarning(UserWarning):
+    """The warning issued when BeautifulSoup is given 'markup' that
+    actually looks like a resource locator -- a URL or a path to a file
+    on disk.
+    """
+
+
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
 
@@ -272,7 +285,10 @@ class BeautifulSoup(Tag):
                         parser=builder.NAME,
                         markup_type=markup_type
                     )
-                    warnings.warn(self.NO_PARSER_SPECIFIED_WARNING % values, stacklevel=2)
+                    warnings.warn(
+                        self.NO_PARSER_SPECIFIED_WARNING % values,
+                        GuessedAtParserWarning, stacklevel=2
+                    )
         else:
             if kwargs:
                 warnings.warn("Keyword arguments to the BeautifulSoup constructor will be ignored. These would normally be passed into the TreeBuilder constructor, but a TreeBuilder instance was passed in as `builder`.")
@@ -312,7 +328,8 @@ class BeautifulSoup(Tag):
                 warnings.warn(
                     '"%s" looks like a filename, not markup. You should'
                     ' probably open this file and pass the filehandle into'
-                    ' Beautiful Soup.' % self._decode_markup(markup)
+                    ' Beautiful Soup.' % self._decode_markup(markup),
+                    MarkupResemblesLocatorWarning
                 )
             self._check_markup_is_url(markup)
 
@@ -399,7 +416,8 @@ class BeautifulSoup(Tag):
                     ' requests to get the document behind the URL, and feed'
                     ' that document to Beautiful Soup.' % cls._decode_markup(
                         markup
-                    )
+                    ),
+                    MarkupResemblesLocatorWarning
                 )
 
     def _feed(self):

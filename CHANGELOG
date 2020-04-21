@@ -1,5 +1,14 @@
 = 4.9.1 (unreleased)
 
+* Added a distinct subclass, GuessedAsParserWarning, for the warning
+  issued when BeautifulSoup is instantiated without a parser being
+  specified. [bug=1873787]
+
+* Added a distinct subclass, MarkupResemblesLocatorWarning, for the
+  warning issued when BeautifulSoup is instantiated with 'markup' that
+  actually seems to be a URL or the path to a file on
+  disk. [bug=1873787]
+
 * The new NavigableString subclasses (Stylesheet, Script, and
   TemplateString) can now be imported directly from the bs4 package.
 
