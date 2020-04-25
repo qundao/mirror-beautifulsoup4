@@ -2404,7 +2404,7 @@ return value::
 ``get_text()``
 --------------
 
-If you only want the text part of a document or tag, you can use the
+If you only want the human-readable text inside a document or tag, you can use the
 ``get_text()`` method. It returns all the text in a document or
 beneath a tag, as a single Unicode string::
 
