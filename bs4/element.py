@@ -43,6 +43,35 @@ def _alias(attr):
     return alias
 
 
+# These encodings are recognized by Python (so PageElement.encode
+# could theoretically support them) but XML and HTML don't recognize
+# them (so they should not show up in an XML or HTML document as that
+# document's encoding).
+#
+# If an XML document is encoded in one of these encodings, no encoding
+# will be mentioned in the XML declaration. If an HTML document is
+# encoded in one of these encodings, and the HTML document has a
+# <meta> tag that mentions an encoding, the encoding will be given as
+# the empty string.
+#
+# Source:
+# https://docs.python.org/3/library/codecs.html#python-specific-encodings
+PYTHON_SPECIFIC_ENCODINGS = set([
+    u"idna",
+    u"mbcs",
+    u"oem",
+    u"palmos",
+    u"punycode",
+    u"raw_unicode_escape",
+    u"undefined",
+    u"unicode_escape",
+    u"raw-unicode-escape",
+    u"unicode-escape",
+    u"string-escape",
+    u"string_escape",
+])
+    
+
 class NamespacedAttribute(unicode):
     """A namespaced string (e.g. 'xml:lang') that remembers the namespace
     ('xml') and the name ('lang') that were used to create it.
@@ -85,6 +114,8 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         """When an HTML document is being encoded to a given encoding, the
         value of a meta tag's 'charset' is the name of the encoding.
         """
+        if encoding in PYTHON_SPECIFIC_ENCODINGS:
+            return ''
         return encoding
 
 
@@ -110,6 +141,8 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         return obj
 
     def encode(self, encoding):
+        if encoding in PYTHON_SPECIFIC_ENCODINGS:
+            return ''
         def rewrite(match):
             return match.group(1) + encoding
         return self.CHARSET_RE.sub(rewrite, self.original_value)

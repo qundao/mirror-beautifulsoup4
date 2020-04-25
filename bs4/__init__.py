@@ -39,6 +39,7 @@ from .element import (
     NavigableString,
     PageElement,
     ProcessingInstruction,
+    PYTHON_SPECIFIC_ENCODINGS,
     ResultSet,
     Script,
     Stylesheet,
@@ -109,7 +110,7 @@ class BeautifulSoup(Tag):
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
-
+    
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
                  element_classes=None, **kwargs):
@@ -697,7 +698,7 @@ class BeautifulSoup(Tag):
     def handle_data(self, data):
         """Called by the tree builder when a chunk of textual data is encountered."""
         self.current_data.append(data)
-
+       
     def decode(self, pretty_print=False,
                eventual_encoding=DEFAULT_OUTPUT_ENCODING,
                formatter="minimal"):
@@ -712,6 +713,11 @@ class BeautifulSoup(Tag):
         if self.is_xml:
             # Print the XML declaration
             encoding_part = ''
+            if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
+                # This is a special Python encoding; it can't actually
+                # go into an XML document because it means nothing
+                # outside of Python.
+                eventual_encoding = None
             if eventual_encoding != None:
                 encoding_part = ' encoding="%s"' % eventual_encoding
             prefix = u'<?xml version="1.0"%s?>\n' % encoding_part

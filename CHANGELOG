@@ -12,6 +12,11 @@
 * The new NavigableString subclasses (Stylesheet, Script, and
   TemplateString) can now be imported directly from the bs4 package.
 
+* If you encode a document with a Python-specific encoding like
+  'unicode_escape', that encoding is no longer mentioned in the final
+  XML or HTML document. Instead, encoding information is omitted or
+  left blank. [bug=1874955]
+
 * Fixed test failures when run against soupselect 2.0. Patch by Tomáš
   Chvátal. [bug=1872279]
 

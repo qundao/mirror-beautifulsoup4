@@ -290,10 +290,9 @@ This table summarizes the advantages and disadvantages of each parser library:
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 
 If you can, I recommend you install and use lxml for speed. If you're
-using a version of Python 2 earlier than 2.7.3, or a version of Python
-3 earlier than 3.2.2, it's `essential` that you install lxml or
-html5lib--Python's built-in HTML parser is just not very good in older
-versions.
+using a very old version of Python -- earlier than 2.7.3 or 3.2.2 --
+it's `essential` that you install lxml or html5lib. Python's built-in
+HTML parser is just not very good in those old versions.
 
 Note that if a document is invalid, different parsers will generate
 different Beautiful Soup trees for it. See `Differences
@@ -310,13 +309,13 @@ constructor. You can pass in a string or an open filehandle::
  with open("index.html") as fp:
      soup = BeautifulSoup(fp)
 
- soup = BeautifulSoup("<html>data</html>")
+ soup = BeautifulSoup("<html>a web page</html>")
 
 First, the document is converted to Unicode, and HTML entities are
 converted to Unicode characters::
 
- BeautifulSoup("Sacr&eacute; bleu!")
- <html><head></head><body>Sacré bleu!</body></html>
+ print(BeautifulSoup("<html><head></head><body>Sacr&eacute; bleu!</body></html>"))
+ # <html><head></head><body>Sacré bleu!</body></html>
 
 Beautiful Soup then parses the document using the best available
 parser. It will use an HTML parser unless you specifically tell it to
@@ -2481,20 +2480,20 @@ Beautiful Soup presents the same interface to a number of different
 parsers, but each parser is different. Different parsers will create
 different parse trees from the same document. The biggest differences
 are between the HTML parsers and the XML parsers. Here's a short
-document, parsed as HTML::
+document, parsed as HTML using the parser that comes with Python::
 
- BeautifulSoup("<a><b /></a>")
- # <html><head></head><body><a><b></b></a></body></html>
+ BeautifulSoup("<a><b/></a>", "html.parser")
+ # <a><b></b></a>
 
-Since an empty <b /> tag is not valid HTML, the parser turns it into a
-<b></b> tag pair.
+Since a standalone <b/> tag is not valid HTML, html.parser turns it into
+a <b></b> tag pair.
 
 Here's the same document parsed as XML (running this requires that you
-have lxml installed). Note that the empty <b /> tag is left alone, and
+have lxml installed). Note that the standalone <b/> tag is left alone, and
 that the document is given an XML declaration instead of being put
 into an <html> tag.::
 
- BeautifulSoup("<a><b /></a>", "xml")
+ print(BeautifulSoup("<a><b/></a>", "xml"))
  # <?xml version="1.0" encoding="utf-8"?>
  # <a><b/></a>
 
@@ -2506,8 +2505,8 @@ document.
 
 But if the document is not perfectly-formed, different parsers will
 give different results. Here's a short, invalid document parsed using
-lxml's HTML parser. Note that the dangling </p> tag is simply
-ignored::
+lxml's HTML parser. Note that the <a> tag gets wrapped in <body> and
+<html> tags, and the dangling </p> tag is simply ignored::
 
  BeautifulSoup("<a></p>", "lxml")
  # <html><body><a></a></body></html>
@@ -2518,8 +2517,8 @@ Here's the same document parsed using html5lib::
  # <html><head></head><body><a><p></p></a></body></html>
 
 Instead of ignoring the dangling </p> tag, html5lib pairs it with an
-opening <p> tag. This parser also adds an empty <head> tag to the
-document.
+opening <p> tag. html5lib also adds an empty <head> tag; lxml didn't
+bother.
 
 Here's the same document parsed with Python's built-in HTML
 parser::
@@ -2528,14 +2527,13 @@ parser::
  # <a></a>
 
 Like html5lib, this parser ignores the closing </p> tag. Unlike
-html5lib, this parser makes no attempt to create a well-formed HTML
-document by adding a <body> tag. Unlike lxml, it doesn't even bother
-to add an <html> tag.
+html5lib or lxml, this parser makes no attempt to create a
+well-formed HTML document by adding <html> or <body> tags.
 
 Since the document "<a></p>" is invalid, none of these techniques is
-the "correct" way to handle it. The html5lib parser uses techniques
+the 'correct' way to handle it. The html5lib parser uses techniques
 that are part of the HTML5 standard, so it has the best claim on being
-the "correct" way, but all three techniques are legitimate.
+the 'correct' way, but all three techniques are legitimate.
 
 Differences between parsers can affect your script. If you're planning
 on distributing your script to other people, or running it on multiple
