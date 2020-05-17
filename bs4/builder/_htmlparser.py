@@ -315,9 +315,17 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             invoked.
         :param kwargs: Keyword arguments for the superclass constructor.
         """
+        # Some keyword arguments will be pulled out of kwargs and placed
+        # into parser_kwargs.
+        extra_parser_kwargs = dict()
+        for arg in ('on_duplicate_attribute',):
+            if arg in kwargs:
+                value = kwargs.pop(arg)
+                extra_parser_kwargs[arg] = value
         super(HTMLParserTreeBuilder, self).__init__(**kwargs)
         parser_args = parser_args or []
         parser_kwargs = parser_kwargs or {}
+        parser_kwargs.update(extra_parser_kwargs)
         if CONSTRUCTOR_TAKES_STRICT and not CONSTRUCTOR_STRICT_IS_DEPRECATED:
             parser_kwargs['strict'] = False
         if CONSTRUCTOR_TAKES_CONVERT_CHARREFS:

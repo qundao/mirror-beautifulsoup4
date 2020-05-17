@@ -4,7 +4,7 @@
   BeautifulSoupHTMLParser constructor (used by the html.parser tree
   builder) which lets you customize the handling of markup that
   contains the same attribute more than once, as in:
-  <a href="url1" href="url2"> [bug=1878209] TODO: This needs documentation.
+  <a href="url1" href="url2"> [bug=1878209]
 
 * Added a distinct subclass, GuessedAtParserWarning, for the warning
   issued when BeautifulSoup is instantiated without a parser being

@@ -67,9 +67,7 @@ class HTMLParserTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         # You can also get this behavior explicitly.
         def assert_attribute(on_duplicate_attribute, expected):
             soup = self.soup(
-                markup, parser_kwargs=dict(
-                    on_duplicate_attribute=on_duplicate_attribute
-                )
+                markup, on_duplicate_attribute=on_duplicate_attribute
             )
             self.assertEquals(expected, soup.a['href'])
 

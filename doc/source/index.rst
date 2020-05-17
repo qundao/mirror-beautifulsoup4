@@ -568,8 +568,8 @@ found in a ``<script>`` tag), and HTML templates (any strings inside a
 ``<template>`` tag). These classes work exactly the same way as
 ``NavigableString``; their only purpose is to make it easier to pick
 out the main body of the page, by ignoring strings that represent
-something else. (These classes are new in Beautiful Soup 4.9.0, and
-the html5lib parser doesn't use them.)
+something else. `(These classes are new in Beautiful Soup 4.9.0, and
+the html5lib parser doesn't use them.)`
  
 Beautiful Soup defines classes for anything else that might show up in
 an XML document: ``CData``, ``ProcessingInstruction``,
@@ -1957,7 +1957,7 @@ If you want to create a comment or some other subclass of
    tag.contents
    # [u'Hello', u' there', u'Nice to see you.']
 
-(This is a new feature in Beautiful Soup 4.4.0.)
+`(This is a new feature in Beautiful Soup 4.4.0.)`
 
 What if you need to create a whole new tag?  The best solution is to
 call the factory method ``BeautifulSoup.new_tag()``::
@@ -2085,7 +2085,7 @@ destroys it and its contents`::
 The behavior of a decomposed ``Tag`` or ``NavigableString`` is not
 defined and you should not use it for anything. If you're not sure
 whether something has been decomposed, you can check its
-``.decomposed`` property (new in 4.9.0)::
+``.decomposed`` property `(new in Beautiful Soup 4.9.0)`::
 
   i_tag.decomposed
   # True
@@ -2180,7 +2180,7 @@ You can call ``Tag.smooth()`` to clean up the parse tree by consolidating adjace
  #  A one, a two
  # </p>
 
-The ``smooth()`` method is new in Beautiful Soup 4.8.0.
+`The ``smooth()`` method is new in Beautiful Soup 4.8.0.`
 
 Output
 ======
@@ -2540,7 +2540,7 @@ on distributing your script to other people, or running it on multiple
 machines, you should specify a parser in the ``BeautifulSoup``
 constructor. That will reduce the chances that your users parse a
 document differently from the way you parse it.
-   
+
 Encodings
 =========
 
@@ -2793,7 +2793,7 @@ document is Windows-1252, and the document will come out looking like
 Line numbers
 ============
 
-The ``html.parser` and ``html5lib`` parsers can keep track of where in
+The ``html.parser`` and ``html5lib`` parsers can keep track of where in
 the original document each Tag was found. You can access this
 information as ``Tag.sourceline`` (line number) and ``Tag.sourcepos``
 (position of the start tag within a line)::
@@ -2824,8 +2824,8 @@ into the ``BeautifulSoup`` constructor::
    soup.p.sourceline
    # None
   
-This feature is new in 4.8.1, and the parsers based on lxml don't
-support it.
+`This feature is new in 4.8.1, and the parsers based on lxml don't
+support it.`
 
 Comparing objects for equality
 ==============================
@@ -2881,9 +2881,15 @@ been called on it::
 This is because two different ``Tag`` objects can't occupy the same
 space at the same time.
 
+Advanced parser customization
+=============================
+
+Beautiful Soup offers a number of ways to customize how the parser
+treats incoming HTML and XML. This section covers the most commonly
+used customization techniques.
 
 Parsing only part of a document
-===============================
+-------------------------------
 
 Let's say you want to use Beautiful Soup look at a document's <a>
 tags. It's a waste of time and memory to parse the entire document and
@@ -2902,7 +2908,7 @@ examples below I'll be forcing Beautiful Soup to use Python's
 built-in parser.)
 
 ``SoupStrainer``
-----------------
+^^^^^^^^^^^^^^^^
 
 The ``SoupStrainer`` class takes the same arguments as a typical
 method from `Searching the tree`_: :ref:`name <name>`, :ref:`attrs
@@ -2971,6 +2977,116 @@ thought I'd mention it::
  soup.find_all(only_short_strings)
  # [u'\n\n', u'\n\n', u'Elsie', u',\n', u'Lacie', u' and\n', u'Tillie',
  #  u'\n\n', u'...', u'\n']
+
+Customizing multi-valued attributes
+-----------------------------------
+
+In an HTML document, an attribute like ``class`` is given a list of
+values, and an attribute like ``id`` is given a single value, because
+the HTML specification treats those attributes differently::
+
+  markup = '<a class="cls1 cls2" id="id1 id2">'
+  soup = BeautifulSoup(markup)
+  soup.a['class']
+  # ['cls1', 'cls2']
+  soup.a['id']
+  # 'id1 id2'
+
+You can turn this off by passing in
+``multi_valued_attributes=None``. Than all attributes will be given a
+single value::
+
+  soup = BeautifulSoup(markup, multi_valued_attributes=None)
+  soup.a['class']
+  # 'cls1 cls2'
+  soup.a['id']
+  # 'id1 id2'
+
+You can customize this behavior quite a bit by passing in a
+dictionary for ``multi_valued_attributes``. If you need this, look at
+``HTMLTreeBuilder.DEFAULT_CDATA_LIST_ATTRIBUTES`` to see the
+configuration Beautiful Soup uses by default, which is based on the
+HTML specification.
+
+`(This is a new feature in Beautiful Soup 4.8.0.)`
+
+Handling duplicate attributes
+-----------------------------
+
+When using the ``html.parser`` parser, you can use the
+``on_duplicate_attribute`` constructor argument to customize what
+Beautiful Soup does when it encounters a tag that defines the same
+attribute more than once::
+
+  markup = '<a href="http://url1/" href="http://url2/">'
+
+The default behavior is to use the last value found for the tag::
+
+  soup = BeautifulSoup(markup, 'html.parser')
+  soup.a['href']
+  # http://url2/
+
+  soup = BeautifulSoup(markup, 'html.parser', on_duplicate_attribute='replace')
+  soup.a['href']
+  # http://url2/
+  
+With ``on_duplicate_attribute='ignore'`` you can tell Beautiful Soup
+to use the `first` value found and ignore the rest::
+
+  soup = BeautifulSoup(markup, 'html.parser', on_duplicate_attribute='ignore')
+  soup.a['href']
+  # http://url1/
+
+(lxml and html5lib always do it this way; their behavior can't be
+configured from within Beautiful Soup.)
+
+If you need more, you can pass in a function that's called on each duplicate value::
+
+  def accumulate(attributes_so_far, key, value):
+      if not isinstance(attributes_so_far[key], list):
+          attributes_so_far[key] = [attributes_so_far[key]]
+      attributes_so_far[key].append(value)
+
+  soup = BeautifulSoup(markup, 'html.parser', on_duplicate_attribute=accumulate)
+  soup.a['href']
+  # ["http://url1/", "http://url2/"]
+
+`(This is a new feature in Beautiful Soup 4.9.1.)`
+
+Instantiating custom subclasses
+-------------------------------
+
+When a parser tells Beautiful Soup about a tag or a string, Beautiful
+Soup will instantiate a ``Tag`` or ``NavigableString`` object to
+contain that information. Instead of that default behavior, you can
+tell Beautiful Soup to instantiate `subclasses` of ``Tag`` or
+``NavigableString``, subclasses you define with custom behavior::
+
+  from bs4 import Tag, NavigableString
+  class MyTag(Tag):
+      pass
+  
+  class MyString(NavigableString):
+      pass
+
+  markup = "<div>some text</div>"
+  soup = BeautifulSoup(markup)
+  isinstance(soup.div, MyTag)
+  # False
+  isinstance(soup.div.string, MyString)
+  # False 
+
+  my_classes = { Tag: MyTag, NavigableString: MyString }
+  soup = BeautifulSoup(markup, element_classes=my_classes)
+  isinstance(soup.div, MyTag)
+  # True
+  isinstance(soup.div.string, MyString)
+  # True  
+
+This can be useful when incorporating Beautiful Soup into a test
+framework.
+
+`(This is a new feature in Beautiful Soup 4.8.1.)`
 
 Troubleshooting
 ===============
