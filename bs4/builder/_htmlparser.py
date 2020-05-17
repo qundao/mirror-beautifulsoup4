@@ -146,7 +146,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
             else:
                 attr_dict[key] = value
             attrvalue = '""'
-        #print "START", name
+        #print("START", name)
         sourceline, sourcepos = self.getpos()
         tag = self.soup.handle_starttag(
             name, None, None, attr_dict, sourceline=sourceline,
@@ -176,12 +176,12 @@ class BeautifulSoupHTMLParser(HTMLParser):
            be the closing portion of an empty-element tag,
            e.g. '<tag></tag>'.
         """
-        #print "END", name
+        #print("END", name)
         if check_already_closed and name in self.already_closed_empty_element:
             # This is a redundant end tag for an empty-element tag.
             # We've already called handle_endtag() for it, so just
             # check it off the list.
-            # print "ALREADY CLOSED", name
+            # print("ALREADY CLOSED", name)
             self.already_closed_empty_element.remove(name)
         else:
             self.soup.handle_endtag(name)

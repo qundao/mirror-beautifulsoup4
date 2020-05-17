@@ -1432,7 +1432,7 @@ class Tag(PageElement):
 
     def __getattr__(self, tag):
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
-        #print "Getattr %s.%s" % (self.__class__, tag)
+        #print("Getattr %s.%s" % (self.__class__, tag))
         if len(tag) > 3 and tag.endswith('Tag'):
             # BS3: soup.aTag -> "soup.find("a")
             tag_name = tag[:-3]
@@ -2035,7 +2035,7 @@ class SoupStrainer(object):
 
         :param markup: A PageElement or a list of them.
         """
-        # print 'looking for %s in %s' % (self, markup)
+        # print('looking for %s in %s' % (self, markup))
         found = None
         # If given a list of items, scan it for a text element that
         # matches.
@@ -2061,7 +2061,7 @@ class SoupStrainer(object):
         return found
 
     def _matches(self, markup, match_against, already_tried=None):
-        # print u"Matching %s against %s" % (markup, match_against)
+        # print(u"Matching %s against %s" % (markup, match_against))
         result = False
         if isinstance(markup, list) or isinstance(markup, tuple):
             # This should only happen when searching a multi-valued attribute

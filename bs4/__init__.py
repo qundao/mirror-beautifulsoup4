@@ -15,7 +15,7 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.9.0"
+__version__ = "4.9.1"
 __copyright__ = "Copyright (c) 2004-2020 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
@@ -513,14 +513,14 @@ class BeautifulSoup(Tag):
             self.preserve_whitespace_tag_stack.pop()
         if self.string_container_stack and tag == self.string_container_stack[-1]:
             self.string_container_stack.pop()
-        #print "Pop", tag.name
+        #print("Pop", tag.name)
         if self.tagStack:
             self.currentTag = self.tagStack[-1]
         return self.currentTag
 
     def pushTag(self, tag):
         """Internal method called by handle_starttag when a tag is opened."""
-        #print "Push", tag.name
+        #print("Push", tag.name)
         if self.currentTag is not None:
             self.currentTag.contents.append(tag)
         self.tagStack.append(tag)
@@ -643,7 +643,7 @@ class BeautifulSoup(Tag):
           to but *not* including the most recent instqance of the
           given tag.
         """
-        #print "Popping to %s" % name
+        #print("Popping to %s" % name)
         if name == self.ROOT_TAG_NAME:
             # The BeautifulSoup object itself can never be popped.
             return
@@ -678,7 +678,7 @@ class BeautifulSoup(Tag):
         in the document. For instance, if this was a self-closing tag,
         don't call handle_endtag.
         """
-        # print "Start tag %s: %s" % (name, attrs)
+        # print("Start tag %s: %s" % (name, attrs))
         self.endData()
 
         if (self.parse_only and len(self.tagStack) <= 1
@@ -705,7 +705,7 @@ class BeautifulSoup(Tag):
         :param name: Name of the tag.
         :param nsprefix: Namespace prefix for the tag.
         """
-        #print "End tag: " + name
+        #print("End tag: " + name)
         self.endData()
         self._popToTag(name, nsprefix)
 
@@ -774,4 +774,4 @@ class FeatureNotFound(ValueError):
 if __name__ == '__main__':
     import sys
     soup = BeautifulSoup(sys.stdin)
-    print soup.prettify()
+    print(soup.prettify())
