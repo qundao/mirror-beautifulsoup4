@@ -1757,7 +1757,7 @@ class Tag(PageElement):
         if l:
             r = l[0]
         return r
-    findChild = find
+    findChild = find #BS2
 
     def find_all(self, name=None, attrs={}, recursive=True, text=None,
                  limit=None, **kwargs):

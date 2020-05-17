@@ -1,5 +1,11 @@
 = 4.9.1 (unreleased)
 
+* Added a keyword argument 'on_duplicate_attribute' to the
+  BeautifulSoupHTMLParser constructor (used by the html.parser tree
+  builder) which lets you customize the handling of markup that
+  contains the same attribute more than once, as in:
+  <a href="url1" href="url2"> [bug=1878209] TODO: This needs documentation.
+
 * Added a distinct subclass, GuessedAtParserWarning, for the warning
   issued when BeautifulSoup is instantiated without a parser being
   specified. [bug=1873787]
