@@ -3281,6 +3281,18 @@ on BS4 until you change them.
 * ``Tag.next`` -> ``Tag.next_element``
 * ``Tag.previous`` -> ``Tag.previous_element``
 
+These methods are left over from the Beautiful Soup 2 API. They've
+been deprecated since 2006, and should not be used at all:
+
+* ``Tag.fetchNextSiblings``
+* ``Tag.fetchPreviousSiblings``
+* ``Tag.fetchPrevious``
+* ``Tag.fetchPreviousSiblings``
+* ``Tag.fetchParents``
+* ``Tag.findChild``
+* ``Tag.findChildren``
+
+
 Generators
 ^^^^^^^^^^
 

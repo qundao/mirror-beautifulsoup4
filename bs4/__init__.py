@@ -450,7 +450,21 @@ class BeautifulSoup(Tag):
 
     def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
                 sourceline=None, sourcepos=None, **kwattrs):
-        """Create a new Tag associated with this BeautifulSoup object."""
+        """Create a new Tag associated with this BeautifulSoup object.
+
+        :param name: The name of the new Tag.
+        :param namespace: The URI of the new Tag's XML namespace, if any.
+        :param prefix: The prefix for the new Tag's XML namespace, if any.
+        :param attrs: A dictionary of this Tag's attribute values; can
+            be used instead of `kwattrs` for attributes like 'class'
+            that are reserved words in Python.
+        :param sourceline: The line number where this tag was
+            (purportedly) found in its source document.
+        :param sourcepos: The character position within `sourceline` where this
+            tag was (purportedly) found.
+        :param kwattrs: Keyword arguments for the new Tag's attribute values.
+
+        """
         kwattrs.update(attrs)
         return self.element_classes.get(Tag, Tag)(
             None, self.builder, name, namespace, nsprefix, kwattrs,
