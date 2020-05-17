@@ -1,4 +1,4 @@
-= 4.9.1 (unreleased)
+= 4.9.1 (20200517)
 
 * Added a keyword argument 'on_duplicate_attribute' to the
   BeautifulSoupHTMLParser constructor (used by the html.parser tree
