@@ -22,6 +22,7 @@ __license__ = "MIT"
 
 __all__ = ['BeautifulSoup']
 
+from collections import Counter
 import os
 import re
 import sys
@@ -444,6 +445,7 @@ class BeautifulSoup(Tag):
         self.current_data = []
         self.currentTag = None
         self.tagStack = []
+        self.open_tag_counter = Counter()
         self.preserve_whitespace_tag_stack = []
         self.string_container_stack = []
         self.pushTag(self)
@@ -509,6 +511,8 @@ class BeautifulSoup(Tag):
     def popTag(self):
         """Internal method called by _popToTag when a tag is closed."""
         tag = self.tagStack.pop()
+        if tag.name in self.open_tag_counter:
+            self.open_tag_counter[tag.name] -= 1
         if self.preserve_whitespace_tag_stack and tag == self.preserve_whitespace_tag_stack[-1]:
             self.preserve_whitespace_tag_stack.pop()
         if self.string_container_stack and tag == self.string_container_stack[-1]:
@@ -525,6 +529,8 @@ class BeautifulSoup(Tag):
             self.currentTag.contents.append(tag)
         self.tagStack.append(tag)
         self.currentTag = self.tagStack[-1]
+        if tag.name != self.ROOT_TAG_NAME:
+            self.open_tag_counter[tag.name] += 1
         if tag.name in self.builder.preserve_whitespace_tags:
             self.preserve_whitespace_tag_stack.append(tag)
         if tag.name in self.builder.string_containers:
@@ -635,13 +641,17 @@ class BeautifulSoup(Tag):
 
     def _popToTag(self, name, nsprefix=None, inclusivePop=True):
         """Pops the tag stack up to and including the most recent
-        instance of the given tag. 
+        instance of the given tag.
+
+        If there are no open tags with the given name, nothing will be
+        popped.
 
         :param name: Pop up to the most recent tag with this name.
         :param nsprefix: The namespace prefix that goes with `name`.
         :param inclusivePop: It this is false, pops the tag stack up
           to but *not* including the most recent instqance of the
           given tag.
+
         """
         #print("Popping to %s" % name)
         if name == self.ROOT_TAG_NAME:
@@ -652,6 +662,8 @@ class BeautifulSoup(Tag):
 
         stack_size = len(self.tagStack)
         for i in range(stack_size - 1, 0, -1):
+            if not self.open_tag_counter.get(name):
+                break
             t = self.tagStack[i]
             if (name == t.name and nsprefix == t.prefix):
                 if inclusivePop:
