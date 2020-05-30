@@ -15,7 +15,9 @@ rm -rf build dist
 
 # Run this in a Python 2 env and a Python 3 env to make both sdist and
 # wheels.
-python setup.py sdist bdist_wheel
+python2 setup.py sdist bdist_wheel
+python3 setup.py sdist bdist_wheel
+
 
 # Run this in Python 3 env.
 

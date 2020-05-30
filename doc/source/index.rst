@@ -18,7 +18,7 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.9.0. The examples in
+This document covers Beautiful Soup version 4.9.1. The examples in
 this documentation should work the same way in Python 2.7 and Python
 3.2.
 
