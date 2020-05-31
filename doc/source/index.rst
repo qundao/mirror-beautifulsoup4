@@ -3211,15 +3211,14 @@ Miscellaneous
 
 * ``UnicodeEncodeError: 'charmap' codec can't encode character
   u'\xfoo' in position bar`` (or just about any other
-  ``UnicodeEncodeError``) - This is not a problem with Beautiful Soup.
-  This problem shows up in two main situations. First, when you try to
-  print a Unicode character that your console doesn't know how to
-  display. (See `this page on the Python wiki
-  <http://wiki.python.org/moin/PrintFails>`_ for help.) Second, when
-  you're writing to a file and you pass in a Unicode character that's
-  not supported by your default encoding.  In this case, the simplest
-  solution is to explicitly encode the Unicode string into UTF-8 with
-  ``u.encode("utf8")``.
+  ``UnicodeEncodeError``) - This problem shows up in two main
+  situations. First, when you try to print a Unicode character that
+  your console doesn't know how to display. (See `this page on the
+  Python wiki <http://wiki.python.org/moin/PrintFails>`_ for help.)
+  Second, when you're writing to a file and you pass in a Unicode
+  character that's not supported by your default encoding.  In this
+  case, the simplest solution is to explicitly encode the Unicode
+  string into UTF-8 with ``u.encode("utf8")``.
 
 * ``KeyError: [attr]`` - Caused by accessing ``tag['attr']`` when the
   tag in question doesn't define the ``attr`` attribute. The most
@@ -3244,8 +3243,8 @@ Miscellaneous
 
 * ``AttributeError: 'NavigableString' object has no attribute
   'foo'`` - This usually happens because you're treating a string as
-  though it were a tag. You may be iterating over a list, thinking
-  that it contains only tags, when it actually contains both tags and
+  though it were a tag. You may be iterating over a list, expecting
+  that it contains nothing but tags, when it actually contains both tags and
   strings.
 
 
