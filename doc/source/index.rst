@@ -3147,7 +3147,7 @@ The most common type of unexpected behavior is that you can't find a
 tag that you know is in the document. You saw it going in, but
 ``find_all()`` returns ``[]`` or ``find()`` returns ``None``. This is
 another common problem with Python's built-in HTML parser, which
-sometimes skips tags it doesn't understand.  Again, the solution is to
+sometimes skips tags it doesn't understand.  Again, the best solution is to
 :ref:`install lxml or html5lib. <parser-installation>`
 
 Version mismatch problems
@@ -3241,6 +3241,13 @@ Miscellaneous
   ``find()`` didn't find anything, so it returned ``None``, instead of
   returning a tag or a string. You need to figure out why your
   ``find()`` call isn't returning anything.
+
+* ``AttributeError: 'NavigableString' object has no attribute
+  'foo'`` - This usually happens because you're treating a string as
+  though it were a tag. You may be iterating over a list, thinking
+  that it contains only tags, when it actually contains both tags and
+  strings.
+
 
 Improving Performance
 ---------------------
