@@ -2180,7 +2180,7 @@ You can call ``Tag.smooth()`` to clean up the parse tree by consolidating adjace
  #  A one, a two
  # </p>
 
-`The ``smooth()`` method is new in Beautiful Soup 4.8.0.`
+The ``smooth()`` method is new in Beautiful Soup 4.8.0.
 
 Output
 ======
