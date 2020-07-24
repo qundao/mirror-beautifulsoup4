@@ -3495,6 +3495,11 @@ B.string. (Previously, it was None.)
 their values, not strings. This may affect the way you search by CSS
 class.
 
+``Tag`` objects now implement the ``__hash__`` method, such that two
+``Tag`` objects are considered equal if they generate the same
+markup. This may change your script's behavior if you put ``Tag``
+objects into a dictionary or set.
+
 If you pass one of the ``find*`` methods both :ref:`string <string>` `and`
 a tag-specific argument like :ref:`name <name>`, Beautiful Soup will
 search for tags that match your tag-specific criteria and whose
