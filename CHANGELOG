@@ -4,6 +4,9 @@
   stack during tree building, when encountering a closing tag that had
   no matching opening tag. [bug=1880420]
 
+* Specify the soupsieve dependency in a way that complies with
+  PEP 508. Patch by Mike Nerone. [bug=1893696] 
+
 = 4.9.1 (20200517)
 
 * Added a keyword argument 'on_duplicate_attribute' to the
