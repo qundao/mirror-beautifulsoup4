@@ -1,4 +1,4 @@
-= 4.9.2 (Unreleased)
+= 4.9.2 (20200926)
 
 * Fixed a bug that caused too many tags to be popped from the tag
   stack during tree building, when encountering a closing tag that had
