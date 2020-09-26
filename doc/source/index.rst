@@ -20,7 +20,7 @@ violates your expectations.
 
 This document covers Beautiful Soup version 4.9.2. The examples in
 this documentation should work the same way in Python 2.7 and Python
-3.2.
+3.8.
 
 You might be looking for the documentation for `Beautiful Soup 3
 <http://www.crummy.com/software/BeautifulSoup/bs3/documentation.html>`_.
@@ -202,7 +202,7 @@ package the entire library with your application. You can download the
 tarball, copy its ``bs4`` directory into your application's codebase,
 and use Beautiful Soup without installing it at all.
 
-I use Python 2.7 and Python 3.2 to develop Beautiful Soup, but it
+I use Python 2.7 and Python 3.8 to develop Beautiful Soup, but it
 should work with other recent versions.
 
 Problems after installation
