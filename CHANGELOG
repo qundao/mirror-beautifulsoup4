@@ -5,7 +5,11 @@
   no matching opening tag. [bug=1880420]
 
 * Specify the soupsieve dependency in a way that complies with
-  PEP 508. Patch by Mike Nerone. [bug=1893696] 
+  PEP 508. Patch by Mike Nerone. [bug=1893696]
+
+* Change the signatures for BeautifulSoup.insert_before and insert_after
+  (which are not implemented) to match PageElement.insert_before and
+  insert_after, quieting warnings in some IDEs. [bug=1897120]
 
 = 4.9.1 (20200517)
 

@@ -496,13 +496,13 @@ class BeautifulSoup(Tag):
         container = self.string_container(subclass)
         return container(s)
 
-    def insert_before(self, successor):
+    def insert_before(self, *args):
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """
         raise NotImplementedError("BeautifulSoup objects don't support insert_before().")
 
-    def insert_after(self, successor):
+    def insert_after(self, *args):
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """
