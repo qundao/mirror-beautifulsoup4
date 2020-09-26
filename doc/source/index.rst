@@ -1915,8 +1915,8 @@ like calling ``.append()`` on a Python list::
 ------------
 
 Starting in Beautiful Soup 4.7.0, ``Tag`` also supports a method
-called ``.extend()``, which works just like calling ``.extend()`` on a
-Python list::
+called ``.extend()``, which adds every element of a list to a ``Tag``,
+in order::
 
  soup = BeautifulSoup("<a>Soup</a>", 'html.parser')
  soup.a.extend(["'s", " ", "on"])

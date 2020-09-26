@@ -253,7 +253,9 @@ class BeautifulSoup(Tag):
             if not original_builder and not (
                     original_features == builder.NAME or
                     original_features in builder.ALTERNATE_NAMES
-            ):
+            ) and markup:
+                # The user did not tell us which TreeBuilder to use,
+                # and we had to guess. Issue a warning.
                 if builder.is_xml:
                     markup_type = "XML"
                 else:

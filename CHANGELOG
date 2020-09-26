@@ -1,8 +1,11 @@
-= Unreleased
+= 4.9.2 (Unreleased)
 
 * Fixed a bug that caused too many tags to be popped from the tag
   stack during tree building, when encountering a closing tag that had
   no matching opening tag. [bug=1880420]
+
+* Fixed a bug that inconsistently moved elements over when passing
+  a Tag, rather than a list, into Tag.extend(). [bug=1885710]
 
 * Specify the soupsieve dependency in a way that complies with
   PEP 508. Patch by Mike Nerone. [bug=1893696]
