@@ -1,3 +1,8 @@
+= 4.9.3 (Unreleased)
+
+* Implemented a significant performance optimization to the process of
+  searching the parse tree. Patch by Morotti. [bug=1898212]
+
 = 4.9.2 (20200926)
 
 * Fixed a bug that caused too many tags to be popped from the tag
