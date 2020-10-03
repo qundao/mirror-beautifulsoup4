@@ -1,4 +1,4 @@
-= 4.9.3 (Unreleased)
+= 4.9.3 (20201003)
 
 * Implemented a significant performance optimization to the process of
   searching the parse tree. Patch by Morotti. [bug=1898212]

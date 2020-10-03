@@ -8,6 +8,11 @@
 # release the second time, add the '--pre' argument to pip install to
 # find the 'prerelease'.
 
+# Change the version number in
+#  CHANGELOG
+#  setup.py
+#  bs4/__init__.py
+
 # Make sure tests pass
 ./test-all-versions
 
