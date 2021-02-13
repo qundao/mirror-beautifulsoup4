@@ -1911,14 +1911,25 @@ class TestNavigableStringSubclasses(SoupTest):
         soup = self.soup(
             "<template>Some text<p>In a tag</p></template>Some text outside"
         )
-        assert all(isinstance(x, TemplateString) for x in soup.template.strings)
-
+        assert all(
+            isinstance(x, TemplateString)
+            for x in soup.template._all_strings(types=None)
+        )
+        
         # Once the <template> tag closed, we went back to using
         # NavigableString.
         outside = soup.template.next_sibling
         assert isinstance(outside, NavigableString)
         assert not isinstance(outside, TemplateString)
 
+        # The TemplateString is also unusual because it can contain
+        # NavigableString subclasses of _other_ types, such as
+        # Comment.
+        markup = b"<template>Some text<p>In a tag</p><!--with a comment--></template>"
+        soup = self.soup(markup)
+        self.assertEqual(markup, soup.template.encode("utf8"))
+
+        
 class TestSoupSelector(TreeTest):
 
     HTML = """

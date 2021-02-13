@@ -497,7 +497,7 @@ class BeautifulSoup(Tag):
 
         # On top of that, we may be inside a tag that needs a special
         # container class.
-        if self.string_container_stack:
+        if self.string_container_stack and container is NavigableString:
             container = self.builder.string_containers.get(
                 self.string_container_stack[-1].name, container
             )

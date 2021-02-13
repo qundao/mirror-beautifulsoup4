@@ -7,6 +7,11 @@
 * Performance improvement when processing tags that speeds up overall
   tree construction by 2%. Patch by Morotti. [bug=1899358]
 
+* Corrected the use of special string container classes in cases when a
+  single tag may contain strings with different containers; such as
+  the <template> tag, which may contain both TemplateString objects
+  and Comment objects. [bug=1913406]
+
 * Added a second way to pass specify encodings to UnicodeDammit and
   EncodingDetector, based on the order of precedence defined in the
   HTML5 spec, starting at:
