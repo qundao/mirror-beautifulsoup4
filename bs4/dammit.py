@@ -228,32 +228,65 @@ class EncodingDetector:
     Order of precedence:
 
     1. Encodings you specifically tell EncodingDetector to try first
-    (the override_encodings argument to the constructor).
+    (the known_definite_encodings argument to the constructor).
 
-    2. An encoding declared within the bytestring itself, either in an
+    2. An encoding determined by sniffing the document's byte-order mark.
+
+    3. Encodings you specifically tell EncodingDetector to try if
+    byte-order mark sniffing fails (the user_encodings argument to the
+    constructor).
+
+    4. An encoding declared within the bytestring itself, either in an
     XML declaration (if the bytestring is to be interpreted as an XML
     document), or in a <meta> tag (if the bytestring is to be
     interpreted as an HTML document.)
 
-    3. An encoding detected through textual analysis by chardet,
+    5. An encoding detected through textual analysis by chardet,
     cchardet, or a similar external library.
 
     4. UTF-8.
 
     5. Windows-1252.
+
     """
-    def __init__(self, markup, override_encodings=None, is_html=False,
-                 exclude_encodings=None):
+    def __init__(self, markup, known_definite_encodings=None,
+                 is_html=False, exclude_encodings=None,
+                 user_encodings=None, override_encodings=None):
         """Constructor.
 
         :param markup: Some markup in an unknown encoding.
-        :param override_encodings: These encodings will be tried first.
-        :param is_html: If True, this markup is considered to be HTML. Otherwise
-            it's assumed to be XML.
-        :param exclude_encodings: These encodings will not be tried, even
-            if they otherwise would be.
+
+        :param known_definite_encodings: When determining the encoding
+            of `markup`, these encodings will be tried first, in
+            order. In HTML terms, this corresponds to the "known
+            definite encoding" step defined here:
+            https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding
+
+        :param user_encodings: These encodings will be tried after the
+            `known_definite_encodings` have been tried and failed, and
+            after an attempt to sniff the encoding by looking at a
+            byte order mark has failed. In HTML terms, this
+            corresponds to the step "user has explicitly instructed
+            the user agent to override the document's character
+            encoding", defined here:
+            https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding
+
+        :param override_encodings: A deprecated alias for
+            known_definite_encodings. Any encodings here will be tried
+            immediately after the encodings in
+            known_definite_encodings.
+
+        :param is_html: If True, this markup is considered to be
+            HTML. Otherwise it's assumed to be XML.
+
+        :param exclude_encodings: These encodings will not be tried,
+            even if they otherwise would be.
+
         """
-        self.override_encodings = override_encodings or []
+        self.known_definite_encodings = list(known_definite_encodings or [])
+        if override_encodings:
+            self.known_definite_encodings += override_encodings
+        self.user_encodings = user_encodings or []
         exclude_encodings = exclude_encodings or []
         self.exclude_encodings = set([x.lower() for x in exclude_encodings])
         self.chardet_encoding = None
@@ -286,7 +319,9 @@ class EncodingDetector:
         :yield: A sequence of strings.
         """
         tried = set()
-        for e in self.override_encodings:
+
+        # First, try the known definite encodings
+        for e in self.known_definite_encodings:
             if self._usable(e, tried):
                 yield e
 
@@ -295,6 +330,12 @@ class EncodingDetector:
         if self._usable(self.sniffed_encoding, tried):
             yield self.sniffed_encoding
 
+        # Sniffing the byte-order mark did nothing; try the user
+        # encodings.
+        for e in self.user_encodings:
+            if self._usable(e, tried):
+                yield e
+            
         # Look within the document for an XML or HTML encoding
         # declaration.
         if self.declared_encoding is None:
@@ -405,13 +446,33 @@ class UnicodeDammit:
         "iso-8859-2",
         ]
 
-    def __init__(self, markup, override_encodings=[],
-                 smart_quotes_to=None, is_html=False, exclude_encodings=[]):
+    def __init__(self, markup, known_definite_encodings=[],
+                 smart_quotes_to=None, is_html=False, exclude_encodings=[],
+                 user_encodings=None, override_encodings=None
+    ):
         """Constructor.
 
         :param markup: A bytestring representing markup in an unknown encoding.
-        :param override_encodings: These encodings will be tried first,
-           before any sniffing code is run.
+
+        :param known_definite_encodings: When determining the encoding
+            of `markup`, these encodings will be tried first, in
+            order. In HTML terms, this corresponds to the "known
+            definite encoding" step defined here:
+            https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding
+
+        :param user_encodings: These encodings will be tried after the
+            `known_definite_encodings` have been tried and failed, and
+            after an attempt to sniff the encoding by looking at a
+            byte order mark has failed. In HTML terms, this
+            corresponds to the step "user has explicitly instructed
+            the user agent to override the document's character
+            encoding", defined here:
+            https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding
+
+        :param override_encodings: A deprecated alias for
+            known_definite_encodings. Any encodings here will be tried
+            immediately after the encodings in
+            known_definite_encodings.
 
         :param smart_quotes_to: By default, Microsoft smart quotes will, like all other characters, be converted
            to Unicode characters. Setting this to 'ascii' will convert them to ASCII quotes instead.
@@ -421,6 +482,7 @@ class UnicodeDammit:
             it's assumed to be XML.
         :param exclude_encodings: These encodings will not be considered, even
             if the sniffing code thinks they might make sense.
+
         """
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings = []
@@ -428,7 +490,9 @@ class UnicodeDammit:
         self.is_html = is_html
         self.log = logging.getLogger(__name__)
         self.detector = EncodingDetector(
-            markup, override_encodings, is_html, exclude_encodings)
+            markup, known_definite_encodings, is_html, exclude_encodings,
+            user_encodings, override_encodings
+        )
 
         # Short-circuit if the data is in Unicode to begin with.
         if isinstance(markup, unicode) or markup == '':

@@ -7,6 +7,20 @@
 * Performance improvement when processing tags that speeds up overall
   tree construction by 2%. Patch by Morotti. [bug=1899358]
 
+* Added a second way to pass specify encodings to UnicodeDammit and
+  EncodingDetector, based on the order of precedence defined in the
+  HTML5 spec, starting at:
+  https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding
+
+  Encodings in 'known_definite_encodings' are tried first, then
+  byte-order-mark sniffing is run, then encodings in 'user_encodings'
+  are tried. The old argument, 'override_encodings', is now a
+  deprecated alias for 'known_definite_encodings'.
+
+  This changes the default behavior of the html.parser and lxml tree
+  builders, in a way that may slightly improve encoding
+  detection but will probably have no effect. [bug=1889014]
+
 * Improve the warning issued when a directory name (as opposed to
   the name of a regular file) is passed as markup into the BeautifulSoup
   constructor. [bug=1913628]
