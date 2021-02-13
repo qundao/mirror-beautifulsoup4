@@ -1069,7 +1069,8 @@ class Tag(PageElement):
                  prefix=None, attrs=None, parent=None, previous=None,
                  is_xml=None, sourceline=None, sourcepos=None,
                  can_be_empty_element=None, cdata_list_attributes=None,
-                 preserve_whitespace_tags=None
+                 preserve_whitespace_tags=None,
+                 interesting_string_types=None,
     ):
         """Basic constructor.
 
@@ -1095,6 +1096,13 @@ class Tag(PageElement):
             be treated as CDATA if they ever show up on this tag.
         :param preserve_whitespace_tags: A list of tag names whose contents
             should have their whitespace preserved.
+        :param interesting_string_types: This is a NavigableString
+            subclass or a tuple of them. When iterating over this
+            Tag's strings in methods like Tag.strings or Tag.get_text,
+            these are the types of strings that are interesting enough
+            to be considered. The default is to consider
+            NavigableString and CData the only interesting string
+            subtypes.
         """
         if parser is None:
             self.parser_class = None
@@ -1140,6 +1148,7 @@ class Tag(PageElement):
             self.can_be_empty_element = can_be_empty_element
             self.cdata_list_attributes = cdata_list_attributes
             self.preserve_whitespace_tags = preserve_whitespace_tags
+            self.interesting_string_types = interesting_string_types
         else:
             # Set up any substitutions for this tag, such as the charset in a META tag.
             builder.set_up_substitutions(self)
@@ -1160,6 +1169,13 @@ class Tag(PageElement):
             # Keep track of the names that might cause this tag to be treated as a
             # whitespace-preserved tag.
             self.preserve_whitespace_tags = builder.preserve_whitespace_tags
+
+            if self.name in builder.string_containers:
+                # This sort of tag uses a special string container
+                # subclass for most of its strings. When we ask the
+                self.interesting_string_types = builder.string_containers[self.name]
+            else:
+                self.interesting_string_types = self.DEFAULT_INTERESTING_STRING_TYPES
             
     parserClass = _alias("parser_class")  # BS3
 
@@ -1226,25 +1242,38 @@ class Tag(PageElement):
         self.clear()
         self.append(string.__class__(string))
 
-    def _all_strings(self, strip=False, types=(NavigableString, CData)):
+    DEFAULT_INTERESTING_STRING_TYPES = (NavigableString, CData)
+    default = object()
+    def _all_strings(self, strip=False, types=default):
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
             yielded.
 
-        :types: A tuple of NavigableString subclasses. Any strings of
+        :param types: A tuple of NavigableString subclasses. Any strings of
             a subclass not found in this list will be ignored. By
-            default, this means only NavigableString and CData objects
-            will be considered. So no comments, processing instructions,
-            etc.
+            default, the subclasses considered are the ones found in
+            self.interesting_string_types. If that's not specified,
+            only NavigableString and CData objects will be
+            considered. That means no comments, processing
+            instructions, etc.
 
         :yield: A sequence of strings.
+
         """
+        if types is self.default:
+            types = self.interesting_string_types
+
         for descendant in self.descendants:
-            if (
-                (types is None and not isinstance(descendant, NavigableString))
-                or
-                (types is not None and type(descendant) not in types)):
+            if (types is None and not isinstance(descendant, NavigableString)):
+                continue
+            descendant_type = type(descendant)
+            if isinstance(types, type):
+                if descendant_type is not types:
+                    # We're not interested in strings of this type.
+                    continue
+            elif types is not None and descendant_type not in types:
+                # We're not interested in strings of this type.
                 continue
             if strip:
                 descendant = descendant.strip()
@@ -1264,7 +1293,7 @@ class Tag(PageElement):
             yield string
 
     def get_text(self, separator=u"", strip=False,
-                 types=(NavigableString, CData)):
+                 types=default):
         """Get all child strings, concatenated using the given separator.
 
         :param separator: Strings will be concatenated using this separator.
@@ -1272,11 +1301,13 @@ class Tag(PageElement):
         :param strip: If True, strings will be stripped before being
             concatenated.
 
-        :types: A tuple of NavigableString subclasses. Any strings of
+        :param types: A tuple of NavigableString subclasses. Any strings of
             a subclass not found in this list will be ignored. By
-            default, this means only NavigableString and CData objects
-            will be considered. So no comments, processing instructions,
-            stylesheets, etc.
+            default, the subclasses considered are the ones found in
+            self.interesting_string_types. If that's not specified,
+            only NavigableString and CData objects will be
+            considered. That means no comments, processing
+            instructions, etc.
 
         :return: A string.
         """

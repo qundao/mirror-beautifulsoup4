@@ -1,5 +1,24 @@
-= 4.9.4 (unreleased)
+= 4.10.0 (unreleased)
 
+* The behavior of methods like .get_text() and .strings now differs
+  depending on the type of tag. The change is visible with HTML tags
+  like <script>, <style>, and <template>. Starting in 4.9.0, methods
+  like get_text() returned no results on such tags, because the
+  contents of those tags are not considered 'text' within the document
+  as a whole.
+
+  But a user who calls script.get_text() is working from a different
+  definition of 'text' than a user who calls div.get_text()--otherwise
+  there would be no need to call script.get_text() at all. In 4.10.0,
+  the contents of (e.g.) a <script> tag are considered 'text' during a
+  get_text() call on the tag itself, but not considered 'text' during
+  a get_text() call on the tag's parent.
+
+  Because of this change, calling get_text() on each child of a tag
+  may now return a different result than calling get_text() on the tag
+  itself. That's because different tags now have different
+  understandings of what counts as 'text'. [bug=1906226] [bug=1868861]
+	
 * Corrected output when the namespace prefix associated with a
   namespaced attribute is the empty string, as opposed to
   None. [bug=1915583]

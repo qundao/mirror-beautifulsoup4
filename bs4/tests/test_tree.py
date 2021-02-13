@@ -1440,6 +1440,40 @@ class TestElementObjects(SoupTest):
         soup = self.soup("foo<style>CSS</style><script>Javascript</script>bar")
         self.assertEqual(['foo', 'bar'], list(soup.strings))
 
+    def test_string_methods_inside_special_string_container_tags(self):
+        # Strings inside tags like <script> are generally ignored by
+        # methods like get_text, because they're not what humans
+        # consider 'text'. But if you call get_text on the <script>
+        # tag itself, those strings _are_ considered to be 'text',
+        # because there's nothing else you might be looking for.
+        
+        style = self.soup("<div>a<style>Some CSS</style></div>")
+        template = self.soup("<div>a<template><p>Templated <b>text</b>.</p><!--With a comment.--></template></div>")
+        script = self.soup("<div>a<script><!--a comment-->Some text</script></div>")
+        
+        self.assertEqual(style.div.get_text(), "a")
+        self.assertEqual(list(style.div.strings), ["a"])
+        self.assertEqual(style.div.style.get_text(), "Some CSS")
+        self.assertEqual(list(style.div.style.strings),
+                         ['Some CSS'])
+        
+        # The comment is not picked up here. That's because it was
+        # parsed into a Comment object, which is not considered
+        # interesting by template.strings.
+        self.assertEqual(template.div.get_text(), "a")
+        self.assertEqual(list(template.div.strings), ["a"])
+        self.assertEqual(template.div.template.get_text(), "Templated text.")
+        self.assertEqual(list(template.div.template.strings),
+                         ["Templated ", "text", "."])
+
+        # The comment is included here, because it didn't get parsed
+        # into a Comment object--it's part of the Script string.
+        self.assertEqual(script.div.get_text(), "a")
+        self.assertEqual(list(script.div.strings), ["a"])
+        self.assertEqual(script.div.script.get_text(),
+                         "<!--a comment-->Some text")
+        self.assertEqual(list(script.div.script.strings),
+                         ['<!--a comment-->Some text'])
 
 class TestCDAtaListAttributes(SoupTest):
 
