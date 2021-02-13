@@ -4,6 +4,9 @@
   namespaced attribute is the empty string, as opposed to
   None. [bug=1915583]
 
+* Performance improvement when processing tags that speeds up overall
+  tree construction by 2%. Patch by Morotti. [bug=1899358]
+
 * Improve the warning issued when a directory name (as opposed to
   the name of a regular file) is passed as markup into the BeautifulSoup
   constructor. [bug=1913628]

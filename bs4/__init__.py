@@ -553,9 +553,7 @@ class BeautifulSoup(Tag):
     def endData(self, containerClass=None):
         """Method called by the TreeBuilder when the end of a data segment
         occurs.
-        """
-        containerClass = self.string_container(containerClass)
-        
+        """       
         if self.current_data:
             current_data = u''.join(self.current_data)
             # If whitespace is not preserved, and this string contains
@@ -582,6 +580,7 @@ class BeautifulSoup(Tag):
                     not self.parse_only.search(current_data)):
                 return
 
+            containerClass = self.string_container(containerClass)
             o = containerClass(current_data)
             self.object_was_parsed(o)
 
