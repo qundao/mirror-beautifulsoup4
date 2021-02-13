@@ -1,3 +1,9 @@
+= 4.9.4 (unreleased)
+
+* Corrected output when the namespace prefix associated with a
+  namespaced attribute is the empty string, as opposed to
+  None. [bug=1915583]
+
 = 4.9.3 (20201003)
 
 * Implemented a significant performance optimization to the process of

@@ -688,8 +688,18 @@ class TestNamedspacedAttribute(SoupTest):
         a = NamespacedAttribute("xmlns", None)
         self.assertEqual(a, "xmlns")
 
+        a = NamespacedAttribute("xmlns", "")
+        self.assertEqual(a, "xmlns")
+
         a = NamespacedAttribute("xmlns")
         self.assertEqual(a, "xmlns")
+        
+    def test_namespace_may_be_none_or_missing(self):
+        a = NamespacedAttribute(None, "tag")
+        self.assertEqual(a, "tag")
+        
+        a = NamespacedAttribute("", "tag")
+        self.assertEqual(a, "tag")
         
     def test_attribute_is_equivalent_to_colon_separated_string(self):
         a = NamespacedAttribute("a", "b")

@@ -83,9 +83,9 @@ class NamespacedAttribute(unicode):
             # per https://www.w3.org/TR/xml-names/#defaulting
             name = None
 
-        if name is None:
+        if not name:
             obj = unicode.__new__(cls, prefix)
-        elif prefix is None:
+        elif not prefix:
             # Not really namespaced.
             obj = unicode.__new__(cls, name)
         else:
