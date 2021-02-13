@@ -3,6 +3,7 @@
 
 from pdb import set_trace
 import logging
+import os
 import unittest
 import sys
 import tempfile
@@ -291,6 +292,21 @@ class TestWarnings(SoupTest):
             soup = self.soup(filename)
         self.assertEqual([], w)
 
+    def test_directory_warning(self):
+        try:
+            filename = tempfile.mkdtemp()
+            with warnings.catch_warnings(record=True) as w:
+                soup = self.soup(filename)
+            warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
+            self.assertTrue("looks like a directory" in str(warning.message))
+        finally:
+            os.rmdir(filename)
+
+        # The directory no longer exists, so Beautiful Soup will no longer issue the warning.
+        with warnings.catch_warnings(record=True) as w:
+            soup = self.soup(filename)
+        self.assertEqual([], w)
+        
     def test_url_warning_with_bytes_url(self):
         with warnings.catch_warnings(record=True) as warning_list:
             soup = self.soup(b"http://www.crummybytes.com/")

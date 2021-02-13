@@ -321,14 +321,26 @@ class BeautifulSoup(Tag):
             else:
                 possible_filename = markup
             is_file = False
+            is_directory = False
             try:
                 is_file = os.path.exists(possible_filename)
+                if is_file:
+                    is_directory = os.path.isdir(possible_filename)
             except Exception, e:
                 # This is almost certainly a problem involving
                 # characters not valid in filenames on this
                 # system. Just let it go.
                 pass
-            if is_file:
+            if is_directory:
+                warnings.warn(
+                    '"%s" looks like a directory name, not markup. You may'
+                    ' want to open a file found in this directory and pass'
+                    ' the filehandle into Beautiful Soup.' % (
+                        self._decode_markup(markup)
+                    ),
+                    MarkupResemblesLocatorWarning
+                )
+            elif is_file:
                 warnings.warn(
                     '"%s" looks like a filename, not markup. You should'
                     ' probably open this file and pass the filehandle into'
