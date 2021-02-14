@@ -255,6 +255,47 @@ class PageElement(object):
     nextSibling = _alias("next_sibling")  # BS3
     previousSibling = _alias("previous_sibling")  # BS3
 
+    default = object()
+    def _all_strings(self, strip=False, types=default):
+        """Yield all strings of certain classes, possibly stripping them.
+        
+        This is implemented differently in Tag and NavigableString.
+        """
+        raise NotImplementedError()
+   
+    @property
+    def stripped_strings(self):
+        """Yield all strings in this PageElement, stripping them first.
+
+        :yield: A sequence of stripped strings.
+        """
+        for string in self._all_strings(True):
+            yield string
+
+    def get_text(self, separator=u"", strip=False,
+                 types=default):
+        """Get all child strings of this PageElement, concatenated using the
+        given separator.
+
+        :param separator: Strings will be concatenated using this separator.
+
+        :param strip: If True, strings will be stripped before being
+            concatenated.
+
+        :param types: A tuple of NavigableString subclasses. Any
+            strings of a subclass not found in this list will be
+            ignored. Although there are exceptions, the default
+            behavior in most cases is to consider only NavigableString
+            and CData objects. That means no comments, processing
+            instructions, etc.
+
+        :return: A string.
+        """
+        return separator.join([s for s in self._all_strings(
+                    strip, types=types)])
+    getText = get_text
+    text = property(get_text)
+    
     def replace_with(self, replace_with):
         """Replace this PageElement with another one, keeping the rest of the
         tree the same.
@@ -945,7 +986,49 @@ class NavigableString(unicode, PageElement):
         """Prevent NavigableString.name from ever being set."""
         raise AttributeError("A NavigableString cannot be given a name.")
 
-    
+    def _all_strings(self, strip=False, types=PageElement.default):
+        """Yield all strings of certain classes, possibly stripping them.
+
+        This makes it easy for NavigableString to implement methods
+        like get_text() as conveniences, creating a consistent
+        text-extraction API across all PageElements.
+
+        :param strip: If True, all strings will be stripped before being
+            yielded.
+
+        :param types: A tuple of NavigableString subclasses. If this
+            NavigableString isn't one of those subclasses, the
+            sequence will be empty. By default, the subclasses
+            considered are NavigableString and CData objects. That
+            means no comments, processing instructions, etc.
+
+        :yield: A sequence that either contains this string, or is empty.
+
+        """
+        if types is self.default:
+            # This is kept in Tag because it's full of subclasses of
+            # this class, which aren't defined until later in the file.
+            types = Tag.DEFAULT_INTERESTING_STRING_TYPES
+
+        # Do nothing if the caller is looking for specific types of
+        # string, and we're of a different type.
+        my_type = type(self)
+        if types is not None:
+            if isinstance(types, type):
+                # Looking for a single type.
+                if my_type is not types:
+                    return
+            elif my_type not in types:
+                # Looking for one of a list of types.
+                return
+
+        value = self
+        if strip:
+            value = value.strip()
+        if len(value) > 0:
+            yield value
+    strings = property(_all_strings)
+
 class PreformattedString(NavigableString):
     """A NavigableString not subject to the normal formatting rules.
 
@@ -1243,8 +1326,7 @@ class Tag(PageElement):
         self.append(string.__class__(string))
 
     DEFAULT_INTERESTING_STRING_TYPES = (NavigableString, CData)
-    default = object()
-    def _all_strings(self, strip=False, types=default):
+    def _all_strings(self, strip=False, types=PageElement.default):
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
@@ -1280,41 +1362,7 @@ class Tag(PageElement):
                 if len(descendant) == 0:
                     continue
             yield descendant
-
     strings = property(_all_strings)
-
-    @property
-    def stripped_strings(self):
-        """Yield all strings in the document, stripping them first.
-
-        :yield: A sequence of stripped strings.
-        """
-        for string in self._all_strings(True):
-            yield string
-
-    def get_text(self, separator=u"", strip=False,
-                 types=default):
-        """Get all child strings, concatenated using the given separator.
-
-        :param separator: Strings will be concatenated using this separator.
-
-        :param strip: If True, strings will be stripped before being
-            concatenated.
-
-        :param types: A tuple of NavigableString subclasses. Any strings of
-            a subclass not found in this list will be ignored. By
-            default, the subclasses considered are the ones found in
-            self.interesting_string_types. If that's not specified,
-            only NavigableString and CData objects will be
-            considered. That means no comments, processing
-            instructions, etc.
-
-        :return: A string.
-        """
-        return separator.join([s for s in self._all_strings(
-                    strip, types=types)])
-    getText = get_text
-    text = property(get_text)
 
     def decompose(self):
         """Recursively destroys this PageElement and its children.

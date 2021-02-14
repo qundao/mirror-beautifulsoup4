@@ -1,5 +1,9 @@
 = 4.10.0 (unreleased)
 
+Beautiful Soup's official support for Python 2 ended on December 31st,
+2020. This release supports both Python 2 and Python 3, but there's no
+guarantee that this will hold for the next release.
+
 * The behavior of methods like .get_text() and .strings now differs
   depending on the type of tag. The change is visible with HTML tags
   like <script>, <style>, and <template>. Starting in 4.9.0, methods
@@ -18,6 +22,12 @@
   may now return a different result than calling get_text() on the tag
   itself. That's because different tags now have different
   understandings of what counts as 'text'. [bug=1906226] [bug=1868861]
+
+* NavigableString and its subclasses now implement the get_text()
+  method, as well as the properties .strings and
+  .stripped_strings. These methods will either return the string
+  itself, or nothing, so the only reason to use this is when iterating
+  over a list of mixed Tag and NavigableString objects. [bug=1904309]
 
 * The 'html5' formatter now treats attributes whose values are the
   empty string as HTML boolean attributes. Previously (and in other

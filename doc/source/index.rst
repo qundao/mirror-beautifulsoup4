@@ -2312,7 +2312,7 @@ omit the closing slash in HTML void tags like "br"::
  # b'<br>'
 
 In addition, any attributes whose values are the empty string
-will become HTML-style boolean attributes:
+will become HTML-style boolean attributes::
 
  option = BeautifulSoup('<option selected=""></option>').option
  print(option.encode(formatter="html"))
@@ -2321,6 +2321,8 @@ will become HTML-style boolean attributes:
  print(option.encode(formatter="html5"))
  # b'<option selected></option>'
 
+*(This behavior is new as of Beautiful Soup 4.10.0.)*
+ 
 If you pass in ``formatter=None``, Beautiful Soup will not modify
 strings at all on output. This is the fastest option, but it may lead
 to Beautiful Soup generating invalid HTML/XML, as in these examples::
@@ -2429,8 +2431,13 @@ generator instead, and process the text yourself::
 
 *As of Beautiful Soup version 4.9.0, when lxml or html.parser are in
 use, the contents of <script>, <style>, and <template>
-tags are not considered to be 'text', since those tags are not part of
+tags are generally not considered to be 'text', since those tags are not part of
 the human-visible content of the page.*
+
+*As of Beautiful Soup version 4.10.0, you can call get_text(),
+.strings, or .stripped_strings on a NavigableString object. It will
+either return the object itself, or nothing, so the only reason to do
+this is when you're iterating over a mixed list.*
 
  
 Specifying the parser to use
