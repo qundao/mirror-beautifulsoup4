@@ -18,7 +18,13 @@
   may now return a different result than calling get_text() on the tag
   itself. That's because different tags now have different
   understandings of what counts as 'text'. [bug=1906226] [bug=1868861]
-	
+
+* The 'html5' formatter now treats attributes whose values are the
+  empty string as HTML boolean attributes. Previously (and in other
+  formatters), an attribute value must be set as None to be treated as
+  a boolean attribute. In a future release, I plan to also give this
+  behavior to the 'html' formatter. Patch by Isaac Muse. [bug=1915424]
+
 * Corrected output when the namespace prefix associated with a
   namespaced attribute is the empty string, as opposed to
   None. [bug=1915583]

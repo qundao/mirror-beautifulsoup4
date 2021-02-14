@@ -2299,7 +2299,7 @@ Unicode characters to HTML entities whenever possible::
  #  Il a dit &lt;&lt;Sacr&eacute; bleu!&gt;&gt;
  # </p>
 
-If you pass in ``formatter="html5"``, it's the same as
+If you pass in ``formatter="html5"``, it's similar to
 ``formatter="html"``, but Beautiful Soup will
 omit the closing slash in HTML void tags like "br"::
 
@@ -2310,7 +2310,17 @@ omit the closing slash in HTML void tags like "br"::
  
  print(br.encode(formatter="html5"))
  # b'<br>'
+
+In addition, any attributes whose values are the empty string
+will become HTML-style boolean attributes:
+
+ option = BeautifulSoup('<option selected=""></option>').option
+ print(option.encode(formatter="html"))
+ # b'<option selected=""></option>'
  
+ print(option.encode(formatter="html5"))
+ # b'<option selected></option>'
+
 If you pass in ``formatter=None``, Beautiful Soup will not modify
 strings at all on output. This is the fastest option, but it may lead
 to Beautiful Soup generating invalid HTML/XML, as in these examples::
