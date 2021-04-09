@@ -439,7 +439,7 @@ keyword argument into the ``BeautifulSoup`` constructor::
  no_list_soup.p['class']
  # 'body strikeout'
 
-You can use ```get_attribute_list`` to get a value that's always a
+You can use ``get_attribute_list`` to get a value that's always a
 list, whether or not it's a multi-valued atribute::
 
  id_soup.p.get_attribute_list('id')

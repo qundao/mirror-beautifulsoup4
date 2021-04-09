@@ -3,6 +3,7 @@ trees."""
 
 from pdb import set_trace
 import pickle
+import warnings
 from bs4.testing import SoupTest, HTMLTreeBuilderSmokeTest
 from bs4.builder import HTMLParserTreeBuilder
 from bs4.builder._htmlparser import BeautifulSoupHTMLParser
@@ -94,4 +95,8 @@ class TestHTMLParserSubclass(SoupTest):
         that doesn't cause a crash.
         """
         parser = BeautifulSoupHTMLParser()
-        parser.error("don't crash")
+        with warnings.catch_warnings(record=True) as warns:
+            parser.error("don't crash")
+        [warning] = warns
+        assert "don't crash" == str(warning.message)
+
