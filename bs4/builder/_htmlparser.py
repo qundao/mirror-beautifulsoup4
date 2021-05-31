@@ -231,7 +231,7 @@ class BeautifulSoupHTMLParser(HTMLParser):
 
     def handle_entityref(self, name):
         """Handle a named entity reference by converting it to the
-        corresponding Unicode character and treating it as textual
+        corresponding Unicode character(s) and treating it as textual
         data.
 
         :param name: Name of the entity reference.

@@ -234,13 +234,13 @@ class TreeBuilderSmokeTest(object):
 
     def test_fuzzed_input(self):
         # This test centralizes in one place the various fuzz tests
-        # for Beautiful Soup created by the oss-fuzz.
+        # for Beautiful Soup created by the oss-fuzz project.
         
         # These strings superficially resemble markup, but they
         # generally can't be parsed into anything. The best we can
         # hope for is that parsing these strings won't crash the
         # parser.
-
+        #
         # n.b. This markup is commented out because these fuzz tests
         # _do_ crash the parser. However the crashes are due to bugs
         # in html.parser, not Beautiful Soup -- otherwise I'd fix the
@@ -261,7 +261,6 @@ class TreeBuilderSmokeTest(object):
         for markup in bad_markup:
             with warnings.catch_warnings(record=False):
                 soup = self.soup(markup)
-                pass
         
 
 class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
@@ -625,7 +624,7 @@ Hello, world!
         self.assertSoupEquals("&#10000000000000;", expect)
         self.assertSoupEquals("&#x10000000000000;", expect)
         self.assertSoupEquals("&#1000000000;", expect)
-        
+       
     def test_multipart_strings(self):
         "Mostly to prevent a recurrence of a bug in the html5lib treebuilder."
         soup = self.soup("<html><h2>\nfoo</h2><p></p></html>")

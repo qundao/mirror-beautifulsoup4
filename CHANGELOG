@@ -47,6 +47,11 @@ guarantee that this will hold for the next release.
   the <template> tag, which may contain both TemplateString objects
   and Comment objects. [bug=1913406]
 
+* The html.parser tree builder can now handles named entities
+  found in the HTML5 spec in much the same way that the html5lib
+  tree builder does. Note that the lxml tree builder still handles
+  named entities differently. [bug=1924908]
+
 * Added a second way to pass specify encodings to UnicodeDammit and
   EncodingDetector, based on the order of precedence defined in the
   HTML5 spec, starting at:

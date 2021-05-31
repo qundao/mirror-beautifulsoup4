@@ -368,6 +368,51 @@ class TestEntitySubstitution(unittest.TestCase):
         self.assertEqual(self.sub.substitute_html(dammit.markup),
                           "&lsquo;&rsquo;foo&ldquo;&rdquo;")
 
+    def test_html5_entity(self):
+        # Some HTML5 entities correspond to single- or multi-character
+        # Unicode sequences.
+
+        for entity, u in (
+            # A few spot checks of our ability to recognize
+            # special character sequences and convert them
+            # to named entities.
+            ('&models;', u'\u22a7'),
+            ('&Nfr;', u'\U0001d511'),
+            ('&ngeqq;', u'\u2267\u0338'),
+            ('&not;', u'\xac'),
+            ('&Not;', u'\u2aec'),
+                
+            # We _could_ convert | to &verbarr;, but we don't, because
+            # | is an ASCII character.
+            ('|' '|'),
+
+            # Similarly for the fj ligature, which we could convert to
+            # &fjlig;, but we don't.
+            ("fj", "fj"),
+
+            # We do convert _these_ ASCII characters to HTML entities,
+            # because that's required to generate valid HTML.
+            ('&gt;', '>'),
+            ('&lt;', '<'),
+            ('&amp;', '&'),
+        ):
+            template = u'3 %s 4'
+            raw = template % u
+            with_entities = template % entity
+            self.assertEqual(self.sub.substitute_html(raw), with_entities)
+            
+    def test_html5_entity_with_variation_selector(self):
+        # Some HTML5 entities correspond either to a single-character
+        # Unicode sequence _or_ to the same character plus U+FE00,
+        # VARIATION SELECTOR 1. We can handle this.
+        data = u"fjords \u2294 penguins"
+        markup = u"fjords &sqcup; penguins"
+        self.assertEqual(self.sub.substitute_html(data), markup)
+
+        data = u"fjords \u2294\ufe00 penguins"
+        markup = u"fjords &sqcups; penguins"
+        self.assertEqual(self.sub.substitute_html(data), markup)
+        
     def test_xml_converstion_includes_no_quotes_if_make_quoted_attribute_is_false(self):
         s = 'Welcome to "my bar"'
         self.assertEqual(self.sub.substitute_xml(s, False), s)
