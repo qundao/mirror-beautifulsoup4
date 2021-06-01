@@ -296,25 +296,26 @@ class PageElement(object):
     getText = get_text
     text = property(get_text)
     
-    def replace_with(self, replace_with):
-        """Replace this PageElement with another one, keeping the rest of the
-        tree the same.
+    def replace_with(self, *args):
+        """Replace this PageElement with one or more PageElements, keeping the 
+        rest of the tree the same.
         
-        :param replace_with: A PageElement.
+        :param args: One or more PageElements.
         :return: `self`, no longer part of the tree.
         """
         if self.parent is None:
             raise ValueError(
                 "Cannot replace one element with another when the "
                 "element to be replaced is not part of a tree.")
-        if replace_with is self:
+        if len(args) == 1 and args[0] is self:
             return
-        if replace_with is self.parent:
+        if any(x is self.parent for x in args):
             raise ValueError("Cannot replace a Tag with its parent.")
         old_parent = self.parent
         my_index = self.parent.index(self)
         self.extract(_self_index=my_index)
-        old_parent.insert(my_index, replace_with)
+        for idx, replace_with in enumerate(args, start=my_index):
+            old_parent.insert(idx, replace_with)
         return self
     replaceWith = replace_with  # BS3
 

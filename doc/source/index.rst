@@ -2097,21 +2097,34 @@ whether something has been decomposed, you can check its
 ------------------
 
 ``PageElement.replace_with()`` removes a tag or string from the tree,
-and replaces it with the tag or string of your choice::
+and replaces it with one or more tags or strings of your choice::
 
  markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
  soup = BeautifulSoup(markup, 'html.parser')
  a_tag = soup.a
 
  new_tag = soup.new_tag("b")
- new_tag.string = "example.net"
+ new_tag.string = "example.com"
  a_tag.i.replace_with(new_tag)
 
  a_tag
- # <a href="http://example.com/">I linked to <b>example.net</b></a>
+ # <a href="http://example.com/">I linked to <b>example.com</b></a>
 
-``replace_with()`` returns the tag or string that was replaced, so
+ bold_tag = soup.new_tag("b")
+ bold_tag.string = "example"
+ i_tag = soup.new_tag("i")
+ i_tag.string = "net"
+ a_tag.b.replace_with(bold_tag, ".", i_tag)
+
+ a_tag
+ # <a href="http://example.com/">I linked to <b>example</b>.<i>net</i></a>
+
+``replace_with()`` returns the tag or string that got replaced, so
 that you can examine it or add it back to another part of the tree.
+
+`The ability to pass multiple arguments into replace_with() is new
+in Beautiful Soup 4.10.0.`
+
 
 ``wrap()``
 ----------
@@ -2126,7 +2139,7 @@ returns the new wrapper::
  soup.p.wrap(soup.new_tag("div"))
  # <div><p><b>I wish I was bold.</b></p></div>
 
-This method is new in Beautiful Soup 4.0.5.
+`This method is new in Beautiful Soup 4.0.5.`
 
 ``unwrap()``
 ---------------------------
@@ -2177,7 +2190,7 @@ You can call ``Tag.smooth()`` to clean up the parse tree by consolidating adjace
  #  A one, a two
  # </p>
 
-The ``smooth()`` method is new in Beautiful Soup 4.8.0.
+`This method is new in Beautiful Soup 4.8.0.`
 
 Output
 ======

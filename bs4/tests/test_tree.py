@@ -1130,6 +1130,37 @@ class TestTreeModification(SoupTest):
         self.assertEqual(no.next_element, "no")
         self.assertEqual(no.next_sibling, " business")
 
+    def test_replace_with_errors(self):
+        # Can't replace a tag that's not part of a tree.
+        a_tag = Tag(name="a")
+        self.assertRaises(ValueError, a_tag.replace_with, "won't work")
+
+        # Can't replace a tag with its parent.
+        a_tag = self.soup("<a><b></b></a>").a
+        self.assertRaises(ValueError, a_tag.b.replace_with, a_tag)
+
+        # Or with a list that includes its parent.
+        self.assertRaises(ValueError, a_tag.b.replace_with,
+                          "string1", a_tag, "string2")
+        
+    def test_replace_with_multiple(self):
+        data = "<a><b></b><c></c></a>"
+        soup = self.soup(data)
+        d_tag = soup.new_tag("d")
+        d_tag.string = "Text In D Tag"
+        e_tag = soup.new_tag("e")
+        f_tag = soup.new_tag("f")
+        a_string = "Random Text"
+        soup.c.replace_with(d_tag, e_tag, a_string, f_tag)
+        self.assertEqual(
+            "<a><b></b><d>Text In D Tag</d><e></e>Random Text<f></f></a>",
+            soup.decode()
+        )
+        assert soup.b.next_element == d_tag
+        assert d_tag.string.next_element==e_tag
+        assert e_tag.next_element.string == a_string
+        assert e_tag.next_element.next_element == f_tag
+        
     def test_replace_first_child(self):
         data = "<a><b></b><c></c></a>"
         soup = self.soup(data)
