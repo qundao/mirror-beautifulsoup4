@@ -15,7 +15,7 @@ class TestNavigableString(SoupTest):
     def test_text_acquisition_methods(self):
         # These methods are intended for use against Tag, but they
         # work on NavigableString as well,
-        eq_ = self.assertEquals
+        eq_ = self.assertEqual
         
         s = NavigableString("fee ")
         cdata = CData("fie ")

@@ -18,12 +18,12 @@ class TestFormatter(SoupTest):
         # Attributes come out sorted by name. In Python 3, attributes
         # normally come out of a dictionary in the order they were
         # added.
-        self.assertEquals([('a', 2), ('b', 1)], formatter.attributes(tag))
+        self.assertEqual([('a', 2), ('b', 1)], formatter.attributes(tag))
 
         # This works even if Tag.attrs is None, though this shouldn't
         # normally happen.
         tag.attrs = None
-        self.assertEquals([], formatter.attributes(tag))
+        self.assertEqual([], formatter.attributes(tag))
         
     def test_sort_attributes(self):
         # Test the ability to override Formatter.attributes() to,
@@ -42,8 +42,8 @@ class TestFormatter(SoupTest):
 
         # attributes() was called on the <p> tag. It filtered out one
         # attribute and sorted the other two.
-        self.assertEquals(formatter.called_with, soup.p)
-        self.assertEquals(u'<p aval="2" cval="1"></p>', decoded)
+        self.assertEqual(formatter.called_with, soup.p)
+        self.assertEqual('<p aval="2" cval="1"></p>', decoded)
 
     def test_empty_attributes_are_booleans(self):
         # Test the behavior of empty_attributes_are_booleans as well
@@ -51,17 +51,17 @@ class TestFormatter(SoupTest):
         
         for name in ('html', 'minimal', None):
             formatter = HTMLFormatter.REGISTRY[name]
-            self.assertEquals(False, formatter.empty_attributes_are_booleans)
+            self.assertEqual(False, formatter.empty_attributes_are_booleans)
 
         formatter = XMLFormatter.REGISTRY[None]
-        self.assertEquals(False, formatter.empty_attributes_are_booleans)
+        self.assertEqual(False, formatter.empty_attributes_are_booleans)
 
         formatter = HTMLFormatter.REGISTRY['html5']
-        self.assertEquals(True, formatter.empty_attributes_are_booleans)
+        self.assertEqual(True, formatter.empty_attributes_are_booleans)
 
         # Verify that the constructor sets the value.
         formatter = Formatter(empty_attributes_are_booleans=True)
-        self.assertEquals(True, formatter.empty_attributes_are_booleans)
+        self.assertEqual(True, formatter.empty_attributes_are_booleans)
 
         # Now demonstrate what it does to markup.
         for markup in (
@@ -70,11 +70,11 @@ class TestFormatter(SoupTest):
         ):
             soup = self.soup(markup)
             for formatter in ('html', 'minimal', 'xml', None):
-                self.assertEquals(
+                self.assertEqual(
                     b'<option selected=""></option>',
                     soup.option.encode(formatter='html')
                 )
-                self.assertEquals(
+                self.assertEqual(
                     b'<option selected></option>',
                     soup.option.encode(formatter='html5')
                 )

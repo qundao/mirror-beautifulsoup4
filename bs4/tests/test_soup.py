@@ -51,17 +51,17 @@ PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
 class TestConstructor(SoupTest):
 
     def test_short_unicode_input(self):
-        data = u"<h1>éé</h1>"
+        data = "<h1>éé</h1>"
         soup = self.soup(data)
-        self.assertEqual(u"éé", soup.h1.string)
+        self.assertEqual("éé", soup.h1.string)
 
     def test_embedded_null(self):
-        data = u"<h1>foo\0bar</h1>"
+        data = "<h1>foo\0bar</h1>"
         soup = self.soup(data)
-        self.assertEqual(u"foo\0bar", soup.h1.string)
+        self.assertEqual("foo\0bar", soup.h1.string)
 
     def test_exclude_encodings(self):
-        utf8_data = u"Räksmörgås".encode("utf-8")
+        utf8_data = "Räksmörgås".encode("utf-8")
         soup = self.soup(utf8_data, exclude_encodings=["utf-8"])
         self.assertEqual("windows-1252", soup.original_encoding)
 
@@ -127,7 +127,7 @@ class TestConstructor(SoupTest):
             yield markup, None, None, False
             
         import re
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ParserRejectedMarkup,
             "The markup you provided was rejected by the parser. Trying a different parser or a different encoding may help.",
             BeautifulSoup, '', builder=Mock,
@@ -318,7 +318,7 @@ class TestWarnings(SoupTest):
         with warnings.catch_warnings(record=True) as warning_list:
             # note - this url must differ from the bytes one otherwise
             # python's warnings system swallows the second warning
-            soup = self.soup(u"http://www.crummyunicode.com/")
+            soup = self.soup("http://www.crummyunicode.com/")
         warning = self._assert_warning(
             warning_list, MarkupResemblesLocatorWarning
         )
@@ -334,7 +334,7 @@ class TestWarnings(SoupTest):
 
     def test_url_warning_with_unicode_and_space(self):
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = self.soup(u"http://www.crummyuncode.com/ is great")
+            soup = self.soup("http://www.crummyuncode.com/ is great")
         self.assertFalse(any("looks like a URL" in str(w.message) 
             for w in warning_list))
 
@@ -356,9 +356,9 @@ class TestEntitySubstitution(unittest.TestCase):
     def test_simple_html_substitution(self):
         # Unicode characters corresponding to named HTML entites
         # are substituted, and no others.
-        s = u"foo\u2200\N{SNOWMAN}\u00f5bar"
+        s = "foo\u2200\N{SNOWMAN}\u00f5bar"
         self.assertEqual(self.sub.substitute_html(s),
-                          u"foo&forall;\N{SNOWMAN}&otilde;bar")
+                          "foo&forall;\N{SNOWMAN}&otilde;bar")
 
     def test_smart_quote_substitution(self):
         # MS smart quotes are a common source of frustration, so we
@@ -376,11 +376,11 @@ class TestEntitySubstitution(unittest.TestCase):
             # A few spot checks of our ability to recognize
             # special character sequences and convert them
             # to named entities.
-            ('&models;', u'\u22a7'),
-            ('&Nfr;', u'\U0001d511'),
-            ('&ngeqq;', u'\u2267\u0338'),
-            ('&not;', u'\xac'),
-            ('&Not;', u'\u2aec'),
+            ('&models;', '\u22a7'),
+            ('&Nfr;', '\U0001d511'),
+            ('&ngeqq;', '\u2267\u0338'),
+            ('&not;', '\xac'),
+            ('&Not;', '\u2aec'),
                 
             # We _could_ convert | to &verbarr;, but we don't, because
             # | is an ASCII character.
@@ -396,7 +396,7 @@ class TestEntitySubstitution(unittest.TestCase):
             ('&lt;', '<'),
             ('&amp;', '&'),
         ):
-            template = u'3 %s 4'
+            template = '3 %s 4'
             raw = template % u
             with_entities = template % entity
             self.assertEqual(self.sub.substitute_html(raw), with_entities)
@@ -405,12 +405,12 @@ class TestEntitySubstitution(unittest.TestCase):
         # Some HTML5 entities correspond either to a single-character
         # Unicode sequence _or_ to the same character plus U+FE00,
         # VARIATION SELECTOR 1. We can handle this.
-        data = u"fjords \u2294 penguins"
-        markup = u"fjords &sqcup; penguins"
+        data = "fjords \u2294 penguins"
+        markup = "fjords &sqcup; penguins"
         self.assertEqual(self.sub.substitute_html(data), markup)
 
-        data = u"fjords \u2294\ufe00 penguins"
-        markup = u"fjords &sqcups; penguins"
+        data = "fjords \u2294\ufe00 penguins"
+        markup = "fjords &sqcups; penguins"
         self.assertEqual(self.sub.substitute_html(data), markup)
         
     def test_xml_converstion_includes_no_quotes_if_make_quoted_attribute_is_false(self):
@@ -468,7 +468,7 @@ class TestEncodingConversion(SoupTest):
 
     def setUp(self):
         super(TestEncodingConversion, self).setUp()
-        self.unicode_data = u'<html><head><meta charset="utf-8"/></head><body><foo>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</foo></body></html>'
+        self.unicode_data = '<html><head><meta charset="utf-8"/></head><body><foo>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</foo></body></html>'
         self.utf8_data = self.unicode_data.encode("utf-8")
         # Just so you know what it looks like.
         self.assertEqual(
@@ -488,7 +488,7 @@ class TestEncodingConversion(SoupTest):
             ascii = b"<foo>a</foo>"
             soup_from_ascii = self.soup(ascii)
             unicode_output = soup_from_ascii.decode()
-            self.assertTrue(isinstance(unicode_output, unicode))
+            self.assertTrue(isinstance(unicode_output, str))
             self.assertEqual(unicode_output, self.document_for(ascii.decode()))
             self.assertEqual(soup_from_ascii.original_encoding.lower(), "utf-8")
         finally:
@@ -500,7 +500,7 @@ class TestEncodingConversion(SoupTest):
         # is not set.
         soup_from_unicode = self.soup(self.unicode_data)
         self.assertEqual(soup_from_unicode.decode(), self.unicode_data)
-        self.assertEqual(soup_from_unicode.foo.string, u'Sacr\xe9 bleu!')
+        self.assertEqual(soup_from_unicode.foo.string, 'Sacr\xe9 bleu!')
         self.assertEqual(soup_from_unicode.original_encoding, None)
 
     def test_utf8_in_unicode_out(self):
@@ -508,7 +508,7 @@ class TestEncodingConversion(SoupTest):
         # attribute is set.
         soup_from_utf8 = self.soup(self.utf8_data)
         self.assertEqual(soup_from_utf8.decode(), self.unicode_data)
-        self.assertEqual(soup_from_utf8.foo.string, u'Sacr\xe9 bleu!')
+        self.assertEqual(soup_from_utf8.foo.string, 'Sacr\xe9 bleu!')
 
     def test_utf8_out(self):
         # The internal data structures can be encoded as UTF-8.
@@ -519,7 +519,7 @@ class TestEncodingConversion(SoupTest):
         PYTHON_3_PRE_3_2,
         "Bad HTMLParser detected; skipping test of non-ASCII characters in attribute name.")
     def test_attribute_name_containing_unicode_characters(self):
-        markup = u'<div><a \N{SNOWMAN}="snowman"></a></div>'
+        markup = '<div><a \N{SNOWMAN}="snowman"></a></div>'
         self.assertEqual(self.soup(markup).div.encode("utf8"), markup.encode("utf8"))
 
 

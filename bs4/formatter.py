@@ -89,7 +89,7 @@ class Formatter(EntitySubstitution):
         """
         if not self.entity_substitution:
             return ns
-        from element import NavigableString
+        from .element import NavigableString
         if (isinstance(ns, NavigableString)
             and ns.parent is not None
             and ns.parent.name in self.cdata_containing_tags):
@@ -122,7 +122,7 @@ class Formatter(EntitySubstitution):
             return []
         return sorted(
             (k, (None if self.empty_attributes_are_booleans and v == '' else v))
-            for k, v in tag.attrs.items()
+            for k, v in list(tag.attrs.items())
         )
    
 class HTMLFormatter(Formatter):

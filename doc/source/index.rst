@@ -18,14 +18,13 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.9.3. The examples in
-this documentation should work the same way in Python 2.7 and Python
-3.8.
+This document covers Beautiful Soup version 4.10.0. The examples in
+this documentation were written for Python 3.8.
 
 You might be looking for the documentation for `Beautiful Soup 3
 <http://www.crummy.com/software/BeautifulSoup/bs3/documentation.html>`_.
 If so, you should know that Beautiful Soup 3 is no longer being
-developed and that support for it will be dropped on or after December
+developed and that all support for it was dropped on December
 31, 2020. If you want to learn about the differences between Beautiful
 Soup 3 and Beautiful Soup 4, see `Porting code to BS4`_.
 
@@ -170,16 +169,13 @@ Installing Beautiful Soup
 If you're using a recent version of Debian or Ubuntu Linux, you can
 install Beautiful Soup with the system package manager:
 
-:kbd:`$ apt-get install python-bs4` (for Python 2)
-
-:kbd:`$ apt-get install python3-bs4` (for Python 3)
+:kbd:`$ apt-get install python3-bs4`
 
 Beautiful Soup 4 is published through PyPi, so if you can't install it
 with the system packager, you can install it with ``easy_install`` or
-``pip``. The package name is ``beautifulsoup4``, and the same package
-works on Python 2 and Python 3. Make sure you use the right version of
-``pip`` or ``easy_install`` for your Python version (these may be named
-``pip3`` and ``easy_install3`` respectively if you're using Python 3).
+``pip``. The package name is ``beautifulsoup4``. Make sure you use the
+right version of ``pip`` or ``easy_install`` for your Python version
+(these may be named ``pip3`` and ``easy_install3`` respectively).
 
 :kbd:`$ easy_install beautifulsoup4`
 
@@ -202,40 +198,8 @@ package the entire library with your application. You can download the
 tarball, copy its ``bs4`` directory into your application's codebase,
 and use Beautiful Soup without installing it at all.
 
-I use Python 2.7 and Python 3.8 to develop Beautiful Soup, but it
-should work with other recent versions.
-
-Problems after installation
----------------------------
-
-Beautiful Soup is packaged as Python 2 code. When you install it for
-use with Python 3, it's automatically converted to Python 3 code. If
-you don't install the package, the code won't be converted. There have
-also been reports on Windows machines of the wrong version being
-installed.
-
-If you get the ``ImportError`` "No module named HTMLParser", your
-problem is that you're running the Python 2 version of the code under
-Python 3.
-
-If you get the ``ImportError`` "No module named html.parser", your
-problem is that you're running the Python 3 version of the code under
-Python 2.
-
-In both cases, your best bet is to completely remove the Beautiful
-Soup installation from your system (including any directory created
-when you unzipped the tarball) and try the installation again.
-
-If you get the ``SyntaxError`` "Invalid syntax" on the line
-``ROOT_TAG_NAME = u'[document]'``, you need to convert the Python 2
-code to Python 3. You can do this either by installing the package:
-
-:kbd:`$ python3 setup.py install`
-
-or by manually running Python's ``2to3`` conversion script on the
-``bs4`` directory:
-
-:kbd:`$ 2to3-3.2 -w bs4`
+I use Python 3.8 to develop Beautiful Soup, but it should work with
+other recent versions.
 
 .. _parser-installation:
 
@@ -272,8 +236,7 @@ This table summarizes the advantages and disadvantages of each parser library:
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 | Python's html.parser | ``BeautifulSoup(markup, "html.parser")``   | * Batteries included           | * Not as fast as lxml,   |
 |                      |                                            | * Decent speed                 |   less lenient than      |
-|                      |                                            | * Lenient (As of Python 2.7.3  |   html5lib.              |
-|                      |                                            |   and 3.2.)                    |                          |
+|                      |                                            | * Lenient (As of Python 3.2)   |   html5lib.              |
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 | lxml's HTML parser   | ``BeautifulSoup(markup, "lxml")``          | * Very fast                    | * External C dependency  |
 |                      |                                            | * Lenient                      |                          |
@@ -289,9 +252,9 @@ This table summarizes the advantages and disadvantages of each parser library:
 +----------------------+--------------------------------------------+--------------------------------+--------------------------+
 
 If you can, I recommend you install and use lxml for speed. If you're
-using a very old version of Python -- earlier than 2.7.3 or 3.2.2 --
-it's `essential` that you install lxml or html5lib. Python's built-in
-HTML parser is just not very good in those old versions.
+using a very old version of Python -- earlier than 3.2.2 -- it's
+`essential` that you install lxml or html5lib. Python's built-in HTML
+parser is just not very good in those old versions.
 
 Note that if a document is invalid, different parsers will generate
 different Beautiful Soup trees for it. See `Differences
@@ -481,8 +444,7 @@ uses the ``NavigableString`` class to contain these bits of text::
 A ``NavigableString`` is just like a Python Unicode string, except
 that it also supports some of the features described in `Navigating
 the tree`_ and `Searching the tree`_. You can convert a
-``NavigableString`` to a Unicode string with ``unicode()`` (in
-Python 2) or ``str`` (in Python 3)::
+``NavigableString`` to a Unicode string with ``str``::
 
  unicode_string = str(tag.string)
  unicode_string
@@ -2243,8 +2205,7 @@ Non-pretty printing
 -------------------
 
 If you just want a string, with no fancy formatting, you can call
-``str()`` on a ``BeautifulSoup`` object (``unicode()`` in Python 2),
-or on a ``Tag`` within it::
+``str()`` on a ``BeautifulSoup`` object, or on a ``Tag`` within it::
 
  str(soup)
  # '<html><head></head><body><a href="http://example.com/">I linked to <i>example.com</i></a></body></html>'
@@ -3169,10 +3130,10 @@ Version mismatch problems
 -------------------------
 
 * ``SyntaxError: Invalid syntax`` (on the line ``ROOT_TAG_NAME =
-  '[document]'``): Caused by running the Python 2 version of
+  '[document]'``): Caused by running an old Python 2 version of
   Beautiful Soup under Python 3, without converting the code.
 
-* ``ImportError: No module named HTMLParser`` - Caused by running the
+* ``ImportError: No module named HTMLParser`` - Caused by running an old
   Python 2 version of Beautiful Soup under Python 3.
 
 * ``ImportError: No module named html.parser`` - Caused by running the

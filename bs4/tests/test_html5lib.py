@@ -5,7 +5,7 @@ import warnings
 try:
     from bs4.builder import HTML5TreeBuilder
     HTML5LIB_PRESENT = True
-except ImportError, e:
+except ImportError as e:
     HTML5LIB_PRESENT = False
 from bs4.element import SoupStrainer
 from bs4.testing import (
@@ -74,14 +74,14 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
     def test_reparented_markup(self):
         markup = '<p><em>foo</p>\n<p>bar<a></a></em></p>'
         soup = self.soup(markup)
-        self.assertEqual(u"<body><p><em>foo</em></p><em>\n</em><p><em>bar<a></a></em></p></body>", soup.body.decode())
+        self.assertEqual("<body><p><em>foo</em></p><em>\n</em><p><em>bar<a></a></em></p></body>", soup.body.decode())
         self.assertEqual(2, len(soup.find_all('p')))
 
 
     def test_reparented_markup_ends_with_whitespace(self):
         markup = '<p><em>foo</p>\n<p>bar<a></a></em></p>\n'
         soup = self.soup(markup)
-        self.assertEqual(u"<body><p><em>foo</em></p><em>\n</em><p><em>bar<a></a></em></p>\n</body>", soup.body.decode())
+        self.assertEqual("<body><p><em>foo</em></p><em>\n</em><p><em>bar<a></a></em></p>\n</body>", soup.body.decode())
         self.assertEqual(2, len(soup.find_all('p')))
 
     def test_reparented_markup_containing_identical_whitespace_nodes(self):
@@ -127,7 +127,7 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
     def test_foster_parenting(self):
         markup = b"""<table><td></tbody>A"""
         soup = self.soup(markup)
-        self.assertEqual(u"<body>A<table><tbody><tr><td></td></tr></tbody></table></body>", soup.body.decode())
+        self.assertEqual("<body>A<table><tbody><tr><td></td></tr></tbody></table></body>", soup.body.decode())
 
     def test_extraction(self):
         """
@@ -199,28 +199,28 @@ class HTML5LibBuilderSmokeTest(SoupTest, HTML5TreeBuilderSmokeTest):
         # HTMLParserTreeBuilderSmokeTest.  It's not in the superclass
         # because the lxml HTML TreeBuilder _doesn't_ work this way.
         for input_element, output_unicode, output_element in (
-                ("&RightArrowLeftArrow;", u'\u21c4', b'&rlarr;'),
-                ('&models;', u'\u22a7', b'&models;'),
-                ('&Nfr;', u'\U0001d511', b'&Nfr;'),
-                ('&ngeqq;', u'\u2267\u0338', b'&ngeqq;'),
-                ('&not;', u'\xac', b'&not;'),
-                ('&Not;', u'\u2aec', b'&Not;'),
-                ('&quot;', u'"', b'"'),
-                ('&there4;', u'\u2234', b'&there4;'),
-                ('&Therefore;', u'\u2234', b'&there4;'),
-                ('&therefore;', u'\u2234', b'&there4;'),
-                ("&fjlig;", u'fj', b'fj'),                
-                ("&sqcup;", u'\u2294', b'&sqcup;'),
-                ("&sqcups;", u'\u2294\ufe00', b'&sqcups;'),
-                ("&apos;", u"'", b"'"),
-                ("&verbar;", u"|", b"|"),
+                ("&RightArrowLeftArrow;", '\u21c4', b'&rlarr;'),
+                ('&models;', '\u22a7', b'&models;'),
+                ('&Nfr;', '\U0001d511', b'&Nfr;'),
+                ('&ngeqq;', '\u2267\u0338', b'&ngeqq;'),
+                ('&not;', '\xac', b'&not;'),
+                ('&Not;', '\u2aec', b'&Not;'),
+                ('&quot;', '"', b'"'),
+                ('&there4;', '\u2234', b'&there4;'),
+                ('&Therefore;', '\u2234', b'&there4;'),
+                ('&therefore;', '\u2234', b'&there4;'),
+                ("&fjlig;", 'fj', b'fj'),                
+                ("&sqcup;", '\u2294', b'&sqcup;'),
+                ("&sqcups;", '\u2294\ufe00', b'&sqcups;'),
+                ("&apos;", "'", b"'"),
+                ("&verbar;", "|", b"|"),
         ):
-            markup = u'<div>%s</div>' % input_element
+            markup = '<div>%s</div>' % input_element
             div = self.soup(markup).div
             without_element = div.encode()
             expect = b"<div>%s</div>" % output_unicode.encode("utf8")
-            self.assertEquals(without_element, expect)
+            self.assertEqual(without_element, expect)
 
             with_element = div.encode(formatter="html")
             expect = b"<div>%s</div>" % output_element
-            self.assertEquals(with_element, expect)
+            self.assertEqual(with_element, expect)

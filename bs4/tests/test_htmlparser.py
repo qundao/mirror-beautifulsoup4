@@ -61,20 +61,20 @@ class HTMLParserTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         # If you don't provide any particular value for
         # on_duplicate_attribute, later values replace earlier values.
         soup = self.soup(markup)
-        self.assertEquals("url3", soup.a['href'])
-        self.assertEquals(["cls"], soup.a['class'])
-        self.assertEquals("id", soup.a['id'])
+        self.assertEqual("url3", soup.a['href'])
+        self.assertEqual(["cls"], soup.a['class'])
+        self.assertEqual("id", soup.a['id'])
         
         # You can also get this behavior explicitly.
         def assert_attribute(on_duplicate_attribute, expected):
             soup = self.soup(
                 markup, on_duplicate_attribute=on_duplicate_attribute
             )
-            self.assertEquals(expected, soup.a['href'])
+            self.assertEqual(expected, soup.a['href'])
 
             # Verify that non-duplicate attributes are treated normally.
-            self.assertEquals(["cls"], soup.a['class'])
-            self.assertEquals("id", soup.a['id'])
+            self.assertEqual(["cls"], soup.a['class'])
+            self.assertEqual("id", soup.a['id'])
         assert_attribute(None, "url3")
         assert_attribute(BeautifulSoupHTMLParser.REPLACE, "url3")
 
@@ -94,31 +94,31 @@ class HTMLParserTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         # convert those Unicode characters to a (potentially
         # different) named entity on the way out.
         for input_element, output_unicode, output_element in (
-                ("&RightArrowLeftArrow;", u'\u21c4', b'&rlarr;'),
-                ('&models;', u'\u22a7', b'&models;'),
-                ('&Nfr;', u'\U0001d511', b'&Nfr;'),
-                ('&ngeqq;', u'\u2267\u0338', b'&ngeqq;'),
-                ('&not;', u'\xac', b'&not;'),
-                ('&Not;', u'\u2aec', b'&Not;'),
-                ('&quot;', u'"', b'"'),
-                ('&there4;', u'\u2234', b'&there4;'),
-                ('&Therefore;', u'\u2234', b'&there4;'),
-                ('&therefore;', u'\u2234', b'&there4;'),
-                ("&fjlig;", u'fj', b'fj'),                
-                ("&sqcup;", u'\u2294', b'&sqcup;'),
-                ("&sqcups;", u'\u2294\ufe00', b'&sqcups;'),
-                ("&apos;", u"'", b"'"),
-                ("&verbar;", u"|", b"|"),
+                ("&RightArrowLeftArrow;", '\u21c4', b'&rlarr;'),
+                ('&models;', '\u22a7', b'&models;'),
+                ('&Nfr;', '\U0001d511', b'&Nfr;'),
+                ('&ngeqq;', '\u2267\u0338', b'&ngeqq;'),
+                ('&not;', '\xac', b'&not;'),
+                ('&Not;', '\u2aec', b'&Not;'),
+                ('&quot;', '"', b'"'),
+                ('&there4;', '\u2234', b'&there4;'),
+                ('&Therefore;', '\u2234', b'&there4;'),
+                ('&therefore;', '\u2234', b'&there4;'),
+                ("&fjlig;", 'fj', b'fj'),                
+                ("&sqcup;", '\u2294', b'&sqcup;'),
+                ("&sqcups;", '\u2294\ufe00', b'&sqcups;'),
+                ("&apos;", "'", b"'"),
+                ("&verbar;", "|", b"|"),
         ):
-            markup = u'<div>%s</div>' % input_element
+            markup = '<div>%s</div>' % input_element
             div = self.soup(markup).div
             without_element = div.encode()
             expect = b"<div>%s</div>" % output_unicode.encode("utf8")
-            self.assertEquals(without_element, expect)
+            self.assertEqual(without_element, expect)
 
             with_element = div.encode(formatter="html")
             expect = b"<div>%s</div>" % output_element
-            self.assertEquals(with_element, expect)
+            self.assertEqual(with_element, expect)
 
 
 class TestHTMLParserSubclass(SoupTest):

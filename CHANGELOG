@@ -1,8 +1,14 @@
-= 4.10.0 (unreleased)
-
 Beautiful Soup's official support for Python 2 ended on December 31st,
-2020. This release supports both Python 2 and Python 3, but there's no
-guarantee that this will hold for the next release.
+2020. The final release to support Python 2 was Beautiful Soup
+4.9.3. In the Launchpad Bazaar repository, the final revision to support
+Python 2 was revision 605.
+
+= 4.10.0 (20210907)
+
+* This is the first release of Beautiful Soup to only support Python
+  3. I dropped Python 2 support to maintain support for newer versions
+  (58 and up) of setuptools. See:
+  https://github.com/pypa/setuptools/issues/2769 [bug=1942919]
 
 * The behavior of methods like .get_text() and .strings now differs
   depending on the type of tag. The change is visible with HTML tags
