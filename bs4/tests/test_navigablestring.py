@@ -15,34 +15,33 @@ class TestNavigableString(SoupTest):
     def test_text_acquisition_methods(self):
         # These methods are intended for use against Tag, but they
         # work on NavigableString as well,
-        eq_ = self.assertEqual
         
         s = NavigableString("fee ")
         cdata = CData("fie ")
         comment = Comment("foe ")
 
-        eq_("fee ", s.get_text())
-        eq_("fee", s.get_text(strip=True))
-        eq_(["fee "], list(s.strings))
-        eq_(["fee"], list(s.stripped_strings))
-        eq_(["fee "], list(s._all_strings()))
+        assert "fee " == s.get_text()
+        assert "fee" == s.get_text(strip=True)
+        assert ["fee "] == list(s.strings)
+        assert ["fee"] == list(s.stripped_strings)
+        assert ["fee "] == list(s._all_strings())
 
-        eq_("fie ", cdata.get_text())
-        eq_("fie", cdata.get_text(strip=True))
-        eq_(["fie "], list(cdata.strings))
-        eq_(["fie"], list(cdata.stripped_strings))
-        eq_(["fie "], list(cdata._all_strings()))
+        assert "fie " == cdata.get_text()
+        assert "fie" == cdata.get_text(strip=True)
+        assert ["fie "] == list(cdata.strings)
+        assert ["fie"] == list(cdata.stripped_strings)
+        assert ["fie "] == list(cdata._all_strings())
         
         # Since a Comment isn't normally considered 'text',
         # these methods generally do nothing.
-        eq_("", comment.get_text())
-        eq_([], list(comment.strings))
-        eq_([], list(comment.stripped_strings))
-        eq_([], list(comment._all_strings()))
+        assert "" == comment.get_text()
+        assert [] == list(comment.strings)
+        assert [] == list(comment.stripped_strings)
+        assert [] == list(comment._all_strings())
 
         # Unless you specifically say that comments are okay.
-        eq_("foe", comment.get_text(strip=True, types=Comment))
-        eq_("foe ", comment.get_text(types=(Comment, NavigableString)))
+        assert "foe" == comment.get_text(strip=True, types=Comment)
+        assert "foe " == comment.get_text(types=(Comment, NavigableString))
         
 class TestNavigableStringSubclasses(SoupTest):
 
@@ -52,9 +51,9 @@ class TestNavigableStringSubclasses(SoupTest):
         soup = self.soup("")
         cdata = CData("foo")
         soup.insert(1, cdata)
-        self.assertEqual(str(soup), "<![CDATA[foo]]>")
-        self.assertEqual(soup.find(text="foo"), "foo")
-        self.assertEqual(soup.contents[0], "foo")
+        assert str(soup) == "<![CDATA[foo]]>"
+        assert soup.find(text="foo") == "foo"
+        assert soup.contents[0] == "foo"
 
     def test_cdata_is_never_formatted(self):
         """Text inside a CData object is passed into the formatter.
@@ -70,9 +69,8 @@ class TestNavigableStringSubclasses(SoupTest):
         soup = self.soup("")
         cdata = CData("<><><>")
         soup.insert(1, cdata)
-        self.assertEqual(
-            b"<![CDATA[<><><>]]>", soup.encode(formatter=increment))
-        self.assertEqual(1, self.count)
+        assert b"<![CDATA[<><><>]]>" == soup.encode(formatter=increment)
+        assert 1 == self.count
 
     def test_doctype_ends_in_newline(self):
         # Unlike other NavigableString subclasses, a DOCTYPE always ends
@@ -80,11 +78,11 @@ class TestNavigableStringSubclasses(SoupTest):
         doctype = Doctype("foo")
         soup = self.soup("")
         soup.insert(1, doctype)
-        self.assertEqual(soup.encode(), b"<!DOCTYPE foo>\n")
+        assert soup.encode() == b"<!DOCTYPE foo>\n"
 
     def test_declaration(self):
         d = Declaration("foo")
-        self.assertEqual("<?foo?>", d.output_ready())
+        assert "<?foo?>" == d.output_ready()
 
     def test_default_string_containers(self):
         # In some cases, we use different NavigableString subclasses for
@@ -92,10 +90,9 @@ class TestNavigableStringSubclasses(SoupTest):
         soup = self.soup(
             "<div>text</div><script>text</script><style>text</style>"
         )
-        self.assertEqual(
-            [NavigableString, Script, Stylesheet],
-            [x.__class__ for x in soup.find_all(text=True)]
-        )
+        assert [NavigableString, Script, Stylesheet] == [
+            x.__class__ for x in soup.find_all(text=True)
+        ]
 
         # The TemplateString is a little unusual because it's generally found
         # _inside_ children of a <template> element, not a direct child of the
@@ -119,5 +116,5 @@ class TestNavigableStringSubclasses(SoupTest):
         # Comment.
         markup = b"<template>Some text<p>In a tag</p><!--with a comment--></template>"
         soup = self.soup(markup)
-        self.assertEqual(markup, soup.template.encode("utf8"))
+        assert markup == soup.template.encode("utf8")
 

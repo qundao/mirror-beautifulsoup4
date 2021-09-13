@@ -31,7 +31,7 @@ from bs4.testing import (
 @skipIf(
     not LXML_PRESENT,
     "lxml seems not to be present, not testing its tree builder.")
-class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
+class TestLXMLTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
     """See ``HTMLTreeBuilderSmokeTest``."""
 
     @property
@@ -39,11 +39,11 @@ class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
         return LXMLTreeBuilder
 
     def test_out_of_range_entity(self):
-        self.assertSoupEquals(
+        self.assert_soup(
             "<p>foo&#10000000000000;bar</p>", "<p>foobar</p>")
-        self.assertSoupEquals(
+        self.assert_soup(
             "<p>foo&#x10000000000000;bar</p>", "<p>foobar</p>")
-        self.assertSoupEquals(
+        self.assert_soup(
             "<p>foo&#1000000000;bar</p>", "<p>foobar</p>")
         
     def test_entities_in_foreign_document_encoding(self):
@@ -61,15 +61,15 @@ class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
     def test_empty_doctype(self):
         soup = self.soup("<!DOCTYPE>")
         doctype = soup.contents[0]
-        self.assertEqual("", doctype.strip())
+        assert "" == doctype.strip()
 
     def test_beautifulstonesoup_is_xml_parser(self):
         # Make sure that the deprecated BSS class uses an xml builder
         # if one is installed.
         with warnings.catch_warnings(record=True) as w:
             soup = BeautifulStoneSoup("<b />")
-        self.assertEqual("<b/>", str(soup.b))
-        self.assertTrue("BeautifulStoneSoup class is deprecated" in str(w[0].message))
+        assert "<b/>" == str(soup.b)
+        assert "BeautifulStoneSoup class is deprecated" in str(w[0].message)
 
     def test_tracking_line_numbers(self):
         # The lxml TreeBuilder cannot keep track of line numbers from
@@ -83,8 +83,8 @@ class LXMLTreeBuilderSmokeTest(SoupTest, HTMLTreeBuilderSmokeTest):
             "\n   <p>\n\n<sourceline>\n<b>text</b></sourceline><sourcepos></p>",
             store_line_numbers=True
         )
-        self.assertEqual("sourceline", soup.p.sourceline.name)
-        self.assertEqual("sourcepos", soup.p.sourcepos.name)
+        assert "sourceline" == soup.p.sourceline.name
+        assert "sourcepos" == soup.p.sourcepos.name
         
 @skipIf(
     not LXML_PRESENT,
@@ -109,7 +109,6 @@ class LXMLXMLTreeBuilderSmokeTest(SoupTest, XMLTreeBuilderSmokeTest):
             '<prefix:tag xmlns:prefix="http://prefixed-namespace.com">content</tag>'
             '</root>'
         )
-        self.assertEqual(
-            soup._namespaces,
+        assert soup._namespaces == (
             {'xml': 'http://www.w3.org/XML/1998/namespace', 'prefix': 'http://prefixed-namespace.com'}
         )

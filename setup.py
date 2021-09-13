@@ -17,10 +17,11 @@ setup(
     url="http://www.crummy.com/software/BeautifulSoup/bs4/",
     download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
     description="Screen-scraping library",
-    python_requires='>3.0.0',
+    python_requires='>=3.6.0',
     install_requires=[
         "soupsieve >1.2",
     ],
+    tests_require=['pytest'],
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",

@@ -1,6 +1,6 @@
 # encoding: utf-8
+import pytest
 import logging
-import unittest
 import bs4
 from bs4 import BeautifulSoup
 from bs4.dammit import (
@@ -8,67 +8,62 @@ from bs4.dammit import (
     UnicodeDammit,
 )
 
-class TestUnicodeDammit(unittest.TestCase):
+class TestUnicodeDammit(object):
     """Standalone tests of UnicodeDammit."""
 
     def test_unicode_input(self):
         markup = "I'm already Unicode! \N{SNOWMAN}"
         dammit = UnicodeDammit(markup)
-        self.assertEqual(dammit.unicode_markup, markup)
+        assert dammit.unicode_markup == markup
 
     def test_smart_quotes_to_unicode(self):
         markup = b"<foo>\x91\x92\x93\x94</foo>"
         dammit = UnicodeDammit(markup)
-        self.assertEqual(
-            dammit.unicode_markup, "<foo>\u2018\u2019\u201c\u201d</foo>")
+        assert dammit.unicode_markup == "<foo>\u2018\u2019\u201c\u201d</foo>"
 
     def test_smart_quotes_to_xml_entities(self):
         markup = b"<foo>\x91\x92\x93\x94</foo>"
         dammit = UnicodeDammit(markup, smart_quotes_to="xml")
-        self.assertEqual(
-            dammit.unicode_markup, "<foo>&#x2018;&#x2019;&#x201C;&#x201D;</foo>")
+        assert dammit.unicode_markup == "<foo>&#x2018;&#x2019;&#x201C;&#x201D;</foo>"
 
     def test_smart_quotes_to_html_entities(self):
         markup = b"<foo>\x91\x92\x93\x94</foo>"
         dammit = UnicodeDammit(markup, smart_quotes_to="html")
-        self.assertEqual(
-            dammit.unicode_markup, "<foo>&lsquo;&rsquo;&ldquo;&rdquo;</foo>")
+        assert dammit.unicode_markup == "<foo>&lsquo;&rsquo;&ldquo;&rdquo;</foo>"
 
     def test_smart_quotes_to_ascii(self):
         markup = b"<foo>\x91\x92\x93\x94</foo>"
         dammit = UnicodeDammit(markup, smart_quotes_to="ascii")
-        self.assertEqual(
-            dammit.unicode_markup, """<foo>''""</foo>""")
+        assert dammit.unicode_markup == """<foo>''""</foo>"""
 
     def test_detect_utf8(self):
         utf8 = b"Sacr\xc3\xa9 bleu! \xe2\x98\x83"
         dammit = UnicodeDammit(utf8)
-        self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
-        self.assertEqual(dammit.unicode_markup, 'Sacr\xe9 bleu! \N{SNOWMAN}')
-
+        assert dammit.original_encoding.lower() == 'utf-8'
+        assert dammit.unicode_markup == 'Sacr\xe9 bleu! \N{SNOWMAN}'
 
     def test_convert_hebrew(self):
         hebrew = b"\xed\xe5\xec\xf9"
         dammit = UnicodeDammit(hebrew, ["iso-8859-8"])
-        self.assertEqual(dammit.original_encoding.lower(), 'iso-8859-8')
-        self.assertEqual(dammit.unicode_markup, '\u05dd\u05d5\u05dc\u05e9')
+        assert dammit.original_encoding.lower() == 'iso-8859-8'
+        assert dammit.unicode_markup == '\u05dd\u05d5\u05dc\u05e9'
 
     def test_dont_see_smart_quotes_where_there_are_none(self):
         utf_8 = b"\343\202\261\343\203\274\343\202\277\343\202\244 Watch"
         dammit = UnicodeDammit(utf_8)
-        self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
-        self.assertEqual(dammit.unicode_markup.encode("utf-8"), utf_8)
+        assert dammit.original_encoding.lower() == 'utf-8'
+        assert dammit.unicode_markup.encode("utf-8") == utf_8
 
     def test_ignore_inappropriate_codecs(self):
         utf8_data = "Räksmörgås".encode("utf-8")
         dammit = UnicodeDammit(utf8_data, ["iso-8859-8"])
-        self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
+        assert dammit.original_encoding.lower() == 'utf-8'
 
     def test_ignore_invalid_codecs(self):
         utf8_data = "Räksmörgås".encode("utf-8")
         for bad_encoding in ['.utf8', '...', 'utF---16.!']:
             dammit = UnicodeDammit(utf8_data, [bad_encoding])
-            self.assertEqual(dammit.original_encoding.lower(), 'utf-8')
+            assert dammit.original_encoding.lower() == 'utf-8'
 
     def test_exclude_encodings(self):
         # This is UTF-8.
@@ -77,14 +72,14 @@ class TestUnicodeDammit(unittest.TestCase):
         # But if we exclude UTF-8 from consideration, the guess is
         # Windows-1252.
         dammit = UnicodeDammit(utf8_data, exclude_encodings=["utf-8"])
-        self.assertEqual(dammit.original_encoding.lower(), 'windows-1252')
+        assert dammit.original_encoding.lower() == 'windows-1252'
 
         # And if we exclude that, there is no valid guess at all.
         dammit = UnicodeDammit(
             utf8_data, exclude_encodings=["utf-8", "windows-1252"])
-        self.assertEqual(dammit.original_encoding, None)
+        assert dammit.original_encoding == None
 
-class TestEncodingDetector(unittest.TestCase):
+class TestEncodingDetector(object):
         
     def test_encoding_detector_replaces_junk_in_encoding_name_with_replacement_character(self):
         detected = EncodingDetector(
@@ -100,8 +95,7 @@ class TestEncodingDetector(unittest.TestCase):
             b"<html><meta charset=euc-jp /></html>",
             b"<html><meta charset=euc-jp/></html>"):
             dammit = UnicodeDammit(data, is_html=True)
-            self.assertEqual(
-                "euc-jp", dammit.original_encoding)
+            assert "euc-jp" == dammit.original_encoding
 
     def test_last_ditch_entity_replacement(self):
         # This is a UTF-8 document that contains bytestrings
@@ -129,11 +123,11 @@ class TestEncodingDetector(unittest.TestCase):
                 return None
             bs4.dammit.chardet_dammit = noop
             dammit = UnicodeDammit(doc)
-            self.assertEqual(True, dammit.contains_replacement_characters)
-            self.assertTrue("\ufffd" in dammit.unicode_markup)
+            assert True == dammit.contains_replacement_characters
+            assert "\ufffd" in dammit.unicode_markup
 
             soup = BeautifulSoup(doc, "html.parser")
-            self.assertTrue(soup.contains_replacement_characters)
+            assert soup.contains_replacement_characters
         finally:
             logging.disable(logging.NOTSET)
             bs4.dammit.chardet_dammit = chardet
@@ -142,8 +136,8 @@ class TestEncodingDetector(unittest.TestCase):
         # A document written in UTF-16LE will have its byte order marker stripped.
         data = b'\xff\xfe<\x00a\x00>\x00\xe1\x00\xe9\x00<\x00/\x00a\x00>\x00'
         dammit = UnicodeDammit(data)
-        self.assertEqual("<a>áé</a>", dammit.unicode_markup)
-        self.assertEqual("utf-16le", dammit.original_encoding)
+        assert "<a>áé</a>" == dammit.unicode_markup
+        assert "utf-16le" == dammit.original_encoding
        
     def test_known_definite_versus_user_encodings(self):
         # The known_definite_encodings are used before sniffing the
@@ -156,16 +150,14 @@ class TestEncodingDetector(unittest.TestCase):
         # We can process it as UTF-16 by passing it in as a known
         # definite encoding.
         before = UnicodeDammit(data, known_definite_encodings=["utf-16"])
-        self.assertEqual("utf-16", before.original_encoding)
+        assert "utf-16" == before.original_encoding
         
         # If we pass UTF-18 as a user encoding, it's not even
         # tried--the encoding sniffed from the byte-order mark takes
         # precedence.
         after = UnicodeDammit(data, user_encodings=["utf-8"])
-        self.assertEqual("utf-16le", after.original_encoding)
-        self.assertEqual(
-            ["utf-16le"], [x[0] for x in dammit.tried_encodings]
-        )
+        assert "utf-16le" == after.original_encoding
+        assert ["utf-16le"] == [x[0] for x in dammit.tried_encodings]
         
         # Here's a document in ISO-8859-8.
         hebrew = b"\xed\xe5\xec\xf9"
@@ -175,10 +167,8 @@ class TestEncodingDetector(unittest.TestCase):
         # The known_definite_encodings don't work, BOM sniffing does
         # nothing (it only works for a few UTF encodings), but one of
         # the user_encodings does work.
-        self.assertEqual("iso-8859-8", dammit.original_encoding)
-        self.assertEqual(
-            ["utf-8", "iso-8859-8"], [x[0] for x in dammit.tried_encodings]
-        )
+        assert "iso-8859-8" == dammit.original_encoding
+        assert ["utf-8", "iso-8859-8"] == [x[0] for x in dammit.tried_encodings]
         
     def test_deprecated_override_encodings(self):
         # override_encodings is a deprecated alias for
@@ -190,12 +180,11 @@ class TestEncodingDetector(unittest.TestCase):
             override_encodings=["utf-8"],
             user_encodings=["iso-8859-8"],
         )
-        self.assertEqual("iso-8859-8", dammit.original_encoding)
+        assert "iso-8859-8" == dammit.original_encoding
 
         # known_definite_encodings and override_encodings were tried
         # before user_encodings.
-        self.assertEqual(
-            ["shift-jis", "utf-8", "iso-8859-8"],
+        assert ["shift-jis", "utf-8", "iso-8859-8"] == (
             [x[0] for x in dammit.tried_encodings]
         )
 
@@ -212,16 +201,15 @@ class TestEncodingDetector(unittest.TestCase):
         doc = utf8 + windows_1252 + utf8
 
         # The document can't be turned into UTF-8:
-        self.assertRaises(UnicodeDecodeError, doc.decode, "utf8")
+        with pytest.raises(UnicodeDecodeError):
+            doc.decode("utf8")
 
         # Unicode, Dammit thinks the whole document is Windows-1252,
         # and decodes it into "â˜ƒâ˜ƒâ˜ƒ“Hi, I like Windows!”â˜ƒâ˜ƒâ˜ƒ"
 
         # But if we run it through fix_embedded_windows_1252, it's fixed:
-
         fixed = UnicodeDammit.detwingle(doc)
-        self.assertEqual(
-            "☃☃☃“Hi, I like Windows!”☃☃☃", fixed.decode("utf8"))
+        assert "☃☃☃“Hi, I like Windows!”☃☃☃" == fixed.decode("utf8")
 
     def test_detwingle_ignores_multibyte_characters(self):
         # Each of these characters has a UTF-8 representation ending
@@ -234,9 +222,9 @@ class TestEncodingDetector(unittest.TestCase):
             "\xf0\x90\x90\x93", # This is a CJK character, not sure which one.
             ):
             input = tricky_unicode_char.encode("utf8")
-            self.assertTrue(input.endswith(b'\x93'))
+            assert input.endswith(b'\x93')
             output = UnicodeDammit.detwingle(input)
-            self.assertEqual(output, input)
+            assert output == input
 
     def test_find_declared_encoding(self):
         # Test our ability to find a declared encoding inside an
@@ -253,34 +241,30 @@ class TestEncodingDetector(unittest.TestCase):
         xml_bytes = xml_unicode.encode("ascii")
 
         m = EncodingDetector.find_declared_encoding
-        self.assertEqual(None, m(html_unicode, is_html=False))
-        self.assertEqual("utf-8", m(html_unicode, is_html=True))
-        self.assertEqual("utf-8", m(html_bytes, is_html=True))
+        assert m(html_unicode, is_html=False) is None
+        assert "utf-8" == m(html_unicode, is_html=True)
+        assert "utf-8" == m(html_bytes, is_html=True)
 
-        self.assertEqual("iso-8859-1", m(xml_unicode))
-        self.assertEqual("iso-8859-1", m(xml_bytes))
+        assert "iso-8859-1" == m(xml_unicode)
+        assert "iso-8859-1" == m(xml_bytes)
 
         # Normally, only the first few kilobytes of a document are checked for
         # an encoding.
         spacer = b' ' * 5000
-        self.assertEqual(None, m(spacer + html_bytes))
-        self.assertEqual(None, m(spacer + xml_bytes))
+        assert m(spacer + html_bytes) is None
+        assert m(spacer + xml_bytes) is None
 
         # But you can tell find_declared_encoding to search an entire
         # HTML document.
-        self.assertEqual(
-            "utf-8",
+        assert (
             m(spacer + html_bytes, is_html=True, search_entire_document=True)
+            == "utf-8"
         )
 
         # The XML encoding declaration has to be the very first thing
         # in the document. We'll allow whitespace before the document
         # starts, but nothing else.
-        self.assertEqual(
-            "iso-8859-1",
-            m(xml_bytes, search_entire_document=True)
-        )
-        self.assertEqual(
-            None, m(b'a' + xml_bytes, search_entire_document=True)
-        )
+        assert m(xml_bytes, search_entire_document=True) == "iso-8859-1"
+        assert m(b' ' + xml_bytes, search_entire_document=True) == "iso-8859-1"
+        assert m(b'a' + xml_bytes, search_entire_document=True) is None
             
