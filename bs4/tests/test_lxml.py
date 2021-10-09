@@ -19,9 +19,8 @@ from bs4 import (
     BeautifulStoneSoup,
     )
 from bs4.element import Comment, Doctype, SoupStrainer
-from bs4.testing import skipIf
-from bs4.tests import test_htmlparser
-from bs4.testing import (
+from . import test_htmlparser
+from .testing import (
     HTMLTreeBuilderSmokeTest,
     XMLTreeBuilderSmokeTest,
     SoupTest,

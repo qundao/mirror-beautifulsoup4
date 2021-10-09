@@ -1,4 +1,4 @@
-from bs4.testing import SoupTest
+from .testing import SoupTest
 from bs4.element import (
     CData,
     Comment,

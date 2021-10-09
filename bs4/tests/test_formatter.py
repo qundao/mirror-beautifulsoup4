@@ -1,10 +1,10 @@
 from bs4.element import Tag
-from bs4.testing import SoupTest
 from bs4.formatter import (
     Formatter,
     HTMLFormatter,
     XMLFormatter,
 )
+from .testing import SoupTest
 
 class TestFormatter(SoupTest):
 

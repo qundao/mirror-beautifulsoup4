@@ -8,7 +8,7 @@ try:
 except ImportError as e:
     HTML5LIB_PRESENT = False
 from bs4.element import SoupStrainer
-from bs4.testing import (
+from .testing import (
     HTML5TreeBuilderSmokeTest,
     SoupTest,
     skipIf,
