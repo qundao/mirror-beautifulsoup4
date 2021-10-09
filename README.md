@@ -40,13 +40,13 @@ idioms for iterating, searching, and modifying the parse tree.
 </tag1>
 ```
 
-To go beyond the basics, [comprehensive documentation is available](http://www.crummy.com/software/BeautifulSoup/bs4/doc/).
+To go beyond the basics, [comprehensive documentation is available](https://www.crummy.com/software/BeautifulSoup/bs4/doc/).
 
 # Links
 
-* [Homepage](http://www.crummy.com/software/BeautifulSoup/bs4/)
-* [Documentation](http://www.crummy.com/software/BeautifulSoup/bs4/doc/)
-* [Discussion group](http://groups.google.com/group/beautifulsoup/)
+* [Homepage](https://www.crummy.com/software/BeautifulSoup/bs4/)
+* [Documentation](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+* [Discussion group](https://groups.google.com/group/beautifulsoup/)
 * [Development](https://code.launchpad.net/beautifulsoup/)
 * [Bug tracker](https://bugs.launchpad.net/beautifulsoup/)
 * [Complete changelog](https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG)
@@ -80,12 +80,9 @@ documentation.
 
 # Running the unit tests
 
-Beautiful Soup supports unit test discovery from the project root directory:
+Beautiful Soup supports unit test discovery using Pytest:
 
 ```
-$ nosetests
+$ pytest
 ```
 
-```
-$ python3 -m unittest discover -s bs4
-```

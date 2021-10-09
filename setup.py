@@ -14,8 +14,8 @@ setup(
     version = __version__,
     author="Leonard Richardson",
     author_email='leonardr@segfault.org',
-    url="http://www.crummy.com/software/BeautifulSoup/bs4/",
-    download_url = "http://www.crummy.com/software/BeautifulSoup/bs4/download/",
+    url="https://www.crummy.com/software/BeautifulSoup/bs4/",
+    download_url = "https://www.crummy.com/software/BeautifulSoup/bs4/download/",
     description="Screen-scraping library",
     python_requires='>=3.6.0',
     install_requires=[
