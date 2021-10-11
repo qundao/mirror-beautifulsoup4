@@ -6,7 +6,7 @@ import pickle
 import warnings
 from bs4.builder import HTMLParserTreeBuilder
 from bs4.builder._htmlparser import BeautifulSoupHTMLParser
-from .testing import SoupTest, HTMLTreeBuilderSmokeTest
+from . import SoupTest, HTMLTreeBuilderSmokeTest
 
 class TestHTMLParserTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
 

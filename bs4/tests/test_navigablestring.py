@@ -1,4 +1,3 @@
-from .testing import SoupTest
 from bs4.element import (
     CData,
     Comment,
@@ -9,6 +8,8 @@ from bs4.element import (
     Stylesheet,
     TemplateString,
 )
+
+from . import SoupTest
 
 class TestNavigableString(SoupTest):
 

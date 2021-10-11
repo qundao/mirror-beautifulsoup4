@@ -19,8 +19,7 @@ from bs4 import (
     BeautifulStoneSoup,
     )
 from bs4.element import Comment, Doctype, SoupStrainer
-from . import test_htmlparser
-from .testing import (
+from . import (
     HTMLTreeBuilderSmokeTest,
     XMLTreeBuilderSmokeTest,
     SoupTest,

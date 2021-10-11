@@ -33,7 +33,7 @@ from bs4.dammit import (
     EntitySubstitution,
     UnicodeDammit,
 )
-from .testing import (
+from . import (
     default_builder,
     SoupTest,
     skipIf,

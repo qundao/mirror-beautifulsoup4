@@ -4,7 +4,7 @@ from bs4.formatter import (
     HTMLFormatter,
     XMLFormatter,
 )
-from .testing import SoupTest
+from . import SoupTest
 
 class TestFormatter(SoupTest):
 

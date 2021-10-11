@@ -34,7 +34,7 @@ from bs4.element import (
     Tag,
     TemplateString,
 )
-from .testing import (
+from . import (
     SoupTest,
     skipIf,
 )
