@@ -4,6 +4,7 @@ import logging
 import bs4
 from bs4 import BeautifulSoup
 from bs4.dammit import (
+    EntitySubstitution,
     EncodingDetector,
     UnicodeDammit,
 )
@@ -267,4 +268,104 @@ class TestEncodingDetector(object):
         assert m(xml_bytes, search_entire_document=True) == "iso-8859-1"
         assert m(b' ' + xml_bytes, search_entire_document=True) == "iso-8859-1"
         assert m(b'a' + xml_bytes, search_entire_document=True) is None
+
+
+class TestEntitySubstitution(object):
+    """Standalone tests of the EntitySubstitution class."""
+    def setup_method(self):
+        self.sub = EntitySubstitution
+
+    def test_simple_html_substitution(self):
+        # Unicode characters corresponding to named HTML entites
+        # are substituted, and no others.
+        s = "foo\u2200\N{SNOWMAN}\u00f5bar"
+        assert self.sub.substitute_html(s) == "foo&forall;\N{SNOWMAN}&otilde;bar"
+
+    def test_smart_quote_substitution(self):
+        # MS smart quotes are a common source of frustration, so we
+        # give them a special test.
+        quotes = b"\x91\x92foo\x93\x94"
+        dammit = UnicodeDammit(quotes)
+        assert self.sub.substitute_html(dammit.markup) == "&lsquo;&rsquo;foo&ldquo;&rdquo;"
+
+    def test_html5_entity(self):
+        # Some HTML5 entities correspond to single- or multi-character
+        # Unicode sequences.
+
+        for entity, u in (
+            # A few spot checks of our ability to recognize
+            # special character sequences and convert them
+            # to named entities.
+            ('&models;', '\u22a7'),
+            ('&Nfr;', '\U0001d511'),
+            ('&ngeqq;', '\u2267\u0338'),
+            ('&not;', '\xac'),
+            ('&Not;', '\u2aec'),
+                
+            # We _could_ convert | to &verbarr;, but we don't, because
+            # | is an ASCII character.
+            ('|' '|'),
+
+            # Similarly for the fj ligature, which we could convert to
+            # &fjlig;, but we don't.
+            ("fj", "fj"),
+
+            # We do convert _these_ ASCII characters to HTML entities,
+            # because that's required to generate valid HTML.
+            ('&gt;', '>'),
+            ('&lt;', '<'),
+            ('&amp;', '&'),
+        ):
+            template = '3 %s 4'
+            raw = template % u
+            with_entities = template % entity
+            assert self.sub.substitute_html(raw) == with_entities
             
+    def test_html5_entity_with_variation_selector(self):
+        # Some HTML5 entities correspond either to a single-character
+        # Unicode sequence _or_ to the same character plus U+FE00,
+        # VARIATION SELECTOR 1. We can handle this.
+        data = "fjords \u2294 penguins"
+        markup = "fjords &sqcup; penguins"
+        assert self.sub.substitute_html(data) == markup
+
+        data = "fjords \u2294\ufe00 penguins"
+        markup = "fjords &sqcups; penguins"
+        assert self.sub.substitute_html(data) == markup
+        
+    def test_xml_converstion_includes_no_quotes_if_make_quoted_attribute_is_false(self):
+        s = 'Welcome to "my bar"'
+        assert self.sub.substitute_xml(s, False) == s
+
+    def test_xml_attribute_quoting_normally_uses_double_quotes(self):
+        assert self.sub.substitute_xml("Welcome", True) == '"Welcome"'
+        assert self.sub.substitute_xml("Bob's Bar", True) == '"Bob\'s Bar"'
+
+    def test_xml_attribute_quoting_uses_single_quotes_when_value_contains_double_quotes(self):
+        s = 'Welcome to "my bar"'
+        assert self.sub.substitute_xml(s, True) == "'Welcome to \"my bar\"'"
+
+    def test_xml_attribute_quoting_escapes_single_quotes_when_value_contains_both_single_and_double_quotes(self):
+        s = 'Welcome to "Bob\'s Bar"'
+        assert self.sub.substitute_xml(s, True) == '"Welcome to &quot;Bob\'s Bar&quot;"'
+
+    def test_xml_quotes_arent_escaped_when_value_is_not_being_quoted(self):
+        quoted = 'Welcome to "Bob\'s Bar"'
+        assert self.sub.substitute_xml(quoted) == quoted
+
+    def test_xml_quoting_handles_angle_brackets(self):
+        assert self.sub.substitute_xml("foo<bar>") == "foo&lt;bar&gt;"
+
+    def test_xml_quoting_handles_ampersands(self):
+        assert self.sub.substitute_xml("AT&T") == "AT&amp;T"
+
+    def test_xml_quoting_including_ampersands_when_they_are_part_of_an_entity(self):
+        assert self.sub.substitute_xml("&Aacute;T&T") == "&amp;Aacute;T&amp;T"
+
+    def test_xml_quoting_ignoring_ampersands_when_they_are_part_of_an_entity(self):
+        assert self.sub.substitute_xml_containing_entities("&Aacute;T&T") == "&Aacute;T&amp;T"
+       
+    def test_quotes_not_html_substituted(self):
+        """There's no need to do this except inside attribute values."""
+        text = 'Bob\'s "bar"'
+        assert self.sub.substitute_html(text) == text

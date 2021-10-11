@@ -13,26 +13,20 @@ from bs4 import (
     BeautifulStoneSoup,
     GuessedAtParserWarning,
     MarkupResemblesLocatorWarning,
+    dammit,
 )
 from bs4.builder import (
+    builder_registry,
     TreeBuilder,
     ParserRejectedMarkup,
 )
 from bs4.element import (
-    CharsetMetaAttributeValue,
     Comment,
-    ContentMetaAttributeValue,
     SoupStrainer,
-    NamespacedAttribute,
     Tag,
     NavigableString,
-    )
-
-import bs4.dammit
-from bs4.dammit import (
-    EntitySubstitution,
-    UnicodeDammit,
 )
+
 from . import (
     default_builder,
     SoupTest,
@@ -45,7 +39,7 @@ try:
     LXML_PRESENT = True
 except ImportError as e:
     LXML_PRESENT = False
-
+    
 PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
 
 class TestConstructor(SoupTest):
@@ -344,106 +338,50 @@ class TestSelectiveParsing(SoupTest):
         soup = self.soup(markup, parse_only=strainer)
         assert soup.encode() == b"<b>Yes</b><b>Yes <c>Yes</c></b>"
 
-
-class TestEntitySubstitution(object):
-    """Standalone tests of the EntitySubstitution class."""
-    def setup_method(self):
-        self.sub = EntitySubstitution
-
-    def test_simple_html_substitution(self):
-        # Unicode characters corresponding to named HTML entites
-        # are substituted, and no others.
-        s = "foo\u2200\N{SNOWMAN}\u00f5bar"
-        assert self.sub.substitute_html(s) == "foo&forall;\N{SNOWMAN}&otilde;bar"
-
-    def test_smart_quote_substitution(self):
-        # MS smart quotes are a common source of frustration, so we
-        # give them a special test.
-        quotes = b"\x91\x92foo\x93\x94"
-        dammit = UnicodeDammit(quotes)
-        assert self.sub.substitute_html(dammit.markup) == "&lsquo;&rsquo;foo&ldquo;&rdquo;"
-
-    def test_html5_entity(self):
-        # Some HTML5 entities correspond to single- or multi-character
-        # Unicode sequences.
-
-        for entity, u in (
-            # A few spot checks of our ability to recognize
-            # special character sequences and convert them
-            # to named entities.
-            ('&models;', '\u22a7'),
-            ('&Nfr;', '\U0001d511'),
-            ('&ngeqq;', '\u2267\u0338'),
-            ('&not;', '\xac'),
-            ('&Not;', '\u2aec'),
-                
-            # We _could_ convert | to &verbarr;, but we don't, because
-            # | is an ASCII character.
-            ('|' '|'),
-
-            # Similarly for the fj ligature, which we could convert to
-            # &fjlig;, but we don't.
-            ("fj", "fj"),
-
-            # We do convert _these_ ASCII characters to HTML entities,
-            # because that's required to generate valid HTML.
-            ('&gt;', '>'),
-            ('&lt;', '<'),
-            ('&amp;', '&'),
-        ):
-            template = '3 %s 4'
-            raw = template % u
-            with_entities = template % entity
-            assert self.sub.substitute_html(raw) == with_entities
-            
-    def test_html5_entity_with_variation_selector(self):
-        # Some HTML5 entities correspond either to a single-character
-        # Unicode sequence _or_ to the same character plus U+FE00,
-        # VARIATION SELECTOR 1. We can handle this.
-        data = "fjords \u2294 penguins"
-        markup = "fjords &sqcup; penguins"
-        assert self.sub.substitute_html(data) == markup
-
-        data = "fjords \u2294\ufe00 penguins"
-        markup = "fjords &sqcups; penguins"
-        assert self.sub.substitute_html(data) == markup
         
-    def test_xml_converstion_includes_no_quotes_if_make_quoted_attribute_is_false(self):
-        s = 'Welcome to "my bar"'
-        assert self.sub.substitute_xml(s, False) == s
+class TestNewTag(SoupTest):
+    """Test the BeautifulSoup.new_tag() method."""
+    def test_new_tag(self):
+        soup = self.soup("")
+        new_tag = soup.new_tag("foo", bar="baz", attrs={"name": "a name"})
+        assert isinstance(new_tag, Tag)
+        assert "foo" == new_tag.name
+        assert dict(bar="baz", name="a name") == new_tag.attrs
+        assert None == new_tag.parent
+        
+    def test_tag_inherits_self_closing_rules_from_builder(self):
+        if LXML_PRESENT:
+            xml_soup = BeautifulSoup("", "lxml-xml")
+            xml_br = xml_soup.new_tag("br")
+            xml_p = xml_soup.new_tag("p")
 
-    def test_xml_attribute_quoting_normally_uses_double_quotes(self):
-        assert self.sub.substitute_xml("Welcome", True) == '"Welcome"'
-        assert self.sub.substitute_xml("Bob's Bar", True) == '"Bob\'s Bar"'
+            # Both the <br> and <p> tag are empty-element, just because
+            # they have no contents.
+            assert b"<br/>" == xml_br.encode()
+            assert b"<p/>" == xml_p.encode()
 
-    def test_xml_attribute_quoting_uses_single_quotes_when_value_contains_double_quotes(self):
-        s = 'Welcome to "my bar"'
-        assert self.sub.substitute_xml(s, True) == "'Welcome to \"my bar\"'"
+        html_soup = BeautifulSoup("", "html.parser")
+        html_br = html_soup.new_tag("br")
+        html_p = html_soup.new_tag("p")
 
-    def test_xml_attribute_quoting_escapes_single_quotes_when_value_contains_both_single_and_double_quotes(self):
-        s = 'Welcome to "Bob\'s Bar"'
-        assert self.sub.substitute_xml(s, True) == '"Welcome to &quot;Bob\'s Bar&quot;"'
+        # The HTML builder users HTML's rules about which tags are
+        # empty-element tags, and the new tags reflect these rules.
+        assert b"<br/>" == html_br.encode()
+        assert b"<p></p>" == html_p.encode()
 
-    def test_xml_quotes_arent_escaped_when_value_is_not_being_quoted(self):
-        quoted = 'Welcome to "Bob\'s Bar"'
-        assert self.sub.substitute_xml(quoted) == quoted
+class TestNewString(SoupTest):
+    """Test the BeautifulSoup.new_string() method."""
+    def test_new_string_creates_navigablestring(self):
+        soup = self.soup("")
+        s = soup.new_string("foo")
+        assert "foo" == s
+        assert isinstance(s, NavigableString)
 
-    def test_xml_quoting_handles_angle_brackets(self):
-        assert self.sub.substitute_xml("foo<bar>") == "foo&lt;bar&gt;"
-
-    def test_xml_quoting_handles_ampersands(self):
-        assert self.sub.substitute_xml("AT&T") == "AT&amp;T"
-
-    def test_xml_quoting_including_ampersands_when_they_are_part_of_an_entity(self):
-        assert self.sub.substitute_xml("&Aacute;T&T") == "&amp;Aacute;T&amp;T"
-
-    def test_xml_quoting_ignoring_ampersands_when_they_are_part_of_an_entity(self):
-        assert self.sub.substitute_xml_containing_entities("&Aacute;T&T") == "&Aacute;T&amp;T"
-       
-    def test_quotes_not_html_substituted(self):
-        """There's no need to do this except inside attribute values."""
-        text = 'Bob\'s "bar"'
-        assert self.sub.substitute_html(text) == text
+    def test_new_string_can_create_navigablestring_subclass(self):
+        soup = self.soup("")
+        s = soup.new_string("foo", Comment)
+        assert "foo" == s
+        assert isinstance(s, Comment)
 
 
 class TestEncodingConversion(SoupTest):
@@ -459,13 +397,13 @@ class TestEncodingConversion(SoupTest):
     def test_ascii_in_unicode_out(self):
         # ASCII input is converted to Unicode. The original_encoding
         # attribute is set to 'utf-8', a superset of ASCII.
-        chardet = bs4.dammit.chardet_dammit
+        chardet = dammit.chardet_dammit
         logging.disable(logging.WARNING)
         try:
             def noop(str):
                 return None
             # Disable chardet, which will realize that the ASCII is ASCII.
-            bs4.dammit.chardet_dammit = noop
+            dammit.chardet_dammit = noop
             ascii = b"<foo>a</foo>"
             soup_from_ascii = self.soup(ascii)
             unicode_output = soup_from_ascii.decode()
@@ -474,7 +412,7 @@ class TestEncodingConversion(SoupTest):
             assert soup_from_ascii.original_encoding.lower() == "utf-8"
         finally:
             logging.disable(logging.NOTSET)
-            bs4.dammit.chardet_dammit = chardet
+            dammit.chardet_dammit = chardet
 
     def test_unicode_in_unicode_out(self):
         # Unicode input is left alone. The original_encoding attribute
@@ -504,57 +442,4 @@ class TestEncodingConversion(SoupTest):
         assert self.soup(markup).div.encode("utf8") == markup.encode("utf8")
 
 
-class TestNamedspacedAttribute(SoupTest):
 
-    def test_name_may_be_none_or_missing(self):
-        a = NamespacedAttribute("xmlns", None)
-        assert a == "xmlns"
-
-        a = NamespacedAttribute("xmlns", "")
-        assert a == "xmlns"
-
-        a = NamespacedAttribute("xmlns")
-        assert a == "xmlns"
-        
-    def test_namespace_may_be_none_or_missing(self):
-        a = NamespacedAttribute(None, "tag")
-        assert a == "tag"
-        
-        a = NamespacedAttribute("", "tag")
-        assert a == "tag"
-        
-    def test_attribute_is_equivalent_to_colon_separated_string(self):
-        a = NamespacedAttribute("a", "b")
-        assert "a:b" == a
-
-    def test_attributes_are_equivalent_if_prefix_and_name_identical(self):
-        a = NamespacedAttribute("a", "b", "c")
-        b = NamespacedAttribute("a", "b", "c")
-        assert a == b
-
-        # The actual namespace is not considered.
-        c = NamespacedAttribute("a", "b", None)
-        assert a == c
-
-        # But name and prefix are important.
-        d = NamespacedAttribute("a", "z", "c")
-        assert a != d
-
-        e = NamespacedAttribute("z", "b", "c")
-        assert a != e
-
-
-class TestAttributeValueWithCharsetSubstitution(object):
-
-    def test_content_meta_attribute_value(self):
-        value = CharsetMetaAttributeValue("euc-jp")
-        assert "euc-jp" == value
-        assert "euc-jp" == value.original_value
-        assert "utf8" == value.encode("utf8")
-
-
-    def test_content_meta_attribute_value(self):
-        value = ContentMetaAttributeValue("text/html; charset=euc-jp")
-        assert "text/html; charset=euc-jp" == value
-        assert "text/html; charset=euc-jp" == value.original_value
-        assert "text/html; charset=utf8" == value.encode("utf8")

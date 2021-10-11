@@ -23,7 +23,6 @@ from bs4.formatter import (
 )
 
 DEFAULT_OUTPUT_ENCODING = "utf-8"
-PY3K = (sys.version_info[0] > 2)
 
 nonwhitespace_re = re.compile(r"\S+")
 
@@ -1558,36 +1557,19 @@ class Tag(PageElement):
     def __repr__(self, encoding="unicode-escape"):
         """Renders this PageElement as a string.
 
-        :param encoding: The encoding to use (Python 2 only).
-        :return: Under Python 2, a bytestring; under Python 3,
-            a Unicode string.
+        :param encoding: The encoding to use (Python 2 only). 
+            TODO: This is now ignored and a warning should be issued
+            if a value is provided.
+        :return: A (Unicode) string.
         """
-        if PY3K:
-            # "The return value must be a string object", i.e. Unicode
-            return self.decode()
-        else:
-            # "The return value must be a string object", i.e. a bytestring.
-            # By convention, the return value of __repr__ should also be
-            # an ASCII string.
-            return self.encode(encoding)
+        # "The return value must be a string object", i.e. Unicode
+        return self.decode()
 
     def __unicode__(self):
         """Renders this PageElement as a Unicode string."""
         return self.decode()
 
-    def __str__(self):
-        """Renders this PageElement as a generic string.
-
-        :return: Under Python 2, a UTF-8 bytestring; under Python 3,
-            a Unicode string.        
-        """
-        if PY3K:
-            return self.decode()
-        else:
-            return self.encode()
-
-    if PY3K:
-        __str__ = __repr__ = __unicode__
+    __str__ = __repr__ = __unicode__
 
     def encode(self, encoding=DEFAULT_OUTPUT_ENCODING,
                indent_level=None, formatter="minimal",

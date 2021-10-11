@@ -230,6 +230,24 @@ class SoupTest(object):
             # Return the child to the recursive caller
             return child
 
+    def assert_selects(self, tags, should_match):
+        """Make sure that the given tags have the correct text.
+
+        This is used in tests that define a bunch of tags, each
+        containing a single string, and then select certain strings by
+        some mechanism.
+        """
+        assert [tag.string for tag in tags] == should_match
+
+    def assert_selects_ids(self, tags, should_match):
+        """Make sure that the given tags have the correct IDs.
+
+        This is used in tests that define a bunch of tags, each
+        containing a single string, and then select certain strings by
+        some mechanism.
+        """
+        assert [tag['id'] for tag in tags] == should_match
+
 
 class TreeBuilderSmokeTest(object):
     # Tests that are common to HTML and XML tree builders.
