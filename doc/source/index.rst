@@ -1796,7 +1796,7 @@ selectors.::
  soup.select("child")
  # [<ns1:child>I'm in namespace 1</ns1:child>, <ns2:child>I'm in namespace 2</ns2:child>]
 
- soup.select("ns1|child", namespaces=soup.namespaces)
+ soup.select("ns1|child")
  # [<ns1:child>I'm in namespace 1</ns1:child>]
  
 When handling a CSS selector that uses namespaces, Beautiful Soup
