@@ -6,6 +6,8 @@ from bs4.element import (
     Declaration,
     Doctype,
     NavigableString,
+    RubyParenthesisString,
+    RubyTextString,
     Script,
     Stylesheet,
     TemplateString,
@@ -128,3 +130,15 @@ class TestNavigableStringSubclasses(SoupTest):
         soup = self.soup(markup)
         assert markup == soup.template.encode("utf8")
 
+    def test_ruby_strings(self):
+        markup = "<ruby>漢 <rp>(</rp><rt>kan</rt><rp>)</rp> 字 <rp>(</rp><rt>ji</rt><rp>)</rp></ruby>"
+        soup = self.soup(markup)
+        assert isinstance(soup.rp.string, RubyParenthesisString)
+        assert isinstance(soup.rt.string, RubyTextString)
+
+        # Just as a demo, here's what this means for get_text usage.
+        assert "漢字" == soup.get_text(strip=True)
+        assert "漢(kan)字(ji)" == soup.get_text(
+            strip=True,
+            types=(NavigableString, RubyTextString, RubyParenthesisString)
+        )

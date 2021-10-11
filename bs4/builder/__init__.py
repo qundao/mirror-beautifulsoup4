@@ -7,6 +7,8 @@ import sys
 from bs4.element import (
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
+    RubyParenthesisString,
+    RubyTextString,
     Stylesheet,
     Script,
     TemplateString,
@@ -319,7 +321,7 @@ class TreeBuilder(object):
                         values = value
                     attrs[attr] = values
         return attrs
-
+    
 class SAXTreeBuilder(TreeBuilder):
     """A Beautiful Soup treebuilder that listens for SAX events.
 
@@ -390,17 +392,25 @@ class HTMLTreeBuilder(TreeBuilder):
     # you need to use it.
     block_elements = set(["address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video"])
 
-    # The HTML standard defines an unusual content model for these tags.
-    # We represent this by using a string class other than NavigableString
-    # inside these tags.
+    # These HTML tags need special treatment so they can be
+    # represented by a string class other than NavigableString.
     #
-    # I made this list by going through the HTML spec
+    # For some of these tags, it's because the HTML standard defines
+    # an unusual content model for them. I made this list by going
+    # through the HTML spec
     # (https://html.spec.whatwg.org/#metadata-content) and looking for
     # "metadata content" elements that can contain strings.
+    #
+    # The Ruby tags (<rt> and <rp>) are here despite being normal
+    # "phrasing content" tags, because the content they contain is
+    # qualitatively different from other text in the document, and it
+    # can be useful to be able to distinguish it.
     #
     # TODO: Arguably <noscript> could go here but it seems
     # qualitatively different from the other tags.
     DEFAULT_STRING_CONTAINERS = {
+        'rt' : RubyTextString,
+        'rp' : RubyParenthesisString,
         'style': Stylesheet,
         'script': Script,
         'template': TemplateString,
