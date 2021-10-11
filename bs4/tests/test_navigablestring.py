@@ -1,3 +1,5 @@
+import pytest
+
 from bs4.element import (
     CData,
     Comment,
@@ -43,7 +45,14 @@ class TestNavigableString(SoupTest):
         # Unless you specifically say that comments are okay.
         assert "foe" == comment.get_text(strip=True, types=Comment)
         assert "foe " == comment.get_text(types=(Comment, NavigableString))
-        
+
+    def test_string_has_immutable_name_property(self):
+        # string.name is defined as None and can't be modified
+        string = self.soup("s").string
+        assert None == string.name
+        with pytest.raises(AttributeError):
+            string.name = 'foo'
+
 class TestNavigableStringSubclasses(SoupTest):
 
     def test_cdata(self):
