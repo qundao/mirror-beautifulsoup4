@@ -172,6 +172,12 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         if isinstance(markup, str):
             # We were given Unicode. Maybe lxml can parse Unicode on
             # this system?
+
+            # TODO: This is a workaround for
+            # https://bugs.launchpad.net/lxml/+bug/1948551.
+            # We can remove it once the upstream issue is fixed.
+            if len(markup) > 0 and markup[0] == u'\N{BYTE ORDER MARK}':
+                markup = markup[1:]
             yield markup, None, document_declared_encoding, False
 
         if isinstance(markup, str):

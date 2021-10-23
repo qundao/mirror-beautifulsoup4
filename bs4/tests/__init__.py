@@ -1024,6 +1024,11 @@ class XMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         soup = self.soup(markup)
         assert 'Sacr\xe9 bleu!' == soup.root.string
 
+    def test_can_parse_unicode_document_begining_with_bom(self):
+        markup = '\N{BYTE ORDER MARK}<?xml version="1.0" encoding="euc-jp"><root>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</root>'
+        soup = self.soup(markup)
+        assert 'Sacr\xe9 bleu!' == soup.root.string
+        
     def test_popping_namespaced_tag(self):
         markup = '<rss xmlns:dc="foo"><dc:creator>b</dc:creator><dc:date>2012-07-02T20:33:42Z</dc:date><dc:rights>c</dc:rights><image>d</image></rss>'
         soup = self.soup(markup)

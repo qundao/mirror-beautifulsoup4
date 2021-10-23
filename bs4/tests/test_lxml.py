@@ -87,7 +87,7 @@ class TestLXMLTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
 @skipIf(
     not LXML_PRESENT,
     "lxml seems not to be present, not testing its XML tree builder.")
-class LXMLXMLTreeBuilderSmokeTest(SoupTest, XMLTreeBuilderSmokeTest):
+class TestLXMLXMLTreeBuilder(SoupTest, XMLTreeBuilderSmokeTest):
     """See ``HTMLTreeBuilderSmokeTest``."""
 
     @property

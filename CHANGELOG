@@ -14,6 +14,11 @@ Python 2 was revision 605.
 * Fixed a crash when overriding multi_valued_attributes and using the
   html5lib parser. [bug=1948488]
 
+* Added a workaround for an lxml bug
+  (https://bugs.launchpad.net/lxml/+bug/1948551) that caused
+  problems when parsing a Unicode string beginning with BYTE ORDER MARK.
+  [bug=1947768]
+
 = 4.10.0 (20210907)
 
 * This is the first release of Beautiful Soup to only support Python
