@@ -75,13 +75,16 @@ class TestFindAll(SoupTest):
         soup = self.soup("<html>Foo<b>bar</b>\xbb</html>")
         # Exact match.
         assert soup.find_all(string="bar") == ["bar"]
+
+        # 'text' is a deprecated alias for 'string'.
         assert soup.find_all(text="bar") == ["bar"]
+        
         # Match any of a number of strings.
-        assert soup.find_all(text=["Foo", "bar"]) == ["Foo", "bar"]
+        assert soup.find_all(string=["Foo", "bar"]) == ["Foo", "bar"]
         # Match a regular expression.
-        assert soup.find_all(text=re.compile('.*')) == ["Foo", "bar", '\xbb']
+        assert soup.find_all(string=re.compile('.*')) == ["Foo", "bar", '\xbb']
         # Match anything.
-        assert soup.find_all(text=True) == ["Foo", "bar", '\xbb']
+        assert soup.find_all(string=True) == ["Foo", "bar", '\xbb']
 
     def test_find_all_limit(self):
         """You can limit the number of items returned by find_all."""
@@ -119,7 +122,7 @@ class TestFindAll(SoupTest):
         result = soup.find_all(True)
         assert hasattr(result, "source")
 
-        result = soup.find_all(text="foo")
+        result = soup.find_all(string="foo")
         assert hasattr(result, "source")
 
 
@@ -146,13 +149,13 @@ class TestFindAllByName(SoupTest):
 
     def test_find_all_by_name_and_text(self):
         self.assert_selects(
-            self.tree.find_all('a', text='First tag.'), ['First tag.'])
+            self.tree.find_all('a', string='First tag.'), ['First tag.'])
 
         self.assert_selects(
-            self.tree.find_all('a', text=True), ['First tag.', 'Nested tag.'])
+            self.tree.find_all('a', string=True), ['First tag.', 'Nested tag.'])
 
         self.assert_selects(
-            self.tree.find_all('a', text=re.compile("tag")),
+            self.tree.find_all('a', string=re.compile("tag")),
             ['First tag.', 'Nested tag.'])
 
 
@@ -374,19 +377,19 @@ class TestFindAllByAttribute(SoupTest):
         soup = self.soup("<b>foo</b><b>bar</b><a>foo</a>")
         a = soup.a
 
-        assert [a] == soup.find_all("a", text="foo")
-        assert [] == soup.find_all("a", text="bar")
+        assert [a] == soup.find_all("a", string="foo")
+        assert [] == soup.find_all("a", string="bar")
 
     def test_find_by_name_and_containing_string_when_string_is_buried(self):
         soup = self.soup("<a>foo</a><a><b><c>foo</c></b></a>")
-        assert soup.find_all("a") == soup.find_all("a", text="foo")
+        assert soup.find_all("a") == soup.find_all("a", string="foo")
 
     def test_find_by_attribute_and_containing_string(self):
         soup = self.soup('<b id="1">foo</b><a id="2">foo</a>')
         a = soup.a
 
-        assert [a] == soup.find_all(id=2, text="foo")
-        assert [] == soup.find_all(id=1, text="bar")
+        assert [a] == soup.find_all(id=2, string="foo")
+        assert [] == soup.find_all(id=1, string="bar")
 
 
 class TestSmooth(SoupTest):
@@ -489,11 +492,11 @@ class TestParentOperations(SoupTest):
         assert self.start.find_parent('ul', id='top')['id'] == 'top'
 
     def test_parent_of_text_element(self):
-        text = self.tree.find(text="Start here")
+        text = self.tree.find(string="Start here")
         assert text.parent.name == 'b'
 
     def test_text_element_find_parent(self):
-        text = self.tree.find(text="Start here")
+        text = self.tree.find(string="Start here")
         assert text.find_parent('ul')['id'] == 'bottom'
 
     def test_parent_generator(self):
@@ -520,7 +523,7 @@ class TestNextOperations(ProximityTest):
         assert self.start.next_element.next_element['id'] == "2"
 
     def test_next_of_last_item_is_none(self):
-        last = self.tree.find(text="Three")
+        last = self.tree.find(string="Three")
         assert last.next_element == None
 
     def test_next_of_root_is_none(self):
@@ -534,15 +537,15 @@ class TestNextOperations(ProximityTest):
 
     def test_find_next(self):
         assert self.start.find_next('b')['id'] == '2'
-        assert self.start.find_next(text="Three") == "Three"
+        assert self.start.find_next(string="Three") == "Three"
 
     def test_find_next_for_text_element(self):
-        text = self.tree.find(text="One")
+        text = self.tree.find(string="One")
         assert text.find_next("b").string == "Two"
         self.assert_selects(text.find_all_next("b"), ["Two", "Three"])
 
     def test_next_generator(self):
-        start = self.tree.find(text="Two")
+        start = self.tree.find(string="Two")
         successors = [node for node in start.next_elements]
         # There are two successors: the final <b> tag and its text contents.
         tag, contents = successors
@@ -553,7 +556,7 @@ class TestPreviousOperations(ProximityTest):
 
     def setup_method(self):
         super(TestPreviousOperations, self).setup_method()
-        self.end = self.tree.find(text="Three")
+        self.end = self.tree.find(string="Three")
 
     def test_previous(self):
         assert self.end.previous_element['id'] == "3"
@@ -577,16 +580,16 @@ class TestPreviousOperations(ProximityTest):
 
     def test_find_previous(self):
         assert self.end.find_previous('b')['id'] == '3'
-        assert self.end.find_previous(text="One") == "One"
+        assert self.end.find_previous(string="One") == "One"
 
     def test_find_previous_for_text_element(self):
-        text = self.tree.find(text="Three")
+        text = self.tree.find(string="Three")
         assert text.find_previous("b").string == "Three"
         self.assert_selects(
             text.find_all_previous("b"), ["Three", "Two", "One"])
 
     def test_previous_generator(self):
-        start = self.tree.find(text="One")
+        start = self.tree.find(string="One")
         predecessors = [node for node in start.previous_elements]
 
         # There are four predecessors: the <b> tag containing "One"
@@ -655,13 +658,13 @@ class TestNextSibling(SiblingTest):
 
     def test_next_sibling_for_text_element(self):
         soup = self.soup("Foo<b>bar</b>baz")
-        start = soup.find(text="Foo")
+        start = soup.find(string="Foo")
         assert start.next_sibling.name == 'b'
         assert start.next_sibling.next_sibling == 'baz'
 
         self.assert_selects(start.find_next_siblings('b'), ['bar'])
-        assert start.find_next_sibling(text="baz") == "baz"
-        assert start.find_next_sibling(text="nonesuch") == None
+        assert start.find_next_sibling(string="baz") == "baz"
+        assert start.find_next_sibling(string="nonesuch") == None
 
 
 class TestPreviousSibling(SiblingTest):
@@ -700,13 +703,13 @@ class TestPreviousSibling(SiblingTest):
 
     def test_previous_sibling_for_text_element(self):
         soup = self.soup("Foo<b>bar</b>baz")
-        start = soup.find(text="baz")
+        start = soup.find(string="baz")
         assert start.previous_sibling.name == 'b'
         assert start.previous_sibling.previous_sibling == 'Foo'
 
         self.assert_selects(start.find_previous_siblings('b'), ['bar'])
-        assert start.find_previous_sibling(text="Foo") == "Foo"
-        assert start.find_previous_sibling(text="nonesuch") == None
+        assert start.find_previous_sibling(string="Foo") == "Foo"
+        assert start.find_previous_sibling(string="nonesuch") == None
 
 
 class TestTreeModification(SoupTest):
@@ -828,8 +831,8 @@ class TestTreeModification(SoupTest):
 
     def test_replace_final_node(self):
         soup = self.soup("<b>Argh!</b>")
-        soup.find(text="Argh!").replace_with("Hooray!")
-        new_text = soup.find(text="Hooray!")
+        soup.find(string="Argh!").replace_with("Hooray!")
+        new_text = soup.find(string="Hooray!")
         b = soup.b
         assert new_text.previous_element == b
         assert new_text.parent == b
@@ -847,7 +850,7 @@ class TestTreeModification(SoupTest):
             "<a><b>Argh!Hooray!</b><c></c></a>"
         )
 
-        new_text = soup.find(text="Hooray!")
+        new_text = soup.find(string="Hooray!")
         assert new_text.previous_element == "Argh!"
         assert new_text.previous_element.next_element == new_text
 
@@ -883,7 +886,7 @@ class TestTreeModification(SoupTest):
         assert b_tag.next_sibling == magic_tag
         assert magic_tag.previous_sibling == b_tag
 
-        find = b_tag.find(text="Find")
+        find = b_tag.find(string="Find")
         assert find.next_element == magic_tag
         assert magic_tag.previous_element == find
 
@@ -891,7 +894,7 @@ class TestTreeModification(SoupTest):
         assert magic_tag.next_sibling == c_tag
         assert c_tag.previous_sibling == magic_tag
 
-        the = magic_tag.find(text="the")
+        the = magic_tag.find(string="the")
         assert the.parent == magic_tag
         assert the.next_element == c_tag
         assert c_tag.previous_element == the
@@ -1105,7 +1108,7 @@ class TestTreeModification(SoupTest):
 
         # The <b> tag is now an orphan.
         assert remove_tag.parent == None
-        assert remove_tag.find(text="right").next_element == None
+        assert remove_tag.find(string="right").next_element == None
         assert remove_tag.previous_element == None
         assert remove_tag.next_sibling == None
         assert remove_tag.previous_sibling == None
@@ -1118,7 +1121,7 @@ class TestTreeModification(SoupTest):
 
         # The gap where the <f> tag used to be has been mended, and
         # the word "to" is now connected to the <g> tag.
-        to_text = soup.find(text="to")
+        to_text = soup.find(string="to")
         g_tag = soup.g
         assert to_text.next_element == g_tag
         assert to_text.next_sibling == g_tag
@@ -1169,8 +1172,8 @@ class TestTreeModification(SoupTest):
         assert extracted.next_element.next_element == None
 
         # The gap where the extracted tag used to be has been mended.
-        content_1 = soup.find(text="Some content. ")
-        content_2 = soup.find(text=" More content.")
+        content_1 = soup.find(string="Some content. ")
+        content_2 = soup.find(string=" More content.")
         assert content_1.next_element == content_2
         assert content_1.next_sibling == content_2
         assert content_2.previous_element == content_1
