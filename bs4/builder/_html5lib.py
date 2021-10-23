@@ -242,8 +242,8 @@ class AttrList(object):
     def __setitem__(self, name, value):
         # If this attribute is a multi-valued attribute for this element,
         # turn its value into a list.
-        list_attr = self.element.cdata_list_attributes
-        if (name in list_attr['*']
+        list_attr = self.element.cdata_list_attributes or {}
+        if (name in list_attr.get('*')
             or (self.element.name in list_attr
                 and name in list_attr[self.element.name])):
             # A node that is being cloned may have already undergone

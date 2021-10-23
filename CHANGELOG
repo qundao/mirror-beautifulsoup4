@@ -11,6 +11,9 @@ Python 2 was revision 605.
   to make it possible to treat ruby text specially in get_text() calls.
   [bug=1941980]
 
+* Fixed a crash when overriding multi_valued_attributes and using the
+  html5lib parser. [bug=1948488]
+
 = 4.10.0 (20210907)
 
 * This is the first release of Beautiful Soup to only support Python

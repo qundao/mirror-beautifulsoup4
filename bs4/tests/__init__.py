@@ -252,6 +252,25 @@ class SoupTest(object):
 class TreeBuilderSmokeTest(object):
     # Tests that are common to HTML and XML tree builders.
 
+    @pytest.mark.parametrize(
+        "multi_valued_attributes",
+        [None, dict(b=['class']), {'*': ['notclass']}]
+    )
+    def test_attribute_not_multi_valued(self, multi_valued_attributes):
+        markup = '<a class="a b c">'
+        soup = self.soup(markup, multi_valued_attributes=multi_valued_attributes)
+        assert soup.a['class'] == 'a b c'
+
+    @pytest.mark.parametrize(
+        "multi_valued_attributes", [dict(a=['class']), {'*': ['class']}]
+    )
+    def test_attribute_multi_valued(self, multi_valued_attributes):
+        markup = '<a class="a b c">'
+        soup = self.soup(
+            markup, multi_valued_attributes=multi_valued_attributes
+        )
+        assert soup.a['class'] == ['a', 'b', 'c']
+        
     def test_fuzzed_input(self):
         # This test centralizes in one place the various fuzz tests
         # for Beautiful Soup created by the oss-fuzz project.
