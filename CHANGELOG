@@ -19,6 +19,12 @@ Python 2 was revision 605.
   problems when parsing a Unicode string beginning with BYTE ORDER MARK.
   [bug=1947768]
 
+* Some time ago, the misleadingly named "text" argument to find-type
+  methods was renamed to the more accurate "string." But this supposed
+  "renaming" didn't make it into important places like the method
+  signatures or the docstrings. That's corrected in this
+  version. ("text" still works, but don't use it.) [bug=1947038]
+
 = 4.10.0 (20210907)
 
 * This is the first release of Beautiful Soup to only support Python

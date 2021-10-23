@@ -554,7 +554,7 @@ class PageElement(object):
             parent.insert(index+1+offset, successor)
             offset += 1
 
-    def find_next(self, name=None, attrs={}, text=None, **kwargs):
+    def find_next(self, name=None, attrs={}, string=None, **kwargs):
         """Find the first PageElement that matches the given criteria and
         appears later in the document than this PageElement.
 
@@ -563,15 +563,15 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
-        return self._find_one(self.find_all_next, name, attrs, text, **kwargs)
+        return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
     findNext = find_next  # BS3
 
-    def find_all_next(self, name=None, attrs={}, text=None, limit=None,
+    def find_all_next(self, name=None, attrs={}, string=None, limit=None,
                     **kwargs):
         """Find all PageElements that match the given criteria and appear
         later in the document than this PageElement.
@@ -581,16 +581,16 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet containing PageElements.
         """
-        return self._find_all(name, attrs, text, limit, self.next_elements,
+        return self._find_all(name, attrs, string, limit, self.next_elements,
                              **kwargs)
     findAllNext = find_all_next  # BS3
 
-    def find_next_sibling(self, name=None, attrs={}, text=None, **kwargs):
+    def find_next_sibling(self, name=None, attrs={}, string=None, **kwargs):
         """Find the closest sibling to this PageElement that matches the
         given criteria and appears later in the document.
 
@@ -599,16 +599,16 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
-        return self._find_one(self.find_next_siblings, name, attrs, text,
+        return self._find_one(self.find_next_siblings, name, attrs, string,
                              **kwargs)
     findNextSibling = find_next_sibling  # BS3
 
-    def find_next_siblings(self, name=None, attrs={}, text=None, limit=None,
+    def find_next_siblings(self, name=None, attrs={}, string=None, limit=None,
                            **kwargs):
         """Find all siblings of this PageElement that match the given criteria
         and appear later in the document.
@@ -618,18 +618,18 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
         :rtype: bs4.element.ResultSet
         """
-        return self._find_all(name, attrs, text, limit,
+        return self._find_all(name, attrs, string, limit,
                               self.next_siblings, **kwargs)
     findNextSiblings = find_next_siblings   # BS3
     fetchNextSiblings = find_next_siblings  # BS2
 
-    def find_previous(self, name=None, attrs={}, text=None, **kwargs):
+    def find_previous(self, name=None, attrs={}, string=None, **kwargs):
         """Look backwards in the document from this PageElement and find the
         first PageElement that matches the given criteria.
 
@@ -638,16 +638,16 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         return self._find_one(
-            self.find_all_previous, name, attrs, text, **kwargs)
+            self.find_all_previous, name, attrs, string, **kwargs)
     findPrevious = find_previous  # BS3
 
-    def find_all_previous(self, name=None, attrs={}, text=None, limit=None,
+    def find_all_previous(self, name=None, attrs={}, string=None, limit=None,
                         **kwargs):
         """Look backwards in the document from this PageElement and find all
         PageElements that match the given criteria.
@@ -657,18 +657,18 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
         :rtype: bs4.element.ResultSet
         """
-        return self._find_all(name, attrs, text, limit, self.previous_elements,
+        return self._find_all(name, attrs, string, limit, self.previous_elements,
                            **kwargs)
     findAllPrevious = find_all_previous  # BS3
     fetchPrevious = find_all_previous    # BS2
 
-    def find_previous_sibling(self, name=None, attrs={}, text=None, **kwargs):
+    def find_previous_sibling(self, name=None, attrs={}, string=None, **kwargs):
         """Returns the closest sibling to this PageElement that matches the
         given criteria and appears earlier in the document.
 
@@ -677,16 +677,16 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         :return: A PageElement.
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
-        return self._find_one(self.find_previous_siblings, name, attrs, text,
+        return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
     findPreviousSibling = find_previous_sibling  # BS3
 
-    def find_previous_siblings(self, name=None, attrs={}, text=None,
+    def find_previous_siblings(self, name=None, attrs={}, string=None,
                                limit=None, **kwargs):
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
@@ -696,13 +696,13 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
         :return: A ResultSet of PageElements.
         :rtype: bs4.element.ResultSet
         """
-        return self._find_all(name, attrs, text, limit,
+        return self._find_all(name, attrs, string, limit,
                               self.previous_siblings, **kwargs)
     findPreviousSiblings = find_previous_siblings   # BS3
     fetchPreviousSiblings = find_previous_siblings  # BS2
@@ -769,26 +769,25 @@ class PageElement(object):
 
     #These methods do the real heavy lifting.
 
-    def _find_one(self, method, name, attrs, text, **kwargs):
+    def _find_one(self, method, name, attrs, string, **kwargs):
         r = None
-        l = method(name, attrs, text, 1, **kwargs)
+        l = method(name, attrs, string, 1, **kwargs)
         if l:
             r = l[0]
         return r
 
-    def _find_all(self, name, attrs, text, limit, generator, **kwargs):
+    def _find_all(self, name, attrs, string, limit, generator, **kwargs):
         "Iterates over a generator looking for things that match."
 
-        if text is None and 'string' in kwargs:
-            text = kwargs['string']
-            del kwargs['string']
+        if string is None and 'text' in kwargs:
+            string = kwargs.pop('text')
 
         if isinstance(name, SoupStrainer):
             strainer = name
         else:
-            strainer = SoupStrainer(name, attrs, text, **kwargs)
+            strainer = SoupStrainer(name, attrs, string, **kwargs)
 
-        if text is None and not limit and not attrs and not kwargs:
+        if string is None and not limit and not attrs and not kwargs:
             if name is True or name is None:
                 # Optimization to find all tags.
                 result = (element for element in generator
@@ -1827,7 +1826,7 @@ class Tag(PageElement):
 
     #Soup methods
 
-    def find(self, name=None, attrs={}, recursive=True, text=None,
+    def find(self, name=None, attrs={}, recursive=True, string=None,
              **kwargs):
         """Look in the children of this PageElement and find the first
         PageElement that matches the given criteria.
@@ -1846,13 +1845,13 @@ class Tag(PageElement):
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         r = None
-        l = self.find_all(name, attrs, recursive, text, 1, **kwargs)
+        l = self.find_all(name, attrs, recursive, string, 1, **kwargs)
         if l:
             r = l[0]
         return r
     findChild = find #BS2
 
-    def find_all(self, name=None, attrs={}, recursive=True, text=None,
+    def find_all(self, name=None, attrs={}, recursive=True, string=None,
                  limit=None, **kwargs):
         """Look in the children of this PageElement and find all
         PageElements that match the given criteria.
@@ -1873,7 +1872,7 @@ class Tag(PageElement):
         generator = self.descendants
         if not recursive:
             generator = self.children
-        return self._find_all(name, attrs, text, limit, generator, **kwargs)
+        return self._find_all(name, attrs, string, limit, generator, **kwargs)
     findAll = find_all       # BS3
     findChildren = find_all  # BS2
 
@@ -1990,7 +1989,7 @@ class SoupStrainer(object):
     document.
     """
 
-    def __init__(self, name=None, attrs={}, text=None, **kwargs):
+    def __init__(self, name=None, attrs={}, string=None, **kwargs):
         """Constructor.
 
         The SoupStrainer constructor takes the same arguments passed
@@ -1999,9 +1998,11 @@ class SoupStrainer(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param text: A filter for a NavigableString with specific text.
+        :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         """        
+        if string is None and 'text' in kwargs:
+            string = kwargs.pop('text')
         self.name = self._normalize_search_value(name)
         if not isinstance(attrs, dict):
             # Treat a non-dict value for attrs as a search for the 'class'
@@ -2026,7 +2027,7 @@ class SoupStrainer(object):
             normalized_attrs[key] = self._normalize_search_value(value)
 
         self.attrs = normalized_attrs
-        self.text = self._normalize_search_value(text)
+        self.text = self._normalize_search_value(string)
 
     def _normalize_search_value(self, value):
         # Leave it alone if it's a Unicode string, a callable, a
