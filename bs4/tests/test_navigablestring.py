@@ -64,7 +64,7 @@ class TestNavigableStringSubclasses(SoupTest):
         cdata = CData("foo")
         soup.insert(1, cdata)
         assert str(soup) == "<![CDATA[foo]]>"
-        assert soup.find(text="foo") == "foo"
+        assert soup.find(string="foo") == "foo"
         assert soup.contents[0] == "foo"
 
     def test_cdata_is_never_formatted(self):
@@ -103,7 +103,7 @@ class TestNavigableStringSubclasses(SoupTest):
             "<div>text</div><script>text</script><style>text</style>"
         )
         assert [NavigableString, Script, Stylesheet] == [
-            x.__class__ for x in soup.find_all(text=True)
+            x.__class__ for x in soup.find_all(string=True)
         ]
 
         # The TemplateString is a little unusual because it's generally found

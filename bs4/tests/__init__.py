@@ -510,13 +510,13 @@ Hello, world!
         self.assert_soup(markup)
 
         soup = self.soup(markup)
-        comment = soup.find(text="foobar")
+        comment = soup.find(string="foobar")
         assert comment.__class__ == Comment
 
         # The comment is properly integrated into the tree.
-        foo = soup.find(text="foo")
+        foo = soup.find(string="foo")
         assert comment == foo.next_element
-        baz = soup.find(text="baz")
+        baz = soup.find(string="baz")
         assert comment == baz.previous_element
 
     def test_preserved_whitespace_in_pre_and_textarea(self):

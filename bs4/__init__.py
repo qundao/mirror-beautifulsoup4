@@ -207,10 +207,10 @@ class BeautifulSoup(Tag):
             if old_name in kwargs:
                 warnings.warn(
                     'The "%s" argument to the BeautifulSoup constructor '
-                    'has been renamed to "%s."' % (old_name, new_name))
-                value = kwargs[old_name]
-                del kwargs[old_name]
-                return value
+                    'has been renamed to "%s."' % (old_name, new_name),
+                    DeprecationWarning
+                )
+                return kwargs.pop(old_name)
             return None
 
         parse_only = parse_only or deprecated_argument(
@@ -782,7 +782,9 @@ class BeautifulStoneSoup(BeautifulSoup):
         kwargs['features'] = 'xml'
         warnings.warn(
             'The BeautifulStoneSoup class is deprecated. Instead of using '
-            'it, pass features="xml" into the BeautifulSoup constructor.')
+            'it, pass features="xml" into the BeautifulSoup constructor.',
+            DeprecationWarning
+        )
         super(BeautifulStoneSoup, self).__init__(*args, **kwargs)
 
 

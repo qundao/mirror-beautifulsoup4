@@ -76,9 +76,7 @@ class TestFindAll(SoupTest):
         # Exact match.
         assert soup.find_all(string="bar") == ["bar"]
 
-        # 'text' is a deprecated alias for 'string'.
-        assert soup.find_all(text="bar") == ["bar"]
-        
+       
         # Match any of a number of strings.
         assert soup.find_all(string=["Foo", "bar"]) == ["Foo", "bar"]
         # Match a regular expression.
@@ -1270,4 +1268,23 @@ class TestTreeModification(SoupTest):
         cdata = CData("foo")
         soup.a.string = cdata
         assert isinstance(soup.a.string, CData)
+
+
+class TestDeprecatedArguments(SoupTest):
+
+    def test_find_type_method_string(self):
+        soup = self.soup("<a>some</a><b>markup</b>")
+        with warnings.catch_warnings(record=True) as w:
+            [result] = soup.find_all(text='markup')
+            assert result == 'markup'
+            assert result.parent.name == 'b'
+            msg = str(w[0].message)
+            assert msg == "The 'text' argument to find()-type methods is deprecated. Use 'string' instead."
+
+    def test_soupstrainer_constructor_string(self):
+        with warnings.catch_warnings(record=True) as w:
+            strainer = SoupStrainer(text="text")
+            assert strainer.text == 'text'
+            msg = str(w[0].message)
+            assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
 

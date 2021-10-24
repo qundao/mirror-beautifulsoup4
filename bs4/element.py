@@ -781,6 +781,10 @@ class PageElement(object):
 
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
+            warnings.warn(
+                "The 'text' argument to find()-type methods is deprecated. Use 'string' instead.",
+                DeprecationWarning
+            )
 
         if isinstance(name, SoupStrainer):
             strainer = name
@@ -1548,7 +1552,8 @@ class Tag(PageElement):
             warnings.warn(
                 '.%(name)sTag is deprecated, use .find("%(name)s") instead. If you really were looking for a tag called %(name)sTag, use .find("%(name)sTag")' % dict(
                     name=tag_name
-                )
+                ),
+                DeprecationWarning
             )
             return self.find(tag_name)
         # We special case contents to avoid recursion.
@@ -1974,8 +1979,10 @@ class Tag(PageElement):
 
         has_key() is gone in Python 3, anyway.
         """
-        warnings.warn('has_key is deprecated. Use has_attr("%s") instead.' % (
-                key))
+        warnings.warn(
+            'has_key is deprecated. Use has_attr("%s") instead.' % key,
+            DeprecationWarning
+        )
         return self.has_attr(key)
 
 # Next, a couple classes to represent queries and their results.
@@ -2003,6 +2010,11 @@ class SoupStrainer(object):
         """        
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
+            warnings.warn(
+                "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
+                DeprecationWarning
+            )
+
         self.name = self._normalize_search_value(name)
         if not isinstance(attrs, dict):
             # Treat a non-dict value for attrs as a search for the 'class'
@@ -2027,7 +2039,10 @@ class SoupStrainer(object):
             normalized_attrs[key] = self._normalize_search_value(value)
 
         self.attrs = normalized_attrs
-        self.text = self._normalize_search_value(string)
+        self.string = self._normalize_search_value(string)
+
+        # DEPRECATED but just in case someone is checking this.
+        self.text = self.string
 
     def _normalize_search_value(self, value):
         # Leave it alone if it's a Unicode string, a callable, a
@@ -2061,8 +2076,8 @@ class SoupStrainer(object):
 
     def __str__(self):
         """A human-readable representation of this SoupStrainer."""
-        if self.text:
-            return self.text
+        if self.string:
+            return self.string
         else:
             return "%s|%s" % (self.name, self.attrs)
 
@@ -2122,7 +2137,7 @@ class SoupStrainer(object):
                     found = markup
                 else:
                     found = markup_name
-        if found and self.text and not self._matches(found.string, self.text):
+        if found and self.string and not self._matches(found.string, self.string):
             found = None
         return found
 
@@ -2150,12 +2165,12 @@ class SoupStrainer(object):
         # If it's a Tag, make sure its name or attributes match.
         # Don't bother with Tags if we're searching for text.
         elif isinstance(markup, Tag):
-            if not self.text or self.name or self.attrs:
+            if not self.string or self.name or self.attrs:
                 found = self.search_tag(markup)
         # If it's text, make sure the text matches.
         elif isinstance(markup, NavigableString) or \
                  isinstance(markup, str):
-            if not self.name and not self.attrs and self._matches(markup, self.text):
+            if not self.name and not self.attrs and self._matches(markup, self.string):
                 found = markup
         else:
             raise Exception(
