@@ -35,7 +35,11 @@ import warnings
 if sys.version_info.major < 3:
     raise ImportError('You are trying to use a Python 3-specific version of Beautiful Soup under Python 2. This will not work. The final version of Beautiful Soup to support Python 2 was 4.9.3.')
 
-from .builder import builder_registry, ParserRejectedMarkup
+from .builder import (
+    builder_registry,
+    ParserRejectedMarkup,
+    XMLParsedAsHTMLWarning,
+)
 from .dammit import UnicodeDammit
 from .element import (
     CData,
@@ -67,7 +71,7 @@ class MarkupResemblesLocatorWarning(UserWarning):
     on disk.
     """
 
-
+   
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
 
@@ -735,7 +739,7 @@ class BeautifulSoup(Tag):
         #print("End tag: " + name)
         self.endData()
         self._popToTag(name, nsprefix)
-
+        
     def handle_data(self, data):
         """Called by the tree builder when a chunk of textual data is encountered."""
         self.current_data.append(data)

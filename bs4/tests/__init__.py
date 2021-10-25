@@ -22,7 +22,11 @@ from bs4.element import (
     Tag
 )
 
-from bs4.builder import HTMLParserTreeBuilder
+from bs4.builder import (
+    DetectsXMLParsedAsHTML,
+    HTMLParserTreeBuilder,
+    XMLParsedAsHTMLWarning,
+)
 default_builder = HTMLParserTreeBuilder
 
 BAD_DOCUMENT = """A bare string
@@ -422,16 +426,43 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 <head><title>Hello.</title></head>
 <body>Goodbye.</body>
 </html>"""
-        soup = self.soup(markup)
+        with warnings.catch_warnings(record=True) as w:
+            soup = self.soup(markup)
         assert soup.encode("utf-8").replace(b"\n", b"") == markup.replace(b"\n", b"")
 
+        # No warning was issued about parsing an XML document as HTML,
+        # because XHTML is both.
+        assert w == []
+
+
     def test_namespaced_html(self):
-        """When a namespaced XML document is parsed as HTML it should
-        be treated as HTML with weird tag names.
-        """
+        # When a namespaced XML document is parsed as HTML it should
+        # be treated as HTML with weird tag names.
         markup = b"""<ns1:foo>content</ns1:foo><ns1:foo/><ns2:foo/>"""
-        soup = self.soup(markup)
+        with warnings.catch_warnings(record=True) as w:
+            soup = self.soup(markup)
+
         assert 2 == len(soup.find_all("ns1:foo"))
+            
+        # n.b. no "you're parsing XML as HTML" warning was given
+        # because there was no XML declaration.
+        assert [] == w
+
+    def test_detect_xml_parsed_as_html(self):
+        # A warning is issued when parsing an XML document as HTML,
+        # but basic stuff should still work.
+        markup = b"""<?xml version="1.0" encoding="utf-8"?><tag>string</tag>"""
+        with warnings.catch_warnings(record=True) as w:
+            soup = self.soup(markup)
+            assert soup.tag.string == 'string'
+        [warning] = w
+        assert isinstance(warning.message, XMLParsedAsHTMLWarning)
+        assert str(warning.message) == XMLParsedAsHTMLWarning.MESSAGE
+
+        # NOTE: the warning is not issued if the document appears to
+        # be XHTML (tested with test_real_xhtml_document in the
+        # superclass) or if there is no XML declaration (tested with
+        # test_namespaced_html in the superclass).
         
     def test_processing_instruction(self):
         # We test both Unicode and bytestring to verify that

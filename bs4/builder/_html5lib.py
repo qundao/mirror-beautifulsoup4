@@ -8,6 +8,7 @@ __all__ = [
 import warnings
 import re
 from bs4.builder import (
+    DetectsXMLParsedAsHTML,
     PERMISSIVE,
     HTML,
     HTML_5,
@@ -70,6 +71,11 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         # UnicodeDammit.
         if exclude_encodings:
             warnings.warn("You provided a value for exclude_encoding, but the html5lib tree builder doesn't support exclude_encoding.")
+
+        # html5lib only parses HTML, so if it's given XML that's worth
+        # noting.
+        DetectsXMLParsedAsHTML.warn_if_markup_looks_like_xml(markup)
+
         yield (markup, None, None, False)
 
     # These methods are defined by Beautiful Soup.

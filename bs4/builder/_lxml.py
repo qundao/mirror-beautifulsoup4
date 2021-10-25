@@ -22,6 +22,7 @@ from bs4.element import (
     XMLProcessingInstruction,
 )
 from bs4.builder import (
+    DetectsXMLParsedAsHTML,
     FAST,
     HTML,
     HTMLTreeBuilder,
@@ -166,6 +167,9 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         is_html = not self.is_xml
         if is_html:
             self.processing_instruction_class = ProcessingInstruction
+            # We're in HTML mode, so if we're given XML, that's worth
+            # noting.
+            DetectsXMLParsedAsHTML.warn_if_markup_looks_like_xml(markup)
         else:
             self.processing_instruction_class = XMLProcessingInstruction
 
@@ -271,7 +275,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         namespace, name = self._getNsTag(name)
         nsprefix = self._prefix_for_namespace(namespace)
         self.soup.handle_starttag(name, namespace, nsprefix, attrs)
-
+      
     def _prefix_for_namespace(self, namespace):
         """Find the currently active prefix for the given namespace."""
         if namespace is None:
@@ -299,9 +303,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
     def pi(self, target, data):
         self.soup.endData()
-        self.soup.handle_data(target + ' ' + data)
+        data = target + ' ' + data
+        self.soup.handle_data(data)
         self.soup.endData(self.processing_instruction_class)
-
+        
     def data(self, content):
         self.soup.handle_data(content)
 

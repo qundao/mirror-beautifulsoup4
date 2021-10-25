@@ -4,7 +4,10 @@ trees."""
 from pdb import set_trace
 import pickle
 import warnings
-from bs4.builder import HTMLParserTreeBuilder
+from bs4.builder import (
+    HTMLParserTreeBuilder,
+    XMLParsedAsHTMLWarning,
+)
 from bs4.builder._htmlparser import BeautifulSoupHTMLParser
 from . import SoupTest, HTMLTreeBuilderSmokeTest
 
@@ -119,7 +122,6 @@ class TestHTMLParserTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
             with_element = div.encode(formatter="html")
             expect = b"<div>%s</div>" % output_element
             assert with_element == expect
-
 
 class TestHTMLParserSubclass(SoupTest):
     def test_error(self):

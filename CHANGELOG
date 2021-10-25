@@ -15,16 +15,19 @@ Python 2 was revision 605.
   html5lib parser. [bug=1948488]
 
 * Added a workaround for an lxml bug
-  (https://bugs.launchpad.net/lxml/+bug/1948551) that caused
+  (https://bugs.launchpad.net/lxml/+bug/1948551) that causes
   problems when parsing a Unicode string beginning with BYTE ORDER MARK.
   [bug=1947768]
+
+* Issue a warning when an HTML parser is used to parse a document that
+  looks like XML but not XHTML. [bug=1939121]
 
 * Some time ago, the misleadingly named "text" argument to find-type
   methods was renamed to the more accurate "string." But this supposed
   "renaming" didn't make it into important places like the method
   signatures or the docstrings. That's corrected in this
-  version. "text" still works, but will give a deprecation
-  warning. [bug=1947038]
+  version. "text" still works, but will give a DeprecationWarning.
+  [bug=1947038]
 
 = 4.10.0 (20210907)
 
