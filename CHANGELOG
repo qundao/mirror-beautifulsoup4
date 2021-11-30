@@ -22,6 +22,10 @@ Python 2 was revision 605.
 * Issue a warning when an HTML parser is used to parse a document that
   looks like XML but not XHTML. [bug=1939121]
 
+* Do a better job of keeping track of namespaces as an XML document is
+  parsed, so that CSS selectors that use namespaces will do the right
+  thing more often. [bug=1946243]
+
 * Some time ago, the misleadingly named "text" argument to find-type
   methods was renamed to the more accurate "string." But this supposed
   "renaming" didn't make it into important places like the method

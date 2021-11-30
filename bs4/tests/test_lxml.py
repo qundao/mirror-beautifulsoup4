@@ -95,18 +95,93 @@ class TestLXMLXMLTreeBuilder(SoupTest, XMLTreeBuilderSmokeTest):
         return LXMLTreeBuilderForXML
 
     def test_namespace_indexing(self):
-        # We should not track un-prefixed namespaces as we can only hold one
-        # and it will be recognized as the default namespace by soupsieve,
-        # which may be confusing in some situations. When no namespace is provided
-        # for a selector, the default namespace (if defined) is assumed.
-
         soup = self.soup(
             '<?xml version="1.1"?>\n'
             '<root>'
             '<tag xmlns="http://unprefixed-namespace.com">content</tag>'
-            '<prefix:tag xmlns:prefix="http://prefixed-namespace.com">content</tag>'
+            '<prefix:tag2 xmlns:prefix="http://prefixed-namespace.com">content</prefix:tag2>'
+            '<prefix2:tag3 xmlns:prefix2="http://another-namespace.com">'
+            '<subtag xmlns="http://another-unprefixed-namespace.com">'
+            '<subsubtag xmlns="http://yet-another-unprefixed-namespace.com">'
+            '</prefix2:tag3>'
             '</root>'
         )
-        assert soup._namespaces == (
-            {'xml': 'http://www.w3.org/XML/1998/namespace', 'prefix': 'http://prefixed-namespace.com'}
+
+        # The BeautifulSoup object includes every namespace prefix
+        # defined in the entire document. This is the default set of
+        # namespaces used by soupsieve.
+        #
+        # Un-prefixed namespaces are not included, and if a given
+        # prefix is defined twice, only the first prefix encountered
+        # in the document shows up here.
+        assert soup._namespaces == {
+            'xml': 'http://www.w3.org/XML/1998/namespace',
+            'prefix': 'http://prefixed-namespace.com',
+            'prefix2': 'http://another-namespace.com'
+        }
+
+        # A Tag object includes only the namespace prefixes
+        # that were in scope when it was parsed.
+
+        # We do not track un-prefixed namespaces as we can only hold
+        # one (the first one), and it will be recognized as the
+        # default namespace by soupsieve, even when operating from a
+        # tag with a different un-prefixed namespace.
+        assert soup.tag._namespaces == {
+            'xml': 'http://www.w3.org/XML/1998/namespace',
+        }
+
+        assert soup.tag2._namespaces == {
+            'prefix': 'http://prefixed-namespace.com',
+            'xml': 'http://www.w3.org/XML/1998/namespace',
+        }
+
+        assert soup.subtag._namespaces == {
+            'prefix2': 'http://another-namespace.com',
+            'xml': 'http://www.w3.org/XML/1998/namespace',
+        }
+
+        assert soup.subsubtag._namespaces == {
+            'prefix2': 'http://another-namespace.com',
+            'xml': 'http://www.w3.org/XML/1998/namespace',
+        }
+
+
+    def test_namespace_interaction_with_select_and_find(self):
+        # Demonstrate how namespaces interact with select* and
+        # find* methods.
+        
+        soup = self.soup(
+            '<?xml version="1.1"?>\n'
+            '<root>'
+            '<tag xmlns="http://unprefixed-namespace.com">content</tag>'
+            '<prefix:tag2 xmlns:prefix="http://prefixed-namespace.com">content</tag>'
+            '<subtag xmlns:prefix="http://another-namespace-same-prefix.com">'
+             '<prefix:tag3>'
+            '</subtag>'
+            '</root>'
         )
+
+        # soupselect uses namespace URIs.
+        assert soup.select_one('tag').name == 'tag'
+        assert soup.select_one('prefix|tag2').name == 'tag2'
+
+        # If a prefix is declared more than once, only the first usage
+        # is registered with the BeautifulSoup object.
+        assert soup.select_one('prefix|tag3') is None
+
+        # But you can always explicitly specify a namespace dictionary.
+        assert soup.select_one(
+            'prefix|tag3', namespaces=soup.subtag._namespaces
+        ).name == 'tag3'
+
+        # And a Tag (as opposed to the BeautifulSoup object) will
+        # have a set of default namespaces scoped to that Tag.
+        assert soup.subtag.select_one('prefix|tag3').name=='tag3'
+
+        # the find() methods aren't fully namespace-aware; they just
+        # look at prefixes.
+        assert soup.find('tag').name == 'tag'
+        assert soup.find('prefix:tag2').name == 'tag2'
+        assert soup.find('prefix:tag3').name == 'tag3'
+        assert soup.subtag.find('prefix:tag3').name == 'tag3'

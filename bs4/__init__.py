@@ -309,8 +309,6 @@ class BeautifulSoup(Tag):
         self._namespaces = dict()
         self.parse_only = parse_only
 
-        self.builder.initialize_soup(self)
-
         if hasattr(markup, 'read'):        # It's a file-type object.
             markup = markup.read()
         elif len(markup) <= 256 and (
@@ -362,6 +360,7 @@ class BeautifulSoup(Tag):
              self.builder.prepare_markup(
                  markup, from_encoding, exclude_encodings=exclude_encodings)):
             self.reset()
+            self.builder.initialize_soup(self)
             try:
                 self._feed()
                 success = True
@@ -400,7 +399,7 @@ class BeautifulSoup(Tag):
         if 'builder' in d and not self.builder.picklable:
             d['builder'] = None
         return d
-
+    
     @classmethod
     def _decode_markup(cls, markup):
         """Ensure `markup` is bytes so it's safe to send into warnings.warn.
@@ -693,7 +692,7 @@ class BeautifulSoup(Tag):
         return most_recently_popped
 
     def handle_starttag(self, name, namespace, nsprefix, attrs, sourceline=None,
-                        sourcepos=None):
+                        sourcepos=None, namespaces=None):
         """Called by the tree builder when a new tag is encountered.
 
         :param name: Name of the tag.
@@ -703,6 +702,8 @@ class BeautifulSoup(Tag):
             source document.
         :param sourcepos: The character position within `sourceline` where this
             tag was found.
+        :param namespaces: A dictionary of all namespace prefix mappings 
+            currently in scope in the document.
 
         If this method returns None, the tag was rejected by an active
         SoupStrainer. You should proceed as if the tag had not occurred
@@ -720,7 +721,8 @@ class BeautifulSoup(Tag):
         tag = self.element_classes.get(Tag, Tag)(
             self, self.builder, name, namespace, nsprefix, attrs,
             self.currentTag, self._most_recent_element,
-            sourceline=sourceline, sourcepos=sourcepos
+            sourceline=sourceline, sourcepos=sourcepos,
+            namespaces=namespaces
         )
         if tag is None:
             return tag

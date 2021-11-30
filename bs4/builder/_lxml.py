@@ -80,15 +80,24 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
         This might be useful later on when creating CSS selectors.
 
+        This will track (almost) all namespaces, even ones that were
+        only in scope for part of the document. If two namespaces have
+        the same prefix, only the first one encountered will be
+        tracked. Un-prefixed namespaces are not tracked.
+
         :param mapping: A dictionary mapping namespace prefixes to URIs.
         """
         for key, value in list(mapping.items()):
+            # This is 'if key' and not 'if key is not None' because we
+            # don't track un-prefixed namespaces. Soupselect will
+            # treat an un-prefixed namespace as the default, which
+            # causes confusion in some cases.
             if key and key not in self.soup._namespaces:
                 # Let the BeautifulSoup object know about a new namespace.
                 # If there are multiple namespaces defined with the same
                 # prefix, the first one in the document takes precedence.
                 self.soup._namespaces[key] = value
-
+                
     def default_parser(self, encoding):
         """Find the default parser for the given encoding.
 
@@ -126,6 +135,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             self.empty_element_tags = set(empty_element_tags)
         self.soup = None
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
+        self.active_namespace_prefixes = [dict(self.DEFAULT_NSMAPS)]
         super(LXMLTreeBuilderForXML, self).__init__(**kwargs)
         
     def _getNsTag(self, tag):
@@ -250,6 +260,20 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             # mappings.
             self.nsmaps.append(_invert(nsmap))
 
+            # The currently active namespace prefixes have
+            # changed. Calculate the new mapping so it can be stored
+            # with all Tag objects created while these prefixes are in
+            # scope.
+            current_mapping = dict(self.active_namespace_prefixes[-1])
+            current_mapping.update(nsmap)
+
+            # We should not track un-prefixed namespaces as we can only hold one
+            # and it will be recognized as the default namespace by soupsieve,
+            # which may be confusing in some situations.
+            if '' in current_mapping:
+                del current_mapping['']
+            self.active_namespace_prefixes.append(current_mapping)
+            
             # Also treat the namespace mapping as a set of attributes on the
             # tag, so we can recreate it later.
             attrs = attrs.copy()
@@ -274,8 +298,11 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
         namespace, name = self._getNsTag(name)
         nsprefix = self._prefix_for_namespace(namespace)
-        self.soup.handle_starttag(name, namespace, nsprefix, attrs)
-      
+        self.soup.handle_starttag(
+            name, namespace, nsprefix, attrs,
+            namespaces=self.active_namespace_prefixes[-1]
+        )
+        
     def _prefix_for_namespace(self, namespace):
         """Find the currently active prefix for the given namespace."""
         if namespace is None:
@@ -299,8 +326,14 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         if len(self.nsmaps) > 1:
             # This tag, or one of its parents, introduced a namespace
             # mapping, so pop it off the stack.
-            self.nsmaps.pop()
+            out_of_scope_nsmap = self.nsmaps.pop()
 
+            if out_of_scope_nsmap is not None:
+                # This tag introduced a namespace mapping which is no
+                # longer in scope. Recalculate the currently active
+                # namespace prefixes.
+                self.active_namespace_prefixes.pop()
+            
     def pi(self, target, data):
         self.soup.endData()
         data = target + ' ' + data

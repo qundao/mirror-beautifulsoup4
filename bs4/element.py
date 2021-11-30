@@ -1183,6 +1183,7 @@ class Tag(PageElement):
                  can_be_empty_element=None, cdata_list_attributes=None,
                  preserve_whitespace_tags=None,
                  interesting_string_types=None,
+                 namespaces=None
     ):
         """Basic constructor.
 
@@ -1215,6 +1216,9 @@ class Tag(PageElement):
             to be considered. The default is to consider
             NavigableString and CData the only interesting string
             subtypes.
+        :param namespaces: A dictionary mapping currently active
+            namespace prefixes to URIs. This can be used later to
+            construct CSS selectors.
         """
         if parser is None:
             self.parser_class = None
@@ -1226,6 +1230,7 @@ class Tag(PageElement):
             raise ValueError("No value provided for new tag's name.")
         self.name = name
         self.namespace = namespace
+        self._namespaces = namespaces or {}
         self.prefix = prefix
         if ((not builder or builder.store_line_numbers)
             and (sourceline is not None or sourcepos is not None)):
@@ -1308,7 +1313,7 @@ class Tag(PageElement):
         for child in self.contents:
             clone.append(child.__copy__())
         return clone
-
+    
     @property
     def is_empty_element(self):
         """Is this tag an empty-element tag? (aka a self-closing tag)

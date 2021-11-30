@@ -1800,9 +1800,9 @@ selectors.::
  # [<ns1:child>I'm in namespace 1</ns1:child>]
  
 When handling a CSS selector that uses namespaces, Beautiful Soup
-uses the namespace abbreviations it found when parsing the
-document. You can override this by passing in your own dictionary of
-abbreviations::
+always tries to use namespace prefixes that make sense based on what
+it saw while parsing the document. You can always provide your own
+dictionary of abbreviations::
 
  namespaces = dict(first="http://namespace1/", second="http://namespace2/")
  soup.select("second|child", namespaces=namespaces)
