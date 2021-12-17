@@ -33,6 +33,9 @@ Python 2 was revision 605.
   version. "text" still works, but will give a DeprecationWarning.
   [bug=1947038]
 
+* Fix a crash when pickling a BeautifulSoup object that has no
+  tree builder. [bug=1934003]
+
 = 4.10.0 (20210907)
 
 * This is the first release of Beautiful Soup to only support Python

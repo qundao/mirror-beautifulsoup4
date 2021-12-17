@@ -1,5 +1,6 @@
 """Tests to ensure that the lxml tree builder generates good trees."""
 
+import pickle
 import re
 import warnings
 
@@ -185,3 +186,14 @@ class TestLXMLXMLTreeBuilder(SoupTest, XMLTreeBuilderSmokeTest):
         assert soup.find('prefix:tag2').name == 'tag2'
         assert soup.find('prefix:tag3').name == 'tag3'
         assert soup.subtag.find('prefix:tag3').name == 'tag3'
+
+    def test_pickle_removes_builder(self):
+        # The lxml TreeBuilder is not picklable, so it won't be
+        # preserved in a pickle/unpickle operation.
+
+        soup = self.soup("<a>some markup</a>")
+        assert isinstance(soup.builder, self.default_builder)
+        pickled = pickle.dumps(soup)
+        unpickled = pickle.loads(pickled)
+        assert "some markup" == unpickled.a.string
+        assert unpickled.builder is None

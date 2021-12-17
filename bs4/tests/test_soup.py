@@ -4,6 +4,7 @@
 from pdb import set_trace
 import logging
 import os
+import pickle
 import pytest
 import sys
 import tempfile
@@ -383,6 +384,24 @@ class TestNewString(SoupTest):
         assert "foo" == s
         assert isinstance(s, Comment)
 
+
+class TestPickle(SoupTest):
+   # Test our ability to pickle the BeautifulSoup object itself.
+
+    def test_normal_pickle(self):
+        soup = self.soup("<a>some markup</a>")
+        pickled = pickle.dumps(soup)
+        unpickled = pickle.loads(pickled)
+        assert "some markup" == unpickled.a.string
+        
+    def test_pickle_with_no_builder(self):
+        # We had a bug that prevented pickling from working if
+        # the builder wasn't set.
+        soup = self.soup("some markup")
+        soup.builder = None
+        pickled = pickle.dumps(soup)
+        unpickled = pickle.loads(pickled)
+        assert "some markup" == unpickled.string
 
 class TestEncodingConversion(SoupTest):
     # Test Beautiful Soup's ability to decode and encode from various
