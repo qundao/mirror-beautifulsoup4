@@ -48,15 +48,6 @@ else:
     def chardet_dammit(s):
         return None
 
-# Available from http://cjkpython.i18n.org/.
-#
-# TODO: This doesn't work anymore and the closest thing, iconv_codecs,
-# is GPL-licensed. Check whether this is still necessary.
-try:
-    import iconv_codec
-except ImportError:
-    pass
-
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
 xml_encoding = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'

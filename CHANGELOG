@@ -43,6 +43,10 @@ Python 2 was revision 605.
 * Fixed a crash when overriding multi_valued_attributes and using the
   html5lib parser. [bug=1948488]
 
+* Removed support for the iconv_codec library, which doesn't seem
+  to exist anymore and was never put up on PyPI. (The closest
+  replacement on PyPI, iconv_codecs, is GPL-licensed, so we can't use it.)
+
 = 4.10.0 (20210907)
 
 * This is the first release of Beautiful Soup to only support Python
