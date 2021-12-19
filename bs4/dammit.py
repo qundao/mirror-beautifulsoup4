@@ -16,32 +16,37 @@ import re
 import logging
 import string
 
-# Import a library to autodetect character encodings.
-chardet_type = None
+# Import a library to autodetect character encodings. We'll support
+# any of a number of libraries that all support the same API:
+#
+# * cchardet
+# * chardet
+# * charset-normalizer
+chardet_module = None
 try:
-    # First try the fast C implementation.
     #  PyPI package: cchardet
-    import cchardet
+    import cchardet as chardet_module
+except ImportError:
+    try:
+        #  Debian package: python-chardet
+        #  PyPI package: chardet
+        import chardet as chardet_module
+    except ImportError:
+        try:
+            # PyPI package: charset-normalizer
+            import charset_normalizer as chardet_module
+        except ImportError:
+            # No chardet available.
+            chardet_module = None
+
+if chardet_module:
     def chardet_dammit(s):
         if isinstance(s, str):
             return None
-        return cchardet.detect(s)['encoding']
-except ImportError:
-    try:
-        # Fall back to the pure Python implementation
-        #  Debian package: python-chardet
-        #  PyPI package: chardet
-        import chardet
-        def chardet_dammit(s):
-            if isinstance(s, str):
-                return None
-            return chardet.detect(s)['encoding']
-        #import chardet.constants
-        #chardet.constants._debug = 1
-    except ImportError:
-        # No chardet available.
-        def chardet_dammit(s):
-            return None
+        return chardet_module.detect(s)['encoding']
+else:
+    def chardet_dammit(s):
+        return None
 
 # Available from http://cjkpython.i18n.org/.
 #

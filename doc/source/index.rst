@@ -2676,10 +2676,10 @@ become Unicode::
  # 'utf-8'
 
 Unicode, Dammit's guesses will get a lot more accurate if you install
-the ``chardet`` or ``cchardet`` Python libraries. The more data you
-give Unicode, Dammit, the more accurately it will guess. If you have
-your own suspicions as to what the encoding might be, you can pass
-them in as a list::
+one of these Python libraries: ``charset-normalizer``, ``chardet``, or
+``cchardet``. The more data you give Unicode, Dammit, the more
+accurately it will guess. If you have your own suspicions as to what
+the encoding might be, you can pass them in as a list::
 
  dammit = UnicodeDammit("Sacr\xe9 bleu!", ["latin-1", "iso-8859-1"])
  print(dammit.unicode_markup)

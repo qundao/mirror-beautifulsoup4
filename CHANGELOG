@@ -11,8 +11,12 @@ Python 2 was revision 605.
   to make it possible to treat ruby text specially in get_text() calls.
   [bug=1941980]
 
-* Fixed a crash when overriding multi_valued_attributes and using the
-  html5lib parser. [bug=1948488]
+* If the charset-normalizer Python module
+  (https://pypi.org/project/charset-normalizer/) is installed, Beautiful
+  Soup will use it to detect the character sets of incoming documents.
+  This is also the module used by newer versions of the Requests library.
+  For the sake of backwards compatibility, chardet and cchardet both take
+  precedence if installed. [bug=1955346]
 
 * Added a workaround for an lxml bug
   (https://bugs.launchpad.net/lxml/+bug/1948551) that causes
@@ -33,8 +37,11 @@ Python 2 was revision 605.
   version. "text" still works, but will give a DeprecationWarning.
   [bug=1947038]
 
-* Fix a crash when pickling a BeautifulSoup object that has no
+* Fixed a crash when pickling a BeautifulSoup object that has no
   tree builder. [bug=1934003]
+
+* Fixed a crash when overriding multi_valued_attributes and using the
+  html5lib parser. [bug=1948488]
 
 = 4.10.0 (20210907)
 
