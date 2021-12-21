@@ -49,8 +49,8 @@ Python 2 was revision 605.
 * Fixed a crash when overriding multi_valued_attributes and using the
   html5lib parser. [bug=1948488]
 
-* Changed the wording of the MarkupResemblesLocatorWarning
-  warnings to to make them less judgemental about what you ought to
+* Standardized the wording of the MarkupResemblesLocatorWarning
+  warnings to to make them less judgmental about what you ought to
   be doing. [bug=1955450]
 
 * Removed support for the iconv_codec library, which doesn't seem
