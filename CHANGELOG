@@ -15,7 +15,7 @@ Python 2 was revision 605.
   providing a value for the 'indent' argument to the Formatter
   constructor. The 'indent' argument works very similarly to the
   argument of the same name in the Python standard library's
-  json.dump() method. [bug=1955497]
+  json.dump() function. [bug=1955497]
 
 * If the charset-normalizer Python module
   (https://pypi.org/project/charset-normalizer/) is installed, Beautiful
