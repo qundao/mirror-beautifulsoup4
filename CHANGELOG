@@ -11,6 +11,12 @@ Python 2 was revision 605.
   to make it possible to treat ruby text specially in get_text() calls.
   [bug=1941980]
 
+* It's now possible to customize the way output is indented by
+  providing a value for the 'indent' argument to the Formatter
+  constructor. The 'indent' argument works very similarly to the
+  argument of the same name in the Python standard library's
+  json.dump() method. [bug=1955497]
+
 * If the charset-normalizer Python module
   (https://pypi.org/project/charset-normalizer/) is installed, Beautiful
   Soup will use it to detect the character sets of incoming documents.

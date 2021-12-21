@@ -1614,8 +1614,10 @@ class Tag(PageElement):
 
         :param encoding: The destination encoding.
         :param indent_level: Each line of the rendering will be
-            indented this many spaces. Used internally in
-            recursive calls while pretty-printing.
+           indented this many levels. (The formatter decides what a
+           'level' means in terms of spaces or other characters
+           output.) Used internally in recursive calls while
+           pretty-printing.
         :param formatter: A Formatter object, or a string naming one of
             the standard formatters.
         :param errors: An error handling strategy such as
@@ -1691,7 +1693,7 @@ class Tag(PageElement):
         space = ''
         indent_space = ''
         if indent_level is not None:
-            indent_space = (' ' * (indent_level - 1))
+            indent_space = (formatter.indent * (indent_level - 1))
         if pretty_print:
             space = indent_space
             indent_contents = indent_level + 1
@@ -1766,8 +1768,10 @@ class Tag(PageElement):
         """Renders the contents of this tag as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
-           indented this many spaces. Used internally in
-           recursive calls while pretty-printing.
+           indented this many levels. (The formatter decides what a
+           'level' means in terms of spaces or other characters
+           output.) Used internally in recursive calls while
+           pretty-printing.
 
         :param eventual_encoding: The tag is destined to be
            encoded into this encoding. decode_contents() is _not_
@@ -1778,6 +1782,7 @@ class Tag(PageElement):
 
         :param formatter: A Formatter object, or a string naming one of
             the standard Formatters.
+
         """
         # First off, turn a string formatter into a Formatter object. This
         # will stop the lookup from happening over and over again.
@@ -1800,7 +1805,7 @@ class Tag(PageElement):
                 text = text.strip()
             if text:
                 if pretty_print and not preserve_whitespace:
-                    s.append(" " * (indent_level - 1))
+                    s.append(formatter.indent * (indent_level - 1))
                 s.append(text)
                 if pretty_print and not preserve_whitespace:
                     s.append("\n")
@@ -1812,8 +1817,10 @@ class Tag(PageElement):
         """Renders the contents of this PageElement as a bytestring.
 
         :param indent_level: Each line of the rendering will be
-           indented this many spaces. Used internally in
-           recursive calls while pretty-printing.
+           indented this many levels. (The formatter decides what a
+           'level' means in terms of spaces or other characters
+           output.) Used internally in recursive calls while
+           pretty-printing.
 
         :param eventual_encoding: The bytestring will be in this encoding.
 

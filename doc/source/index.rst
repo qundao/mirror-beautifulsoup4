@@ -2331,6 +2331,14 @@ attribute value::
  #  A LINK
  # </a>
 
+Here's a formatter that increases the indentation when pretty-printing::
+
+ formatter = HTMLFormatter(indent=8)
+ print(link_soup.a.prettify(formatter=formatter))
+ # <a href="http://example.com/?foo=val1&bar=val2">
+ #         A link
+ # </a>
+ 
 Subclassing ``HTMLFormatter`` or ``XMLFormatter`` will give you even
 more control over the output. For example, Beautiful Soup sorts the
 attributes in every tag by default::

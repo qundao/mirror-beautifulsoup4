@@ -1,3 +1,5 @@
+import pytest
+
 from bs4.element import Tag
 from bs4.formatter import (
     Formatter,
@@ -24,6 +26,8 @@ class TestFormatter(SoupTest):
         # normally happen.
         tag.attrs = None
         assert [] == formatter.attributes(tag)
+
+        assert ' ' == formatter.indent
         
     def test_sort_attributes(self):
         # Test the ability to override Formatter.attributes() to,
@@ -72,4 +76,38 @@ class TestFormatter(SoupTest):
             for formatter in ('html', 'minimal', 'xml', None):
                 assert b'<option selected=""></option>' == soup.option.encode(formatter='html')
                 assert b'<option selected></option>' == soup.option.encode(formatter='html5')
+
+    @pytest.mark.parametrize(
+        "indent,expect",
+        [
+            (None, '<a>\n<b>\ntext\n</b>\n</a>'),
+            (-1, '<a>\n<b>\ntext\n</b>\n</a>'),
+            (0, '<a>\n<b>\ntext\n</b>\n</a>'),
+            ("", '<a>\n<b>\ntext\n</b>\n</a>'),
+
+            (1, '<a>\n <b>\n  text\n </b>\n</a>'),
+            (2, '<a>\n  <b>\n    text\n  </b>\n</a>'),
+
+            ("\t", '<a>\n\t<b>\n\t\ttext\n\t</b>\n</a>'),
+            ('abc', '<a>\nabc<b>\nabcabctext\nabc</b>\n</a>'),
+
+            # Some invalid inputs -- the default behavior is used.
+            (object(), '<a>\n <b>\n  text\n </b>\n</a>'),
+            (b'bytes', '<a>\n <b>\n  text\n </b>\n</a>'),
+        ]
+    )
+    def test_indent(self, indent, expect):
+        # Pretty-print a tree with a Formatter set to
+        # indent in a certain way and verify the results.
+        soup = self.soup("<a><b>text</b></a>")
+        formatter = Formatter(indent=indent)
+        assert soup.prettify(formatter=formatter) == expect
+
+        # Pretty-printing only happens with prettify(), not
+        # encode().
+        assert soup.encode(formatter=formatter) != expect
+        
+    def test_default_indent_value(self):
+        formatter = Formatter()
+        assert formatter.indent == ' '
 
