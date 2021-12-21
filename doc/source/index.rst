@@ -661,6 +661,12 @@ children using the ``.children`` generator::
      print(child)
  # The Dormouse's story
 
+If you want to modify a tag's children, use the methods described in
+`Modifying the tree`_. Don't modify the the ``.contents`` list
+directly: that can lead to problems that are subtle and difficult to
+spot.
+
+ 
 ``.descendants``
 ^^^^^^^^^^^^^^^^
 
