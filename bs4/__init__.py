@@ -346,8 +346,8 @@ class BeautifulSoup(Tag):
                 )
             elif is_file:
                 warnings.warn(
-                    '"%s" looks like a filename, not markup. You should'
-                    ' probably open this file and pass the filehandle into'
+                    '"%s" looks like a filename, not markup. You may'
+                    ' want to open this file and pass the filehandle into'
                     ' Beautiful Soup.' % self._decode_markup(markup),
                     MarkupResemblesLocatorWarning
                 )
@@ -432,11 +432,12 @@ class BeautifulSoup(Tag):
         if any(markup.startswith(prefix) for prefix in cant_start_with):
             if not space in markup:
                 warnings.warn(
-                    '"%s" looks like a URL. Beautiful Soup is not an'
-                    ' HTTP client. You should probably use an HTTP client like'
-                    ' requests to get the document behind the URL, and feed'
-                    ' that document to Beautiful Soup.' % cls._decode_markup(
-                        markup
+                    '"%s" looks like a URL, not markup. You may want to use'
+                    ' an HTTP client like requests to get the document behind'
+                    ' the URL, and feed that document to Beautiful Soup.' % (
+                        cls._decode_markup(
+                            markup
+                        )
                     ),
                     MarkupResemblesLocatorWarning
                 )
