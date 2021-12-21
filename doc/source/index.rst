@@ -829,7 +829,7 @@ Going sideways
 
 Consider a simple document like this::
 
- sibling_soup = BeautifulSoup("<a><b>text1</b><c>text2</c></b></a>", 'html.parser')
+ sibling_soup = BeautifulSoup("<a><b>text1</b><c>text2</c></a>", 'html.parser')
  print(sibling_soup.prettify())
  #   <a>
  #    <b>
