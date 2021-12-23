@@ -2514,7 +2514,7 @@ parser::
  BeautifulSoup("<a></p>", "html.parser")
  # <a></a>
 
-Like html5lib, this parser ignores the closing </p> tag. Unlike
+Like lxml, this parser ignores the closing </p> tag. Unlike
 html5lib or lxml, this parser makes no attempt to create a
 well-formed HTML document by adding <html> or <body> tags.
 
