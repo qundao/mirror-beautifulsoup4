@@ -3,7 +3,7 @@ Beautiful Soup's official support for Python 2 ended on December 31st,
 4.9.3. In the Launchpad Bazaar repository, the final revision to support
 Python 2 was revision 605.
 
-= 4.11.0 (Unreleased)
+= 4.11.0 (20220407)
 
 * Ported unit tests to use pytest.
 
@@ -50,8 +50,8 @@ Python 2 was revision 605.
   html5lib parser. [bug=1948488]
 
 * Standardized the wording of the MarkupResemblesLocatorWarning
-  warnings to to make them less judgmental about what you ought to
-  be doing. [bug=1955450]
+  warnings to omit untrusted input and make the warnings less
+  judgmental about what you ought to be doing. [bug=1955450]
 
 * Removed support for the iconv_codec library, which doesn't seem
   to exist anymore and was never put up on PyPI. (The closest

@@ -15,13 +15,12 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.10.0"
-__copyright__ = "Copyright (c) 2004-2021 Leonard Richardson"
+__version__ = "4.11.0"
+__copyright__ = "Copyright (c) 2004-2022 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
 __all__ = ['BeautifulSoup']
-
 
 from collections import Counter
 import os
@@ -315,43 +314,12 @@ class BeautifulSoup(Tag):
                 (isinstance(markup, bytes) and not b'<' in markup)
                 or (isinstance(markup, str) and not '<' in markup)
         ):
-            # Print out warnings for a couple beginner problems
+            # Issue warnings for a couple beginner problems
             # involving passing non-markup to Beautiful Soup.
             # Beautiful Soup will still parse the input as markup,
-            # just in case that's what the user really wants.
-            if (isinstance(markup, str)
-                and not os.path.supports_unicode_filenames):
-                possible_filename = markup.encode("utf8")
-            else:
-                possible_filename = markup
-            is_file = False
-            is_directory = False
-            try:
-                is_file = os.path.exists(possible_filename)
-                if is_file:
-                    is_directory = os.path.isdir(possible_filename)
-            except Exception as e:
-                # This is almost certainly a problem involving
-                # characters not valid in filenames on this
-                # system. Just let it go.
-                pass
-            if is_directory:
-                warnings.warn(
-                    '"%s" looks like a directory name, not markup. You may'
-                    ' want to open a file found in this directory and pass'
-                    ' the filehandle into Beautiful Soup.' % (
-                        self._decode_markup(markup)
-                    ),
-                    MarkupResemblesLocatorWarning
-                )
-            elif is_file:
-                warnings.warn(
-                    '"%s" looks like a filename, not markup. You may'
-                    ' want to open this file and pass the filehandle into'
-                    ' Beautiful Soup.' % self._decode_markup(markup),
-                    MarkupResemblesLocatorWarning
-                )
-            self._check_markup_is_url(markup)
+            # since that is sometimes the intended behavior.
+            if not self._markup_is_url(markup):
+                self._markup_resembles_filename(markup)                
 
         rejections = []
         success = False
@@ -414,11 +382,13 @@ class BeautifulSoup(Tag):
         return decoded
 
     @classmethod
-    def _check_markup_is_url(cls, markup):
+    def _markup_is_url(cls, markup):
         """Error-handling method to raise a warning if incoming markup looks
         like a URL.
 
         :param markup: A string.
+        :return: Whether or not the markup resembles a URL
+            closely enough to justify a warning.
         """
         if isinstance(markup, bytes):
             space = b' '
@@ -427,21 +397,50 @@ class BeautifulSoup(Tag):
             space = ' '
             cant_start_with = ("http:", "https:")
         else:
-            return
+            return False
 
         if any(markup.startswith(prefix) for prefix in cant_start_with):
             if not space in markup:
                 warnings.warn(
-                    '"%s" looks like a URL, not markup. You may want to use'
+                    'The input looks more like a URL than markup. You may want to use'
                     ' an HTTP client like requests to get the document behind'
-                    ' the URL, and feed that document to Beautiful Soup.' % (
-                        cls._decode_markup(
-                            markup
-                        )
-                    ),
+                    ' the URL, and feed that document to Beautiful Soup.',
                     MarkupResemblesLocatorWarning
                 )
+                return True
+        return False
 
+    @classmethod
+    def _markup_resembles_filename(cls, markup):
+        """Error-handling method to raise a warning if incoming markup
+        resembles a filename.
+
+        :param markup: A bytestring or string.
+        :return: Whether or not the markup resembles a filename
+            closely enough to justify a warning.
+        """
+        path_characters = '/\\'
+        extensions = ['.html', '.htm', '.xml', '.xhtml', '.txt']
+        if isinstance(markup, bytes):
+            path_characters = path_characters.encode("utf8")
+            extensions = [x.encode('utf8') for x in extensions]
+        filelike = False
+        if any(x in markup for x in path_characters):
+            filelike = True
+        else:
+            lower = markup.lower()
+            if any(lower.endswith(ext) for ext in extensions):
+                filelike = True
+        if filelike:
+            warnings.warn(
+                'The input looks more like a filename than markup. You may'
+                ' want to open this file and pass the filehandle into'
+                ' Beautiful Soup.',
+                MarkupResemblesLocatorWarning
+            )
+            return True
+        return False
+    
     def _feed(self):
         """Internal method that parses previously set markup, creating a large
         number of Tag and NavigableString objects.

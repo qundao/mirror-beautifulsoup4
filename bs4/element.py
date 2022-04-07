@@ -1992,7 +1992,7 @@ class Tag(PageElement):
         has_key() is gone in Python 3, anyway.
         """
         warnings.warn(
-            'has_key is deprecated. Use has_attr("%s") instead.' % key,
+            'has_key is deprecated. Use has_attr(key) instead.',
             DeprecationWarning
         )
         return self.has_attr(key)

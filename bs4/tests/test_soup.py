@@ -224,7 +224,7 @@ class TestWarnings(SoupTest):
         for w in warnings:
             if isinstance(w.message, cls):
                 return w
-        raise Exception("%s warning not found in %r" % cls, warnings)
+        raise Exception("%s warning not found in %r" % (cls, warnings))
     
     def _assert_no_parser_specified(self, w):
         warning = self._assert_warning(w, GuessedAtParserWarning)
@@ -267,67 +267,65 @@ class TestWarnings(SoupTest):
         with pytest.raises(TypeError):
             self.soup("<a>", no_such_argument=True)
 
-    def test_disk_file_warning(self):
-        filehandle = tempfile.NamedTemporaryFile()
-        filename = filehandle.name
-        try:
-            with warnings.catch_warnings(record=True) as w:
-                soup = self.soup(filename)
-            warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
-            assert "looks like a filename" in str(warning.message)
-        finally:
-            filehandle.close()
-
-        # The file no longer exists, so Beautiful Soup will no longer issue the warning.
+    @pytest.mark.parametrize(
+        "extension",
+        ['markup.html', 'markup.htm', 'markup.HTML', 'markup.txt',
+         'markup.xhtml', 'markup.xml', "/home/user/file", "c:\\user\file"]
+    )
+    def test_resembles_filename_warning(self, extension):
+        # A warning is issued if the "markup" looks like the name of
+        # an HTML or text file, or a full path to a file on disk.
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup(filename)
-        assert [] == w
-
-    def test_directory_warning(self):
-        try:
-            filename = tempfile.mkdtemp()
-            with warnings.catch_warnings(record=True) as w:
-                soup = self.soup(filename)
+            soup = self.soup("markup" + extension)
             warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
-            assert "looks like a directory" in str(warning.message)
-        finally:
-            os.rmdir(filename)
+            assert "looks more like a filename" in str(warning.message)
 
-        # The directory no longer exists, so Beautiful Soup will no longer issue the warning.
+    @pytest.mark.parametrize(
+        "extension",
+        ['markuphtml', 'markup.com', '', 'markup.js']
+    )
+    def test_resembles_filename_no_warning(self, extension):
+        # The 'looks more like a filename' warning is not issued if
+        # the markup looks like a bare string, a domain name, or a
+        # file that's not an HTML file.
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup(filename)
+            soup = self.soup("markup" + extension)
         assert [] == w
         
     def test_url_warning_with_bytes_url(self):
+        url = b"http://www.crummybytes.com/"
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = self.soup(b"http://www.crummybytes.com/")
+            soup = self.soup(url)
         warning = self._assert_warning(
             warning_list, MarkupResemblesLocatorWarning
         )
-        assert "looks like a URL" in str(warning.message)
-
+        assert "looks more like a URL" in str(warning.message)
+        assert url not in str(warning.message).encode("utf8")
+        
     def test_url_warning_with_unicode_url(self):
+        url = "http://www.crummyunicode.com/"
         with warnings.catch_warnings(record=True) as warning_list:
             # note - this url must differ from the bytes one otherwise
             # python's warnings system swallows the second warning
-            soup = self.soup("http://www.crummyunicode.com/")
+            soup = self.soup(url)
         warning = self._assert_warning(
             warning_list, MarkupResemblesLocatorWarning
         )
-        assert "looks like a URL" in str(warning.message)
+        assert "looks more like a URL" in str(warning.message)
+        assert url not in str(warning.message)
 
     def test_url_warning_with_bytes_and_space(self):
         # Here the markup contains something besides a URL, so no warning
         # is issued.
         with warnings.catch_warnings(record=True) as warning_list:
             soup = self.soup(b"http://www.crummybytes.com/ is great")
-        assert not any("looks like a URL" in str(w.message) 
+        assert not any("looks more like a URL" in str(w.message) 
                        for w in warning_list)
 
     def test_url_warning_with_unicode_and_space(self):
         with warnings.catch_warnings(record=True) as warning_list:
             soup = self.soup("http://www.crummyunicode.com/ is great")
-        assert not any("looks like a URL" in str(w.message) 
+        assert not any("looks more like a URL" in str(w.message) 
                        for w in warning_list)
 
 
