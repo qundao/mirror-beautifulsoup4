@@ -25,7 +25,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
-    packages=find_packages(exclude=['tests*', '*.tests*']),
+    packages=['bs4', 'bs4/builder', 'bs4/tests'],
+    # NOTE: Stuff like the documentation is included via MANIFEST.in
     extras_require = {
         'lxml' : [ 'lxml'],
         'html5lib' : ['html5lib'],

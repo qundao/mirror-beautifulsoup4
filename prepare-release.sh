@@ -16,7 +16,7 @@
 # Make sure tests pass
 ./test-all-versions
 
-rm -rf build dist
+rm -rf build dist beautifulsoup4.egg-info
 
 # Make both sdist and wheels.
 python3 setup.py sdist bdist_wheel
