@@ -26,7 +26,7 @@ python3 setup.py sdist bdist_wheel
 rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
-pip install dist/beautifulsoup4-*.whl lxml html5lib
+pip install dist/beautifulsoup4-*.whl pytest lxml html5lib soupsieve
 pytest ../py3-install-test-virtualenv/lib/python3.8/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")

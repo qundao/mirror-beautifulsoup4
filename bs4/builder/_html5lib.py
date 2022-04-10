@@ -249,9 +249,9 @@ class AttrList(object):
         # If this attribute is a multi-valued attribute for this element,
         # turn its value into a list.
         list_attr = self.element.cdata_list_attributes or {}
-        if (name in list_attr.get('*')
+        if (name in list_attr.get('*', [])
             or (self.element.name in list_attr
-                and name in list_attr[self.element.name])):
+                and name in list_attr.get(self.element.name, []))):
             # A node that is being cloned may have already undergone
             # this procedure.
             if not isinstance(value, list):
