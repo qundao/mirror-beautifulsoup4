@@ -5,6 +5,9 @@ Python 2 was revision 605.
 
 = Unreleased
 
+* Fixed a test failure when cchardet is not installed but
+  charset_normalizer is. [bug=1973072]
+
 * Fixed another crash when overriding multi_valued_attributes and using the
   html5lib parser. [bug=1948488]
 
