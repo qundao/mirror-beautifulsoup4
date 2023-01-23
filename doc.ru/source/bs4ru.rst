@@ -1565,7 +1565,7 @@ Soup API, вы можете использовать сокращенную за
   #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>;
   #  and they lived at the bottom of a well.</p>
 
-  a_string.find_parents("p", class="title")
+  a_string.find_parents("p", class_="title")
   # []
 
 Один из трех тегов <a> является прямым родителем искомой строки,
