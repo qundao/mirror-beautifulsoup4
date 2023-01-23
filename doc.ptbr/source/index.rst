@@ -1542,7 +1542,7 @@ Vamos experimentá-los: começando por uma string "enterrada" no documento
   #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>;
   #  and they lived at the bottom of a well.</p>
 
-  a_string.find_parents("p", class="title")
+  a_string.find_parents("p", class_="title")
   # []
 
 Uma das três tags <a> é diretamente um nível superior da string em

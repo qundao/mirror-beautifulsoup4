@@ -1382,7 +1382,7 @@ find_parent( `name`_ , `attrs`_ , `recursive`_ , `string`_ , `**kwargs`_ )
     #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>;
     #  and they lived at the bottom of a well.</p>
 
-    a_string.find_parents("p", class="title")
+    a_string.find_parents("p", class_="title")
     # []
 
 文档中的一个<a>标签是是当前叶子节点的直接父节点,所以可以被找到.还有一个<p>标签,是目标叶子节点的间接父辈节点,所以也可以被找到.包含class值为"title"的<p>标签不是不是目标叶子节点的父辈节点,所以通过 ``find_parents()`` 方法搜索不到.

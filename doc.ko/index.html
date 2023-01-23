@@ -1225,7 +1225,7 @@ a_string.find_parent("p")
 #  &lt;a class="sister" href="http://example.com/tillie" id="link3"&gt;Tillie&lt;/a&gt;;
 #  and they lived at the bottom of a well.&lt;/p&gt;
 
-a_string.find_parents("p", class="title")
+a_string.find_parents("p", class_="title")
 # []</pre>
 </div>
 <p>세가지 &lt;a&gt; 태그 중 하나는 해당 문자열의 직계 부모이다. 그래서 탐색해서 그것을 찾는다. 세가지 &lt;p&gt; 태그 중 하나는 그 문자열의 방계 부모이고, 그것도 역시 잘 탐색한다. CSS 클래스가“title”인 &lt;p&gt; 태그가 문서 <cite>어딘가에</cite> 존재하지만, 그것은 이 문자열의 부모가 아니므로, <tt class="docutils literal"><span class="pre">find_parents()</span></tt>로 부모를 찾을 수 없다.</p>
