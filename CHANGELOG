@@ -12,6 +12,9 @@ Bazaar repository, the final revision to support Python 2 was 605.
 * Fixed another crash when overriding multi_valued_attributes and using the
   html5lib parser. [bug=1948488]
 
+* The HTMLFormatter and XMLFormatter constructors no longer return a
+  value. [bug=1992693]
+
 * Passing a Tag's .contents into PageElement.extend() now works the
   same way as passing the Tag itself.
 

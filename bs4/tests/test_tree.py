@@ -913,7 +913,7 @@ class TestTreeModification(SoupTest):
     @pytest.mark.parametrize(
         "get_tags", [lambda tag: tag, lambda tag: tag.contents]
     )
-    def test_extend_with_another_tags_contents(self, tags):
+    def test_extend_with_another_tags_contents(self, get_tags):
         data = '<body><div id="d1"><a>1</a><a>2</a><a>3</a><a>4</a></div><div id="d2"></div></body>'
         soup = self.soup(data)
         d1 = soup.find('div', id='d1')
