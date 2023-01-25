@@ -886,9 +886,9 @@ In real documents, the ``.next_sibling`` or ``.previous_sibling`` of a
 tag will usually be a string containing whitespace. Going back to the
 "three sisters" document::
 
- # <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>
- # <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a>
- # <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>
+ # <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
+ # <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
+ # <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
 
 You might think that the ``.next_sibling`` of the first <a> tag would
 be the second <a> tag. But actually, it's a string: the comma and
