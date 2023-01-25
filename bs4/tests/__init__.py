@@ -827,12 +827,13 @@ Hello, world!
         # Here it is in Unicode. Note that it claims to be in ISO-Latin-1.
         unicode_html = '<html><head><meta content="text/html; charset=ISO-Latin-1" http-equiv="Content-type"/></head><body><p>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</p></body></html>'
 
-        # That's because we're going to encode it into ISO-Latin-1, and use
-        # that to test.
+        # That's because we're going to encode it into ISO-Latin-1,
+        # a.k.a ISO-8859-1, and use that to test.
         iso_latin_html = unicode_html.encode("iso-8859-1")
 
         # Parse the ISO-Latin-1 HTML.
-        soup = self.soup(iso_latin_html)
+        soup = self.soup(iso_latin_html, from_encoding="iso-8859-1")
+
         # Encode it to UTF-8.
         result = soup.encode("utf-8")
 
