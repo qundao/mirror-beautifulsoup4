@@ -694,6 +694,7 @@ class TestPersistence(SoupTest):
         assert tag.can_be_empty_element == copied.can_be_empty_element
         assert tag.cdata_list_attributes == copied.cdata_list_attributes
         assert tag.preserve_whitespace_tags == copied.preserve_whitespace_tags
+        assert tag.interesting_string_types == copied.interesting_string_types
         
     def test_unicode_pickle(self):
         # A tree containing Unicode characters can be pickled.

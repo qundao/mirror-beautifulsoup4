@@ -1309,7 +1309,8 @@ class Tag(PageElement):
             sourceline=self.sourceline, sourcepos=self.sourcepos,
             can_be_empty_element=self.can_be_empty_element,
             cdata_list_attributes=self.cdata_list_attributes,
-            preserve_whitespace_tags=self.preserve_whitespace_tags
+            preserve_whitespace_tags=self.preserve_whitespace_tags,
+            interesting_string_types=self.interesting_string_types
         )
         for attr in ('can_be_empty_element', 'hidden'):
             setattr(clone, attr, getattr(self, attr))
