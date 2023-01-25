@@ -496,13 +496,16 @@ class PageElement(object):
     def extend(self, tags):
         """Appends the given PageElements to this one's contents.
 
-        :param tags: A list of PageElements.
+        :param tags: A list of PageElements. If a single Tag is
+            provided instead, this PageElement's contents will be extended
+            with that Tag's contents.
         """
         if isinstance(tags, Tag):
-            # Calling self.append() on another tag's contents will change
-            # the list we're iterating over. Make a list that won't
-            # change.
-            tags = list(tags.contents)
+            tags = tags.contents
+        if isinstance(tags, list):
+            # Moving items around the tree may change their position in
+            # the original list. Make a list that won't change.
+            tags = list(tags)
         for tag in tags:
             self.append(tag)
 
