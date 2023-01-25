@@ -820,27 +820,27 @@ Hello, world!
         soup = self.soup(text)
         assert soup.p.encode("utf-8") == expected
 
-    def test_real_iso_latin_document(self):
+    def test_real_iso_8859_document(self):
         # Smoke test of interrelated functionality, using an
         # easy-to-understand document.
 
-        # Here it is in Unicode. Note that it claims to be in ISO-Latin-1.
-        unicode_html = '<html><head><meta content="text/html; charset=ISO-Latin-1" http-equiv="Content-type"/></head><body><p>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</p></body></html>'
+        # Here it is in Unicode. Note that it claims to be in ISO-8859-1.
+        unicode_html = '<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="Content-type"/></head><body><p>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</p></body></html>'
 
-        # That's because we're going to encode it into ISO-Latin-1,
-        # a.k.a ISO-8859-1, and use that to test.
+        # That's because we're going to encode it into ISO-8859-1,
+        # and use that to test.
         iso_latin_html = unicode_html.encode("iso-8859-1")
 
-        # Parse the ISO-Latin-1 HTML.
-        soup = self.soup(iso_latin_html, from_encoding="iso-8859-1")
+        # Parse the ISO-8859-1 HTML.
+        soup = self.soup(iso_latin_html)
 
         # Encode it to UTF-8.
         result = soup.encode("utf-8")
 
         # What do we expect the result to look like? Well, it would
         # look like unicode_html, except that the META tag would say
-        # UTF-8 instead of ISO-Latin-1.
-        expected = unicode_html.replace("ISO-Latin-1", "utf-8")
+        # UTF-8 instead of ISO-8859-1.
+        expected = unicode_html.replace("ISO-8859-1", "utf-8")
 
         # And, of course, it would be in UTF-8, not Unicode.
         expected = expected.encode("utf-8")
