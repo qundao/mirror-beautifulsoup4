@@ -20,7 +20,7 @@ Bazaar repository, the final revision to support Python 2 was 605.
   copied. [bug=1990400]
 
 * Warnings now do their best to provide an appropriate stacklevel,
-  improving the usefulness of the error message. [bug=1978744]
+  improving the usefulness of the message. [bug=1978744]
 
 * Passing a Tag's .contents into PageElement.extend() now works the
   same way as passing the Tag itself.
