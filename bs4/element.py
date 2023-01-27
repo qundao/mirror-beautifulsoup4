@@ -786,7 +786,7 @@ class PageElement(object):
             string = kwargs.pop('text')
             warnings.warn(
                 "The 'text' argument to find()-type methods is deprecated. Use 'string' instead.",
-                DeprecationWarning
+                DeprecationWarning, stacklevel=3
             )
 
         if isinstance(name, SoupStrainer):
@@ -1562,7 +1562,7 @@ class Tag(PageElement):
                 '.%(name)sTag is deprecated, use .find("%(name)s") instead. If you really were looking for a tag called %(name)sTag, use .find("%(name)sTag")' % dict(
                     name=tag_name
                 ),
-                DeprecationWarning
+                DeprecationWarning, stacklevel=2
             )
             return self.find(tag_name)
         # We special case contents to avoid recursion.
@@ -1997,7 +1997,7 @@ class Tag(PageElement):
         """
         warnings.warn(
             'has_key is deprecated. Use has_attr(key) instead.',
-            DeprecationWarning
+            DeprecationWarning, stacklevel=2
         )
         return self.has_attr(key)
 
@@ -2028,7 +2028,7 @@ class SoupStrainer(object):
             string = kwargs.pop('text')
             warnings.warn(
                 "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
-                DeprecationWarning
+                DeprecationWarning, stacklevel=2
             )
 
         self.name = self._normalize_search_value(name)

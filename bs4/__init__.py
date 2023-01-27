@@ -405,7 +405,8 @@ class BeautifulSoup(Tag):
                     'The input looks more like a URL than markup. You may want to use'
                     ' an HTTP client like requests to get the document behind'
                     ' the URL, and feed that document to Beautiful Soup.',
-                    MarkupResemblesLocatorWarning
+                    MarkupResemblesLocatorWarning,
+                    stacklevel=3
                 )
                 return True
         return False
@@ -436,7 +437,7 @@ class BeautifulSoup(Tag):
                 'The input looks more like a filename than markup. You may'
                 ' want to open this file and pass the filehandle into'
                 ' Beautiful Soup.',
-                MarkupResemblesLocatorWarning
+                MarkupResemblesLocatorWarning, stacklevel=3
             )
             return True
         return False
@@ -789,7 +790,7 @@ class BeautifulStoneSoup(BeautifulSoup):
         warnings.warn(
             'The BeautifulStoneSoup class is deprecated. Instead of using '
             'it, pass features="xml" into the BeautifulSoup constructor.',
-            DeprecationWarning
+            DeprecationWarning, stacklevel=2
         )
         super(BeautifulStoneSoup, self).__init__(*args, **kwargs)
 

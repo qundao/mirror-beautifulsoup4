@@ -95,12 +95,12 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         """In Python 3, HTMLParser subclasses must implement error(), although
         this requirement doesn't appear to be documented.
 
-        In Python 2, HTMLParser implements error() by raising an exception,
-        which we don't want to do.
-
         In any event, this method is called only on very strange
         markup and our best strategy is to pretend it didn't happen
         and keep going.
+
+        NOTE: this was deprecated in Python 3.4, and removed in 3.5.
+        Since Beautiful Soup support starts at 3.6, this can be removed.
         """
         warnings.warn(msg)
         
