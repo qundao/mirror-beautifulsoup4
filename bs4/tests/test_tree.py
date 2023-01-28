@@ -1276,12 +1276,19 @@ class TestTreeModification(SoupTest):
 
 class TestDeprecatedArguments(SoupTest):
 
-    def test_find_type_method_string(self):
+    @pytest.mark.parametrize(
+        "method_name", [
+            "find", "find_all", "find_parent", "find_parents",
+            "find_next", "find_all_next", "find_previous",
+            "find_all_previous", "find_next_sibling", "find_next_siblings",
+            "find_previous_sibling", "find_previous_siblings",
+        ]
+    )
+    def test_find_type_method_string(self, method_name):
         soup = self.soup("<a>some</a><b>markup</b>")
+        method = getattr(soup.b, method_name)
         with warnings.catch_warnings(record=True) as w:
-            [result] = soup.find_all(text='markup')
-            assert result == 'markup'
-            assert result.parent.name == 'b'
+            method(text='markup')
             [warning] = w
             assert warning.filename == __file__
             msg = str(warning.message)
