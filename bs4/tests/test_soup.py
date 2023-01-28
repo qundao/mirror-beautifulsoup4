@@ -219,10 +219,17 @@ class TestConstructor(SoupTest):
 
 
 class TestWarnings(SoupTest):
+    # Note that some of the tests in this class create BeautifulSoup
+    # objects directly rather than using self.soup(). That's
+    # because SoupTest.soup is defined in a different file,
+    # which will throw off the assertion in _assert_warning
+    # that the code that triggered the warning is in the same
+    # file as the test.
 
     def _assert_warning(self, warnings, cls):
         for w in warnings:
             if isinstance(w.message, cls):
+                assert w.filename == __file__
                 return w
         raise Exception("%s warning not found in %r" % (cls, warnings))
     
@@ -243,13 +250,17 @@ class TestWarnings(SoupTest):
 
     def test_no_warning_if_explicit_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
-            soup = BeautifulSoup("<a><b></b></a>", "html.parser")
+            soup = self.soup("<a><b></b></a>")
         assert [] == w
 
     def test_parseOnlyThese_renamed_to_parse_only(self):
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("<a><b></b></a>", parseOnlyThese=SoupStrainer("b"))
-        msg = str(w[0].message)
+            soup = BeautifulSoup(
+                "<a><b></b></a>", "html.parser",
+                parseOnlyThese=SoupStrainer("b"),
+            )
+        warning = self._assert_warning(w, DeprecationWarning)
+        msg = str(warning.message)
         assert "parseOnlyThese" in msg
         assert "parse_only" in msg
         assert b"<b></b>" == soup.encode()
@@ -257,8 +268,11 @@ class TestWarnings(SoupTest):
     def test_fromEncoding_renamed_to_from_encoding(self):
         with warnings.catch_warnings(record=True) as w:
             utf8 = b"\xc3\xa9"
-            soup = self.soup(utf8, fromEncoding="utf8")
-        msg = str(w[0].message)
+            soup = BeautifulSoup(
+                utf8, "html.parser", fromEncoding="utf8"
+            )
+        warning = self._assert_warning(w, DeprecationWarning)
+        msg = str(warning.message)
         assert "fromEncoding" in msg
         assert "from_encoding" in msg
         assert "utf8" == soup.original_encoding
@@ -276,7 +290,7 @@ class TestWarnings(SoupTest):
         # A warning is issued if the "markup" looks like the name of
         # an HTML or text file, or a full path to a file on disk.
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("markup" + extension)
+            soup = BeautifulSoup("markup" + extension, "html.parser")
             warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
             assert "looks more like a filename" in str(warning.message)
 
@@ -291,11 +305,11 @@ class TestWarnings(SoupTest):
         with warnings.catch_warnings(record=True) as w:
             soup = self.soup("markup" + extension)
         assert [] == w
-        
+
     def test_url_warning_with_bytes_url(self):
         url = b"http://www.crummybytes.com/"
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = self.soup(url)
+            soup = BeautifulSoup(url, "html.parser")
         warning = self._assert_warning(
             warning_list, MarkupResemblesLocatorWarning
         )
@@ -307,7 +321,7 @@ class TestWarnings(SoupTest):
         with warnings.catch_warnings(record=True) as warning_list:
             # note - this url must differ from the bytes one otherwise
             # python's warnings system swallows the second warning
-            soup = self.soup(url)
+            soup = BeautifulSoup(url, "html.parser")
         warning = self._assert_warning(
             warning_list, MarkupResemblesLocatorWarning
         )

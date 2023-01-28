@@ -211,7 +211,7 @@ class BeautifulSoup(Tag):
                 warnings.warn(
                     'The "%s" argument to the BeautifulSoup constructor '
                     'has been renamed to "%s."' % (old_name, new_name),
-                    DeprecationWarning
+                    DeprecationWarning, stacklevel=3
                 )
                 return kwargs.pop(old_name)
             return None
