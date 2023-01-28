@@ -4,7 +4,7 @@ Beautiful Soup's official support for Python 2 ended on January 1st,
 Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7. In the
 Bazaar repository, the final revision to support Python 2 was 605.
 
-= Unreleased
+= 4.11.2 (Unreleased)
 
 * Fixed test failures caused by nondeterministic behavior of
   UnicodeDammit's character detection, depending on the platform setup.
