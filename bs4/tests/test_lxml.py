@@ -68,7 +68,9 @@ class TestLXMLTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
         with warnings.catch_warnings(record=True) as w:
             soup = BeautifulStoneSoup("<b />")
         assert "<b/>" == str(soup.b)
-        assert "BeautifulStoneSoup class is deprecated" in str(w[0].message)
+        [warning] = w
+        assert warning.filename == __file__
+        assert "BeautifulStoneSoup class is deprecated" in str(warning.message)
 
     def test_tracking_line_numbers(self):
         # The lxml TreeBuilder cannot keep track of line numbers from

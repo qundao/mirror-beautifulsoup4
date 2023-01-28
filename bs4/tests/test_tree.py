@@ -1282,13 +1282,17 @@ class TestDeprecatedArguments(SoupTest):
             [result] = soup.find_all(text='markup')
             assert result == 'markup'
             assert result.parent.name == 'b'
-            msg = str(w[0].message)
+            [warning] = w
+            assert warning.filename == __file__
+            msg = str(warning.message)
             assert msg == "The 'text' argument to find()-type methods is deprecated. Use 'string' instead."
 
     def test_soupstrainer_constructor_string(self):
         with warnings.catch_warnings(record=True) as w:
             strainer = SoupStrainer(text="text")
             assert strainer.text == 'text'
-            msg = str(w[0].message)
+            [warning] = w
+            msg = str(warning.message)
+            assert warning.filename == __file__
             assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
 
