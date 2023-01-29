@@ -139,7 +139,7 @@ class TestConstructor(SoupTest):
         assert " an id " == a['id']
         assert ["a", "class"] == a['class']
 
-        # TreeBuilder takes an argument called 'mutli_valued_attributes'  which lets
+        # TreeBuilder takes an argument called 'multi_valued_attributes'  which lets
         # you customize or disable this. As always, you can customize the TreeBuilder
         # by passing in a keyword argument to the BeautifulSoup constructor.
         soup = self.soup(markup, builder=default_builder, multi_valued_attributes=None)

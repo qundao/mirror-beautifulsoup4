@@ -366,8 +366,8 @@ HTML 4 defines a few attributes that can have multiple values. HTML 5
 removes a couple of them, but defines a few more. The most common
 multi-valued attribute is ``class`` (that is, a tag can have more than
 one CSS class). Others include ``rel``, ``rev``, ``accept-charset``,
-``headers``, and ``accesskey``. Beautiful Soup presents the value(s)
-of a multi-valued attribute as a list::
+``headers``, and ``accesskey``. By default, Beautiful Soup parses the value(s)
+of a multi-valued attribute into a list::
 
  css_soup = BeautifulSoup('<p class="body"></p>', 'html.parser')
  css_soup.p['class']
@@ -388,15 +388,16 @@ standard, Beautiful Soup will leave the attribute alone::
 When you turn a tag back into a string, multiple attribute values are
 consolidated::
 
- rel_soup = BeautifulSoup('<p>Back to the <a rel="index">homepage</a></p>', 'html.parser')
+ rel_soup = BeautifulSoup('<p>Back to the <a rel="index first">homepage</a></p>', 'html.parser')
  rel_soup.a['rel']
- # ['index']
+ # ['index', 'first']
  rel_soup.a['rel'] = ['index', 'contents']
  print(rel_soup.p)
  # <p>Back to the <a rel="index contents">homepage</a></p>
 
-You can disable this by passing ``multi_valued_attributes=None`` as a
-keyword argument into the ``BeautifulSoup`` constructor::
+You can force all attributes to be parsed as strings by passing
+``multi_valued_attributes=None`` as a keyword argument into the
+``BeautifulSoup`` constructor::
 
  no_list_soup = BeautifulSoup('<p class="body strikeout"></p>', 'html.parser', multi_valued_attributes=None)
  no_list_soup.p['class']
