@@ -13,6 +13,9 @@ from . import (
     SOUP_SIEVE_PRESENT,
 )
 
+if SOUP_SIEVE_PRESENT:
+    from soupsieve import SelectorSyntaxError
+
 class TestEncoding(SoupTest):
     """Test the ability to encode objects into strings."""
 
