@@ -1,8 +1,7 @@
 Beautiful Soup's official support for Python 2 ended on January 1st,
 2021. The final release to support Python 2 was Beautiful Soup
 4.9.3. In the Launchpad Git repository, the final revision to support
-Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7. In the
-Bazaar repository, the final revision to support Python 2 was 605.
+Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
 = 4.11.2 (Unreleased)
 

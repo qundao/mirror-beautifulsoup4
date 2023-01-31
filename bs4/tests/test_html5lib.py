@@ -1,28 +1,26 @@
 """Tests to ensure that the html5lib tree builder generates good trees."""
 
+import pytest
 import warnings
 
-try:
-    from bs4.builder import HTML5TreeBuilder
-    HTML5LIB_PRESENT = True
-except ImportError as e:
-    HTML5LIB_PRESENT = False
 from bs4 import BeautifulSoup
 from bs4.element import SoupStrainer
 from . import (
+    HTML5LIB_PRESENT,
     HTML5TreeBuilderSmokeTest,
     SoupTest,
-    skipIf,
 )
 
-@skipIf(
+@pytest.mark.skipif(
     not HTML5LIB_PRESENT,
-    "html5lib seems not to be present, not testing its tree builder.")
+    reason="html5lib seems not to be present, not testing its tree builder."
+)
 class TestHTML5LibBuilder(SoupTest, HTML5TreeBuilderSmokeTest):
     """See ``HTML5TreeBuilderSmokeTest``."""
 
     @property
     def default_builder(self):
+        from bs4.builder import HTML5TreeBuilder
         return HTML5TreeBuilder
 
     def test_soupstrainer(self):

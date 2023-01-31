@@ -30,19 +30,11 @@ from bs4.element import (
 
 from . import (
     default_builder,
+    LXML_PRESENT,
     SoupTest,
-    skipIf,
 )
 import warnings
-
-try:
-    from bs4.builder import LXMLTreeBuilder, LXMLTreeBuilderForXML
-    LXML_PRESENT = True
-except ImportError as e:
-    LXML_PRESENT = False
     
-PYTHON_3_PRE_3_2 = (sys.version_info[0] == 3 and sys.version_info < (3,2))
-
 class TestConstructor(SoupTest):
 
     def test_short_unicode_input(self):
@@ -361,18 +353,22 @@ class TestNewTag(SoupTest):
         assert "foo" == new_tag.name
         assert dict(bar="baz", name="a name") == new_tag.attrs
         assert None == new_tag.parent
-        
+
+    @pytest.mark.skipif(
+        not LXML_PRESENT,
+        reason="lxml not installed, cannot parse XML document"
+    )
+    def test_xml_tag_inherits_self_closing_rules_from_builder(self):
+        xml_soup = BeautifulSoup("", "xml")
+        xml_br = xml_soup.new_tag("br")
+        xml_p = xml_soup.new_tag("p")
+
+        # Both the <br> and <p> tag are empty-element, just because
+        # they have no contents.
+        assert b"<br/>" == xml_br.encode()
+        assert b"<p/>" == xml_p.encode()
+
     def test_tag_inherits_self_closing_rules_from_builder(self):
-        if LXML_PRESENT:
-            xml_soup = BeautifulSoup("", "lxml-xml")
-            xml_br = xml_soup.new_tag("br")
-            xml_p = xml_soup.new_tag("p")
-
-            # Both the <br> and <p> tag are empty-element, just because
-            # they have no contents.
-            assert b"<br/>" == xml_br.encode()
-            assert b"<p/>" == xml_p.encode()
-
         html_soup = BeautifulSoup("", "html.parser")
         html_br = html_soup.new_tag("br")
         html_p = html_soup.new_tag("p")
@@ -464,13 +460,3 @@ class TestEncodingConversion(SoupTest):
         # The internal data structures can be encoded as UTF-8.
         soup_from_unicode = self.soup(self.unicode_data)
         assert soup_from_unicode.encode('utf-8') == self.utf8_data
-
-    @skipIf(
-        PYTHON_3_PRE_3_2,
-        "Bad HTMLParser detected; skipping test of non-ASCII characters in attribute name.")
-    def test_attribute_name_containing_unicode_characters(self):
-        markup = '<div><a \N{SNOWMAN}="snowman"></a></div>'
-        assert self.soup(markup).div.encode("utf8") == markup.encode("utf8")
-
-
-

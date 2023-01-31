@@ -33,7 +33,6 @@ from bs4.element import (
 )
 from . import (
     SoupTest,
-    skipIf,
 )
 
 class TestFind(SoupTest):

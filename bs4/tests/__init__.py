@@ -29,6 +29,29 @@ from bs4.builder import (
 )
 default_builder = HTMLParserTreeBuilder
 
+# Some tests depend on specific third-party libraries. We use
+# @pytest.mark.skipIf on the following conditionals to skip them
+# if the libraries are not installed.
+try:
+    from soupsieve import SelectorSyntaxError
+    SOUP_SIEVE_PRESENT = True
+except ImportError:
+    SOUP_SIEVE_PRESENT = False
+
+try:
+    import html5lib
+    HTML5LIB_PRESENT = True
+except ImportError:
+    HTML5LIB_PRESENT = False
+
+try:
+    import lxml.etree
+    LXML_PRESENT = True
+    LXML_VERSION = lxml.etree.LXML_VERSION
+except ImportError:
+    LXML_PRESENT = False
+    LXML_VERSION = (0,)
+
 BAD_DOCUMENT = """A bare string
 <!DOCTYPE xsl:stylesheet SYSTEM "htmlent.dtd">
 <!DOCTYPE xsl:stylesheet PUBLIC "htmlent.dtd">
@@ -1178,15 +1201,3 @@ class HTML5TreeBuilderSmokeTest(HTMLTreeBuilderSmokeTest):
         assert isinstance(soup.contents[0], Comment)
         assert soup.contents[0] == '?xml version="1.0" encoding="utf-8"?'
         assert "html" == soup.contents[0].next_element.name
-
-def skipIf(condition, reason):
-   def nothing(test, *args, **kwargs):
-       return None
-
-   def decorator(test_item):
-       if condition:
-           return nothing
-       else:
-           return test_item
-
-   return decorator

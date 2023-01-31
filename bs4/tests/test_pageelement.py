@@ -3,15 +3,15 @@ import copy
 import pickle
 import pytest
 
-from soupsieve import SelectorSyntaxError
-
 from bs4 import BeautifulSoup
 from bs4.element import (
     Comment,
     SoupStrainer,
 )
-from . import SoupTest
-
+from . import (
+    SoupTest,
+    SOUP_SIEVE_PRESENT,
+)
 
 class TestEncoding(SoupTest):
     """Test the ability to encode objects into strings."""
@@ -213,6 +213,7 @@ class TestFormatters(SoupTest):
         assert soup.contents[0].name == 'pre'
 
 
+@pytest.mark.skipif(not SOUP_SIEVE_PRESENT, reason="Soup Sieve not installed")
 class TestCSSSelectors(SoupTest):
     """Test basic CSS selector functionality.
 
