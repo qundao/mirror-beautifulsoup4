@@ -1954,10 +1954,7 @@ class Tag(PageElement):
         :return: A Tag.
         :rtype: bs4.element.Tag
         """
-        value = self.select(selector, namespaces, 1, **kwargs)
-        if value:
-            return value[0]
-        return None
+        return self.css.select_one(selector, namespaces, **kwargs)
 
     def select(self, selector, namespaces=None, limit=None, **kwargs):
         """Perform a CSS selection operation on the current element.
@@ -1979,21 +1976,12 @@ class Tag(PageElement):
         :return: A ResultSet of Tags.
         :rtype: bs4.element.ResultSet
         """
-        if namespaces is None:
-            namespaces = self._namespaces
-        
-        if limit is None:
-            limit = 0
-        if soupsieve is None:
-            raise NotImplementedError(
-                "Cannot execute CSS selectors because the soupsieve package is not installed."
-            )
-            
-        results = soupsieve.select(selector, self, namespaces, limit, **kwargs)
+        return self.css.select(selector, namespaces, limit, **kwargs)
 
-        # We do this because it's more consistent and because
-        # ResultSet.__getattr__ has a helpful error message.
-        return ResultSet(None, results)
+    @property
+    def css(self):
+        """Return an interface to the CSS selector API."""
+        return SoupSieveProxy(self)
 
     # Old names for backwards compatibility
     def childGenerator(self):
@@ -2307,4 +2295,97 @@ class ResultSet(list):
         """Raise a helpful exception to explain a common code fix."""
         raise AttributeError(
             "ResultSet object has no attribute '%s'. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?" % key
+        )
+
+class SoupSieveProxy(object):
+
+    def __init__(self, element):
+        self.element = element
+
+    def _ns(self, ns):
+        """Normalize a dictionary of namespaces."""
+
+        if soupsieve is None:
+            raise NotImplementedError(
+                "Cannot execute CSS selectors because the soupsieve package is not installed."
+            )
+        
+        if ns is None:
+            ns = self.element._namespaces
+        return ns
+
+    def _rs(self, results):
+        """Normalize a return value to a Resultset.
+
+        We do this because it's more consistent and because
+        ResultSet.__getattr__ has a helpful error message.        
+        """
+        return ResultSet(None, results)
+
+    def select_one(self, select, namespaces=None, flags=0, **kwargs):
+        """Perform a CSS selection operation on the current element.
+
+        :param selector: A CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+           used in the CSS selector to namespace URIs. By default,
+           Beautiful Soup will use the prefixes it encountered while
+           parsing the document.
+
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+           soupsieve.select() method.
+
+        :return: A Tag.
+        :rtype: bs4.element.Tag
+        """
+        return soupsieve.select_one(
+            select, self.element, self._ns(namespaces), flags, **kwargs
+        )
+    
+    def select(self, select, namespaces=None, limit=0, flags=0, **kwargs):
+        """Perform a CSS selection operation on the current element.
+
+        This uses the SoupSieve library.
+
+        :param selector: A string containing a CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+           used in the CSS selector to namespace URIs. By default,
+           Beautiful Soup will use the prefixes it encountered while
+           parsing the document.
+
+        :param limit: After finding this number of results, stop looking.
+
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+           soupsieve.select() method.
+
+        :return: A ResultSet of Tags.
+        :rtype: bs4.element.ResultSet
+        """       
+        if limit is None:
+            limit = 0
+
+        results = soupsieve.select(
+            select, self.element, self._ns(namespaces), limit, flags, **kwargs
+        )
+        return self._rs(results)
+
+    def iselect(self, select, namespaces=None, flags=0, **kwargs):
+        return soupsieve.iselect(
+            select, self.element, self._ns(namespaces), flags, **kwargs
+        )
+    
+    def closest(self, select, namespaces=None, flags=0, **kwargs):
+        return soupsieve.closest(
+            select, self.element, self._ns(namespaces), flags, **kwargs
+        )
+
+    def match(self, select, namespaces=None, flags=0, **kwargs):
+        return soupsieve.match(
+            select, self.element, self._ns(namespaces), flags, **kwargs
+        )
+        
+    def filter(self, select, namespaces=None, flags=0, **kwargs):
+        return soupsieve.filter(
+            select, self.element, self._ns(namespaces), flags, **kwargs
         )

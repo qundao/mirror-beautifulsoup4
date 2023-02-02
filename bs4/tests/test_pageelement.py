@@ -2,6 +2,7 @@
 import copy
 import pickle
 import pytest
+import types
 
 from bs4 import BeautifulSoup
 from bs4.element import (
@@ -637,6 +638,32 @@ class TestCSSSelectors(SoupTest):
         # order.
         for element in soup.find_all(class_=['c1', 'c2']):
             assert element in selected
+
+    def test_closest(self):
+        inner = self.soup.find("div", id="inner")
+        closest = inner.css.closest("div[id=main]")
+        assert closest == self.soup.find("div", id="main")
+
+    def test_match(self):
+        inner = self.soup.find("div", id="inner")
+        main = self.soup.find("div", id="main")
+        assert inner.css.match("div[id=main]") == False
+        assert main.css.match("div[id=main]") == True
+
+    def test_iselect(self):
+        gen = self.soup.css.iselect("h2")
+        assert isinstance(gen, types.GeneratorType)
+        [header2, header3] = gen
+        assert header2['id'] == 'header2'
+        assert header3['id'] == 'header3'
+
+    def test_filter(self):
+        inner = self.soup.find("div", id="inner")
+        results = inner.css.filter("h2")
+        assert len(inner.css.filter("h2")) == 2
+
+        [result] = inner.css.filter("h2[id=header3]")
+        assert result['id'] == 'header3'
 
 
 class TestPersistence(SoupTest):
