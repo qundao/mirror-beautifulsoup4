@@ -7,6 +7,7 @@ import types
 from bs4 import BeautifulSoup
 from bs4.element import (
     Comment,
+    ResultSet,
     SoupStrainer,
 )
 from . import (
@@ -279,7 +280,9 @@ class TestCSSSelectors(SoupTest):
         self.soup = BeautifulSoup(self.HTML, 'html.parser')
 
     def assert_selects(self, selector, expected_ids, **kwargs):
-        el_ids = [el['id'] for el in self.soup.select(selector, **kwargs)]
+        results = self.soup.select(selector, **kwargs)
+        assert isinstance(results, ResultSet)
+        el_ids = [el['id'] for el in results]
         el_ids.sort()
         expected_ids.sort()
         assert expected_ids == el_ids, "Selector %s, expected [%s], got [%s]" % (
@@ -662,7 +665,9 @@ class TestCSSSelectors(SoupTest):
         results = inner.css.filter("h2")
         assert len(inner.css.filter("h2")) == 2
 
-        [result] = inner.css.filter("h2[id=header3]")
+        results = inner.css.filter("h2[id=header3]")
+        assert isinstance(results, ResultSet)
+        [result] = results
         assert result['id'] == 'header3'
 
 

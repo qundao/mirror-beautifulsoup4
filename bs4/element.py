@@ -2306,17 +2306,27 @@ class SoupSieveProxy(object):
     this object through a specific tag.
     """
 
-    def __init__(self, element):
+    def __init__(self, tag):
+        """Constructor.
+
+        You don't need to instantiate this class yourself; instead,
+        access the .css attribute on the Tag you want to use as the
+        starting point for your CSS selector, or on the BeautifulSoup
+        object itself.
+
+        :param tag: All CSS selectors will use this as their starting
+        point.
+        """
         if soupsieve is None:
             raise NotImplementedError(
                 "Cannot execute CSS selectors because the soupsieve package is not installed."
             )
-        self.element = element
+        self.tag = tag
 
     def _ns(self, ns):
         """Normalize a dictionary of namespaces."""
         if ns is None:
-            ns = self.element._namespaces
+            ns = self.tag._namespaces
         return ns
 
     def _rs(self, results):
@@ -2330,8 +2340,8 @@ class SoupSieveProxy(object):
         return ResultSet(None, results)
 
     def select_one(self, select, namespaces=None, flags=0, **kwargs):
-        """Perform a CSS selection operation on the current element
-        and return the first result.
+        """Perform a CSS selection operation on the current Tag and return the
+        first result.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the soupsieve.select_one()
@@ -2352,13 +2362,14 @@ class SoupSieveProxy(object):
 
         :return: A Tag, or None if the selector has no match.
         :rtype: bs4.element.Tag
+
         """
         return soupsieve.select_one(
-            select, self.element, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
     def select(self, select, namespaces=None, limit=0, flags=0, **kwargs):
-        """Perform a CSS selection operation on the current element.
+        """Perform a CSS selection operation on the current Tag.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the soupsieve.select()
@@ -2381,19 +2392,20 @@ class SoupSieveProxy(object):
 
         :return: A ResultSet of Tag objects.
         :rtype: bs4.element.ResultSet
+
         """
         if limit is None:
             limit = 0
 
         return self._rs(
             soupsieve.select(
-                select, self.element, self._ns(namespaces), limit, flags,
+                select, self.tag, self._ns(namespaces), limit, flags,
                 **kwargs
             )
         )
 
     def iselect(self, select, namespaces=None, limit=0, flags=0, **kwargs):
-        """Perform a CSS selection operation on the current element.
+        """Perform a CSS selection operation on the current Tag.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the soupsieve.iselect()
@@ -2419,12 +2431,11 @@ class SoupSieveProxy(object):
         :rtype: types.GeneratorType
         """
         return soupsieve.iselect(
-            select, self.element, self._ns(namespaces), limit, flags, **kwargs
+            select, self.tag, self._ns(namespaces), limit, flags, **kwargs
         )
 
     def closest(self, select, namespaces=None, flags=0, **kwargs):
-        """Find the element closest to this one that matches the given
-        selector.
+        """Find the Tag closest to this one that matches the given selector.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the soupsieve.closest()
@@ -2443,15 +2454,16 @@ class SoupSieveProxy(object):
         :param kwargs: Keyword arguments to be passed into SoupSieve's
             soupsieve.closest() method.
 
-        :return: A PageElement, or None if there is no match.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
+        :return: A Tag, or None if there is no match.
+        :rtype: bs4.Tag
+
         """
         return soupsieve.closest(
-            select, self.element, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
     def match(self, select, namespaces=None, flags=0, **kwargs):
-        """Match this element against the given CSS selector.
+        """Check whether this Tag matches the given CSS selector.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the soupsieve.match()
@@ -2470,19 +2482,18 @@ class SoupSieveProxy(object):
         :param kwargs: Keyword arguments to be passed into SoupSieve's
             soupsieve.match() method.
 
-        :return: True if this element matches the selector; False otherwise.
+        :return: True if this Tag matches the selector; False otherwise.
         :rtype: bool
         """
         return soupsieve.match(
-            select, self.element, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
     def filter(self, select, namespaces=None, flags=0, **kwargs):
-        """Filter this element's direct children based on the given
-        CSS selector.
+        """Filter this Tag's direct children based on the given CSS selector.
 
         This uses the Soup Sieve library. It works the same way as
-        passing this element into that library's soupsieve.filter()
+        passing this Tag into that library's soupsieve.filter()
         method. More information, for more information see the
         documentation for soupsieve.filter().
 
@@ -2499,9 +2510,10 @@ class SoupSieveProxy(object):
 
         :return: A ResultSet of Tag objects.
         :rtype: bs4.element.ResultSet
+
         """
         return self._rs(
             soupsieve.filter(
-                select, self.element, self._ns(namespaces), flags, **kwargs
+                select, self.tag, self._ns(namespaces), flags, **kwargs
             )
         )
