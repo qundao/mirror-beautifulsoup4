@@ -2298,32 +2298,44 @@ class ResultSet(list):
         )
 
 class SoupSieveProxy(object):
+    """A proxy object against the soupsieve library, to simplify its
+    CSS selector API.
+
+    Specifically, the element to be selected against doesn't need to
+    be explicitly specified in the function call, since you access
+    this object through a specific tag.
+    """
 
     def __init__(self, element):
-        self.element = element
-
-    def _ns(self, ns):
-        """Normalize a dictionary of namespaces."""
-
         if soupsieve is None:
             raise NotImplementedError(
                 "Cannot execute CSS selectors because the soupsieve package is not installed."
             )
-        
+        self.element = element
+
+    def _ns(self, ns):
+        """Normalize a dictionary of namespaces."""        
         if ns is None:
             ns = self.element._namespaces
         return ns
 
     def _rs(self, results):
-        """Normalize a return value to a Resultset.
+        """Normalize a list of results to a Resultset.
 
-        We do this because it's more consistent and because
-        ResultSet.__getattr__ has a helpful error message.        
+        A ResultSet is more consistent with the rest of Beautiful
+        Soup, and ResultSet.__getattr__ has a helpful error message if
+        you try to treat a list of results as a single result (a
+        common mistake).
         """
         return ResultSet(None, results)
 
     def select_one(self, select, namespaces=None, flags=0, **kwargs):
-        """Perform a CSS selection operation on the current element.
+        """Perform a CSS selection operation on the current element
+        and return the first result.
+
+        This uses the Soup Sieve library. For more information, see
+        that library's documentation for the soupsieve.select_one()
+        method.
 
         :param selector: A CSS selector.
 
@@ -2332,10 +2344,13 @@ class SoupSieveProxy(object):
            Beautiful Soup will use the prefixes it encountered while
            parsing the document.
 
-        :param kwargs: Keyword arguments to be passed into SoupSieve's 
-           soupsieve.select() method.
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.select_one() method.
 
-        :return: A Tag.
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+           soupsieve.select_one() method.
+
+        :return: A Tag, or None if the selector has no match.
         :rtype: bs4.element.Tag
         """
         return soupsieve.select_one(
@@ -2345,47 +2360,148 @@ class SoupSieveProxy(object):
     def select(self, select, namespaces=None, limit=0, flags=0, **kwargs):
         """Perform a CSS selection operation on the current element.
 
-        This uses the SoupSieve library.
+        This uses the Soup Sieve library. For more information, see
+        that library's documentation for the soupsieve.select()
+        method.
 
         :param selector: A string containing a CSS selector.
 
         :param namespaces: A dictionary mapping namespace prefixes
-           used in the CSS selector to namespace URIs. By default,
-           Beautiful Soup will use the prefixes it encountered while
-           parsing the document.
+            used in the CSS selector to namespace URIs. By default,
+            Beautiful Soup will pass in the prefixes it encountered while
+            parsing the document.
 
         :param limit: After finding this number of results, stop looking.
 
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.select() method.
+        
         :param kwargs: Keyword arguments to be passed into SoupSieve's 
-           soupsieve.select() method.
+            soupsieve.select() method.
 
-        :return: A ResultSet of Tags.
+        :return: A ResultSet of Tag objects.
         :rtype: bs4.element.ResultSet
         """       
         if limit is None:
             limit = 0
 
-        results = soupsieve.select(
-            select, self.element, self._ns(namespaces), limit, flags, **kwargs
+        return self._rs(
+            soupsieve.select(
+                select, self.element, self._ns(namespaces), limit, flags,
+                **kwargs
+            )
         )
-        return self._rs(results)
 
-    def iselect(self, select, namespaces=None, flags=0, **kwargs):
+    def iselect(self, select, namespaces=None, limit=0, flags=0, **kwargs):
+        """Perform a CSS selection operation on the current element.
+
+        This uses the Soup Sieve library. For more information, see
+        that library's documentation for the soupsieve.iselect()
+        method. It is the same as select(), but it returns a generator
+        instead of a list.
+
+        :param selector: A string containing a CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+            used in the CSS selector to namespace URIs. By default,
+            Beautiful Soup will pass in the prefixes it encountered while
+            parsing the document.
+
+        :param limit: After finding this number of results, stop looking.
+
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.iselect() method.
+        
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+            soupsieve.iselect() method.
+
+        :return: A generator
+        :rtype: types.GeneratorType
+        """              
         return soupsieve.iselect(
-            select, self.element, self._ns(namespaces), flags, **kwargs
+            select, self.element, self._ns(namespaces), limit, flags, **kwargs
         )
     
     def closest(self, select, namespaces=None, flags=0, **kwargs):
+        """Find the element closest to this one that matches the given
+        selector.
+
+        This uses the Soup Sieve library. For more information, see
+        that library's documentation for the soupsieve.closest()
+        method.
+
+        :param selector: A string containing a CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+            used in the CSS selector to namespace URIs. By default,
+            Beautiful Soup will pass in the prefixes it encountered while
+            parsing the document.
+
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.closest() method.
+        
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+            soupsieve.closest() method.
+
+        :return: A PageElement, or None if there is no match.
+        :rtype: bs4.element.Tag | bs4.element.NavigableString
+        """              
         return soupsieve.closest(
             select, self.element, self._ns(namespaces), flags, **kwargs
         )
 
     def match(self, select, namespaces=None, flags=0, **kwargs):
+        """Match this element against the given CSS selector.
+
+        This uses the Soup Sieve library. For more information, see
+        that library's documentation for the soupsieve.match()
+        method.
+
+        :param: a CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+            used in the CSS selector to namespace URIs. By default,
+            Beautiful Soup will pass in the prefixes it encountered while
+            parsing the document.
+
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.match() method.
+        
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+            soupsieve.match() method.
+
+        :return: True if this element matches the selector; False otherwise.
+        :rtype: bool
+        """
         return soupsieve.match(
             select, self.element, self._ns(namespaces), flags, **kwargs
         )
         
     def filter(self, select, namespaces=None, flags=0, **kwargs):
-        return soupsieve.filter(
-            select, self.element, self._ns(namespaces), flags, **kwargs
+        """Filter this element's direct children based on the given
+        CSS selector.
+
+        This uses the Soup Sieve library. It works the same way as
+        passing this element into that library's soupsieve.filter()
+        method. More information, for more information see the
+        documentation for soupsieve.filter().
+
+        :param namespaces: A dictionary mapping namespace prefixes
+            used in the CSS selector to namespace URIs. By default,
+            Beautiful Soup will pass in the prefixes it encountered while
+            parsing the document.
+
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.filter() method.
+        
+        :param kwargs: Keyword arguments to be passed into SoupSieve's 
+            soupsieve.filter() method.
+
+        :return: A ResultSet of Tag objects.
+        :rtype: bs4.element.ResultSet
+        """
+        return self._rs(
+            soupsieve.filter(
+                select, self.element, self._ns(namespaces), flags, **kwargs
+            )
         )
