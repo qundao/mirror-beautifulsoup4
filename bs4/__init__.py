@@ -43,6 +43,7 @@ from .dammit import UnicodeDammit
 from .element import (
     CData,
     Comment,
+    CSS,
     DEFAULT_OUTPUT_ENCODING,
     Declaration,
     Doctype,
