@@ -43,13 +43,14 @@ class CSS(object):
 
     @classmethod
     def escape(cls, ident):
-        """Escape a CSS selector.
+        """Escape a CSS identifier.
 
-        This is a simple wrapper around soupselect.escape().
+        This is a simple wrapper around soupselect.escape(). See the
+        documentation for that function for more information.
         """
         if soupsieve is None:
             raise NotImplementedError(
-                "Cannot escape CSS selectors because the soupsieve package is not installed."
+                "Cannot escape CSS identifiers because the soupsieve package is not installed."
             )
         return soupsieve.escape(ident)
         

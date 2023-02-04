@@ -2,6 +2,7 @@ import pytest
 import types
 
 from bs4 import (
+    CSS,
     BeautifulSoup,
     ResultSet,
 )
@@ -466,3 +467,9 @@ class TestCSSSelectors(SoupTest):
         assert isinstance(results, ResultSet)
         [result] = results
         assert result['id'] == 'header3'
+
+    def test_escape(self):
+        m = CSS.escape
+        assert m(".foo#bar") == '\\.foo\\#bar'
+        assert m("()[]{}") == '\\(\\)\\[\\]\\{\\}'
+        assert m(".foo") == self.soup.css.escape(".foo")
