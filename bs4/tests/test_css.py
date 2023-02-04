@@ -1,5 +1,6 @@
 import pytest
 import types
+from unittest.mock import MagicMock
 
 from bs4 import (
     CSS,
@@ -469,7 +470,29 @@ class TestCSSSelectors(SoupTest):
         assert result['id'] == 'header3'
 
     def test_escape(self):
-        m = CSS.escape
+        m = self.soup.css.escape
         assert m(".foo#bar") == '\\.foo\\#bar'
         assert m("()[]{}") == '\\(\\)\\[\\]\\{\\}'
         assert m(".foo") == self.soup.css.escape(".foo")
+
+    def test_fallback(self):
+        class Mock():
+            attribute = "value"
+            pass
+        mock_soupsieve = Mock()
+        mock_soupsieve.some_other_method = MagicMock()
+
+        # If an unknown method turns out to be present in Soup Sieve,
+        # we may still be able to call it.
+        css = CSS(self.soup, api=mock_soupsieve)
+        css.some_other_method("selector", 1, flags=0)
+        mock_soupsieve.some_other_method.assert_called_with(
+            "selector", self.soup, 1, flags=0
+        )
+
+        # If the attribute is not callable, getattr is a passthrough.
+        assert mock_soupsieve.attribute == "value"
+
+        # If the method just isn't there, too bad.
+        with pytest.raises(AttributeError):
+            mock_soupsieve.no_such_method()

@@ -8,7 +8,7 @@ except ImportError as e:
         'The soupsieve package is not installed. CSS selectors cannot be used.'
     )
 
-    
+
 class CSS(object):
     """A proxy object against the soupsieve library, to simplify its
     CSS selector API.
@@ -17,13 +17,12 @@ class CSS(object):
     BeautifulSoup object, or on the Tag you want to use as the
     starting point for a CSS selector.
 
-    Specifically, the element to be selected against doesn't need to
-    be explicitly specified in the function call, since you access
-    this object through a specific tag.
-
+    The main advantage of doing this is that the tag to be selected
+    against doesn't need to be explicitly specified in the function
+    calls, since it's already scoped to a tag.
     """
 
-    def __init__(self, tag):
+    def __init__(self, tag, api=soupsieve):
         """Constructor.
 
         You don't need to instantiate this class yourself; instead,
@@ -35,14 +34,14 @@ class CSS(object):
         point.
 
         """
-        if soupsieve is None:
+        if api is None:
             raise NotImplementedError(
                 "Cannot execute CSS selectors because the soupsieve package is not installed."
             )
+        self.api = api
         self.tag = tag
 
-    @classmethod
-    def escape(cls, ident):
+    def escape(self, ident):
         """Escape a CSS identifier.
 
         This is a simple wrapper around soupselect.escape(). See the
@@ -52,8 +51,8 @@ class CSS(object):
             raise NotImplementedError(
                 "Cannot escape CSS identifiers because the soupsieve package is not installed."
             )
-        return soupsieve.escape(ident)
-        
+        return self.api.escape(ident)
+
     def _ns(self, ns):
         """Normalize a dictionary of namespaces."""
         if ns is None:
@@ -97,7 +96,7 @@ class CSS(object):
         :rtype: bs4.element.Tag
 
         """
-        return soupsieve.select_one(
+        return self.api.select_one(
             select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
@@ -131,7 +130,7 @@ class CSS(object):
             limit = 0
 
         return self._rs(
-            soupsieve.select(
+            self.api.select(
                 select, self.tag, self._ns(namespaces), limit, flags,
                 **kwargs
             )
@@ -163,7 +162,7 @@ class CSS(object):
         :return: A generator
         :rtype: types.GeneratorType
         """
-        return soupsieve.iselect(
+        return self.api.iselect(
             select, self.tag, self._ns(namespaces), limit, flags, **kwargs
         )
 
@@ -191,7 +190,7 @@ class CSS(object):
         :rtype: bs4.Tag
 
         """
-        return soupsieve.closest(
+        return self.api.closest(
             select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
@@ -218,7 +217,7 @@ class CSS(object):
         :return: True if this Tag matches the selector; False otherwise.
         :rtype: bool
         """
-        return soupsieve.match(
+        return self.api.match(
             select, self.tag, self._ns(namespaces), flags, **kwargs
         )
 
@@ -246,7 +245,23 @@ class CSS(object):
 
         """
         return self._rs(
-            soupsieve.filter(
+            self.api.filter(
                 select, self.tag, self._ns(namespaces), flags, **kwargs
             )
         )
+
+    def __getattr__(self, __name):
+        """Catch-all method that has a chance of giving access to future
+        methods to be added to Soup Sieve without needing a Beautiful Soup
+        API change.
+
+        Basically, if you call tag.css.somemethod(selector), this code will
+        turn that into soupsieve.somemethod(selector, tag).
+        """
+        attr = getattr(self.api, __name)
+        if callable(attr):
+            return (
+                lambda pattern, *args, __tag=self.tag, __attr=attr, **kwargs:
+                attr(pattern, __tag, *args, **kwargs)
+            )
+        return attr
