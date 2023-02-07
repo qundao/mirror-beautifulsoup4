@@ -33,6 +33,8 @@ class CSS(object):
         :param tag: All CSS selectors will use this as their starting
         point.
 
+        :param api: A plug-in replacement for the soupsieve module,
+        designed mainly for use in tests.
         """
         if api is None:
             raise NotImplementedError(
@@ -63,9 +65,9 @@ class CSS(object):
         """Normalize a list of results to a Resultset.
 
         A ResultSet is more consistent with the rest of Beautiful
-        Soup, and ResultSet.__getattr__ has a helpful error message if
-        you try to treat a list of results as a single result (a
-        common mistake).
+        Soup's API, and ResultSet.__getattr__ has a helpful error
+        message if you try to treat a list of results as a single
+        result (a common mistake).
         """
         # Import here to avoid circular import
         from bs4.element import ResultSet
@@ -249,19 +251,3 @@ class CSS(object):
                 select, self.tag, self._ns(namespaces), flags, **kwargs
             )
         )
-
-    def __getattr__(self, __name):
-        """Catch-all method that has a chance of giving access to future
-        methods to be added to Soup Sieve without needing a Beautiful Soup
-        API change.
-
-        Basically, if you call tag.css.somemethod(selector), this code will
-        turn that into soupsieve.somemethod(selector, tag).
-        """
-        attr = getattr(self.api, __name)
-        if callable(attr):
-            return (
-                lambda pattern, *args, __tag=self.tag, __attr=attr, **kwargs:
-                attr(pattern, __tag, *args, **kwargs)
-            )
-        return attr

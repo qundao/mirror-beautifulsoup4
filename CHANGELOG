@@ -3,6 +3,30 @@ Note: Beautiful Soup's official support for Python 2 ended on January 1st,
 4.9.3. In the Launchpad Git repository, the final revision to support
 Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
+= 4.12.0 (Unreleased)
+
+* Introduced the .css property, which centralizes all access to
+  the Soup Sieve API. This allows Beautiful Soup to give direct
+  access to as much of Soup Sieve that makes sense, without cluttering
+  the BeautifulSoup and Tag classes with a lot of new methods.
+
+  This does mean one addition to the BeautifulSoup and Tag classes
+  (the .css property itself), so this might be a breaking change if you
+  happen to use Beautiful Soup to parse XML that includes a tag called
+  <css>. In particular, code like this will not work in 4.12.0:
+
+    soup.css['id']
+
+  Code like this will work just as before:
+
+    soup.find_one('css')['id']
+
+  The Soup Sieve methods supported through the .css property are
+  select(), select_one(), iselect(), closest(), match(), filter(),
+  and escape(). The BeautifulSoup and Tag classes still support the
+  select() and select_one() methods; they have not been deprecated,
+  but they have been demoted to convenience methods.
+
 = 4.11.2 (20230131)
 
 * Fixed test failures caused by nondeterministic behavior of
