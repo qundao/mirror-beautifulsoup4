@@ -79,7 +79,7 @@ Beautiful Soup 4.4.0 文档
     #     Lacie
     #    </a>
     #    and
-    #    <a class="sister" href="http://example.com/tillie" id="link2">
+    #    <a class="sister" href="http://example.com/tillie" id="link3">
     #     Tillie
     #    </a>
     #    ; and they lived at the bottom of a well.
