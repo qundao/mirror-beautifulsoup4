@@ -1673,8 +1673,8 @@ that show up earlier in the document than the one we started with. A
 <p> tag that contains an <a> tag must have shown up before the <a>
 tag it contains.
 
-The ``.css`` property and CSS selectors
----------------------------------------
+CSS selectors through the ``.css`` property
+-------------------------------------------
 
 ``BeautifulSoup`` and ``Tag`` objects support CSS selectors through
 their ``.css`` property. The actual selector implementation is handled
@@ -1683,10 +1683,9 @@ package, available on PyPI as ``soupsieve``. If you installed
 Beautiful Soup through ``pip``, Soup Sieve was installed at the same
 time, so you don't have to do anything extra.
 
-`The Soup Sieve documentation
-<https://facelessuser.github.io/soupsieve/>`_ lists all the currently
-supported CSS selectors, but here are some of the basics. You can find
-tags::
+The Soup Sieve documentation lists `all the currently supported CSS
+selectors <https://facelessuser.github.io/soupsieve/selectors/>`_, but
+here are some of the basics. You can find tags::
 
  soup.css.select("title")
  # [<title>The Dormouse's story</title>]
@@ -1788,7 +1787,8 @@ first tag that matches a selector::
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
 As a convenience, you can call ``select()`` and ``select_one()`` can
-directly on the ``BeautifulSoup`` or ``Tag`` object::
+directly on the ``BeautifulSoup`` or ``Tag`` object, omitting the
+``.css`` property::
 
  soup.select('a[href$="tillie"]')
  # [<a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
@@ -1814,7 +1814,7 @@ documentation <https://facelessuser.github.io/soupsieve/>`_ for full
 documentation.
 
 The ``iselect()`` method works the same as ``select()``, but it
-returns a generator instead of a list.
+returns a generator instead of a list::
 
  [tag['id'] for tag in soup.css.iselect(".sister")]
  # ['link1', 'link2', 'link3']
@@ -1882,7 +1882,7 @@ your own dictionary of abbreviations::
 History of CSS selector support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `.css` property was added in Beautiful Soup 4.12.0. Prior to this,
+The ``.css`` property was added in Beautiful Soup 4.12.0. Prior to this,
 only the ``.select()`` and ``.select_one()`` convenience methods were
 supported.
 

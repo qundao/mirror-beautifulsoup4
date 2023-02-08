@@ -27,6 +27,8 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
   select() and select_one() methods; they have not been deprecated,
   but they have been demoted to convenience methods.
 
+  [bug=2003677]
+
 = 4.11.2 (20230131)
 
 * Fixed test failures caused by nondeterministic behavior of
