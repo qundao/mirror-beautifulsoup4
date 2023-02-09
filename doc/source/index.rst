@@ -1972,6 +1972,7 @@ If you need to add a string to a document, no problem--you can pass a
 Python string in to ``append()``, or you can call the ``NavigableString``
 constructor::
 
+ from bs4 import NavigableString
  soup = BeautifulSoup("<b></b>", 'html.parser')
  tag = soup.b
  tag.append("Hello")
