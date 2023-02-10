@@ -15,7 +15,6 @@ from . import (
 
 if SOUP_SIEVE_PRESENT:
     from soupsieve import SelectorSyntaxError
-    from soupsieve import compile as sv_compile
 
 
 @pytest.mark.skipif(not SOUP_SIEVE_PRESENT, reason="Soup Sieve not installed")
@@ -96,7 +95,7 @@ class TestCSSSelectors(SoupTest):
             self.assert_selects(selector, expected_ids)
 
     def test_precompiled(self):
-        sel = sv_compile('div')
+        sel = self.soup.css.compile('div')
 
         els = self.soup.select(sel)
         assert len(els) == 4

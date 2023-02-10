@@ -73,6 +73,27 @@ class CSS(object):
         from bs4.element import ResultSet
         return ResultSet(None, results)
 
+    def compile(self, select, namespaces=None, flags=0, **kwargs):
+        """Pre-compile a selector and return the compiled object.
+
+        :param selector: A CSS selector.
+
+        :param namespaces: A dictionary mapping namespace prefixes
+           used in the CSS selector to namespace URIs. By default,
+           Beautiful Soup will use the prefixes it encountered while
+           parsing the document.
+
+        :param flags: Flags to be passed into Soup Sieve's
+            soupsieve.select_one() method.
+
+        :param kwargs: Keyword arguments to be passed into SoupSieve's
+           soupsieve.select_one() method.
+
+        :return: A precompiled selector object.
+        :rtype: soupsieve.SoupSieve
+        """
+        return self.api.compile(select, self._ns(namespaces, select), flags, **kwargs)
+
     def select_one(self, select, namespaces=None, flags=0, **kwargs):
         """Perform a CSS selection operation on the current Tag and return the
         first result.
