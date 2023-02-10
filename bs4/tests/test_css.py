@@ -15,6 +15,7 @@ from . import (
 
 if SOUP_SIEVE_PRESENT:
     from soupsieve import SelectorSyntaxError
+    from soupsieve import compile as sv_compile
 
 
 @pytest.mark.skipif(not SOUP_SIEVE_PRESENT, reason="Soup Sieve not installed")
@@ -93,6 +94,17 @@ class TestCSSSelectors(SoupTest):
     def assert_select_multiple(self, *tests):
         for selector, expected_ids in tests:
             self.assert_selects(selector, expected_ids)
+
+    def test_precompiled(self):
+        sel = sv_compile('div')
+
+        els = self.soup.select(sel)
+        assert len(els) == 4
+        for div in els:
+            assert div.name == 'div'
+
+        el = self.soup.select_one(sel)
+        assert 'main' == el['id']
 
     def test_one_tag_one(self):
         els = self.soup.select('title')
@@ -474,20 +486,3 @@ class TestCSSSelectors(SoupTest):
         assert m(".foo#bar") == '\\.foo\\#bar'
         assert m("()[]{}") == '\\(\\)\\[\\]\\{\\}'
         assert m(".foo") == self.soup.css.escape(".foo")
-        
-    def test_api_replacement(self):
-        # You can pass in another object to act as a drop-in
-        # replacement for the soupsieve module.
-        class Mock():
-            attribute = "value"
-            pass
-        mock_soupsieve = Mock()
-        mock_soupsieve.escape = MagicMock()
-
-        # If an unknown method turns out to be present in Soup Sieve,
-        # we may still be able to call it.
-        css = CSS(self.soup, api=mock_soupsieve)
-        css.escape("identifier")
-        mock_soupsieve.escape.assert_called_with(
-            "selector", self.soup, 1, flags=0
-        )

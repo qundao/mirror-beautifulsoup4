@@ -55,9 +55,9 @@ class CSS(object):
             )
         return self.api.escape(ident)
 
-    def _ns(self, ns):
+    def _ns(self, ns, select):
         """Normalize a dictionary of namespaces."""
-        if ns is None:
+        if not isinstance(select, self.api.SoupSieve) and ns is None:
             ns = self.tag._namespaces
         return ns
 
@@ -99,7 +99,7 @@ class CSS(object):
 
         """
         return self.api.select_one(
-            select, self.tag, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces, select), flags, **kwargs
         )
 
     def select(self, select, namespaces=None, limit=0, flags=0, **kwargs):
@@ -133,7 +133,7 @@ class CSS(object):
 
         return self._rs(
             self.api.select(
-                select, self.tag, self._ns(namespaces), limit, flags,
+                select, self.tag, self._ns(namespaces, select), limit, flags,
                 **kwargs
             )
         )
@@ -165,7 +165,7 @@ class CSS(object):
         :rtype: types.GeneratorType
         """
         return self.api.iselect(
-            select, self.tag, self._ns(namespaces), limit, flags, **kwargs
+            select, self.tag, self._ns(namespaces, select), limit, flags, **kwargs
         )
 
     def closest(self, select, namespaces=None, flags=0, **kwargs):
@@ -193,7 +193,7 @@ class CSS(object):
 
         """
         return self.api.closest(
-            select, self.tag, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces, select), flags, **kwargs
         )
 
     def match(self, select, namespaces=None, flags=0, **kwargs):
@@ -220,7 +220,7 @@ class CSS(object):
         :rtype: bool
         """
         return self.api.match(
-            select, self.tag, self._ns(namespaces), flags, **kwargs
+            select, self.tag, self._ns(namespaces, select), flags, **kwargs
         )
 
     def filter(self, select, namespaces=None, flags=0, **kwargs):
@@ -248,6 +248,6 @@ class CSS(object):
         """
         return self._rs(
             self.api.filter(
-                select, self.tag, self._ns(namespaces), flags, **kwargs
+                select, self.tag, self._ns(namespaces, select), flags, **kwargs
             )
         )
