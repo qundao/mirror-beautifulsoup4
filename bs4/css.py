@@ -58,6 +58,9 @@ class CSS(object):
     def _ns(self, ns, select):
         """Normalize a dictionary of namespaces."""
         if not isinstance(select, self.api.SoupSieve) and ns is None:
+            # If the selector is a precompiled pattern, it already has
+            # a namespace context compiled in, which cannot be
+            # replaced.
             ns = self.tag._namespaces
         return ns
 
@@ -84,15 +87,17 @@ class CSS(object):
            parsing the document.
 
         :param flags: Flags to be passed into Soup Sieve's
-            soupsieve.select_one() method.
+            soupsieve.compile() method.
 
         :param kwargs: Keyword arguments to be passed into SoupSieve's
-           soupsieve.select_one() method.
+           soupsieve.compile() method.
 
         :return: A precompiled selector object.
         :rtype: soupsieve.SoupSieve
         """
-        return self.api.compile(select, self._ns(namespaces, select), flags, **kwargs)
+        return self.api.compile(
+            select, self._ns(namespaces, select), flags, **kwargs
+        )
 
     def select_one(self, select, namespaces=None, flags=0, **kwargs):
         """Perform a CSS selection operation on the current Tag and return the
