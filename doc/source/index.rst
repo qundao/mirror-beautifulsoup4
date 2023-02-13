@@ -2755,9 +2755,9 @@ whenever you have data in an unknown encoding and you just want it to
 become Unicode::
 
  from bs4 import UnicodeDammit
- dammit = UnicodeDammit("Sacr\xc3\xa9 bleu!")
+ dammit = UnicodeDammit(b"\xc2\xabSacr\xc3\xa9 bleu!\xc2\xbb")
  print(dammit.unicode_markup)
- # Sacré bleu!
+ # «Sacré bleu!»
  dammit.original_encoding
  # 'utf-8'
 
