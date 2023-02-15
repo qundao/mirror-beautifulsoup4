@@ -1,5 +1,6 @@
 """Integration code for CSS selectors using Soup Sieve (pypi: soupsieve)."""
 
+import warnings
 try:
     import soupsieve
 except ImportError as e:
