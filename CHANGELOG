@@ -33,6 +33,10 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
   Soup now consistently propagates this fact by raising a
   ParserRejectedMarkup error. [bug=2007343]
 
+* Removed some error checking code from diagnose(), which is redundant with
+  similar (but more Pythonic) code in the BeautifulSoup constructor.
+  [bug=2007344]
+
 = 4.11.2 (20230131)
 
 * Fixed test failures caused by nondeterministic behavior of
