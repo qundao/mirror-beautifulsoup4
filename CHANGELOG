@@ -29,6 +29,10 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
   [bug=2003677]
 
+* When the html.parser parser decides it can't parse a document, Beautiful
+  Soup now consistently propagates this fact by raising a
+  ParserRejectedMarkup error. [bug=2007343]
+
 = 4.11.2 (20230131)
 
 * Fixed test failures caused by nondeterministic behavior of
