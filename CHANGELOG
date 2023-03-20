@@ -3,7 +3,7 @@ Note: Beautiful Soup's official support for Python 2 ended on January 1st,
 4.9.3. In the Launchpad Git repository, the final revision to support
 Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
-= 4.12.0 (Unreleased)
+= 4.12.0 (20230320)
 
 * Introduced the .css property, which centralizes all access to
   the Soup Sieve API. This allows Beautiful Soup to give direct
@@ -36,6 +36,10 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 * Removed some error checking code from diagnose(), which is redundant with
   similar (but more Pythonic) code in the BeautifulSoup constructor.
   [bug=2007344]
+
+* Added intersphinx references to the documentation so that other
+  projects have a target to point to when they reference Beautiful
+  Soup classes. [bug=1453370]
 
 = 4.11.2 (20230131)
 

@@ -14,7 +14,7 @@
 #  doc/source/index.rst
 
 # Make sure tests pass
-./test-all-versions
+python -m pytest bs4
 
 rm -rf build dist beautifulsoup4.egg-info
 
@@ -27,14 +27,12 @@ rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
 pip install dist/beautifulsoup4-*.whl pytest lxml html5lib soupsieve
-pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
 # That should print '<a>foo</a>'
 deactivate
 rm -rf ../py3-install-test-virtualenv
-
-#
 
 # Upload to test
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
@@ -44,8 +42,9 @@ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
+pip install pytest lxml html5lib
 pip install -i https://testpypi.python.org/pypi beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi
-pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python -c "from bs4 import _s; print(_s('<a>foo', 'html.parser'))")
 # That should print '<a>foo</a>'
