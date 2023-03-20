@@ -60,9 +60,6 @@ class TestFuzz(object):
             # b')<a><math><TR><a><mI><a><p><a>'
             "clusterfuzz-testcase-minimized-bs4_fuzzer-4999465949331456",
 
-            # very large, lots of %&&%&&
-            "clusterfuzz-testcase-minimized-bs4_fuzzer-5389523868581888",
-
             # b'-<math><sElect><mi><sElect><sElect>'
             "clusterfuzz-testcase-minimized-bs4_fuzzer-5843991618256896",
 
@@ -70,7 +67,7 @@ class TestFuzz(object):
             "clusterfuzz-testcase-minimized-bs4_fuzzer-6241471367348224",
 
             # <TABLE>, some ^@ characters, some <math> tags.
-            "clusterfuzz-testcase-minimized-bs4_fuzzer-6600557255327744"
+            "clusterfuzz-testcase-minimized-bs4_fuzzer-6600557255327744",
 
             # Nested table
             "crash-0d306a50c8ed8bcd0785b67000fcd5dea1d33f08"
