@@ -14,7 +14,7 @@
 #  doc/source/index.rst
 
 # Make sure tests pass
-./test-all-versions
+python -m pytest bs4
 
 rm -rf build dist beautifulsoup4.egg-info
 
