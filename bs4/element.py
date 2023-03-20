@@ -148,6 +148,11 @@ class PageElement(object):
     NavigableString, Tag, etc. are all subclasses of PageElement.
     """
 
+    # In general, we can't tell just by looking at an element whether
+    # it's contained in an XML document or an HTML document. But for
+    # Tags (q.v.) we can store this information at parse time.
+    known_xml = None
+
     def setup(self, parent=None, previous_element=None, next_element=None,
               previous_sibling=None, next_sibling=None):
         """Sets up the initial relations between this element and
@@ -934,11 +939,6 @@ class NavigableString(str, PageElement):
 
     PREFIX = ''
     SUFFIX = ''
-
-    # We can't tell just by looking at a string whether it's contained
-    # in an XML document or an HTML document.
-
-    known_xml = None
 
     def __new__(cls, value):
         """Create a new NavigableString.
