@@ -3,6 +3,14 @@ Note: Beautiful Soup's official support for Python 2 ended on January 1st,
 4.9.3. In the Launchpad Git repository, the final revision to support
 Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
+= 4.12.1 (Unreleased)
+
+* Added unit tests for fuzz test cases created by third
+  parties. Most of these tests are skipped since they either point
+  out problems in code outside of Beautiful Soup, or problems with
+  Beautiful Soup that haven't been resolved yet, but this puts them
+  all in one convenient place.
+
 = 4.12.0 (20230320)
 
 * Introduced the .css property, which centralizes all access to
