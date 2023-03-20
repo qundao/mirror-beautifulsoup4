@@ -71,6 +71,9 @@ class TestFuzz(object):
 
             # <TABLE>, some ^@ characters, some <math> tags.
             "clusterfuzz-testcase-minimized-bs4_fuzzer-6600557255327744"
+
+            # Nested table
+            "crash-0d306a50c8ed8bcd0785b67000fcd5dea1d33f08"
         ]
     )
     def test_html5lib_parse_errors(self, filename):
