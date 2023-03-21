@@ -1642,108 +1642,176 @@ class Tag(PageElement):
         u = self.decode(indent_level, encoding, formatter)
         return u.encode(encoding, errors)
 
-    def decode(self, indent_level=None,
-               eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter="minimal"):
-        """Render a Unicode representation of this PageElement and its
-        contents.
+    def str_from_sax(self):
+        data = []
+        for e, content in self.saxlike():
+            if e == 'string':
+                data.append(content)
+            elif e in ( 'openclose', 'open'):
+                data.append("<%s>" % content.name)
+            elif e == 'close':
+                data.append("</%s>" % content.name)
+        return "".join(data)
 
-        :param indent_level: Each line of the rendering will be
-             indented this many spaces. Used internally in
-             recursive calls while pretty-printing.
-        :param eventual_encoding: The tag is destined to be
-            encoded into this encoding. This method is _not_
-            responsible for performing that encoding. This information
-            is passed in so that it can be substituted in if the
-            document contains a <META> tag that mentions the document's
-            encoding.
-        :param formatter: A Formatter object, or a string naming one of
-            the standard formatters.
+    @property
+    def self_and_descendants(self):
+        if not self.hidden:
+            yield self
+        for i in self.descendants:
+            yield i
+
+    def saxlike(self):
+        """Yield a sequence of SAX-like events that can be used to
+        reconstruct this parse tree.
+
+        This lets us recreate the nested structure of the document
+        without using recursive method calls.
         """
+        tag_stack = []
 
+        for c in self.self_and_descendants:
+
+            # If the parent of the element we're about to yield is not
+            # the tag currently on the stack, it means that the tag on
+            # the stack closed before this element appeared.
+            while tag_stack and c.parent != tag_stack[-1]:
+                now_closed_tag = tag_stack.pop()
+                yield "close", now_closed_tag
+
+            if isinstance(c, Tag):
+                if c.is_empty_element:
+                    yield "openclose", c
+                else:
+                    yield "open", c
+                    tag_stack.append(c)
+                    continue
+            else:
+                yield "string", c
+
+        while tag_stack:
+            now_closed_tag = tag_stack.pop()
+            prettyprint_suppressed_by = None
+            yield "close", now_closed_tag
+
+    def decode(self, indent_level=None,
+                     eventual_encoding=DEFAULT_OUTPUT_ENCODING,
+                     formatter="minimal"):
+        pieces = []
         # First off, turn a non-Formatter `formatter` into a Formatter
         # object. This will stop the lookup from happening over and
         # over again.
         if not isinstance(formatter, Formatter):
             formatter = self.formatter_for_name(formatter)
-        attributes = formatter.attributes(self)
-        attrs = []
-        for key, val in attributes:
-            if val is None:
-                decoded = key
+
+        if indent_level is True:
+            indent_level = 0
+
+        string_literal_mode = False
+        for event, element in self.saxlike():
+            if event in ('open', 'openclose'):
+                piece = element._format_tag(
+                    eventual_encoding, formatter, opening=True)
+            elif event == 'close':
+                piece = element._format_tag(
+                    eventual_encoding, formatter, opening=False)
+                if indent_level is not None:
+                    indent_level -= 1
+                string_literal_mode = False
             else:
-                if isinstance(val, list) or isinstance(val, tuple):
-                    val = ' '.join(val)
-                elif not isinstance(val, str):
-                    val = str(val)
-                elif (
-                        isinstance(val, AttributeValueWithCharsetSubstitution)
-                        and eventual_encoding is not None
-                ):
-                    val = val.encode(eventual_encoding)
+                piece = element.output_ready(formatter)
 
-                text = formatter.attribute_value(val)
-                decoded = (
-                    str(key) + '='
-                    + formatter.quoted_attribute_value(text))
-            attrs.append(decoded)
-        close = ''
-        closeTag = ''
+            if isinstance(element, Tag) and not element._should_pretty_print():
+                if event in ('open', 'openclose'):
+                    # After processing this event we will be in string
+                    # literal mode.
+                    string_literal_mode = True
+                    indent_before = True
+                    indent_after = False
+                else:
+                    # After processing this event we will no longer be
+                    # in string literal mode.
+                    string_literal_mode = False
+                    indent_before = False
+                    indent_after = True
+            elif string_literal_mode:
+                indent_before = indent_after = False
+            else:
+                indent_before = indent_after = True
 
+            if indent_level is not None:
+                if (indent_before or indent_after):
+                    if isinstance(element, NavigableString):
+                        piece = piece.strip()
+                    piece = self._indent(
+                        piece, element, indent_level, formatter,
+                        indent_before, indent_after
+                    )
+                if event == 'open':
+                    indent_level += 1
+            pieces.append(piece)
+        return "".join(pieces)
+
+    def _indent(self, s, e, indent_level, formatter, indent_before, indent_after):
+        space_before = ''
+        if indent_before:
+            space_before = (formatter.indent * indent_level)
+
+        space_after = ''
+        if indent_after:
+            space_after = "\n"
+
+        return space_before + s + space_after
+
+    def _format_tag(self, eventual_encoding, formatter, opening):
+        # A tag starts with the < character.
+
+        # Then the / character, if this is a closing tag.
+        closing_slash = ''
+        if not opening:
+            closing_slash = '/'
+
+        # Then an optional namespace prefix.
         prefix = ''
         if self.prefix:
             prefix = self.prefix + ":"
 
-        if self.is_empty_element:
-            close = formatter.void_element_close_prefix or ''
-        else:
-            closeTag = '</%s%s>' % (prefix, self.name)
+        # Then a list of attribute values, if this is an opening tag.
+        attribute_string = ''
+        if opening:
+            attributes = formatter.attributes(self)
+            attrs = []
+            for key, val in attributes:
+                if val is None:
+                    decoded = key
+                else:
+                    if isinstance(val, list) or isinstance(val, tuple):
+                        val = ' '.join(val)
+                    elif not isinstance(val, str):
+                        val = str(val)
+                    elif (
+                            isinstance(val, AttributeValueWithCharsetSubstitution)
+                            and eventual_encoding is not None
+                    ):
+                        val = val.encode(eventual_encoding)
 
-        pretty_print = self._should_pretty_print(indent_level)
-        space = ''
-        indent_space = ''
-        if indent_level is not None:
-            indent_space = (formatter.indent * (indent_level - 1))
-        if pretty_print:
-            space = indent_space
-            indent_contents = indent_level + 1
-        else:
-            indent_contents = None
-        contents = self.decode_contents(
-            indent_contents, eventual_encoding, formatter
-        )
-
-        if self.hidden:
-            # This is the 'document root' object.
-            s = contents
-        else:
-            s = []
-            attribute_string = ''
+                    text = formatter.attribute_value(val)
+                    decoded = (
+                        str(key) + '='
+                        + formatter.quoted_attribute_value(text))
+                attrs.append(decoded)
             if attrs:
                 attribute_string = ' ' + ' '.join(attrs)
-            if indent_level is not None:
-                # Even if this particular tag is not pretty-printed,
-                # we should indent up to the start of the tag.
-                s.append(indent_space)
-            s.append('<%s%s%s%s>' % (
-                    prefix, self.name, attribute_string, close))
-            if pretty_print:
-                s.append("\n")
-            s.append(contents)
-            if pretty_print and contents and contents[-1] != "\n":
-                s.append("\n")
-            if pretty_print and closeTag:
-                s.append(space)
-            s.append(closeTag)
-            if indent_level is not None and closeTag and self.next_sibling:
-                # Even if this particular tag is not pretty-printed,
-                # we're now done with the tag, and we should add a
-                # newline if appropriate.
-                s.append("\n")
-            s = ''.join(s)
-        return s
 
-    def _should_pretty_print(self, indent_level):
+        # Then an optional closing slash (for a void element in an
+        # XML document).
+        void_element_closing_slash = ''
+        if self.is_empty_element:
+            void_element_closing_slash = formatter.void_element_close_prefix or ''
+
+        # Put it all together.
+        return f'<{closing_slash}{prefix}{self.name}{attribute_string}{void_element_closing_slash}>'
+
+    def _should_pretty_print(self, indent_level=1):
         """Should this tag be pretty-printed?
 
         Most of them should, but some (such as <pre> in HTML
