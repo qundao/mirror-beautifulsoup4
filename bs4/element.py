@@ -1660,23 +1660,31 @@ class Tag(PageElement):
         for i in self.descendants:
             yield i
 
-    def saxlike(self):
-        """Yield a sequence of SAX-like events that can be used to
-        reconstruct this parse tree.
+    CLOSE_EVENT = object()
+            
+    def saxlike(self, iterator=None):
+        """Yield a sequence of SAX-like events that can be used to reconstruct
+        the DOM for this element.
 
-        This lets us recreate the nested structure of the document
-        without using recursive method calls.
+        This lets us recreate the nested structure of this element
+        (e.g. when formatting as a string) without using recursive
+        method calls.
+
+        :param iterator: An alternate iterator to use when traversing
+         the tree.
         """
         tag_stack = []
 
-        for c in self.self_and_descendants:
+        iterator = iterator or self.self_and_descendants
+
+        for c in iterator:
 
             # If the parent of the element we're about to yield is not
             # the tag currently on the stack, it means that the tag on
             # the stack closed before this element appeared.
             while tag_stack and c.parent != tag_stack[-1]:
                 now_closed_tag = tag_stack.pop()
-                yield "close", now_closed_tag
+                yield self.CLOSE_EVENT, now_closed_tag
 
             if isinstance(c, Tag):
                 if c.is_empty_element:
@@ -1691,11 +1699,12 @@ class Tag(PageElement):
         while tag_stack:
             now_closed_tag = tag_stack.pop()
             prettyprint_suppressed_by = None
-            yield "close", now_closed_tag
+            yield self.CLOSE_EVENT, now_closed_tag
 
     def decode(self, indent_level=None,
-                     eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-                     formatter="minimal"):
+               eventual_encoding=DEFAULT_OUTPUT_ENCODING,
+               formatter="minimal",
+               iterator=None):
         pieces = []
         # First off, turn a non-Formatter `formatter` into a Formatter
         # object. This will stop the lookup from happening over and
@@ -1707,11 +1716,11 @@ class Tag(PageElement):
             indent_level = 0
 
         string_literal_mode = False
-        for event, element in self.saxlike():
+        for event, element in self.saxlike(iterator):
             if event in ('open', 'openclose'):
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=True)
-            elif event == 'close':
+            elif event == self.CLOSE_EVENT:
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=False)
                 if indent_level is not None:
@@ -1862,32 +1871,8 @@ class Tag(PageElement):
             the standard Formatters.
 
         """
-        # First off, turn a string formatter into a Formatter object. This
-        # will stop the lookup from happening over and over again.
-        if not isinstance(formatter, Formatter):
-            formatter = self.formatter_for_name(formatter)
-
-        pretty_print = (indent_level is not None)
-        s = []
-        for c in self:
-            text = None
-            if isinstance(c, NavigableString):
-                text = c.output_ready(formatter)
-            elif isinstance(c, Tag):
-                s.append(c.decode(indent_level, eventual_encoding,
-                                  formatter))
-            preserve_whitespace = (
-                self.preserve_whitespace_tags and self.name in self.preserve_whitespace_tags
-            )
-            if text and indent_level and not preserve_whitespace:
-                text = text.strip()
-            if text:
-                if pretty_print and not preserve_whitespace:
-                    s.append(formatter.indent * (indent_level - 1))
-                s.append(text)
-                if pretty_print and not preserve_whitespace:
-                    s.append("\n")
-        return ''.join(s)
+        return self.decode(indent_level, eventual_encoding, formatter,
+                           iterator=self.descendants)
 
     def encode_contents(
         self, indent_level=None, encoding=DEFAULT_OUTPUT_ENCODING,
