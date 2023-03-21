@@ -1642,65 +1642,6 @@ class Tag(PageElement):
         u = self.decode(indent_level, encoding, formatter)
         return u.encode(encoding, errors)
 
-    def str_from_sax(self):
-        data = []
-        for e, content in self.saxlike():
-            if e == 'string':
-                data.append(content)
-            elif e in ( 'openclose', 'open'):
-                data.append("<%s>" % content.name)
-            elif e == 'close':
-                data.append("</%s>" % content.name)
-        return "".join(data)
-
-    @property
-    def self_and_descendants(self):
-        if not self.hidden:
-            yield self
-        for i in self.descendants:
-            yield i
-
-    CLOSE_EVENT = object()
-            
-    def saxlike(self, iterator=None):
-        """Yield a sequence of SAX-like events that can be used to reconstruct
-        the DOM for this element.
-
-        This lets us recreate the nested structure of this element
-        (e.g. when formatting as a string) without using recursive
-        method calls.
-
-        :param iterator: An alternate iterator to use when traversing
-         the tree.
-        """
-        tag_stack = []
-
-        iterator = iterator or self.self_and_descendants
-
-        for c in iterator:
-
-            # If the parent of the element we're about to yield is not
-            # the tag currently on the stack, it means that the tag on
-            # the stack closed before this element appeared.
-            while tag_stack and c.parent != tag_stack[-1]:
-                now_closed_tag = tag_stack.pop()
-                yield self.CLOSE_EVENT, now_closed_tag
-
-            if isinstance(c, Tag):
-                if c.is_empty_element:
-                    yield "openclose", c
-                else:
-                    yield "open", c
-                    tag_stack.append(c)
-                    continue
-            else:
-                yield "string", c
-
-        while tag_stack:
-            now_closed_tag = tag_stack.pop()
-            prettyprint_suppressed_by = None
-            yield self.CLOSE_EVENT, now_closed_tag
-
     def decode(self, indent_level=None,
                eventual_encoding=DEFAULT_OUTPUT_ENCODING,
                formatter="minimal",
@@ -1716,11 +1657,11 @@ class Tag(PageElement):
             indent_level = 0
 
         string_literal_mode = False
-        for event, element in self.saxlike(iterator):
-            if event in ('open', 'openclose'):
+        for event, element in self._event_stream(iterator):
+            if event in (self.START_ELEMENT_EVENT, self.EMPTY_ELEMENT_EVENT):
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=True)
-            elif event == self.CLOSE_EVENT:
+            elif event is self.END_ELEMENT_EVENT:
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=False)
                 if indent_level is not None:
@@ -1730,7 +1671,7 @@ class Tag(PageElement):
                 piece = element.output_ready(formatter)
 
             if isinstance(element, Tag) and not element._should_pretty_print():
-                if event in ('open', 'openclose'):
+                if event is self.START_ELEMENT_EVENT:
                     # After processing this event we will be in string
                     # literal mode.
                     string_literal_mode = True
@@ -1751,16 +1692,75 @@ class Tag(PageElement):
                 if (indent_before or indent_after):
                     if isinstance(element, NavigableString):
                         piece = piece.strip()
-                    piece = self._indent(
-                        piece, element, indent_level, formatter,
+                    piece = self._indent_string(
+                        piece, indent_level, formatter,
                         indent_before, indent_after
                     )
-                if event == 'open':
+                if event == self.START_ELEMENT_EVENT:
                     indent_level += 1
             pieces.append(piece)
         return "".join(pieces)
 
-    def _indent(self, s, e, indent_level, formatter, indent_before, indent_after):
+    # Names for the different events yielded by _event_stream
+    START_ELEMENT_EVENT = object()
+    END_ELEMENT_EVENT = object()
+    VOID_ELEMENT_EVENT = object()
+    STRING_ELEMENT_EVENT = object()
+
+    def _event_stream(self, iterator=None):
+        """Yield a sequence of events that can be used to reconstruct the DOM
+        for this element.
+
+        This lets us recreate the nested structure of this element
+        (e.g. when formatting it as a string) without using recursive
+        method calls.
+
+        This is similar in concept to the SAX API, but it's a simpler
+        interface designed for internal use. The events are different
+        from SAX and the arguments associated with the events are Tags
+        and other Beautiful Soup objects.
+
+        :param iterator: An alternate iterator to use when traversing
+         the tree.
+        """
+        tag_stack = []
+
+        iterator = iterator or self.self_and_descendants
+
+        for c in iterator:
+            # If the parent of the element we're about to yield is not
+            # the tag currently on the stack, it means that the tag on
+            # the stack closed before this element appeared.
+            while tag_stack and c.parent != tag_stack[-1]:
+                now_closed_tag = tag_stack.pop()
+                yield self.END_ELEMENT_EVENT, now_closed_tag
+
+            if isinstance(c, Tag):
+                if c.is_empty_element:
+                    yield self.EMPTY_ELEMENT_EVENT, c
+                else:
+                    yield self.START_ELEMENT_EVENT, c
+                    tag_stack.append(c)
+                    continue
+            else:
+                yield self.STRING_ELEMENT_EVENT, c
+
+        while tag_stack:
+            now_closed_tag = tag_stack.pop()
+            yield self.END_ELEMENT_EVENT, now_closed_tag
+
+    def _indent_string(self, s, indent_level, formatter,
+                       indent_before, indent_after):
+        """Add indentation whitespace before and/or after a string.
+
+        :param s: The string to amend with whitespace.
+        :param indent_level: The indentation level; affects how much
+           whitespace goes before the string.
+        :param indent_before: Whether or not to add whitespace
+           before the string.
+        :param indent_after: Whether or not to add whitespace
+           (a newline) after the string.
+        """
         space_before = ''
         if indent_before:
             space_before = (formatter.indent * indent_level)
@@ -1772,7 +1772,7 @@ class Tag(PageElement):
         return space_before + s + space_after
 
     def _format_tag(self, eventual_encoding, formatter, opening):
-        # A tag starts with the < character.
+        # A tag starts with the < character (see below).
 
         # Then the / character, if this is a closing tag.
         closing_slash = ''
@@ -1968,6 +1968,18 @@ class Tag(PageElement):
         """
         # return iter() to make the purpose of the method clear
         return iter(self.contents)  # XXX This seems to be untested.
+
+    @property
+    def self_and_descendants(self):
+        """Iterate over this PageElement and its children in a
+        breadth-first sequence.
+
+        :yield: A sequence of PageElements.
+        """
+        if not self.hidden:
+            yield self
+        for i in self.descendants:
+            yield i
 
     @property
     def descendants(self):
