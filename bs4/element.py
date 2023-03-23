@@ -1658,10 +1658,10 @@ class Tag(PageElement):
 
         string_literal_mode = False
         for event, element in self._event_stream(iterator):
-            if event in (self.START_ELEMENT_EVENT, self.EMPTY_ELEMENT_EVENT):
+            if event in (Tag.START_ELEMENT_EVENT, Tag.EMPTY_ELEMENT_EVENT):
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=True)
-            elif event is self.END_ELEMENT_EVENT:
+            elif event is Tag.END_ELEMENT_EVENT:
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=False)
                 if indent_level is not None:
@@ -1671,7 +1671,7 @@ class Tag(PageElement):
                 piece = element.output_ready(formatter)
 
             if isinstance(element, Tag) and not element._should_pretty_print():
-                if event is self.START_ELEMENT_EVENT:
+                if event is Tag.START_ELEMENT_EVENT:
                     # After processing this event we will be in string
                     # literal mode.
                     string_literal_mode = True
@@ -1696,7 +1696,7 @@ class Tag(PageElement):
                         piece, indent_level, formatter,
                         indent_before, indent_after
                     )
-                if event == self.START_ELEMENT_EVENT:
+                if event == Tag.START_ELEMENT_EVENT:
                     indent_level += 1
             pieces.append(piece)
         return "".join(pieces)
@@ -1704,7 +1704,7 @@ class Tag(PageElement):
     # Names for the different events yielded by _event_stream
     START_ELEMENT_EVENT = object()
     END_ELEMENT_EVENT = object()
-    VOID_ELEMENT_EVENT = object()
+    EMPTY_ELEMENT_EVENT = object()
     STRING_ELEMENT_EVENT = object()
 
     def _event_stream(self, iterator=None):
@@ -1733,21 +1733,21 @@ class Tag(PageElement):
             # the stack closed before this element appeared.
             while tag_stack and c.parent != tag_stack[-1]:
                 now_closed_tag = tag_stack.pop()
-                yield self.END_ELEMENT_EVENT, now_closed_tag
+                yield Tag.END_ELEMENT_EVENT, now_closed_tag
 
             if isinstance(c, Tag):
                 if c.is_empty_element:
-                    yield self.EMPTY_ELEMENT_EVENT, c
+                    yield Tag.EMPTY_ELEMENT_EVENT, c
                 else:
-                    yield self.START_ELEMENT_EVENT, c
+                    yield Tag.START_ELEMENT_EVENT, c
                     tag_stack.append(c)
                     continue
             else:
-                yield self.STRING_ELEMENT_EVENT, c
+                yield Tag.STRING_ELEMENT_EVENT, c
 
         while tag_stack:
             now_closed_tag = tag_stack.pop()
-            yield self.END_ELEMENT_EVENT, now_closed_tag
+            yield Tag.END_ELEMENT_EVENT, now_closed_tag
 
     def _indent_string(self, s, indent_level, formatter,
                        indent_before, indent_after):

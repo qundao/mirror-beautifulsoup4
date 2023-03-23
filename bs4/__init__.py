@@ -469,6 +469,7 @@ class BeautifulSoup(Tag):
         self.open_tag_counter = Counter()
         self.preserve_whitespace_tag_stack = []
         self.string_container_stack = []
+        self._most_recent_element = None
         self.pushTag(self)
 
     def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
