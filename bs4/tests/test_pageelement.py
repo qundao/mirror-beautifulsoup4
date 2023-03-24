@@ -283,6 +283,21 @@ class TestPersistence(SoupTest):
         copied = copy.deepcopy(self.tree)
         assert copied.decode() == self.tree.decode()
 
+    def test_copy_deeply_nested_document(self):
+        # This test verifies that copy and deepcopy don't involve any
+        # recursive function calls. If they did, this test would
+        # overflow the Python interpreter stack.
+        limit = sys.getrecursionlimit() + 1
+        markup = "<span>" * limit
+
+        soup = self.soup(markup)
+
+        copied = copy.copy(soup)
+        assert soup.encode() == copied.encode()
+
+        copied = copy.deepcopy(soup)
+        assert soup.encode() == copied.encode()
+
     def test_copy_preserves_encoding(self):
         soup = BeautifulSoup(b'<p>&nbsp;</p>', 'html.parser')
         encoding = soup.original_encoding

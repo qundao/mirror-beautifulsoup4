@@ -955,11 +955,18 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __copy__(self):
+    def __copy__(self, recursive=False):
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
+
+        :param recursive: This parameter is ignored; it's only defined
+           so that NavigableString implements the same signature as
+           Tag.
         """
         return type(self)(self)
+
+    def __deepcopy__(self, memo):
+        return self.__copy__()
 
     def __getnewargs__(self):
         return (str(self),)
@@ -1305,9 +1312,14 @@ class Tag(PageElement):
 
     parserClass = _alias("parser_class")  # BS3
 
-    def __copy__(self):
+    def __copy__(self, recursive=True):
         """A copy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
+
+        For PageElements in a Beautiful Soup parse tree, __copy__ is
+        the same as __deepcopy__, because a given PageElement can only
+        be in one parse tree at a time. Thus, copying the element
+        requires creating a brand new element.
         """
         clone = type(self)(
             None, self.builder, self.name, self.namespace,
@@ -1320,9 +1332,29 @@ class Tag(PageElement):
         )
         for attr in ('can_be_empty_element', 'hidden'):
             setattr(clone, attr, getattr(self, attr))
-        for child in self.contents:
-            clone.append(child.__copy__())
+
+        if recursive:
+            # Clone this tag's descendants recursively, but without
+            # making any recursive function calls.
+            tag_stack = [clone]
+            for event, element in self._event_stream(self.descendants):
+                if event is Tag.END_ELEMENT_EVENT:
+                    # Stop appending incoming Tags to the Tag that was
+                    # just closed.
+                    tag_stack.pop()
+                else:
+                    descendant_clone = element.__copy__(recursive=False)
+                    # Add to its parent's .contents
+                    tag_stack[-1].append(descendant_clone)
+
+                    if event is Tag.START_ELEMENT_EVENT:
+                        # Add the Tag itself to the stack so that its
+                        # children will be .appended to it.
+                        tag_stack.append(descendant_clone)
         return clone
+
+    def __deepcopy__(self, memo):
+        return self.__copy__()
 
     @property
     def is_empty_element(self):
