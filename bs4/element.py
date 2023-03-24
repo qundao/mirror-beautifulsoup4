@@ -1684,33 +1684,6 @@ class Tag(PageElement):
             # <script>, can't be prettified, since adding whitespace would
             # change the meaning of the content.
 
-            # When we encounter one of those Tags we need to enter
-            # what I'm calling "string literal mode". We will stay
-            # inside string literal mode until that particular Tag is
-            # closed.
-            #
-            # By definition, string literal mode is on when the
-            # string_literal_tag is set to a Tag.
-            #
-            # For each event we process, there are four possibilities:
-            #
-            # 1. We are entering string literal mode (e.g. by
-            #    encountering a <pre> tag). In this case we want
-            #    whitespace before the tag but not after.
-            #
-            # 2. We are exiting string literal mode (by closing the
-            #    tag that originally put us into string literal
-            #    mode). In this case we want whitespace after the tag
-            #    but not before.
-            #
-            # 3. We are in string literal mode and will be staying
-            #    there. We will not be adding whitespace before or
-            #    after this element.
-            #
-            # 4. We are outside string literal mode and will be
-            #    staying there. We will be putting whitespace before
-            #    and after this element.
-
             # The default behavior is to add whitespace before and
             # after an element when string literal mode is off, and to
             # leave things as they are when string literal mode is on.
@@ -1722,20 +1695,24 @@ class Tag(PageElement):
             # The only time the behavior is more complex than that is
             # when we encounter an opening or closing tag that might
             # put us into or out of string literal mode.
-            if isinstance(element, Tag) and not element._should_pretty_print():
-                if event is Tag.END_ELEMENT_EVENT and element is string_literal_tag:
-                    # We are about to exit string literal mode.  Add
-                    # whitespace after this tag but not before.
-                    indent_before = False
-                    indent_after = True
-                    string_literal_tag = None
-                elif event is Tag.START_ELEMENT_EVENT:
-                    if not string_literal_tag:
-                        # We are about to enter string literal mode.
-                        # Add whitespace before this tag but not after.
-                        indent_before = True
-                        indent_after = False
-                        string_literal_tag = element
+            if (event is Tag.START_ELEMENT_EVENT
+                and not string_literal_tag
+                and not element._should_pretty_print()):
+                    # We are about to enter string literal mode. Add
+                    # whitespace before this tag, but not after. We
+                    # will stay in string literal mode until this tag
+                    # is closed.
+                    indent_before = True
+                    indent_after = False
+                    string_literal_tag = element
+            elif (event is Tag.END_ELEMENT_EVENT
+                  and element is string_literal_tag):
+                # We are about to exit string literal mode by closing
+                # the tag that sent us into that mode. Add whitespace
+                # after this tag, but not before.
+                indent_before = False
+                indent_after = True
+                string_literal_tag = None
 
             # Now we know whether to add whitespace before and/or
             # after this element.
