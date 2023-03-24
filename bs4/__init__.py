@@ -15,7 +15,7 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.12.0"
+__version__ = "4.12.1"
 __copyright__ = "Copyright (c) 2004-2023 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
@@ -469,6 +469,7 @@ class BeautifulSoup(Tag):
         self.open_tag_counter = Counter()
         self.preserve_whitespace_tag_stack = []
         self.string_container_stack = []
+        self._most_recent_element = None
         self.pushTag(self)
 
     def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
