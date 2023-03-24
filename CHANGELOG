@@ -5,6 +5,15 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
 = 4.12.1 (Unreleased)
 
+* Rewrote the code for converting a Beautiful Soup tree to a
+  string, so that it no longer makes recursive function calls. This
+  makes it possible to output documents that have more nested
+  tags than there are levels in the Python interpreter stack.
+  [bug=1471755]
+
+* Tag.prettify() will now consistently end prettified markup with
+  a newline. This is a side effect of the work done for bug #1471755.
+
 * Added unit tests for fuzz test cases created by third
   parties. Most of these tests are skipped since they either point
   out problems in code outside of Beautiful Soup, or problems with
