@@ -1818,7 +1818,7 @@ class Tag(PageElement):
             void_element_closing_slash = formatter.void_element_close_prefix or ''
 
         # Put it all together.
-        return f'<{closing_slash}{prefix}{self.name}{attribute_string}{void_element_closing_slash}>'
+        return '<' + closing_slash + prefix + self.name + attribute_string + void_element_closing_slash + '>'
 
     def _should_pretty_print(self, indent_level=1):
         """Should this tag be pretty-printed?
