@@ -1692,10 +1692,11 @@ class Tag(PageElement):
                 if (indent_before or indent_after):
                     if isinstance(element, NavigableString):
                         piece = piece.strip()
-                    piece = self._indent_string(
-                        piece, indent_level, formatter,
-                        indent_before, indent_after
-                    )
+                    if piece:
+                        piece = self._indent_string(
+                            piece, indent_level, formatter,
+                            indent_before, indent_after
+                        )
                 if event == Tag.START_ELEMENT_EVENT:
                     indent_level += 1
             pieces.append(piece)
