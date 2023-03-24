@@ -158,6 +158,30 @@ class TestFormatters(SoupTest):
         # inside is left alone.
         assert '<div>\n foo\n <pre>  \tbar\n  \n  </pre>\n baz\n <textarea> eee\nfff\t</textarea>\n</div>\n' == soup.div.prettify()
 
+    def test_prettify_handles_nested_string_literal_tags(self):
+        # Most of this markup is inside a <pre> tag, so prettify()
+        # only does three things to it:
+        # 1. Add a newline and a space between the <div> and the <pre>
+        # 2. Add a newline after the </pre>
+        # 3. Add a newline at the end.
+        #
+        # The contents of the <pre> tag are left completely alone.  In
+        # particular, we don't start adding whitespace again once we
+        # encounter the first </pre> tag, because we know it's not
+        # the one that put us into string literal mode.
+        markup = """<div><pre><code>some
+<script><pre>code</pre></script> for you 
+</code></pre></div>"""
+
+        expect = """<div>
+ <pre><code>some
+<script><pre>code</pre></script> for you 
+</code></pre>
+</div>
+"""
+        soup = self.soup(markup)
+        assert expect == soup.div.prettify()
+
     def test_prettify_accepts_formatter_function(self):
         soup = BeautifulSoup("<html><body>foo</body></html>", 'html.parser')
         pretty = soup.prettify(formatter = lambda x: x.upper())
