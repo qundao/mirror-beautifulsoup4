@@ -955,18 +955,18 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __copy__(self, recursive=False):
+    def __deepcopy__(self, memo, recursive=False):
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
 
         :param recursive: This parameter is ignored; it's only defined
-           so that NavigableString implements the same signature as
-           Tag.
+           so that NavigableString.__deepcopy__ implements the same
+           signature as Tag.__deepcopy__.
         """
         return type(self)(self)
 
-    def __deepcopy__(self, memo):
-        return self.__copy__()
+    def __copy__(self):
+        return self.__deepcopy__()
 
     def __getnewargs__(self):
         return (str(self),)
@@ -1312,14 +1312,9 @@ class Tag(PageElement):
 
     parserClass = _alias("parser_class")  # BS3
 
-    def __copy__(self, recursive=True):
-        """A copy of a Tag is a new Tag, unconnected to the parse tree.
+    def __deepcopy__(self, recursive=True):
+        """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
-
-        For PageElements in a Beautiful Soup parse tree, __copy__ is
-        the same as __deepcopy__, because a given PageElement can only
-        be in one parse tree at a time. Thus, copying the element
-        requires creating a brand new element.
         """
         clone = type(self)(
             None, self.builder, self.name, self.namespace,
@@ -1353,8 +1348,8 @@ class Tag(PageElement):
                         tag_stack.append(descendant_clone)
         return clone
 
-    def __deepcopy__(self, memo):
-        return self.__copy__()
+    def __copy__(self):
+        return self.__deepcopy__()
 
     @property
     def is_empty_element(self):
