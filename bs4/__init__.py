@@ -117,7 +117,7 @@ class BeautifulSoup(Tag):
     ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
 
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
-    
+   
     def __init__(self, markup="", features=None, builder=None,
                  parse_only=None, from_encoding=None, exclude_encodings=None,
                  element_classes=None, **kwargs):
@@ -349,19 +349,19 @@ class BeautifulSoup(Tag):
         self.markup = None
         self.builder.soup = None
 
-    def __copy__(self):
-        """Copy a BeautifulSoup object by converting the document to a string and parsing it again."""
-        copy = type(self)(
-            self.encode('utf-8'), builder=self.builder, from_encoding='utf-8'
-        )
+    def _clone(self):
+        """Create a new BeautifulSoup object with the same TreeBuilder,
+        but not associated with any markup.
 
-        # Although we encoded the tree to UTF-8, that may not have
-        # been the encoding of the original markup. Set the copy's
-        # .original_encoding to reflect the original object's
-        # .original_encoding.
-        copy.original_encoding = self.original_encoding
-        return copy
+        This is the first step of the deepcopy process.
+        """
+        clone = type(self)("", None, self.builder)
 
+        # Keep track of the encoding of the original document,
+        # since we won't be parsing it again.
+        clone.original_encoding = self.original_encoding
+        return clone
+        
     def __getstate__(self):
         # Frequently a tree builder can't be pickled.
         d = dict(self.__dict__)

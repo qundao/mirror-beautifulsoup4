@@ -11,8 +11,14 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
   tags than there are levels in the Python interpreter stack.
   [bug=1471755]
 
+* The copy and deepcopy algorithms no longer use recursive function
+  calls, either, making it possible to copy deeply nested trees.
+ 
+* Making a copy of a BeautifulSoup object no longer parses the document
+  again, which should improve performance significantly.
+
 * Tag.prettify() will now consistently end prettified markup with
-  a newline. This is a side effect of the work done for bug #1471755.
+  a newline.
 
 * Added unit tests for fuzz test cases created by third
   parties. Most of these tests are skipped since they either point
