@@ -291,12 +291,13 @@ class TestPersistence(SoupTest):
         markup = "<span>" * limit
 
         soup = self.soup(markup)
-
+        encoded = soup.encode()
+        
         copied = copy.copy(soup)
-        assert soup.encode() == copied.encode()
+        assert encoded == copied.encode()
 
         copied = copy.deepcopy(soup)
-        assert soup.encode() == copied.encode()
+        assert encoded == copied.encode()
 
     def test_copy_preserves_encoding(self):
         soup = BeautifulSoup(b'<p>&nbsp;</p>', 'html.parser')
