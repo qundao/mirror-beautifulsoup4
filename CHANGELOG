@@ -5,17 +5,27 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 
 = 4.12.1 (Unreleased)
 
-* Rewrote the code for converting a Beautiful Soup tree to a
-  string, so that it no longer makes recursive function calls. This
-  makes it possible to output documents that have more nested
-  tags than there are levels in the Python interpreter stack.
-  [bug=1471755]
+* The main improvement in this version is a nonrecursive technique
+  for reconstructing the parser events that led to a particular
+  tree structure. This technique is used to avoid situations where,
+  in previous versions, doing something to a very deeply nested tree
+  would overflow the Python interpreter stack:
 
-* The copy and deepcopy algorithms no longer use recursive function
-  calls, either, making it possible to copy deeply nested trees.
- 
-* Making a copy of a BeautifulSoup object no longer parses the document
-  again, which should improve performance significantly.
+  1. Outputting a parse tree as a string
+     (e.g. BeautifulSoup.encode()) [bug=1471755]
+
+  2. Making copies of parse trees (copy.copy() and
+     copy.deepcopy() from the Python standard library).
+
+  3. Pickling a BeautifulSoup object. (Note that pickling a Tag
+     object can still cause an overflow.)
+
+* Making a copy of a BeautifulSoup object no longer parses the
+  document again, which should improve performance significantly.
+
+* When a BeautifulSoup object is unpickled, Beautiful Soup now
+  tries to associate an appropriate TreeBuilder with it
+  rather than giving up.
 
 * Tag.prettify() will now consistently end prettified markup with
   a newline.
@@ -23,8 +33,8 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 * Added unit tests for fuzz test cases created by third
   parties. Most of these tests are skipped since they either point
   out problems in code outside of Beautiful Soup, or problems with
-  Beautiful Soup that haven't been resolved yet, but this puts them
-  all in one convenient place.
+  Beautiful Soup that haven't been resolved yet; but this change
+  puts them all in one convenient place.
 
 = 4.12.0 (20230320)
 

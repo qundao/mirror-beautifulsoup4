@@ -38,6 +38,7 @@ from .builder import (
     builder_registry,
     ParserRejectedMarkup,
     XMLParsedAsHTMLWarning,
+    HTMLParserTreeBuilder
 )
 from .dammit import UnicodeDammit
 from .element import (
@@ -366,8 +367,32 @@ class BeautifulSoup(Tag):
         # Frequently a tree builder can't be pickled.
         d = dict(self.__dict__)
         if 'builder' in d and d['builder'] is not None and not self.builder.picklable:
-            d['builder'] = None
+            d['builder'] = type(self.builder)
+        # Store the contents as a Unicode string.
+        d['contents'] = []
+        d['markup'] = self.decode()
+
+        # If _most_recent_element is present, it's a Tag object left
+        # over from initial parse. It might not be picklable and we
+        # don't need it.
+        if '_most_recent_element' in d:
+            del d['_most_recent_element']
         return d
+
+    def __setstate__(self, state):
+        # If necessary, restore the TreeBuilder by looking it up.
+        self.__dict__ = state
+        if isinstance(self.builder, type):
+            self.builder = self.builder()
+        elif not self.builder:
+            # We don't know which builder was used to build this
+            # parse tree, so use a default we know is always available.
+            self.builder = HTMLParserTreeBuilder()
+        self.builder.soup = self
+        self.reset()
+        self._feed()
+        return state
+
     
     @classmethod
     def _decode_markup(cls, markup):

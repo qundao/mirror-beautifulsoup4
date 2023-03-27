@@ -911,7 +911,7 @@ class PageElement(object):
         :rtype: bool
         """
         return getattr(self, '_decomposed', False) or False
-
+   
     # Old non-property versions of the generators, for backwards
     # compatibility with BS3.
     def nextGenerator(self):
