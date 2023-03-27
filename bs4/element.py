@@ -966,6 +966,9 @@ class NavigableString(str, PageElement):
         return type(self)(self)
 
     def __copy__(self):
+        """A copy of a NavigableString can only be a deep copy, because
+        only one PageElement can occupy a given place in a parse tree.
+        """
         return self.__deepcopy__({})
 
     def __getnewargs__(self):
@@ -1341,8 +1344,9 @@ class Tag(PageElement):
         return clone
 
     def __copy__(self):
-        # A copy of a Tag must always be a deep copy, because the
-        # Tag's children can only have one parent at a time.
+        """A copy of a Tag must always be a deep copy, because a Tag's
+        children can only have one parent at a time.
+        """
         return self.__deepcopy__({})
 
     def _clone(self):
