@@ -6,16 +6,15 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
 = 4.12.1 (Unreleased)
 
 * The main improvement in this version is a nonrecursive technique
-  for reconstructing the parser events that led to a particular
-  tree structure. This technique is used to avoid situations where,
+  for regenerating a tree. This technique is used to avoid situations where,
   in previous versions, doing something to a very deeply nested tree
   would overflow the Python interpreter stack:
 
-  1. Outputting a parse tree as a string
-     (e.g. BeautifulSoup.encode()) [bug=1471755]
+  1. Outputting a tree as a string, e.g. with
+     BeautifulSoup.encode() [bug=1471755]
 
-  2. Making copies of parse trees (copy.copy() and
-     copy.deepcopy() from the Python standard library).
+  2. Making copies of trees (copy.copy() and
+     copy.deepcopy() from the Python standard library). [bug=1709837]
 
   3. Pickling a BeautifulSoup object. (Note that pickling a Tag
      object can still cause an overflow.)
@@ -24,17 +23,20 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
   document again, which should improve performance significantly.
 
 * When a BeautifulSoup object is unpickled, Beautiful Soup now
-  tries to associate an appropriate TreeBuilder with it
-  rather than giving up.
+  tries to associate an appropriate TreeBuilder object with it.
 
 * Tag.prettify() will now consistently end prettified markup with
   a newline.
 
 * Added unit tests for fuzz test cases created by third
   parties. Most of these tests are skipped since they either point
-  out problems in code outside of Beautiful Soup, or problems with
-  Beautiful Soup that haven't been resolved yet; but this change
+  out problems in code outside of Beautiful Soup, or known problems
+  with Beautiful Soup that haven't been resolved yet; but this change
   puts them all in one convenient place.
+
+* PageElement now implements the known_xml attribute. (This was technically
+  a bug, but it shouldn't be an issue in normal use.) [bug=2007895]
+
 
 = 4.12.0 (20230320)
 
