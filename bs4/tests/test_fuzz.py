@@ -32,25 +32,27 @@ class TestFuzz(object):
 
     # This class of error has to do with very deeply nested documents
     # which overflow the Python call stack when the tree is converted
-    # to string. This is an issue with Beautiful Soup. See
-    # [bug=1471755], for example.
-    @pytest.mark.skip("recursion limit exceeded")
+    # to a string. This is an issue with Beautiful Soup which was fixed
+    # as part of [bug=1471755].
     @pytest.mark.parametrize(
         "filename", [
             "clusterfuzz-testcase-minimized-bs4_fuzzer-5984173902397440",
             "clusterfuzz-testcase-minimized-bs4_fuzzer-5167584867909632",
-            "clusterfuzz-testcase-minimized-bs4_fuzzer-5984173902397440",
             "clusterfuzz-testcase-minimized-bs4_fuzzer-6124268085182464",
             "clusterfuzz-testcase-minimized-bs4_fuzzer-6450958476902400",
         ]
     )
-    def test_recursion_limit_exceeded(self, filename):
+    def test_deeply_nested_document(self, filename):
+        # Parsing the document and encoding it back to a string is
+        # sufficient to demonstrate that the overflow problem has
+        # been fixed.
         markup = self.__markup(filename)
-        with pytest.raises(RecursionError):
-            BeautifulSoup(markup, 'html.parser').encode()
+        BeautifulSoup(markup, 'html.parser').encode()
 
     # This class of error represents problems with html5lib's parser,
-    # not Beautiful Soup.
+    # not Beautiful Soup. I use
+    # https://github.com/html5lib/html5lib-python/issues/568 to notify
+    # the html5lib developers of these issues.
     @pytest.mark.skip("html5lib problems")
     @pytest.mark.parametrize(
         "filename", [
