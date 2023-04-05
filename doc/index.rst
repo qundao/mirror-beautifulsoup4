@@ -1,4 +1,8 @@
-.. _manual:
+.. toctree::
+   :maxdepth: 4
+
+   index
+
 
 Beautiful Soup Documentation
 ============================
