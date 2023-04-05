@@ -14,6 +14,9 @@ release = '4.12.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+import sys
+import os
+sys.path.insert(0, os.path.abspath('../'))
 extensions = ['sphinx.ext.autodoc']
 
 templates_path = ['_templates']
@@ -26,3 +29,5 @@ language = 'en,ja,ko,ru,pt,zh'
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+default_role = 'any'

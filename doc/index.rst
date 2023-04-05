@@ -60,7 +60,7 @@ Quick Start
 ===========
 
 Here's an HTML document I'll be using as an example throughout this
-document. It's part of a story from `Alice in Wonderland`::
+document. It's part of a story from *Alice in Wonderland*::
 
  html_doc = """<html><head><title>The Dormouse's story</title></head>
  <body>
@@ -190,7 +190,7 @@ right version of ``pip`` or ``easy_install`` for your Python version
 
 :kbd:`$ pip install beautifulsoup4`
 
-(The :py:class:`BeautifulSoup` package is `not` what you want. That's
+(The :py:class:`BeautifulSoup` package is *not* what you want. That's
 the previous major release, `Beautiful Soup 3`_. Lots of software uses
 BS3, so it's still available, but if you're writing new code you
 should install ``beautifulsoup4``.)
@@ -294,7 +294,7 @@ Kinds of objects
 
 Beautiful Soup transforms a complex HTML document into a complex tree
 of Python objects. But you'll only ever have to deal with about four
-`kinds` of objects: :py:class:`Tag`, :py:class:`NavigableString`, :py:class:`BeautifulSoup`,
+*kinds* of objects: :py:class:`Tag`, :py:class:`NavigableString`, :py:class:`BeautifulSoup`,
 and :py:class:`Comment`.
 
 .. py:class:: Tag
@@ -380,7 +380,7 @@ and :py:class:`Comment`.
    css_soup.p['class']
    # ['body', 'strikeout']
 
-  If an attribute `looks` like it has more than one value, but it's not
+  If an attribute *looks* like it has more than one value, but it's not
   a multi-valued attribute as defined by any version of the HTML
   standard, Beautiful Soup will leave the attribute alone::
 
@@ -542,8 +542,8 @@ Beautiful Soup defines a few :py:class:`NavigableString` subclasses to
 contain strings found inside specific HTML tags. This makes it easier
 to pick out the main body of the page, by ignoring strings that
 probably represent programming directives found within the
-page. `(These classes are new in Beautiful Soup 4.9.0, and the
-html5lib parser doesn't use them.)`
+page. *(These classes are new in Beautiful Soup 4.9.0, and the
+html5lib parser doesn't use them.)*
 
 .. py:class:: Stylesheet
 
@@ -647,13 +647,13 @@ of the parse tree. This code gets the first <b> tag beneath the <body> tag::
  soup.body.b
  # <b>The Dormouse's story</b>
 
-Using a tag name as an attribute will give you only the `first` tag by that
+Using a tag name as an attribute will give you only the *first* tag by that
 name::
 
  soup.a
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
-If you need to get `all` the <a> tags, or anything more complicated
+If you need to get *all* the <a> tags, or anything more complicated
 than the first tag with a certain name, you'll need to use one of the
 methods described in `Searching the tree`_, such as `find_all()`::
 
@@ -712,7 +712,7 @@ spot.
 ^^^^^^^^^^^^^^^^
 
 The ``.contents`` and ``.children`` attributes only consider a tag's
-`direct` children. For instance, the <head> tag has a single direct
+*direct* children. For instance, the <head> tag has a single direct
 child--the <title> tag::
 
  head_tag.contents
@@ -720,7 +720,7 @@ child--the <title> tag::
 
 But the <title> tag itself has a child: the string "The Dormouse's
 story". There's a sense in which that string is also a child of the
-<head> tag. The ``.descendants`` attribute lets you iterate over `all`
+<head> tag. The ``.descendants`` attribute lets you iterate over *all*
 of a tag's children, recursively: its direct children, the children of
 its direct children, and so on::
 
@@ -750,7 +750,7 @@ the child is made available as ``.string``::
  title_tag.string
  # 'The Dormouse's story'
 
-If a tag's only child is another tag, and `that` tag has a
+If a tag's only child is another tag, and *that* tag has a
 ``.string``, then the parent tag is considered to have the same
 ``.string`` as its child::
 
@@ -817,7 +817,7 @@ Going up
 --------
 
 Continuing the "family tree" analogy, every tag and every string has a
-`parent`: the tag that contains it.
+`.parent`: the tag that contains it.
 
 .. _.parent:
 
@@ -888,7 +888,7 @@ Consider a simple document like this::
  #   </a>
 
 The <b> tag and the <c> tag are at the same level: they're both direct
-children of the same tag. We call them `siblings`. When a document is
+children of the same tag. We call them *siblings*. When a document is
 pretty-printed, siblings show up at the same indentation level. You
 can also use this relationship in the code you write.
 
@@ -905,8 +905,8 @@ between page elements that are on the same level of the parse tree::
  # <b>text1</b>
 
 The <b> tag has a ``.next_sibling``, but no ``.previous_sibling``,
-because there's nothing before the <b> tag `on the same level of the
-tree`. For the same reason, the <c> tag has a ``.previous_sibling``
+because there's nothing before the <b> tag *on the same level of the
+tree*. For the same reason, the <c> tag has a ``.previous_sibling``
 but no ``.next_sibling``::
 
  print(sibling_soup.b.previous_sibling)
@@ -914,7 +914,7 @@ but no ``.next_sibling``::
  print(sibling_soup.c.next_sibling)
  # None
 
-The strings "text1" and "text2" are `not` siblings, because they don't
+The strings "text1" and "text2" are *not* siblings, because they don't
 have the same parent::
 
  sibling_soup.b.string
@@ -1006,7 +1006,7 @@ interrupted by the start of the <a> tag.::
  # ';\nand they lived at the bottom of a well.'
 
 But the ``.next_element`` of that <a> tag, the thing that was parsed
-immediately after the <a> tag, is `not` the rest of that sentence:
+immediately after the <a> tag, is *not* the rest of that sentence:
 it's the word "Tillie"::
 
  last_a_tag.next_element
@@ -1127,8 +1127,8 @@ A list
 ^^^^^^
 
 If you pass in a list, Beautiful Soup will allow a string match
-against `any` item in that list. This code finds all the <a> tags
-`and` all the <b> tags::
+against *any* item in that list. This code finds all the <a> tags
+*and* all the <b> tags::
 
  soup.find_all(["a", "b"])
  # [<b>The Dormouse's story</b>,
@@ -1141,7 +1141,7 @@ against `any` item in that list. This code finds all the <a> tags
 ``True``
 ^^^^^^^^
 
-The value ``True`` matches everything it can. This code finds `all`
+The value ``True`` matches everything it can. This code finds *all*
 the tags in the document, but none of the text strings::
 
  for tag in soup.find_all(True):
@@ -1226,7 +1226,7 @@ Method signature: find_all(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`recur
 <recursive>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
 The ``find_all()`` method looks through a tag's descendants and
-retrieves `all` descendants that match your filters. I gave several
+retrieves *all* descendants that match your filters. I gave several
 examples in `Kinds of filters`_, but here are a few more::
 
  soup.find_all("title")
@@ -1362,7 +1362,7 @@ expression, a function, or ``True``::
 
 :ref:`Remember <multivalue>` that a single tag can have multiple
 values for its "class" attribute. When you search for a tag that
-matches a certain CSS class, you're matching against `any` of its CSS
+matches a certain CSS class, you're matching against *any* of its CSS
 classes::
 
  css_soup = BeautifulSoup('<p class="body strikeout"></p>', 'html.parser')
@@ -1445,7 +1445,7 @@ The ``limit`` argument
 
 ``find_all()`` returns all the tags and strings that match your
 filters. This can take a while if the document is large. If you don't
-need `all` the results, you can pass in a number for ``limit``. This
+need *all* the results, you can pass in a number for ``limit``. This
 works just like the LIMIT keyword in SQL. It tells Beautiful Soup to
 stop gathering results after it's found a certain number.
 
@@ -1482,7 +1482,7 @@ Here's that part of the document::
   </head>
  ...
 
-The <title> tag is beneath the <html> tag, but it's not `directly`
+The <title> tag is beneath the <html> tag, but it's not *directly*
 beneath the <html> tag: the <head> tag is in the way. Beautiful Soup
 finds the <title> tag when it's allowed to look at all descendants of
 the <html> tag, but when ``recursive=False`` restricts it to the
@@ -1523,7 +1523,7 @@ results, but sometimes you only want to find one result. If you know a
 document only has one <body> tag, it's a waste of time to scan the
 entire document looking for more. Rather than passing in ``limit=1``
 every time you call ``find_all``, you can use the ``find()``
-method. These two lines of code are `nearly` equivalent::
+method. These two lines of code are *nearly* equivalent::
 
  soup.find_all('title', limit=1)
  # [<title>The Dormouse's story</title>]
@@ -1566,7 +1566,7 @@ tree they search.
 First let's consider ``find_parents()`` and
 ``find_parent()``. Remember that ``find_all()`` and ``find()`` work
 their way down the tree, looking at tag's descendants. These methods
-do the opposite: they work their way `up` the tree, looking at a tag's
+do the opposite: they work their way *up* the tree, looking at a tag's
 (or a string's) parents. Let's try them out, starting from a string
 buried deep in the "three daughters" document::
 
@@ -1590,7 +1590,7 @@ buried deep in the "three daughters" document::
 One of the three <a> tags is the direct parent of the string in
 question, so our search finds it. One of the three <p> tags is an
 indirect parent of the string, and our search finds that as
-well. There's a <p> tag with the CSS class "title" `somewhere` in the
+well. There's a <p> tag with the CSS class "title" *somewhere* in the
 document, but it's not one of this string's parents, so we can't find
 it with ``find_parents()``.
 
@@ -1740,7 +1740,7 @@ Find tags beneath other tags::
  soup.css.select("html head title")
  # [<title>The Dormouse's story</title>]
 
-Find tags `directly` beneath other tags::
+Find tags *directly* beneath other tags::
 
  soup.css.select("head > title")
  # [<title>The Dormouse's story</title>]
@@ -1837,7 +1837,7 @@ CSS selector support is a convenience for people who already know the
 CSS selector syntax. You can do all of this with the Beautiful Soup
 API. If CSS selectors are all you need, you should skip Beautiful Soup
 altogether and parse the document with ``lxml``: it's a lot
-faster. But Soup Sieve lets you `combine` CSS selectors with the
+faster. But Soup Sieve lets you *combine* CSS selectors with the
 Beautiful Soup API.
 
 Advanced Soup Sieve features
@@ -2031,7 +2031,7 @@ If you want to create a comment or some other subclass of
  tag.contents
  # ['Hello', ' there', 'Nice to see you.']
 
-`(This is a new feature in Beautiful Soup 4.4.0.)`
+*(This is a new feature in Beautiful Soup 4.4.0.)*
 
 What if you need to create a whole new tag?  The best solution is to
 call the factory method ``BeautifulSoup.new_tag()``::
@@ -2144,8 +2144,8 @@ a child of the element you extracted::
 ``decompose()``
 ---------------
 
-``Tag.decompose()`` removes a tag from the tree, then `completely
-destroys it and its contents`::
+``Tag.decompose()`` removes a tag from the tree, then *completely
+destroys it and its contents*::
 
  markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
  soup = BeautifulSoup(markup, 'html.parser')
@@ -2159,7 +2159,7 @@ destroys it and its contents`::
 The behavior of a decomposed :py:class:`Tag` or :py:class:`NavigableString` is not
 defined and you should not use it for anything. If you're not sure
 whether something has been decomposed, you can check its
-``.decomposed`` property `(new in Beautiful Soup 4.9.0)`::
+``.decomposed`` property *(new in Beautiful Soup 4.9.0)*::
 
  i_tag.decomposed
  # True
@@ -2199,8 +2199,8 @@ and replaces it with one or more tags or strings of your choice::
 ``replace_with()`` returns the tag or string that got replaced, so
 that you can examine it or add it back to another part of the tree.
 
-`The ability to pass multiple arguments into replace_with() is new
-in Beautiful Soup 4.10.0.`
+*The ability to pass multiple arguments into replace_with() is new
+in Beautiful Soup 4.10.0.*
 
 
 ``wrap()``
@@ -2216,7 +2216,7 @@ returns the new wrapper::
  soup.p.wrap(soup.new_tag("div"))
  # <div><p><b>I wish I was bold.</b></p></div>
 
-`This method is new in Beautiful Soup 4.0.5.`
+*This method is new in Beautiful Soup 4.0.5.*
 
 ``unwrap()``
 ---------------------------
@@ -2267,7 +2267,7 @@ You can call ``Tag.smooth()`` to clean up the parse tree by consolidating adjace
  #  A one, a two
  # </p>
 
-`This method is new in Beautiful Soup 4.8.0.`
+*This method is new in Beautiful Soup 4.8.0.*
 
 Output
 ======
@@ -2494,8 +2494,8 @@ whenever it appears::
  # <p z="1" a="3"></p>
 
 One last caveat: if you create a :py:class:`CData` object, the text inside
-that object is always presented `exactly as it appears, with no
-formatting`. Beautiful Soup will call your entity substitution
+that object is always presented *exactly as it appears, with no
+formatting*. Beautiful Soup will call your entity substitution
 function, just in case you've written a custom function that counts
 all the strings in the document or something, but it will ignore the
 return value::
@@ -2564,7 +2564,7 @@ which parser is used.
 
 The first argument to the :py:class:`BeautifulSoup` constructor is a string or
 an open filehandle--the markup you want parsed. The second argument is
-`how` you'd like the markup parsed.
+*how* you'd like the markup parsed.
 
 If you don't specify anything, you'll get the best HTML parser that's
 installed. Beautiful Soup ranks lxml's parser as being the best, then
@@ -2937,8 +2937,8 @@ into the :py:class:`BeautifulSoup` constructor::
  print(soup.p.sourceline)
  # None
   
-`This feature is new in 4.8.1, and the parsers based on lxml don't
-support it.`
+*This feature is new in 4.8.1, and the parsers based on lxml don't
+support it.*
 
 Comparing objects for equality
 ==============================
@@ -2959,7 +2959,7 @@ in different parts of the object tree, because they both look like
  # False
 
 If you want to see whether two variables refer to exactly the same
-object, use `is`::
+object, use ``is``::
 
  print(first_b is second_b)
  # False
@@ -3119,7 +3119,7 @@ dictionary for ``multi_valued_attributes``. If you need this, look at
 configuration Beautiful Soup uses by default, which is based on the
 HTML specification.
 
-`(This is a new feature in Beautiful Soup 4.8.0.)`
+*(This is a new feature in Beautiful Soup 4.8.0.)*
 
 Handling duplicate attributes
 -----------------------------
@@ -3142,7 +3142,7 @@ The default behavior is to use the last value found for the tag::
  # http://url2/
   
 With ``on_duplicate_attribute='ignore'`` you can tell Beautiful Soup
-to use the `first` value found and ignore the rest::
+to use the *first* value found and ignore the rest::
 
  soup = BeautifulSoup(markup, 'html.parser', on_duplicate_attribute='ignore')
  soup.a['href']
@@ -3162,7 +3162,7 @@ If you need more, you can pass in a function that's called on each duplicate val
  soup.a['href']
  # ["http://url1/", "http://url2/"]
 
-`(This is a new feature in Beautiful Soup 4.9.1.)`
+*(This is a new feature in Beautiful Soup 4.9.1.)*
 
 Instantiating custom subclasses
 -------------------------------
@@ -3170,7 +3170,7 @@ Instantiating custom subclasses
 When a parser tells Beautiful Soup about a tag or a string, Beautiful
 Soup will instantiate a :py:class:`Tag` or :py:class:`NavigableString` object to
 contain that information. Instead of that default behavior, you can
-tell Beautiful Soup to instantiate `subclasses` of :py:class:`Tag` or
+tell Beautiful Soup to instantiate *subclasses* of :py:class:`Tag` or
 :py:class:`NavigableString`, subclasses you define with custom behavior::
 
  from bs4 import Tag, NavigableString
@@ -3199,7 +3199,7 @@ tell Beautiful Soup to instantiate `subclasses` of :py:class:`Tag` or
 This can be useful when incorporating Beautiful Soup into a test
 framework.
 
-`(This is a new feature in Beautiful Soup 4.8.1.)`
+*(This is a new feature in Beautiful Soup 4.8.1.)*
 
 Troubleshooting
 ===============
@@ -3210,8 +3210,8 @@ Troubleshooting
 --------------
 
 If you're having trouble understanding what Beautiful Soup does to a
-document, pass the document into the ``diagnose()`` function. (New in
-Beautiful Soup 4.2.0.)  Beautiful Soup will print out a report showing
+document, pass the document into the ``diagnose()`` function. *(New in
+Beautiful Soup 4.2.0.)* Beautiful Soup will print out a report showing
 you how different parsers handle the document, and tell you if you're
 missing a parser that Beautiful Soup could be using::
 
@@ -3342,7 +3342,7 @@ Miscellaneous
 
 * ``AttributeError: 'ResultSet' object has no attribute 'foo'`` - This
   usually happens because you expected ``find_all()`` to return a
-  single tag or string. But ``find_all()`` returns a `list` of tags
+  single tag or string. But ``find_all()`` returns a *list* of tags
   and strings--a ``ResultSet`` object. You need to iterate over the
   list and look at the ``.foo`` of each one. Or, if you really only
   want one result, you need to use ``find()`` instead of
@@ -3350,7 +3350,7 @@ Miscellaneous
 
 * ``AttributeError: 'NoneType' object has no attribute 'foo'`` - This
   usually happens because you called ``find()`` and then tried to
-  access the `.foo`` attribute of the result. But in your case,
+  access the ``.foo`` attribute of the result. But in your case,
   ``find()`` didn't find anything, so it returned ``None``, instead of
   returning a tag or a string. You need to figure out why your
   ``find()`` call isn't returning anything.
@@ -3381,7 +3381,7 @@ You can speed up encoding detection significantly by installing the
 
 `Parsing only part of a document`_ won't save you much time parsing
 the document, but it can save a lot of memory, and it'll make
-`searching` the document much faster.
+*searching* the document much faster.
 
 Translating this documentation
 ==============================
@@ -3614,16 +3614,16 @@ class.
 markup. This may change your script's behavior if you put :py:class:`Tag`
 objects into a dictionary or set.
 
-If you pass one of the ``find*`` methods both :ref:`string <string>` `and`
+If you pass one of the ``find*`` methods both :ref:`string <string>` *and*
 a tag-specific argument like :ref:`name <name>`, Beautiful Soup will
 search for tags that match your tag-specific criteria and whose
 :ref:`Tag.string <.string>` matches your value for :ref:`string
-<string>`. It will `not` find the strings themselves. Previously,
+<string>`. It will *not* find the strings themselves. Previously,
 Beautiful Soup ignored the tag-specific arguments and looked for
 strings.
 
 The :py:class:`BeautifulSoup` constructor no longer recognizes the
-`markupMassage` argument. It's now the parser's responsibility to
+``markupMassage`` argument. It's now the parser's responsibility to
 handle markup correctly.
 
 The rarely-used alternate parser classes like

@@ -166,13 +166,12 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         :param exclude_encodings: The user asked _not_ to try any of
             these encodings.
 
-        :yield: A series of 4-tuples:
-         (markup, encoding, declared encoding,
-          has undergone character replacement)
+        :yield: A series of 4-tuples: (markup, encoding, declared encoding,
+            has undergone character replacement)
 
-         Each 4-tuple represents a strategy for converting the
-         document to Unicode and parsing it. Each strategy will be tried 
-         in turn.
+            Each 4-tuple represents a strategy for converting the
+            document to Unicode and parsing it. Each strategy will be tried 
+            in turn.
         """
         is_html = not self.is_xml
         if is_html:

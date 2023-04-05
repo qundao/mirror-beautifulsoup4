@@ -67,6 +67,24 @@ from html.entities import html5
 class EntitySubstitution(object):
     """The ability to substitute XML or HTML entities for certain characters."""
 
+    #: A map of named HTML entities to the corresponding Unicode string.
+    #:
+    #: :meta hide-value:
+    HTML_ENTITY_TO_CHARACTER: dict[str, str] = None
+    
+    #: A map of Unicode strings to the corresponding named HTML entities;
+    #: the inverse of HTML_ENTITY_TO_CHARACTER.
+    #:
+    #: :meta hide-value:
+    CHARACTER_TO_HTML_ENTITY: dict[str, str] = None
+
+    #: A regular expression that matches any character (or, in rare
+    #: cases, pair of characters) that can be replaced with a named
+    #: HTML entity.
+    #:
+    #: :meta hide-value:
+    CHARACTER_TO_HTML_ENTITY_RE: re.Pattern = None
+    
     def _populate_class_variables():
         """Initialize variables used by this class to manage the plethora of
         HTML5 named entities.
@@ -188,7 +206,10 @@ class EntitySubstitution(object):
     (CHARACTER_TO_HTML_ENTITY, HTML_ENTITY_TO_CHARACTER,
      CHARACTER_TO_HTML_ENTITY_RE) = _populate_class_variables()
 
-    CHARACTER_TO_XML_ENTITY = {
+    #: A map of Unicode strings to the corresponding named XML entities.
+    #:
+    #: :meta hide-value:
+    CHARACTER_TO_XML_ENTITY: dict[str, str] = {
         "'": "apos",
         '"': "quot",
         "&": "amp",
@@ -196,11 +217,20 @@ class EntitySubstitution(object):
         ">": "gt",
         }
 
-    BARE_AMPERSAND_OR_BRACKET = re.compile("([<>]|"
-                                           "&(?!#\\d+;|#x[0-9a-fA-F]+;|\\w+;)"
-                                           ")")
+    #: A regular expression matching an angle bracket or an ampersand that
+    #: is not part of an XML or HTML entity.
+    #:
+    #: :meta hide-value:
+    BARE_AMPERSAND_OR_BRACKET: re.Pattern = re.compile(
+        "([<>]|"
+        "&(?!#\\d+;|#x[0-9a-fA-F]+;|\\w+;)"
+        ")"
+    )
 
-    AMPERSAND_OR_BRACKET = re.compile("([<>&])")
+    #: A regular expression matching an angle bracket or an ampersand.
+    #:
+    #: :meta hide-value:    
+    AMPERSAND_OR_BRACKET: re.Pattern = re.compile("([<>&])")
 
     @classmethod
     def _substitute_html_entity(cls, matchobj):
@@ -217,7 +247,7 @@ class EntitySubstitution(object):
         return "&%s;" % entity
 
     @classmethod
-    def quoted_attribute_value(self, value):
+    def quoted_attribute_value(self, value: str) -> str:
         """Make a value into a quoted XML attribute, possibly escaping it.
 
          Most strings will be quoted using double quotes.
@@ -233,7 +263,10 @@ class EntitySubstitution(object):
          double quotes will be escaped, and the string will be quoted
          using double quotes.
 
-          Welcome to "Bob's Bar" -> "Welcome to &quot;Bob's bar&quot;
+          Welcome to "Bob's Bar" -> Welcome to &quot;Bob's bar&quot;
+
+        :param value: The XML attribute value to quote
+        :return: The quoted value
         """
         quote_with = '"'
         if '"' in value:
@@ -254,17 +287,22 @@ class EntitySubstitution(object):
         return quote_with + value + quote_with
 
     @classmethod
-    def substitute_xml(cls, value, make_quoted_attribute=False):
-        """Substitute XML entities for special XML characters.
+    def substitute_xml(cls, value:str, make_quoted_attribute:bool=False) -> str:
+        """Replace special XML characters with named XML entities.
 
-        :param value: A string to be substituted. The less-than sign
-          will become &lt;, the greater-than sign will become &gt;,
-          and any ampersands will become &amp;. If you want ampersands
-          that appear to be part of an entity definition to be left
-          alone, use substitute_xml_containing_entities() instead.
+        The less-than sign will become &lt;, the greater-than sign
+        will become &gt;, and any ampersands will become &amp;. If you
+        want ampersands that seem to be part of an entity definition
+        to be left alone, use `substitute_xml_containing_entities`
+        instead.
+
+        :param value: A string to be substituted.
 
         :param make_quoted_attribute: If True, then the string will be
          quoted, as befits an attribute value.
+
+        :return: A version of `value` with special characters replaced
+         with named entities.
         """
         # Escape angle brackets and ampersands.
         value = cls.AMPERSAND_OR_BRACKET.sub(
@@ -276,7 +314,7 @@ class EntitySubstitution(object):
 
     @classmethod
     def substitute_xml_containing_entities(
-        cls, value, make_quoted_attribute=False):
+        cls, value: str, make_quoted_attribute:bool=False) -> str:
         """Substitute XML entities for special XML characters.
 
         :param value: A string to be substituted. The less-than sign will
@@ -718,7 +756,9 @@ class UnicodeDammit:
         return codec
 
 
-    # A partial mapping of ISO-Latin-1 to HTML entities/XML numeric entities.
+    #: A partial mapping of ISO-Latin-1 to HTML entities/XML numeric entities.
+    #:
+    #: :meta hide-value:
     MS_CHARS = {b'\x80': ('euro', '20AC'),
                 b'\x81': ' ',
                 b'\x82': ('sbquo', '201A'),
@@ -752,9 +792,11 @@ class UnicodeDammit:
                 b'\x9e': ('#x17E', '17E'),
                 b'\x9f': ('Yuml', ''),}
 
-    # A parochial partial mapping of ISO-Latin-1 to ASCII. Contains
-    # horrors like stripping diacritical marks to turn á into a, but also
-    # contains non-horrors like turning “ into ".
+    #: A parochial partial mapping of ISO-Latin-1 to ASCII. Contains
+    #: horrors like stripping diacritical marks to turn á into a, but also
+    #: contains non-horrors like turning “ into ".
+    #:
+    #: :meta hide-value:
     MS_CHARS_TO_ASCII = {
         b'\x80' : 'EUR',
         b'\x81' : ' ',
@@ -887,11 +929,13 @@ class UnicodeDammit:
         b'\xff' : 'y',
         }
 
-    # A map used when removing rogue Windows-1252/ISO-8859-1
-    # characters in otherwise UTF-8 documents.
-    #
-    # Note that \x81, \x8d, \x8f, \x90, and \x9d are undefined in
-    # Windows-1252.
+    #: A map used when removing rogue Windows-1252/ISO-8859-1
+    #: characters in otherwise UTF-8 documents.
+    #:
+    #: Note that \\x81, \\x8d, \\x8f, \\x90, and \\x9d are undefined in
+    #: Windows-1252.
+    #:
+    #: :meta hide-value:
     WINDOWS_1252_TO_UTF8 = {
         0x80 : b'\xe2\x82\xac', # €
         0x82 : b'\xe2\x80\x9a', # ‚
@@ -1017,13 +1061,17 @@ class UnicodeDammit:
         0xfe : b'\xc3\xbe',     # þ
         }
 
+    #: :meta private:
     MULTIBYTE_MARKERS_AND_SIZES = [
         (0xc2, 0xdf, 2), # 2-byte characters start with a byte C2-DF
         (0xe0, 0xef, 3), # 3-byte characters start with E0-EF
         (0xf0, 0xf4, 4), # 4-byte characters start with F0-F4
         ]
 
+    #: :meta private:
     FIRST_MULTIBYTE_MARKER = MULTIBYTE_MARKERS_AND_SIZES[0][0]
+
+    #: :meta private:
     LAST_MULTIBYTE_MARKER = MULTIBYTE_MARKERS_AND_SIZES[-1][1]
 
     @classmethod
