@@ -335,10 +335,10 @@ class EntitySubstitution(object):
         return value
 
     @classmethod
-    def substitute_html(cls, s):
+    def substitute_html(cls, s->str) -> str:
         """Replace certain Unicode characters with named HTML entities.
 
-        This differs from data.encode(encoding, 'xmlcharrefreplace')
+        This differs from ``data.encode(encoding, 'xmlcharrefreplace')``
         in that the goal is to make the result more readable (to those
         with ASCII displays) rather than to recover from
         errors. There's absolutely nothing wrong with a UTF-8 string
@@ -346,7 +346,9 @@ class EntitySubstitution(object):
         character with "&eacute;" will make it more readable to some
         people.
 
-        :param s: A Unicode string.
+        :param s: The string to be modified.
+        :return: The string with some Unicode characters replaced with
+           HTML entities.
         """
         return cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
             cls._substitute_html_entity, s)
