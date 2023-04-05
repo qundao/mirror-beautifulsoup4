@@ -1,9 +1,8 @@
-Note: Beautiful Soup's official support for Python 2 ended on January 1st,
-2021. The final release to support Python 2 was Beautiful Soup
-4.9.3. In the Launchpad Git repository, the final revision to support
-Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
-
 = 4.12.1 (Unreleased)
+
+This is the last version of Beautiful Soup known to support Python
+3.6. Future versions might work under 3.6, but it's not officially
+supported.
 
 * The main improvement in this version is a nonrecursive technique
   for regenerating a tree. This technique is used to avoid situations where,
@@ -29,9 +28,8 @@ Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7.
   a newline.
 
 * Added unit tests for fuzz test cases created by third
-  parties. Most of these tests are skipped since they either point
-  out problems in code outside of Beautiful Soup, or known problems
-  with Beautiful Soup that haven't been resolved yet; but this change
+  parties. Some of these tests are skipped since they point
+  to problems outside of Beautiful Soup; but this change
   puts them all in one convenient place.
 
 * PageElement now implements the known_xml attribute. (This was technically
@@ -247,6 +245,12 @@ release, but there are a few other packaging changes:
   constructor. [bug=1913628]
 
 = 4.9.3 (20201003)
+
+This is the final release of Beautiful Soup to support Python
+2. Beautiful Soup's official support for Python 2 ended on 01 January,
+2021. In the Launchpad Git repository, the final revision to support
+Python 2 was revision 70f546b1e689a70e2f103795efce6d261a3dadf7; it is
+tagged as "python2".
 
 * Implemented a significant performance optimization to the process of
   searching the parse tree. Patch by Morotti. [bug=1898212]
