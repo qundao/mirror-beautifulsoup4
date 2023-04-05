@@ -2,9 +2,11 @@
 """Beautiful Soup bonus library: Unicode, Dammit
 
 This library converts a bytestream to Unicode through any means
-necessary. It is heavily based on code from Mark Pilgrim's Universal
-Feed Parser. It works best on XML and HTML, but it does not rewrite the
-XML or HTML to reflect a new encoding; that's the tree builder's job.
+necessary. It is heavily based on code from Mark Pilgrim's `Universal
+Feed Parser <https://pypi.org/project/feedparser/>`_. It works best on
+XML and HTML, but it does not rewrite the XML or HTML to reflect a new
+encoding; that's the job of `TreeBuilder`.
+
 """
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
@@ -40,15 +42,17 @@ except ImportError:
             # No chardet available.
             chardet_module = None
 
+            
 if chardet_module:
-    def chardet_dammit(s):
+    def _chardet_dammit(s):
         if isinstance(s, str):
             return None
         return chardet_module.detect(s)['encoding']
 else:
-    def chardet_dammit(s):
+    def _chardet_dammit(s):
         return None
 
+    
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
 xml_encoding = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
@@ -477,7 +481,7 @@ class EncodingDetector:
         # Use third-party character set detection to guess at the
         # encoding.
         if self.chardet_encoding is None:
-            self.chardet_encoding = chardet_dammit(self.markup)
+            self.chardet_encoding = _chardet_dammit(self.markup)
         if self._usable(self.chardet_encoding, tried):
             yield self.chardet_encoding
 
@@ -565,59 +569,55 @@ class EncodingDetector:
 
 class UnicodeDammit:
     """A class for detecting the encoding of a bytestring containing an
-    XML or HTML document, and converting it to a Unicode string. If
-    the source encoding is windows-1252, `UnicodeDammit` can replace
-    MS smart quotes with their HTML or XML equivalents.
+    HTML or XML document, and decoding it to Unicode. If the source
+    encoding is windows-1252, `UnicodeDammit` can also replace
+    Microsoft smart quotes with their HTML or XML equivalents.
 
-    :param markup: A bytestring representing markup in an unknown encoding.
+    :param markup: HTML or XML markup in an unknown encoding.
 
     :param known_definite_encodings: When determining the encoding
-        of `markup`, these encodings will be tried first, in
+        of ``markup``, these encodings will be tried first, in
         order. In HTML terms, this corresponds to the "known
-        definite encoding" step defined here:
-        https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding
+        definite encoding" step defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding>`_.
 
     :param user_encodings: These encodings will be tried after the
-        `known_definite_encodings` have been tried and failed, and
+        ``known_definite_encodings`` have been tried and failed, and
         after an attempt to sniff the encoding by looking at a
         byte order mark has failed. In HTML terms, this
         corresponds to the step "user has explicitly instructed
         the user agent to override the document's character
-        encoding", defined here:
-        https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding
+        encoding", defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding>`_.
 
-    :param override_encodings: A deprecated alias for
-        known_definite_encodings. Any encodings here will be tried
+    :param override_encodings: A **deprecated** alias for
+        ``known_definite_encodings``. Any encodings here will be tried
         immediately after the encodings in
-        known_definite_encodings.
+        ``known_definite_encodings``.
 
-    :param smart_quotes_to: By default, Microsoft smart quotes will, like all other characters, be converted
-       to Unicode characters. Setting this to 'ascii' will convert them to ASCII quotes instead.
-       Setting it to 'xml' will convert them to XML entity references, and setting it to 'html'
-       will convert them to HTML entity references.
-    :param is_html: If True, this markup is considered to be HTML. Otherwise
-        it's assumed to be XML.
-    :param exclude_encodings: These encodings will not be considered, even
-        if the sniffing code thinks they might make sense.
+    :param smart_quotes_to: By default, Microsoft smart quotes will,
+       like all other characters, be converted to Unicode
+       characters. Setting this to ``ascii`` will convert them to ASCII
+       quotes instead.  Setting it to ``xml`` will convert them to XML
+       entity references, and setting it to ``html`` will convert them
+       to HTML entity references.
+
+    :param is_html: If True, ``markup`` is treated as an HTML
+       document. Otherwise it's treated as an XML document.
+
+    :param exclude_encodings: These encodings will not be considered,
+       even if the sniffing code thinks they might make sense.
 
     """
-
-    # This dictionary maps commonly seen values for "charset" in HTML
-    # meta tags to the corresponding Python codec names. It only covers
-    # values that aren't in Python's aliases and can't be determined
-    # by the heuristics in find_codec.
-    CHARSET_ALIASES = {"macintosh": "mac-roman",
-                       "x-sjis": "shift-jis"}
-
-    ENCODINGS_WITH_SMART_QUOTES = [
-        "windows-1252",
-        "iso-8859-1",
-        "iso-8859-2",
-        ]
-
-    def __init__(self, markup, known_definite_encodings=[],
-                 smart_quotes_to=None, is_html=False, exclude_encodings=[],
-                 user_encodings=None, override_encodings=None
+    def __init__(
+            self, markup:bytes,
+            known_definite_encodings:list[str] | None=[],
+            # TODO 3.8 Literal is added to the typing module in Python 3.8.
+            #
+            # smart_quotes_to: Literal["ascii", "xml", "html"] | None = None,
+            smart_quotes_to: str | None = None,
+            is_html: bool = False,
+            exclude_encodings:list[str] | None = [],
+            user_encodings:list[str] | None = None,
+            override_encodings:list[str] | None =None
     ):
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings = []
@@ -685,6 +685,24 @@ class UnicodeDammit:
             else:
                 sub = sub.encode()
         return sub
+    
+    #: This dictionary maps commonly seen values for "charset" in HTML
+    #: meta tags to the corresponding Python codec names. It only covers
+    #: values that aren't in Python's aliases and can't be determined
+    #: by the heuristics in `find_codec`.
+    #:
+    #: :meta hide-value:
+    CHARSET_ALIASES: dict[str, str] = {"macintosh": "mac-roman",
+                                       "x-sjis": "shift-jis"}
+
+    #: A list of encodings that tend to contain Microsoft smart quotes.
+    #:
+    #: :meta hide-value:
+    ENCODINGS_WITH_SMART_QUOTES: list[str] = [
+        "windows-1252",
+        "iso-8859-1",
+        "iso-8859-2",
+        ]
 
     def _convert_from(self, proposed, errors="strict"):
         """Attempt to convert the markup to the proposed encoding.
@@ -725,19 +743,19 @@ class UnicodeDammit:
         return str(data, encoding, errors)
 
     @property
-    def declared_html_encoding(self):
-        """If the markup is an HTML document, returns the encoding declared _within_
-        the document.
+    def declared_html_encoding(self) -> str | None:
+        """If the markup is an HTML document, returns the encoding, if any,
+        declared *inside* the document.
         """
         if not self.is_html:
             return None
         return self.detector.declared_encoding
 
-    def find_codec(self, charset):
-        """Convert the name of a character set to a codec name.
+    def find_codec(self, charset:str) -> str|None:
+        """Look up the Python codec corresponding to a given character set.
 
         :param charset: The name of a character set.
-        :return: The name of a codec.
+        :return: The name of a Python codec.
         """
         value = (self._codec(self.CHARSET_ALIASES.get(charset, charset))
                or (charset and self._codec(charset.replace("-", "")))
@@ -764,7 +782,8 @@ class UnicodeDammit:
     #: A partial mapping of ISO-Latin-1 to HTML entities/XML numeric entities.
     #:
     #: :meta hide-value:
-    MS_CHARS = {b'\x80': ('euro', '20AC'),
+    MS_CHARS: dict[bytes, str | tuple[str, str]] = {
+        b'\x80': ('euro', '20AC'),
                 b'\x81': ' ',
                 b'\x82': ('sbquo', '201A'),
                 b'\x83': ('fnof', '192'),
@@ -802,7 +821,7 @@ class UnicodeDammit:
     #: contains non-horrors like turning “ into ".
     #:
     #: :meta hide-value:
-    MS_CHARS_TO_ASCII = {
+    MS_CHARS_TO_ASCII: dict[bytes, str] = {
         b'\x80' : 'EUR',
         b'\x81' : ' ',
         b'\x82' : ',',
@@ -941,7 +960,7 @@ class UnicodeDammit:
     #: Windows-1252.
     #:
     #: :meta hide-value:
-    WINDOWS_1252_TO_UTF8 = {
+    WINDOWS_1252_TO_UTF8: dict[int, bytes] = {
         0x80 : b'\xe2\x82\xac', # €
         0x82 : b'\xe2\x80\x9a', # ‚
         0x83 : b'\xc6\x92',     # ƒ
