@@ -17,7 +17,7 @@ release = '4.12.1'
 import sys
 import os
 sys.path.insert(0, os.path.abspath('../'))
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -31,4 +31,3 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 
 default_role = 'any'
-

@@ -18,6 +18,7 @@ import codecs
 import re
 import logging
 import string
+from typing import Dict, List # < Python 3.9
 
 # Import a library to autodetect character encodings. We'll support
 # any of a number of libraries that all support the same API:
@@ -75,13 +76,13 @@ class EntitySubstitution(object):
     #: A map of named HTML entities to the corresponding Unicode string.
     #:
     #: :meta hide-value:
-    HTML_ENTITY_TO_CHARACTER: dict[str, str] = None
+    HTML_ENTITY_TO_CHARACTER: Dict[str, str] = None
     
     #: A map of Unicode strings to the corresponding named HTML entities;
     #: the inverse of HTML_ENTITY_TO_CHARACTER.
     #:
     #: :meta hide-value:
-    CHARACTER_TO_HTML_ENTITY: dict[str, str] = None
+    CHARACTER_TO_HTML_ENTITY: Dict[str, str] = None
 
     #: A regular expression that matches any character (or, in rare
     #: cases, pair of characters) that can be replaced with a named
@@ -214,7 +215,7 @@ class EntitySubstitution(object):
     #: A map of Unicode strings to the corresponding named XML entities.
     #:
     #: :meta hide-value:
-    CHARACTER_TO_XML_ENTITY: dict[str, str] = {
+    CHARACTER_TO_XML_ENTITY: Dict[str, str] = {
         "'": "apos",
         '"': "quot",
         "&": "amp",
@@ -306,7 +307,7 @@ class EntitySubstitution(object):
         :param make_quoted_attribute: If True, then the string will be
          quoted, as befits an attribute value.
 
-        :return: A version of `value` with special characters replaced
+        :return: A version of ``value`` with special characters replaced
          with named entities.
         """
         # Escape angle brackets and ampersands.
@@ -390,7 +391,7 @@ class EncodingDetector:
     :param known_definite_encodings: When determining the encoding
         of ``markup``, these encodings will be tried first, in
         order. In HTML terms, this corresponds to the "known
-        definite encoding" step defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding>`_.
+        definite encoding" step defined in `section 13.2.3.1 of the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding>`_.
 
     :param user_encodings: These encodings will be tried after the
         ``known_definite_encodings`` have been tried and failed, and
@@ -398,7 +399,7 @@ class EncodingDetector:
         byte order mark has failed. In HTML terms, this
         corresponds to the step "user has explicitly instructed
         the user agent to override the document's character
-        encoding", defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding>`_.
+        encoding", defined in `section 13.2.3.2 of the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding>`_.
 
     :param override_encodings: A **deprecated** alias for
         ``known_definite_encodings``. Any encodings here will be tried
@@ -412,10 +413,10 @@ class EncodingDetector:
         even if they otherwise would be.
 
     """
-    def __init__(self, markup:str, known_definite_encodings:list[str]=None,
-                 is_html:bool=False, exclude_encodings:list[str]=None,
-                 user_encodings:list[str]=None,
-                 override_encodings:list[str]=None):
+    def __init__(self, markup:str, known_definite_encodings:List[str]=None,
+                 is_html:bool=False, exclude_encodings:List[str]=None,
+                 user_encodings:List[str]=None,
+                 override_encodings:List[str]=None):
         self.known_definite_encodings = list(known_definite_encodings or [])
         if override_encodings:
             self.known_definite_encodings += override_encodings
@@ -578,7 +579,7 @@ class UnicodeDammit:
     :param known_definite_encodings: When determining the encoding
         of ``markup``, these encodings will be tried first, in
         order. In HTML terms, this corresponds to the "known
-        definite encoding" step defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding>`_.
+        definite encoding" step defined in `section 13.2.3.1 of the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#parsing-with-a-known-character-encoding>`_.
 
     :param user_encodings: These encodings will be tried after the
         ``known_definite_encodings`` have been tried and failed, and
@@ -586,7 +587,7 @@ class UnicodeDammit:
         byte order mark has failed. In HTML terms, this
         corresponds to the step "user has explicitly instructed
         the user agent to override the document's character
-        encoding", defined `in the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding>`_.
+        encoding", defined in `section 13.2.3.2 of the HTML standard <https://html.spec.whatwg.org/multipage/parsing.html#determining-the-character-encoding>`_.
 
     :param override_encodings: A **deprecated** alias for
         ``known_definite_encodings``. Any encodings here will be tried
@@ -609,15 +610,15 @@ class UnicodeDammit:
     """
     def __init__(
             self, markup:bytes,
-            known_definite_encodings:list[str] | None=[],
+            known_definite_encodings:List[str] | None=[],
             # TODO 3.8 Literal is added to the typing module in Python 3.8.
             #
             # smart_quotes_to: Literal["ascii", "xml", "html"] | None = None,
             smart_quotes_to: str | None = None,
             is_html: bool = False,
-            exclude_encodings:list[str] | None = [],
-            user_encodings:list[str] | None = None,
-            override_encodings:list[str] | None =None
+            exclude_encodings:List[str] | None = [],
+            user_encodings:List[str] | None = None,
+            override_encodings:List[str] | None =None
     ):
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings = []
@@ -692,13 +693,13 @@ class UnicodeDammit:
     #: by the heuristics in `find_codec`.
     #:
     #: :meta hide-value:
-    CHARSET_ALIASES: dict[str, str] = {"macintosh": "mac-roman",
+    CHARSET_ALIASES: Dict[str, str] = {"macintosh": "mac-roman",
                                        "x-sjis": "shift-jis"}
 
     #: A list of encodings that tend to contain Microsoft smart quotes.
     #:
     #: :meta hide-value:
-    ENCODINGS_WITH_SMART_QUOTES: list[str] = [
+    ENCODINGS_WITH_SMART_QUOTES: List[str] = [
         "windows-1252",
         "iso-8859-1",
         "iso-8859-2",
@@ -782,7 +783,7 @@ class UnicodeDammit:
     #: A partial mapping of ISO-Latin-1 to HTML entities/XML numeric entities.
     #:
     #: :meta hide-value:
-    MS_CHARS: dict[bytes, str | tuple[str, str]] = {
+    MS_CHARS: Dict[bytes, str | tuple[str, str]] = {
         b'\x80': ('euro', '20AC'),
                 b'\x81': ' ',
                 b'\x82': ('sbquo', '201A'),
@@ -821,7 +822,7 @@ class UnicodeDammit:
     #: contains non-horrors like turning “ into ".
     #:
     #: :meta hide-value:
-    MS_CHARS_TO_ASCII: dict[bytes, str] = {
+    MS_CHARS_TO_ASCII: Dict[bytes, str] = {
         b'\x80' : 'EUR',
         b'\x81' : ' ',
         b'\x82' : ',',
@@ -960,7 +961,7 @@ class UnicodeDammit:
     #: Windows-1252.
     #:
     #: :meta hide-value:
-    WINDOWS_1252_TO_UTF8: dict[int, bytes] = {
+    WINDOWS_1252_TO_UTF8: Dict[int, bytes] = {
         0x80 : b'\xe2\x82\xac', # €
         0x82 : b'\xe2\x80\x9a', # ‚
         0x83 : b'\xc6\x92',     # ƒ
@@ -1099,23 +1100,23 @@ class UnicodeDammit:
     LAST_MULTIBYTE_MARKER = MULTIBYTE_MARKERS_AND_SIZES[-1][1]
 
     @classmethod
-    def detwingle(cls, in_bytes, main_encoding="utf8",
-                  embedded_encoding="windows-1252"):
+    def detwingle(cls, in_bytes:bytes, main_encoding:str="utf8",
+                  embedded_encoding:str="windows-1252") -> bytes:
         """Fix characters from one encoding embedded in some other encoding.
 
         Currently the only situation supported is Windows-1252 (or its
         subset ISO-8859-1), embedded in UTF-8.
 
         :param in_bytes: A bytestring that you suspect contains
-            characters from multiple encodings. Note that this _must_
+            characters from multiple encodings. Note that this *must*
             be a bytestring. If you've already converted the document
             to Unicode, you're too late.
-        :param main_encoding: The primary encoding of `in_bytes`.
+        :param main_encoding: The primary encoding of ``in_bytes``.
         :param embedded_encoding: The encoding that was used to embed characters
             in the main document.
-        :return: A bytestring in which `embedded_encoding`
-          characters have been converted to their `main_encoding`
-          equivalents.
+        :return: A bytestring similar to ``in_bytes``, in which
+          ``embedded_encoding`` characters have been converted to
+          their ``main_encoding`` equivalents.
         """
         if embedded_encoding.replace('_', '-').lower() not in (
             'windows-1252', 'windows_1252'):
@@ -1134,7 +1135,7 @@ class UnicodeDammit:
         while pos < len(in_bytes):
             byte = in_bytes[pos]
             if not isinstance(byte, int):
-                # Python 2.x
+                # TODO VERSION Python 2.x
                 byte = ord(byte)
             if (byte >= cls.FIRST_MULTIBYTE_MARKER
                 and byte <= cls.LAST_MULTIBYTE_MARKER):

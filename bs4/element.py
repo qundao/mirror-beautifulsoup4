@@ -1,4 +1,5 @@
 # Use of this source code is governed by the MIT license.
+from __future__ import annotations
 __license__ = "MIT"
 
 try:
@@ -7,6 +8,7 @@ except ImportError as e:
     from collections import Callable
 import re
 import sys
+from typing import Optional
 import warnings
 
 from bs4.css import CSS
@@ -70,7 +72,7 @@ class NamespacedAttribute(str):
     ('xml') and the name ('lang') that were used to create it.
     """
 
-    def __new__(cls, prefix, name=None, namespace=None):
+    def __new__(cls, prefix:str, name:Optional[str]=None, namespace:Optional[str]=None):
         if not name:
             # This is the default namespace. Its name "has no value"
             # per https://www.w3.org/TR/xml-names/#defaulting
@@ -89,23 +91,38 @@ class NamespacedAttribute(str):
         return obj
 
 class AttributeValueWithCharsetSubstitution(str):
-    """A stand-in object for a character encoding specified in HTML."""
+    """An abstract class standing in for a character encoding specified
+    inside an HTML ``<meta>`` tag.
+
+    Subclasses exist for each place such a character encoding might be
+    found: either inside the ``charset`` attribute
+    (`CharsetMetaAttributeValue`) or inside the ``content`` attribute
+    (`ContentMetaAttributeValue`)
+
+    This allows Beautiful Soup to replace that part of the HTML file
+    with a different encoding when ouputting a tree as a string.
+    """
+    pass
 
 class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
-    """A generic stand-in for the value of a meta tag's 'charset' attribute.
+    """A generic stand-in for the value of a ``<meta>`` tag's ``charset``
+    attribute.
 
-    When Beautiful Soup parses the markup '<meta charset="utf8">', the
-    value of the 'charset' attribute will be one of these objects.
+    When Beautiful Soup parses the markup ``<meta charset="utf8">``, the
+    value of the ``charset`` attribute will become one of these objects.
+
+    If the document is later encoded to an encoding other than UTF-8, its
+    ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
-
     def __new__(cls, original_value):
         obj = str.__new__(cls, original_value)
         obj.original_value = original_value
         return obj
 
-    def encode(self, encoding):
+    def encode(self, encoding:str) -> str:
         """When an HTML document is being encoded to a given encoding, the
-        value of a meta tag's 'charset' is the name of the encoding.
+        value of a ``<meta>`` tag's ``charset`` becomes the name of
+        the encoding.
         """
         if encoding in PYTHON_SPECIFIC_ENCODINGS:
             return ''
@@ -113,14 +130,18 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
 
 
 class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
-    """A generic stand-in for the value of a meta tag's 'content' attribute.
+    """A generic stand-in for the value of a ``<meta>`` tag's ``content``
+    attribute.
 
     When Beautiful Soup parses the markup:
-     <meta http-equiv="content-type" content="text/html; charset=utf8">
+     ``<meta http-equiv="content-type" content="text/html; charset=utf8">``
 
-    The value of the 'content' attribute will be one of these objects.
+    The value of the ``content`` attribute will become one of these objects.
+
+    If the document is later encoded to an encoding other than UTF-8, its
+    ``<meta>`` tag will be mention the new encoding instead of ``utf8``.
     """
-
+    #: :meta private:
     CHARSET_RE = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
 
     def __new__(cls, original_value):
@@ -133,7 +154,11 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         obj.original_value = original_value
         return obj
 
-    def encode(self, encoding):
+    def encode(self, encoding:str) -> str:
+        """When an HTML document is being encoded to a given encoding, the
+        value of the ``charset=`` in a ``<meta>`` tag's ``content`` becomes
+        the name of the encoding.
+        """
         if encoding in PYTHON_SPECIFIC_ENCODINGS:
             return ''
         def rewrite(match):
@@ -294,12 +319,11 @@ class PageElement(object):
     getText = get_text
     text = property(get_text)
 
-    def replace_with(self, *args):
-        """Replace this PageElement with one or more PageElements, keeping the
-        rest of the tree the same.
+    def replace_with(self, *args:Iterable[PageElement]) -> PageElement:
+        """Replace this `PageElement` with one or more other `PageElements`,
+        keeping the rest of the tree the same.
 
-        :param args: One or more PageElements.
-        :return: `self`, no longer part of the tree.
+        :return: This object, no longer part of the tree.
         """
         if self.parent is None:
             raise ValueError(
@@ -318,9 +342,9 @@ class PageElement(object):
     replaceWith = replace_with  # BS3
 
     def unwrap(self):
-        """Replace this PageElement with its contents.
+        """Replace this `PageElement` with its contents.
 
-        :return: `self`, no longer part of the tree.
+        :return: This object, no longer part of the tree.
         """
         my_parent = self.parent
         if self.parent is None:
@@ -335,25 +359,24 @@ class PageElement(object):
     replace_with_children = unwrap
     replaceWithChildren = unwrap  # BS3
 
-    def wrap(self, wrap_inside):
-        """Wrap this PageElement inside another one.
+    def wrap(self, wrap_inside:PageElement) -> PageElement:
+        """Wrap this `PageElement` inside another one.
 
-        :param wrap_inside: A PageElement.
-        :return: `wrap_inside`, occupying the position in the tree that used
-           to be occupied by `self`, and with `self` inside it.
+        :return: ``wrap_inside``, occupying the position in the tree that used
+           to be occupied by this object, and with this object now inside it.
         """
         me = self.replace_with(wrap_inside)
         wrap_inside.append(me)
         return wrap_inside
 
-    def extract(self, _self_index=None):
+    def extract(self, _self_index:Optional[int]=None) -> PageElement:
         """Destructively rips this element out of the tree.
 
         :param _self_index: The location of this element in its parent's
            .contents, if known. Passing this in allows for a performance
            optimization.
 
-        :return: `self`, no longer part of the tree.
+        :return: this `PageElement`, no longer part of the tree.
         """
         if self.parent is not None:
             if _self_index is None:
@@ -384,12 +407,12 @@ class PageElement(object):
         self.previous_sibling = self.next_sibling = None
         return self
 
-    def _last_descendant(self, is_initialized=True, accept_self=True):
+    def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> PageElement | None:
         """Finds the last element beneath this object to be parsed.
 
-        :param is_initialized: Has `setup` been called on this PageElement
+        :param is_initialized: Has ``setup()`` been called on this PageElement
             yet?
-        :param accept_self: Is `self` an acceptable answer to the question?
+        :param accept_self: Is ``self`` an acceptable answer to the question?
         """
         if is_initialized and self.next_sibling is not None:
             last_child = self.next_sibling.previous_element
@@ -403,14 +426,15 @@ class PageElement(object):
     # BS3: Not part of the API!
     _lastRecursiveChild = _last_descendant
 
-    def insert(self, position, new_child):
+    def insert(self, position:int, new_child:PageElement) -> None:
         """Insert a new PageElement in the list of this PageElement's children.
 
-        This works the same way as `list.insert`.
+        This works the same way as :py:meth:`list.insert`.
 
         :param position: The numeric position that should be occupied
-           in `self.children` by the new PageElement.
-        :param new_child: A PageElement.
+           in this element's `Tag.children` by the new `PageElement`.
+
+        TODO: I think this should be moved to Tag.
         """
         if new_child is None:
             raise ValueError("Cannot insert None into a tag.")
@@ -1112,9 +1136,9 @@ class Declaration(PreformattedString):
 
 
 class Doctype(PreformattedString):
-    """A document type declaration."""
+    """A `document type declaration <https://www.w3.org/TR/REC-xml/#dt-doctype>`_."""
     @classmethod
-    def for_name_and_ids(cls, name, pub_id, system_id):
+    def for_name_and_ids(cls, name:str, pub_id:str, system_id:str) -> Doctype:
         """Generate an appropriate document type declaration for a given
         public ID and system ID.
 
@@ -1123,8 +1147,6 @@ class Doctype(PreformattedString):
             e.g. '-//W3C//DTD XHTML 1.1//EN'
         :param system_id: The system identifier for this document type,
             e.g. 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
-
-        :return: A Doctype.
         """
         value = name or ''
         if pub_id is not None:
