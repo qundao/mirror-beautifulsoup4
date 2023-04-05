@@ -19,7 +19,9 @@ supported.
      object can still cause an overflow.)
 
 * Replaced setup.py and setup.cfg with pyproject.toml. Beautiful Soup
-  packages now uses hatch as its build backend.
+  packages now uses hatch as its build backend. This results in some
+  minor changes to the build artifacts, e.g. wheels no longer include
+  the unit tests.
 
 * Added a tox.ini file to make it easier to run the test suite against all
   supported versions of Python.
@@ -40,6 +42,11 @@ supported.
 
 * PageElement now implements the known_xml attribute. (This was technically
   a bug, but it shouldn't be an issue in normal use.) [bug=2007895]
+
+* The demonstrate_parser_differences.py script was still written in
+  Python 2. I've converted it to Python 3, but since no one noticed this
+  problem, it's a sign that no one uses this script and it's not
+  serving its purpose. I may rework or remove it in a later version.
 
 = 4.12.0 (20230320)
 
