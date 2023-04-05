@@ -50,7 +50,7 @@ path = "bs4/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    # The module itself.
+    # The module itself, and its unit tests.
     "/bs4/**/*.py",
     "/bs4/**/*.testcase",
 
@@ -78,4 +78,12 @@ include = [
     "/doc.ko/*.jpg",
     "/doc.ko/index.css",
     "/doc.ko/index.html",
+]
+
+
+[tool.hatch.build.targets.wheel]
+include = [
+    # The module itself, and its unit tests.
+    "/bs4/**/*.py",
+    "/bs4/**/*.testcase",   
 ]

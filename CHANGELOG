@@ -1,10 +1,19 @@
-= 4.12.1 (Unreleased)
+= 4.12.1 (20230405)
 
-This is the last version of Beautiful Soup known to support Python
-3.6. Future versions might work under 3.6, but it's not officially
-supported.
+NOTE: the following things are likely to be dropped in the next
+release of Beautiful Soup:
 
-* The main improvement in this version is a nonrecursive technique
+ Official support for Python 3.6.
+ Inclusion of unit tests and test data in the wheel file.
+ Two scripts: demonstrate_parser_differences.py and test-all-versions.
+
+Changes:
+
+* This version of Beautiful Soup replaces setup.py and setup.cfg
+  with pyproject.toml. Beautiful Soup now uses tox as its test backend
+  and hatch to do builds.
+
+* The main functional improvement in this version is a nonrecursive technique
   for regenerating a tree. This technique is used to avoid situations where,
   in previous versions, doing something to a very deeply nested tree
   would overflow the Python interpreter stack:
@@ -17,14 +26,6 @@ supported.
 
   3. Pickling a BeautifulSoup object. (Note that pickling a Tag
      object can still cause an overflow.)
-
-* Replaced setup.py and setup.cfg with pyproject.toml. Beautiful Soup
-  packages now uses hatch as its build backend. This results in some
-  minor changes to the build artifacts, e.g. wheels no longer include
-  the unit tests.
-
-* Added a tox.ini file to make it easier to run the test suite against all
-  supported versions of Python.
 
 * Making a copy of a BeautifulSoup object no longer parses the
   document again, which should improve performance significantly.
@@ -44,9 +45,9 @@ supported.
   a bug, but it shouldn't be an issue in normal use.) [bug=2007895]
 
 * The demonstrate_parser_differences.py script was still written in
-  Python 2. I've converted it to Python 3, but since no one noticed this
-  problem, it's a sign that no one uses this script and it's not
-  serving its purpose. I may rework or remove it in a later version.
+  Python 2. I've converted it to Python 3, but since no one has
+  mentioned this over the years, it's a sign that no one uses this
+  script and it's not serving its purpose.
 
 = 4.12.0 (20230320)
 
