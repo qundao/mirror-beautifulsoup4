@@ -17,6 +17,10 @@ from bs4 import (
 
 class TestFuzz(object):
 
+    # Test case markup files from fuzzers are given this extension so
+    # they can be included in builds.
+    TESTCASE_SUFFIX = ".testcase"
+
     # This class of error has been fixed by catching a less helpful
     # exception from html.parser and raising ParserRejectedMarkup
     # instead.
@@ -80,6 +84,8 @@ class TestFuzz(object):
         print(BeautifulSoup(markup, 'html5lib').encode())
 
     def __markup(self, filename):
+        if not filename.endswith(self.TESTCASE_SUFFIX):
+            filename += self.TESTCASE_SUFFIX
         this_dir = os.path.split(__file__)[0]
         path = os.path.join(this_dir, 'fuzz', filename)
         return open(path, 'rb').read()
