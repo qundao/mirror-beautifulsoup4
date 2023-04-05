@@ -2,13 +2,10 @@
 from __future__ import annotations
 __license__ = "MIT"
 
-try:
-    from collections.abc import Callable # Python 3.6
-except ImportError as e:
-    from collections import Callable
+from collections.abc import Callable, Iterable
 import re
 import sys
-from typing import Optional
+from typing import Optional, Set
 import warnings
 
 from bs4.css import CSS
@@ -38,20 +35,20 @@ def _alias(attr):
     return alias
 
 
-# These encodings are recognized by Python (so PageElement.encode
-# could theoretically support them) but XML and HTML don't recognize
-# them (so they should not show up in an XML or HTML document as that
-# document's encoding).
-#
-# If an XML document is encoded in one of these encodings, no encoding
-# will be mentioned in the XML declaration. If an HTML document is
-# encoded in one of these encodings, and the HTML document has a
-# <meta> tag that mentions an encoding, the encoding will be given as
-# the empty string.
-#
-# Source:
-# https://docs.python.org/3/library/codecs.html#python-specific-encodings
-PYTHON_SPECIFIC_ENCODINGS = set([
+#: These encodings are recognized by Python (so `PageElement.encode`
+#: could theoretically support them) but XML and HTML don't recognize
+#: them (so they should not show up in an XML or HTML document as that
+#: document's encoding).
+#:
+#: If an XML document is encoded in one of these encodings, no encoding
+#: will be mentioned in the XML declaration. If an HTML document is
+#: encoded in one of these encodings, and the HTML document has a
+#: <meta> tag that mentions an encoding, the encoding will be given as
+#: the empty string.
+#:
+#: Source:
+#: Python documentation, `Python Specific Encodings <https://docs.python.org/3/library/codecs.html#python-specific-encodings>`_
+PYTHON_SPECIFIC_ENCODINGS: Set = set([
     "idna",
     "mbcs",
     "oem",
@@ -167,15 +164,18 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
 
 
 class PageElement(object):
-    """Contains the navigational information for some part of the page:
-    that is, its current location in the parse tree.
+    """An abstract class representing a single element in the parse tree.
 
-    NavigableString, Tag, etc. are all subclasses of PageElement.
+    `NavigableString`, `Tag`, etc. are all subclasses of
+    `PageElement`. For this reason you'll see a lot of methods that
+    return `PageElement`, but you'll never see an actual `PageElement`
+    object. For the most part you can think of `PageElement` as
+    meaning "a `Tag` or a `NavigableString`."
     """
 
-    # In general, we can't tell just by looking at an element whether
-    # it's contained in an XML document or an HTML document. But for
-    # Tags (q.v.) we can store this information at parse time.
+    #: In general, we can't tell just by looking at an element whether
+    #: it's contained in an XML document or an HTML document. But for
+    #: `Tag` objects (q.v.) we can store this information at parse time.
     known_xml = None
 
     def setup(self, parent=None, previous_element=None, next_element=None,
@@ -275,8 +275,8 @@ class PageElement(object):
             return getattr(self, 'is_xml', False)
         return self.parent._is_xml
 
-    nextSibling = _alias("next_sibling")  # BS3
-    previousSibling = _alias("previous_sibling")  # BS3
+    nextSibling = _alias("next_sibling")  #: :meta private: BS3
+    previousSibling = _alias("previous_sibling")  #: :meta private: BS3
 
     default = object()
     def _all_strings(self, strip=False, types=default):
@@ -339,7 +339,7 @@ class PageElement(object):
         for idx, replace_with in enumerate(args, start=my_index):
             old_parent.insert(idx, replace_with)
         return self
-    replaceWith = replace_with  # BS3
+    replaceWith = replace_with  #: :meta private: BS3
 
     def unwrap(self):
         """Replace this `PageElement` with its contents.
@@ -357,7 +357,7 @@ class PageElement(object):
             my_parent.insert(my_index, child)
         return self
     replace_with_children = unwrap
-    replaceWithChildren = unwrap  # BS3
+    replaceWithChildren = unwrap  #: :meta private: BS3
 
     def wrap(self, wrap_inside:PageElement) -> PageElement:
         """Wrap this `PageElement` inside another one.
@@ -423,7 +423,7 @@ class PageElement(object):
         if not accept_self and last_child is self:
             last_child = None
         return last_child
-    # BS3: Not part of the API!
+    #: :meta private: BS3: Not part of the API!
     _lastRecursiveChild = _last_descendant
 
     def insert(self, position:int, new_child:PageElement) -> None:
@@ -509,19 +509,21 @@ class PageElement(object):
             new_childs_last_element.next_element.previous_element = new_childs_last_element
         self.contents.insert(position, new_child)
 
-    def append(self, tag):
-        """Appends the given PageElement to the contents of this one.
+    def append(self, tag:PageElement) -> None:
+        """Appends the given `PageElement` to the contents of this one.
 
-        :param tag: A PageElement.
+        TODO: Should probably be moved to Tag.
         """
         self.insert(len(self.contents), tag)
 
-    def extend(self, tags):
-        """Appends the given PageElements to this one's contents.
+    def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
+        """Appends `PageElement` objects to this element's contents.
 
-        :param tags: A list of PageElements. If a single Tag is
-            provided instead, this PageElement's contents will be extended
-            with that Tag's contents.
+        :param tags: A list of `PageElement`s. If a single `Tag` is
+            provided instead, this `PageElement`'s contents will be extended
+            with that `Tag`'s `Tag.contents`.
+
+        TODO: Should probably be moved to Tag.
         """
         if isinstance(tags, Tag):
             tags = tags.contents
@@ -532,13 +534,11 @@ class PageElement(object):
         for tag in tags:
             self.append(tag)
 
-    def insert_before(self, *args):
+    def insert_before(self, *args:Iterable[PageElement]) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
 
-        All the elements will have the same parent, and the given elements
-        will be immediately before this one.
-
-        :param args: One or more PageElements.
+        All the elements will have the same `PageElement.parent`, and
+        the given elements will be immediately before this one.
         """
         parent = self.parent
         if parent is None:
@@ -554,13 +554,11 @@ class PageElement(object):
             index = parent.index(self)
             parent.insert(index, predecessor)
 
-    def insert_after(self, *args):
+    def insert_after(self, *args:Iterable[PageElement]) -> None:
         """Makes the given element(s) the immediate successor of this one.
 
-        The elements will have the same parent, and the given elements
-        will be immediately after this one.
-
-        :param args: One or more PageElements.
+        The elements will have the same `PageElement.parent`, and the
+        given elements will be immediately after this one.
         """
         # Do all error checking before modifying the tree.
         parent = self.parent
@@ -595,12 +593,12 @@ class PageElement(object):
         :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
-    findNext = find_next  # BS3
+    findNext = find_next  #: :meta private: BS3
 
     def find_all_next(self, name=None, attrs={}, string=None, limit=None,
-                    **kwargs):
-        """Find all PageElements that match the given criteria and appear
-        later in the document than this PageElement.
+                    **kwargs) -> ResultSet[PageElement]: 
+        """Find all `PageElement` objects that match the given criteria and
+        appear later in the document than this `PageElement`.
 
         All find_* methods take a common set of arguments. See the online
         documentation for detailed explanations.
@@ -610,14 +608,13 @@ class PageElement(object):
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A ResultSet containing PageElements.
         """
         _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, string, limit, self.next_elements,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findAllNext = find_all_next  # BS3
+    findAllNext = find_all_next  #: :meta private: BS3
 
-    def find_next_sibling(self, name=None, attrs={}, string=None, **kwargs):
+    def find_next_sibling(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
         """Find the closest sibling to this PageElement that matches the
         given criteria and appears later in the document.
 
@@ -628,12 +625,10 @@ class PageElement(object):
         :param attrs: A dictionary of filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         return self._find_one(self.find_next_siblings, name, attrs, string,
                              **kwargs)
-    findNextSibling = find_next_sibling  # BS3
+    findNextSibling = find_next_sibling  #: :meta private: BS3
 
     def find_next_siblings(self, name=None, attrs={}, string=None, limit=None,
                            **kwargs):
@@ -656,8 +651,8 @@ class PageElement(object):
             name, attrs, string, limit,
             self.next_siblings, _stacklevel=_stacklevel+1, **kwargs
         )
-    findNextSiblings = find_next_siblings   # BS3
-    fetchNextSiblings = find_next_siblings  # BS2
+    findNextSiblings = find_next_siblings   #: :meta private: BS3
+    fetchNextSiblings = find_next_siblings  #: :meta private: BS2
 
     def find_previous(self, name=None, attrs={}, string=None, **kwargs):
         """Look backwards in the document from this PageElement and find the
@@ -675,7 +670,7 @@ class PageElement(object):
         """
         return self._find_one(
             self.find_all_previous, name, attrs, string, **kwargs)
-    findPrevious = find_previous  # BS3
+    findPrevious = find_previous  #: :meta private: BS3
 
     def find_all_previous(self, name=None, attrs={}, string=None, limit=None,
                         **kwargs):
@@ -698,8 +693,10 @@ class PageElement(object):
             name, attrs, string, limit, self.previous_elements,
             _stacklevel=_stacklevel+1, **kwargs
         )
-    findAllPrevious = find_all_previous  # BS3
-    fetchPrevious = find_all_previous    # BS2
+    findAllPrevious = find_all_previous  #: :meta private: BS3
+
+    
+    fetchPrevious = find_all_previous    #: :meta private: BS2
 
     def find_previous_sibling(self, name=None, attrs={}, string=None, **kwargs):
         """Returns the closest sibling to this PageElement that matches the
@@ -717,7 +714,7 @@ class PageElement(object):
         """
         return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
-    findPreviousSibling = find_previous_sibling  # BS3
+    findPreviousSibling = find_previous_sibling  #: :meta private: BS3
 
     def find_previous_siblings(self, name=None, attrs={}, string=None,
                                limit=None, **kwargs):
@@ -740,8 +737,8 @@ class PageElement(object):
             name, attrs, string, limit,
             self.previous_siblings, _stacklevel=_stacklevel+1, **kwargs
         )
-    findPreviousSiblings = find_previous_siblings   # BS3
-    fetchPreviousSiblings = find_previous_siblings  # BS2
+    findPreviousSiblings = find_previous_siblings   #: :meta private: BS3
+    fetchPreviousSiblings = find_previous_siblings  #: :meta private: BS2
 
     def find_parent(self, name=None, attrs={}, **kwargs):
         """Find the closest parent of this PageElement that matches the given
@@ -764,7 +761,7 @@ class PageElement(object):
         if l:
             r = l[0]
         return r
-    findParent = find_parent  # BS3
+    findParent = find_parent  #: :meta private: BS3
 
     def find_parents(self, name=None, attrs={}, limit=None, **kwargs):
         """Find all parents of this PageElement that match the given criteria.
@@ -783,8 +780,8 @@ class PageElement(object):
         _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, None, limit, self.parents,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findParents = find_parents   # BS3
-    fetchParents = find_parents  # BS2
+    findParents = find_parents   #: :meta private: BS3
+    fetchParents = find_parents  #: :meta private: BS2
 
     @property
     def next(self):
@@ -1009,7 +1006,7 @@ class NavigableString(str, PageElement):
                 "'%s' object has no attribute '%s'" % (
                     self.__class__.__name__, attr))
 
-    def output_ready(self, formatter="minimal"):
+    def output_ready(self, formatter:Formatter|str="minimal"):
         """Run the string through the provided formatter.
 
         :param formatter: A Formatter object, or a string naming one of the standard formatters.
@@ -1081,17 +1078,16 @@ class NavigableString(str, PageElement):
     strings = property(_all_strings)
 
 class PreformattedString(NavigableString):
-    """A NavigableString not subject to the normal formatting rules.
+    """A `NavigableString` not subject to the normal formatting rules.
 
     This is an abstract class used for special kinds of strings such
-    as comments (the Comment class) and CDATA blocks (the CData
-    class).
+    as comments (`Comment`) and CDATA blocks (`CData`).
     """
 
     PREFIX = ''
     SUFFIX = ''
 
-    def output_ready(self, formatter=None):
+    def output_ready(self, formatter:Optional[str|Formatter]=None):
         """Make this string ready for output by adding any subclass-specific
             prefix or suffix.
 
@@ -1241,7 +1237,7 @@ class Tag(PageElement):
             HTML tag.
         :param sourceline: The line number where this tag was found in its
             source document.
-        :param sourcepos: The character position within `sourceline` where this
+        :param sourcepos: The character position within ``sourceline`` where this
             tag was found.
         :param can_be_empty_element: If True, this tag should be
             represented as <tag/>. If False, this tag should be represented
@@ -1335,7 +1331,7 @@ class Tag(PageElement):
             else:
                 self.interesting_string_types = self.DEFAULT_INTERESTING_STRING_TYPES
 
-    parserClass = _alias("parser_class")  # BS3
+    parserClass = _alias("parser_class")  #: :meta private: BS3
 
     def __deepcopy__(self, memo, recursive=True):
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
@@ -1406,7 +1402,7 @@ class Tag(PageElement):
         then any tag with no contents is an empty-element tag.
         """
         return len(self.contents) == 0 and self.can_be_empty_element
-    isSelfClosing = is_empty_element  # BS3
+    isSelfClosing = is_empty_element  #: :meta private: BS3
 
     @property
     def string(self):
@@ -1549,13 +1545,13 @@ class Tag(PageElement):
             n = NavigableString(a+b)
             a.replace_with(n)
 
-    def index(self, element):
+    def index(self, element:PageElement) -> int:
         """Find the index of a child by identity, not value.
 
-        Avoids issues with tag.contents.index(element) getting the
+        This avoids issues with tag.contents.index(element) getting the
         index of equal elements.
 
-        :param element: Look for this PageElement in `self.contents`.
+        :param element: Look for this `PageElement` in this object's contents.
         """
         for i, child in enumerate(self.contents):
             if child is element:
@@ -1628,7 +1624,7 @@ class Tag(PageElement):
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
         #print("Getattr %s.%s" % (self.__class__, tag))
         if len(tag) > 3 and tag.endswith('Tag'):
-            # BS3: soup.aTag -> "soup.find("a")
+            #: :meta private: BS3: soup.aTag -> "soup.find("a")
             tag_name = tag[:-3]
             warnings.warn(
                 '.%(name)sTag is deprecated, use .find("%(name)s") instead. If you really were looking for a tag called %(name)sTag, use .find("%(name)sTag")' % dict(
@@ -1682,35 +1678,34 @@ class Tag(PageElement):
 
     __str__ = __repr__ = __unicode__
 
-    def encode(self, encoding=DEFAULT_OUTPUT_ENCODING,
-               indent_level=None, formatter="minimal",
-               errors="xmlcharrefreplace"):
-        """Render a bytestring representation of this PageElement and its
-        contents.
+    def encode(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
+               indent_level:Optional[int]=None,
+               formatter:Formatter|str="minimal",
+               errors:str="xmlcharrefreplace") -> bytes:
+        """Render this `PageElement` and its contents as a bytestring.
 
         :param encoding: The destination encoding.
         :param indent_level: Each line of the rendering will be
-           indented this many levels. (The formatter decides what a
-           'level' means in terms of spaces or other characters
-           output.) Used internally in recursive calls while
+           indented this many levels. (The ``formatter`` decides what a
+           'level' means, in terms of spaces or other characters
+           output.) This is used internally in recursive calls while
            pretty-printing.
-        :param formatter: A Formatter object, or a string naming one of
+        :param formatter: Either a `Formatter` object, or a string naming one of
             the standard formatters.
         :param errors: An error handling strategy such as
             'xmlcharrefreplace'. This value is passed along into
-            encode() and its value should be one of the constants
-            defined by Python.
-        :return: A bytestring.
-
+            :py:meth:`str.encode` and its value should be one of the `error
+            handling constants defined by Python's codecs module
+            <https://docs.python.org/3/library/codecs.html#error-handlers>`_.
         """
         # Turn the data structure into Unicode, then encode the
         # Unicode.
         u = self.decode(indent_level, encoding, formatter)
         return u.encode(encoding, errors)
 
-    def decode(self, indent_level=None,
+    def decode(self, indent_level:Optional[int]=None,
                eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter="minimal",
+               formatter:Formatter|str="minimal",
                iterator=None):
         pieces = []
         # First off, turn a non-Formatter `formatter` into a Formatter
@@ -1929,7 +1924,7 @@ class Tag(PageElement):
             )
         )
 
-    def prettify(self, encoding=None, formatter="minimal"):
+    def prettify(self, encoding=None, formatter:Formatter|str="minimal"):
         """Pretty-print this PageElement as a string.
 
         :param encoding: The eventual encoding of the string. If this is None,
@@ -1944,9 +1939,9 @@ class Tag(PageElement):
         else:
             return self.encode(encoding, True, formatter=formatter)
 
-    def decode_contents(self, indent_level=None,
+    def decode_contents(self, indent_level:Optional[int]=None,
                        eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-                       formatter="minimal"):
+                       formatter:Formatter|str="minimal"):
         """Renders the contents of this tag as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
@@ -1970,22 +1965,19 @@ class Tag(PageElement):
                            iterator=self.descendants)
 
     def encode_contents(
-        self, indent_level=None, encoding=DEFAULT_OUTPUT_ENCODING,
-        formatter="minimal"):
+        self, indent_level:Optional[int]=None,
+            encoding:str=DEFAULT_OUTPUT_ENCODING,
+            formatter:Formatter|str="minimal") -> bytes:
         """Renders the contents of this PageElement as a bytestring.
 
         :param indent_level: Each line of the rendering will be
-           indented this many levels. (The formatter decides what a
-           'level' means in terms of spaces or other characters
-           output.) Used internally in recursive calls while
+           indented this many levels. (The ``formatter`` decides what a
+           'level' means, in terms of spaces or other characters
+           output.) This is used internally in recursive calls while
            pretty-printing.
-
-        :param eventual_encoding: The bytestring will be in this encoding.
-
-        :param formatter: A Formatter object, or a string naming one of
-            the standard Formatters.
-
-        :return: A bytestring.
+        :param formatter: Either a `Formatter` object, or a string naming one of
+            the standard formatters.
+        :param encoding: The bytestring will be in this encoding.
         """
         contents = self.decode_contents(indent_level, encoding, formatter)
         return contents.encode(encoding)
@@ -1993,7 +1985,10 @@ class Tag(PageElement):
     # Old method for BS3 compatibility
     def renderContents(self, encoding=DEFAULT_OUTPUT_ENCODING,
                        prettyPrint=False, indentLevel=0):
-        """Deprecated method for BS3 compatibility."""
+        """Deprecated method for BS3 compatibility.
+
+        :meta private:
+        """
         if not prettyPrint:
             indentLevel = None
         return self.encode_contents(
@@ -2051,8 +2046,8 @@ class Tag(PageElement):
         _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, string, limit, generator,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findAll = find_all       # BS3
-    findChildren = find_all  # BS2
+    findAll = find_all       #: :meta private: BS3
+    findChildren = find_all  #: :meta private: BS2
 
     #Generator methods
     @property
@@ -2139,11 +2134,15 @@ class Tag(PageElement):
 
     # Old names for backwards compatibility
     def childGenerator(self):
-        """Deprecated generator."""
+        """Deprecated generator.
+        :meta private:
+        """
         return self.children
 
     def recursiveChildGenerator(self):
-        """Deprecated generator."""
+        """Deprecated generator.
+        :meta private:
+        """
         return self.descendants
 
     def has_key(self, key):
@@ -2151,6 +2150,7 @@ class Tag(PageElement):
         (attributes) was different from __in__ (contents).
 
         has_key() is gone in Python 3, anyway.
+        :meta private:
         """
         warnings.warn(
             'has_key is deprecated. Use has_attr(key) instead.',
@@ -2164,7 +2164,7 @@ class SoupStrainer(object):
     string).
 
     This is primarily used to underpin the find_* methods, but you can
-    create one yourself and pass it in as `parse_only` to the
+    create one yourself and pass it in as ``parse_only`` to the
     `BeautifulSoup` constructor, to parse a subset of a large
     document.
     """
@@ -2314,22 +2314,25 @@ class SoupStrainer(object):
             found = None
         return found
 
-    # For BS3 compatibility.
-    searchTag = search_tag
+    searchTag = search_tag #: :meta private: BS3
 
-    def search(self, markup):
-        """Find all items in `markup` that match this SoupStrainer.
+    def search(self, markup:PageElement) -> PageElement | None:
+        """Check whether the given `PageElement` matches this `SoupStrainer`.
 
-        Used by the core _find_all() method, which is ultimately
+        This is used by the core _find_all() method, which is ultimately
         called by all find_* methods.
 
-        :param markup: A PageElement or a list of them.
+        TODO: This is never passed an Iterable, and what it does when
+        passed an Iterable isn't very useful. It should be simplified.
+        Also, it seemingly returns either a PageElement or False,
+        which is slightly off.
         """
         # print('looking for %s in %s' % (self, markup))
         found = None
         # If given a list of items, scan it for a text element that
         # matches.
         if hasattr(markup, '__iter__') and not isinstance(markup, (Tag, str)):
+            import pdb; pdb.set_trace()
             for element in markup:
                 if isinstance(element, NavigableString) \
                        and self.search(element):
