@@ -18,6 +18,12 @@ supported.
   3. Pickling a BeautifulSoup object. (Note that pickling a Tag
      object can still cause an overflow.)
 
+* Replaced setup.py and setup.cfg with pyproject.toml. Beautiful Soup
+  packages now uses hatch as its build backend.
+
+* Added a tox.ini file to make it easier to run the test suite against all
+  supported versions of Python.
+
 * Making a copy of a BeautifulSoup object no longer parses the
   document again, which should improve performance significantly.
 
@@ -29,14 +35,11 @@ supported.
 
 * Added unit tests for fuzz test cases created by third
   parties. Some of these tests are skipped since they point
-  to problems outside of Beautiful Soup; but this change
+  to problems outside of Beautiful Soup, but this change
   puts them all in one convenient place.
 
 * PageElement now implements the known_xml attribute. (This was technically
   a bug, but it shouldn't be an issue in normal use.) [bug=2007895]
-
-* Added a tox.ini file to make it easier to run the test suite against all
-  supported versions of Python.
 
 = 4.12.0 (20230320)
 
