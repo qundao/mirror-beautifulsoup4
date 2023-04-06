@@ -428,114 +428,6 @@ class PageElement(object):
     #: :meta private: BS3: Not part of the API!
     _lastRecursiveChild = _last_descendant
 
-    def insert(self, position:int, new_child:PageElement) -> None:
-        """Insert a new PageElement in the list of this PageElement's children.
-
-        This works the same way as :py:meth:`list.insert`.
-
-        :param position: The numeric position that should be occupied
-           in this element's `Tag.children` by the new `PageElement`.
-
-        TODO: I think this should be moved to Tag.
-        """
-        if new_child is None:
-            raise ValueError("Cannot insert None into a tag.")
-        if new_child is self:
-            raise ValueError("Cannot insert a tag into itself.")
-        if (isinstance(new_child, str)
-            and not isinstance(new_child, NavigableString)):
-            new_child = NavigableString(new_child)
-
-        from bs4 import BeautifulSoup
-        if isinstance(new_child, BeautifulSoup):
-            # We don't want to end up with a situation where one BeautifulSoup
-            # object contains another. Insert the children one at a time.
-            for subchild in list(new_child.contents):
-                self.insert(position, subchild)
-                position += 1
-            return
-        position = min(position, len(self.contents))
-        if hasattr(new_child, 'parent') and new_child.parent is not None:
-            # We're 'inserting' an element that's already one
-            # of this object's children.
-            if new_child.parent is self:
-                current_index = self.index(new_child)
-                if current_index < position:
-                    # We're moving this element further down the list
-                    # of this object's children. That means that when
-                    # we extract this element, our target index will
-                    # jump down one.
-                    position -= 1
-            new_child.extract()
-
-        new_child.parent = self
-        previous_child = None
-        if position == 0:
-            new_child.previous_sibling = None
-            new_child.previous_element = self
-        else:
-            previous_child = self.contents[position - 1]
-            new_child.previous_sibling = previous_child
-            new_child.previous_sibling.next_sibling = new_child
-            new_child.previous_element = previous_child._last_descendant(False)
-        if new_child.previous_element is not None:
-            new_child.previous_element.next_element = new_child
-
-        new_childs_last_element = new_child._last_descendant(False)
-
-        if position >= len(self.contents):
-            new_child.next_sibling = None
-
-            parent = self
-            parents_next_sibling = None
-            while parents_next_sibling is None and parent is not None:
-                parents_next_sibling = parent.next_sibling
-                parent = parent.parent
-                if parents_next_sibling is not None:
-                    # We found the element that comes next in the document.
-                    break
-            if parents_next_sibling is not None:
-                new_childs_last_element.next_element = parents_next_sibling
-            else:
-                # The last element of this tag is the last element in
-                # the document.
-                new_childs_last_element.next_element = None
-        else:
-            next_child = self.contents[position]
-            new_child.next_sibling = next_child
-            if new_child.next_sibling is not None:
-                new_child.next_sibling.previous_sibling = new_child
-            new_childs_last_element.next_element = next_child
-
-        if new_childs_last_element.next_element is not None:
-            new_childs_last_element.next_element.previous_element = new_childs_last_element
-        self.contents.insert(position, new_child)
-
-    def append(self, tag:PageElement) -> None:
-        """Appends the given `PageElement` to the contents of this one.
-
-        TODO: Should probably be moved to Tag.
-        """
-        self.insert(len(self.contents), tag)
-
-    def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
-        """Appends one or more `PageElement` objects to this element's contents.
-
-        :param tags: A list of `PageElement`s. If a single `Tag` is
-            provided instead, this `PageElement`'s contents will be extended
-            with that `Tag`'s `Tag.contents`.
-
-        TODO: Should probably be moved to Tag.
-        """
-        if isinstance(tags, Tag):
-            tags = tags.contents
-        if isinstance(tags, list):
-            # Moving items around the tree may change their position in
-            # the original list. Make a list that won't change.
-            tags = list(tags)
-        for tag in tags:
-            self.append(tag)
-
     def insert_before(self, *args:Iterable[PageElement]) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
 
@@ -1475,6 +1367,109 @@ class Tag(PageElement):
             yield descendant
     strings = property(_all_strings)
 
+    def insert(self, position:int, new_child:PageElement) -> None:
+        """Insert a new PageElement in the list of this PageElement's children.
+
+        This works the same way as :py:meth:`list.insert`.
+
+        :param position: The numeric position that should be occupied
+           in this Tag's `Tag.children` by the new `PageElement`.
+        """
+        if new_child is None:
+            raise ValueError("Cannot insert None into a tag.")
+        if new_child is self:
+            raise ValueError("Cannot insert a tag into itself.")
+        if (isinstance(new_child, str)
+            and not isinstance(new_child, NavigableString)):
+            new_child = NavigableString(new_child)
+
+        from bs4 import BeautifulSoup
+        if isinstance(new_child, BeautifulSoup):
+            # We don't want to end up with a situation where one BeautifulSoup
+            # object contains another. Insert the children one at a time.
+            for subchild in list(new_child.contents):
+                self.insert(position, subchild)
+                position += 1
+            return
+        position = min(position, len(self.contents))
+        if hasattr(new_child, 'parent') and new_child.parent is not None:
+            # We're 'inserting' an element that's already one
+            # of this object's children.
+            if new_child.parent is self:
+                current_index = self.index(new_child)
+                if current_index < position:
+                    # We're moving this element further down the list
+                    # of this object's children. That means that when
+                    # we extract this element, our target index will
+                    # jump down one.
+                    position -= 1
+            new_child.extract()
+
+        new_child.parent = self
+        previous_child = None
+        if position == 0:
+            new_child.previous_sibling = None
+            new_child.previous_element = self
+        else:
+            previous_child = self.contents[position - 1]
+            new_child.previous_sibling = previous_child
+            new_child.previous_sibling.next_sibling = new_child
+            new_child.previous_element = previous_child._last_descendant(False)
+        if new_child.previous_element is not None:
+            new_child.previous_element.next_element = new_child
+
+        new_childs_last_element = new_child._last_descendant(False)
+
+        if position >= len(self.contents):
+            new_child.next_sibling = None
+
+            parent = self
+            parents_next_sibling = None
+            while parents_next_sibling is None and parent is not None:
+                parents_next_sibling = parent.next_sibling
+                parent = parent.parent
+                if parents_next_sibling is not None:
+                    # We found the element that comes next in the document.
+                    break
+            if parents_next_sibling is not None:
+                new_childs_last_element.next_element = parents_next_sibling
+            else:
+                # The last element of this tag is the last element in
+                # the document.
+                new_childs_last_element.next_element = None
+        else:
+            next_child = self.contents[position]
+            new_child.next_sibling = next_child
+            if new_child.next_sibling is not None:
+                new_child.next_sibling.previous_sibling = new_child
+            new_childs_last_element.next_element = next_child
+
+        if new_childs_last_element.next_element is not None:
+            new_childs_last_element.next_element.previous_element = new_childs_last_element
+        self.contents.insert(position, new_child)
+    
+    def append(self, tag:PageElement) -> None:
+        """Appends the given `PageElement` to this `Tag`'s contents.
+        """
+        self.insert(len(self.contents), tag)
+
+    def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
+        """Appends one or more `PageElement` objects to this `Tag`'s contents.
+
+        :param tags: If a list of `PageElement` objects is provided,
+            they will be appended to this tag's contents, one at a time.
+            If a single `Tag` is provided, its `Tag.contents` will be
+            used to extend this object's `Tag.contents`.
+        """
+        if isinstance(tags, Tag):
+            tags = tags.contents
+        if isinstance(tags, list):
+            # Moving items around the tree may change their position in
+            # the original list. Make a list that won't change.
+            tags = list(tags)
+        for tag in tags:
+            self.append(tag)
+    
     def decompose(self):
         """Recursively destroys this PageElement and its children.
 
