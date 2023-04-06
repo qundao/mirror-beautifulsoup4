@@ -291,8 +291,8 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
     NAME = HTMLPARSER
     features = [NAME, HTML, STRICT]
 
-    # The html.parser knows which line number and position in the
-    # original file is the source of an element.
+    #: The html.parser knows which line number and position in the
+    #: original file is the source of an element.
     TRACKS_LINE_NUMBERS = True
 
     def __init__(self, parser_args=None, parser_kwargs=None, **kwargs):
@@ -369,9 +369,6 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
                dammit.contains_replacement_characters)
 
     def feed(self, markup):
-        """Run some incoming markup through some parsing process,
-        populating the `BeautifulSoup` object in self.soup.
-        """
         args, kwargs = self.parser_args
         parser = BeautifulSoupHTMLParser(*args, **kwargs)
         parser.soup = self.soup

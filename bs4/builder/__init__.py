@@ -1,9 +1,11 @@
+from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
 from collections import defaultdict
 import itertools
 import re
+from typing import Dict, Iterable, Optional, Set, Tuple, Union
 import warnings
 import sys
 from bs4.element import (
@@ -109,69 +111,48 @@ class TreeBuilderRegistry(object):
 builder_registry = TreeBuilderRegistry()
 
 class TreeBuilder(object):
-    """Turn a textual document into a Beautiful Soup object tree."""
+    """Turn a textual document into a Beautiful Soup object tree.
 
-    NAME = "[Unknown tree builder]"
-    ALTERNATE_NAMES = []
-    features = []
+    This is an abstract superclass which smooths out the behavior of
+    different parser libraries into a single, unified interface.
 
-    is_xml = False
-    picklable = False
-    empty_element_tags = None # A tag will be considered an empty-element
-                              # tag when and only when it has no contents.
-    
-    # A value for these tag/attribute combinations is a space- or
-    # comma-separated list of CDATA, rather than a single CDATA.
-    DEFAULT_CDATA_LIST_ATTRIBUTES = defaultdict(list)
+    :param multi_valued_attributes: If this is set to None, the
+     TreeBuilder will not turn any values for attributes like
+     'class' into lists. Setting this to a dictionary will
+     customize this behavior; look at DEFAULT_CDATA_LIST_ATTRIBUTES
+     for an example.
 
-    # Whitespace should be preserved inside these tags.
-    DEFAULT_PRESERVE_WHITESPACE_TAGS = set()
+     Internally, these are called "CDATA list attributes", but that
+     probably doesn't make sense to an end-user, so the argument name
+     is `multi_valued_attributes`.
 
-    # The textual contents of tags with these names should be
-    # instantiated with some class other than NavigableString.
-    DEFAULT_STRING_CONTAINERS = {}
-    
-    USE_DEFAULT = object()
+    :param preserve_whitespace_tags: A list of tags to treat
+     the way <pre> tags are treated in HTML. Tags in this list
+     are immune from pretty-printing; their contents will always be
+     output as-is.
 
-    # Most parsers don't keep track of line numbers.
-    TRACKS_LINE_NUMBERS = False
+    :param string_containers: A dictionary mapping tag names to
+    the classes that should be instantiated to contain the textual
+    contents of those tags. The default is to use NavigableString
+    for every tag, no matter what the name. You can override the
+    default by changing DEFAULT_STRING_CONTAINERS.
+
+    :param store_line_numbers: If the parser keeps track of the
+     line numbers and positions of the original markup, that
+     information will, by default, be stored in each corresponding
+     `Tag` object. You can turn this off by passing
+     store_line_numbers=False. If the parser you're using doesn't 
+     keep track of this information, then setting store_line_numbers=True
+     will do nothing.
+    """
+
+    USE_DEFAULT = object() #: :meta private:
     
     def __init__(self, multi_valued_attributes=USE_DEFAULT,
                  preserve_whitespace_tags=USE_DEFAULT,
                  store_line_numbers=USE_DEFAULT,
                  string_containers=USE_DEFAULT,
     ):
-        """Constructor.
-
-        :param multi_valued_attributes: If this is set to None, the
-         TreeBuilder will not turn any values for attributes like
-         'class' into lists. Setting this to a dictionary will
-         customize this behavior; look at DEFAULT_CDATA_LIST_ATTRIBUTES
-         for an example.
-
-         Internally, these are called "CDATA list attributes", but that
-         probably doesn't make sense to an end-user, so the argument name
-         is `multi_valued_attributes`.
-
-        :param preserve_whitespace_tags: A list of tags to treat
-         the way <pre> tags are treated in HTML. Tags in this list
-         are immune from pretty-printing; their contents will always be
-         output as-is.
-
-        :param string_containers: A dictionary mapping tag names to
-        the classes that should be instantiated to contain the textual
-        contents of those tags. The default is to use NavigableString
-        for every tag, no matter what the name. You can override the
-        default by changing DEFAULT_STRING_CONTAINERS.
-
-        :param store_line_numbers: If the parser keeps track of the
-         line numbers and positions of the original markup, that
-         information will, by default, be stored in each corresponding
-         `Tag` object. You can turn this off by passing
-         store_line_numbers=False. If the parser you're using doesn't 
-         keep track of this information, then setting store_line_numbers=True
-         will do nothing.
-        """
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
             multi_valued_attributes = self.DEFAULT_CDATA_LIST_ATTRIBUTES
@@ -185,6 +166,31 @@ class TreeBuilder(object):
         if string_containers == self.USE_DEFAULT:
             string_containers = self.DEFAULT_STRING_CONTAINERS
         self.string_containers = string_containers
+
+    soup: BeautifulSoup
+        
+    NAME = "[Unknown tree builder]"
+    ALTERNATE_NAMES = []
+    features = []
+
+    is_xml = False
+    picklable = False
+    empty_element_tags = None # A tag will be considered an empty-element
+                              # tag when and only when it has no contents.
+    
+    #: A value for these tag/attribute combinations is a space- or
+    #: comma-separated list of CDATA, rather than a single CDATA.
+    DEFAULT_CDATA_LIST_ATTRIBUTES : Dict[str, Set] = defaultdict(set)
+
+    #: Whitespace should be preserved inside these tags.
+    DEFAULT_PRESERVE_WHITESPACE_TAGS = set()
+
+    #: The textual contents of tags with these names should be
+    #: instantiated with some class other than NavigableString.
+    DEFAULT_STRING_CONTAINERS = {}
+    
+    #: Most parsers don't keep track of line numbers.
+    TRACKS_LINE_NUMBERS = False
         
     def initialize_soup(self, soup):
         """The BeautifulSoup object has been initialized and is now
@@ -225,28 +231,27 @@ class TreeBuilder(object):
             return True
         return tag_name in self.empty_element_tags
     
-    def feed(self, markup):
+    def feed(self, markup) -> None:
         """Run some incoming markup through some parsing process,
-        populating the `BeautifulSoup` object in self.soup.
-
-        This method is not implemented in TreeBuilder; it must be
-        implemented in subclasses.
-
-        :return: None.
+        populating the `BeautifulSoup` object in `TreeBuilder.soup`
         """
         raise NotImplementedError()
 
-    def prepare_markup(self, markup, user_specified_encoding=None,
-                       document_declared_encoding=None, exclude_encodings=None):
+    def prepare_markup(self, markup:Union[bytes, str],
+                       user_specified_encoding:Optional[str]=None,
+                       document_declared_encoding:Optional[str]=None,
+                       exclude_encodings:Optional[Iterable[str]]=None
+                       ) -> Iterable[Tuple[Union[bytes, str], str, str, bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
-        :param markup: Some markup -- probably a bytestring.
-        :param user_specified_encoding: The user asked to try this encoding.
+        :param markup: The markup that's about to be parsed.
+        :param user_specified_encoding: The user asked to try this encoding
+           to convert the markup into a Unicode string.
         :param document_declared_encoding: The markup itself claims to be
             in this encoding. NOTE: This argument is not used by the
             calling code and can probably be removed.
-        :param exclude_encodings: The user asked _not_ to try any of
+        :param exclude_encodings: The user asked *not* to try any of
             these encodings.
 
         :yield: A series of 4-tuples: (markup, encoding, declared encoding,
@@ -260,10 +265,12 @@ class TreeBuilder(object):
          as-is. See `LXMLTreeBuilderForXML` and
          `HTMLParserTreeBuilder` for implementations that take into
          account the quirks of particular parsers.
+
+        :meta private:
         """
         yield markup, None, None, False
 
-    def test_fragment_to_document(self, fragment):
+    def test_fragment_to_document(self, fragment:str) -> str:
         """Wrap an HTML fragment to make it look like a document.
 
         Different parsers do this differently. For instance, lxml
@@ -274,8 +281,9 @@ class TreeBuilder(object):
 
         This method should not be used outside of tests.
 
-        :param fragment: A string -- fragment of HTML.
-        :return: A string -- a full HTML document.
+        :param fragment: A fragment of HTML.
+        :return: A full HTML document.
+        :meta private:
         """
         return fragment
 
@@ -288,6 +296,7 @@ class TreeBuilder(object):
 
         :param tag: A `Tag`
         :return: Whether or not a substitution was performed.
+        :meta private:
         """
         return False
 
@@ -380,9 +389,8 @@ class SAXTreeBuilder(TreeBuilder):
 
 
 class HTMLTreeBuilder(TreeBuilder):
-    """This TreeBuilder knows facts about HTML.
-
-    Such as which tags are empty-element tags.
+    """This TreeBuilder knows facts about HTML, such as which tags are treated
+    specially by the HTML standard.
     """
 
     empty_element_tags = set([
@@ -459,6 +467,8 @@ class HTMLTreeBuilder(TreeBuilder):
 
         :param tag: A `Tag`
         :return: Whether or not a substitution was performed.
+
+        :meta private:
         """
         # We are only interested in <meta> tags
         if tag.name != 'meta':

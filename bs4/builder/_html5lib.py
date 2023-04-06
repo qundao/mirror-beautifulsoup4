@@ -5,6 +5,7 @@ __all__ = [
     'HTML5TreeBuilder',
     ]
 
+from typing import Iterable, Tuple, Union, Optional
 import warnings
 import re
 from bs4.builder import (
@@ -40,29 +41,35 @@ except ImportError as e:
     new_html5lib = True
 
 class HTML5TreeBuilder(HTMLTreeBuilder):
-    """Use html5lib to build a tree.
+    """Use `html5lib <https://github.com/html5lib/html5lib-python>`_ to
+    build a tree.
 
-    Note that this TreeBuilder does not support some features common
-    to HTML TreeBuilders. Some of these features could theoretically
+    Note that `HTML5TreeBuilder` does not support some common HTML
+    `TreeBuilder` features. Some of these features could theoretically
     be implemented, but at the very least it's quite difficult,
     because html5lib moves the parse tree around as it's being built.
 
-    * This TreeBuilder doesn't use different subclasses of NavigableString
-      based on the name of the tag in which the string was found.
+    Specifically:
 
-    * You can't use a SoupStrainer to parse only part of a document.
+    * This `TreeBuilder` doesn't use different subclasses of
+      `NavigableString` (e.g. `Script`) based on the name of the tag
+      in which the string was found.
+    * You can't use a `SoupStrainer` to parse only part of a document.
     """
 
     NAME = "html5lib"
 
     features = [NAME, PERMISSIVE, HTML_5, HTML]
 
-    # html5lib can tell us which line number and position in the
-    # original file is the source of an element.
+    #: html5lib can tell us which line number and position in the
+    #: original file is the source of an element.
     TRACKS_LINE_NUMBERS = True
     
-    def prepare_markup(self, markup, user_specified_encoding,
-                       document_declared_encoding=None, exclude_encodings=None):
+    def prepare_markup(self, markup:Union[bytes, str],
+                       user_specified_encoding:str,
+                       document_declared_encoding:Optional[str]=None,
+                       exclude_encodings:Optional[Iterable[str]]=None
+        ) -> Iterable[Tuple[Union[bytes, str], str, str, bool]]:
         # Store the user-specified encoding for use later on.
         self.user_specified_encoding = user_specified_encoding
 
@@ -83,6 +90,9 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     # These methods are defined by Beautiful Soup.
     def feed(self, markup):
+        """Run some incoming markup through some parsing process,
+        populating the `BeautifulSoup` object in `HTML5TreeBuilder.soup`.
+        """
         if self.soup.parse_only is not None:
             warnings.warn(
                 "You provided a value for parse_only, but the html5lib tree builder doesn't support parse_only. The entire document will be parsed.",
@@ -112,8 +122,13 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
                 original_encoding = original_encoding.name
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
-            
+
     def create_treebuilder(self, namespaceHTMLElements):
+        """Called by html5lib to instantiate the kind of class it
+        calls a 'TreeBuilder'.
+        
+        :meta private:
+        """
         self.underlying_builder = TreeBuilderForHtml5lib(
             namespaceHTMLElements, self.soup,
             store_line_numbers=self.store_line_numbers
