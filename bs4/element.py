@@ -413,6 +413,26 @@ class PageElement(object):
         self.previous_sibling = self.next_sibling = None
         return self
 
+    def decompose(self) -> None:
+        """Recursively destroys this PageElement and its children.
+
+        This element will be removed from the tree and wiped out; so
+        will everything beneath it.
+
+        The behavior of a decomposed `PageElement` is undefined and you
+        should never use one for anything, but if you need to *check*
+        whether an element has been decomposed, you can use the
+        `PageElement.decomposed` property.
+        """
+        self.extract()
+        i = self
+        while i is not None:
+            n = i.next_element
+            i.__dict__.clear()
+            i.contents = []
+            i._decomposed = True
+            i = n
+
     def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> PageElement | None:
         """Finds the last element beneath this object to be parsed.
 
@@ -1511,41 +1531,18 @@ class Tag(PageElement):
         for tag in tags:
             self.append(tag)
     
-    def decompose(self) -> None:
-        """Recursively destroys this PageElement and its children.
+    def clear(self, decompose:bool=False) -> None:
+        """Destroy all children of this `Tag` by calling
+           `PageElement.extract` on them.
 
-        This element will be removed from the tree and wiped out; so
-        will everything beneath it.
-
-        The behavior of a decomposed `PageElement` is undefined and you
-        should never use one for anything, but if you need to *check*
-        whether an element has been decomposed, you can use the
-        `PageElement.decomposed` property.
+        :param decompose: If this is True, `PageElement.decompose` (a
+            more destructive method) will be called instead of
+            `PageElement.extract`.
         """
-        self.extract()
-        i = self
-        while i is not None:
-            n = i.next_element
-            i.__dict__.clear()
-            i.contents = []
-            i._decomposed = True
-            i = n
-
-    def clear(self, decompose=False):
-        """Wipe out all children of this PageElement by calling extract()
-           on them.
-
-        :param decompose: If this is True, decompose() (a more
-            destructive method) will be called instead of extract().
-        """
-        if decompose:
-            for element in self.contents[:]:
-                if isinstance(element, Tag):
-                    element.decompose()
-                else:
-                    element.extract()
-        else:
-            for element in self.contents[:]:
+        for element in self.contents[:]:
+            if decompose:
+                element.decompose()
+            else:
                 element.extract()
 
     def smooth(self):

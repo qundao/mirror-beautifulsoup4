@@ -4,6 +4,10 @@
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.
 
+* decompose() was moved from Tag to PageElement, since there's no reason
+  it won't also work on NavigableString objects.
+
+
 = 4.12.1 (20230405)
 
 NOTE: the following things are likely to be dropped in the next
