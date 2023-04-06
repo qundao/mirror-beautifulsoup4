@@ -15,6 +15,8 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
+#: Documents output by Beautiful Soup will be encoded with
+#: this encoding unless you specify otherwise.
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 
 nonwhitespace_re = re.compile(r"\S+")
@@ -35,7 +37,7 @@ def _alias(attr):
     return alias
 
 
-#: These encodings are recognized by Python (so `PageElement.encode`
+#: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize
 #: them (so they should not show up in an XML or HTML document as that
 #: document's encoding).
@@ -136,7 +138,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     The value of the ``content`` attribute will become one of these objects.
 
     If the document is later encoded to an encoding other than UTF-8, its
-    ``<meta>`` tag will be mention the new encoding instead of ``utf8``.
+    ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
     #: :meta private:
     CHARSET_RE = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
@@ -278,7 +280,7 @@ class PageElement(object):
     nextSibling = _alias("next_sibling")  #: :meta private: BS3
     previousSibling = _alias("previous_sibling")  #: :meta private: BS3
 
-    default = object()
+    default = object() #: :meta private:
     def _all_strings(self, strip=False, types=default):
         """Yield all strings of certain classes, possibly stripping them.
 
@@ -517,7 +519,7 @@ class PageElement(object):
         self.insert(len(self.contents), tag)
 
     def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
-        """Appends `PageElement` objects to this element's contents.
+        """Appends one or more `PageElement` objects to this element's contents.
 
         :param tags: A list of `PageElement`s. If a single `Tag` is
             provided instead, this `PageElement`'s contents will be extended
@@ -926,27 +928,30 @@ class PageElement(object):
             i = i.parent
 
     @property
-    def decomposed(self):
-        """Check whether a PageElement has been decomposed.
-
-        :rtype: bool
-        """
+    def decomposed(self) -> bool:
+        """Check whether a PageElement has been decomposed."""
         return getattr(self, '_decomposed', False) or False
    
     # Old non-property versions of the generators, for backwards
     # compatibility with BS3.
+
+    #: :meta private:
     def nextGenerator(self):
         return self.next_elements
 
+    #: :meta private:
     def nextSiblingGenerator(self):
         return self.next_siblings
 
+    #: :meta private:
     def previousGenerator(self):
         return self.previous_elements
 
+    #: :meta private:
     def previousSiblingGenerator(self):
         return self.previous_siblings
 
+    #: :meta private:
     def parentGenerator(self):
         return self.parents
 

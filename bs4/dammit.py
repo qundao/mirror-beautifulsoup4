@@ -13,12 +13,13 @@ __license__ = "MIT"
 
 from html.entities import codepoint2name
 from collections import defaultdict
-from collections.abc import Iterator
 import codecs
 import re
 import logging
 import string
-from typing import Dict, List # < Python 3.9
+from typing import Dict, List, Tuple # < Python 3.9
+from typing import Optional, Union # < Python 3.10
+from typing import Iterator # < Python 3.9
 
 # Import a library to autodetect character encodings. We'll support
 # any of a number of libraries that all support the same API:
@@ -492,7 +493,7 @@ class EncodingDetector:
                 yield e
 
     @classmethod
-    def strip_byte_order_mark(cls, data:bytes) -> tuple[bytes, str|None]:
+    def strip_byte_order_mark(cls, data:bytes) -> Tuple[bytes, Optional[str]]:
         """If a byte-order mark is present, strip it and return the encoding it implies.
 
         :param data: A bytestring that may or may not begin with a
@@ -524,7 +525,7 @@ class EncodingDetector:
         return data, encoding
 
     @classmethod
-    def find_declared_encoding(cls, markup:bytes|str, is_html:bool=False, search_entire_document:bool=False) -> str|None:
+    def find_declared_encoding(cls, markup:Union[bytes,str], is_html:bool=False, search_entire_document:bool=False) -> Optional[str]:
         """Given a document, tries to find an encoding declared within the
         text of the document itself.
 
@@ -610,15 +611,15 @@ class UnicodeDammit:
     """
     def __init__(
             self, markup:bytes,
-            known_definite_encodings:List[str] | None=[],
-            # TODO 3.8 Literal is added to the typing module in Python 3.8.
+            known_definite_encodings:Optional[List[str]]=[],
+            # TODO PYTHON 3.8 Literal is added to the typing module
             #
             # smart_quotes_to: Literal["ascii", "xml", "html"] | None = None,
-            smart_quotes_to: str | None = None,
+            smart_quotes_to: Optional[str] = None,
             is_html: bool = False,
-            exclude_encodings:List[str] | None = [],
-            user_encodings:List[str] | None = None,
-            override_encodings:List[str] | None =None
+            exclude_encodings:Optional[List[str]] = [],
+            user_encodings:Optional[List[str]] = None,
+            override_encodings:Optional[List[str]] = None
     ):
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings = []
@@ -744,7 +745,7 @@ class UnicodeDammit:
         return str(data, encoding, errors)
 
     @property
-    def declared_html_encoding(self) -> str | None:
+    def declared_html_encoding(self) -> Optional[str]:
         """If the markup is an HTML document, returns the encoding, if any,
         declared *inside* the document.
         """
@@ -752,7 +753,7 @@ class UnicodeDammit:
             return None
         return self.detector.declared_encoding
 
-    def find_codec(self, charset:str) -> str|None:
+    def find_codec(self, charset:str) -> Optional[str]:
         """Look up the Python codec corresponding to a given character set.
 
         :param charset: The name of a character set.
@@ -783,7 +784,7 @@ class UnicodeDammit:
     #: A partial mapping of ISO-Latin-1 to HTML entities/XML numeric entities.
     #:
     #: :meta hide-value:
-    MS_CHARS: Dict[bytes, str | tuple[str, str]] = {
+    MS_CHARS: Dict[bytes, Union[str, Tuple[str, str]]] = {
         b'\x80': ('euro', '20AC'),
                 b'\x81': ' ',
                 b'\x82': ('sbquo', '201A'),
