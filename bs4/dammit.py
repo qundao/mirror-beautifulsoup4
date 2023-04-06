@@ -17,6 +17,7 @@ import codecs
 import re
 import logging
 import string
+from types import ModuleType
 from typing import Dict, List, Tuple # < Python 3.9
 from typing import Optional, Union # < Python 3.10
 from typing import Iterator # < Python 3.9
@@ -27,7 +28,6 @@ from typing import Iterator # < Python 3.9
 # * cchardet
 # * chardet
 # * charset-normalizer
-chardet_module = None
 try:
     #  PyPI package: cchardet
     import cchardet as chardet_module
