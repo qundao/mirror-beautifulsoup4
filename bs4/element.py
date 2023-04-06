@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Callable as CallableType, Dict, Iterable, Set, Tuple, Union # Python 3.9
+from typing import Callable as CallableType, Dict, Iterator, Iterable, Set, Tuple, Union # Python 3.9
 import re
 import sys
 from typing import Optional, Set
@@ -291,7 +291,7 @@ class PageElement(object):
         raise NotImplementedError()
 
     @property
-    def stripped_strings(self) -> Iteratable[Union[NavigableString, CData]]:
+    def stripped_strings(self) -> Iterator[Union[NavigableString, CData]]:
         """Yield all interesting strings in this PageElement, stripping them
         first.
 
@@ -414,7 +414,7 @@ class PageElement(object):
         return self
 
     def decompose(self) -> None:
-        """Recursively destroys this PageElement and its children.
+        """Recursively destroys this `PageElement` and its children.
 
         This element will be removed from the tree and wiped out; so
         will everything beneath it.
@@ -498,7 +498,7 @@ class PageElement(object):
             parent.insert(index+1+offset, successor)
             offset += 1
 
-    def find_next(self, name=None, attrs={}, string=None, **kwargs):
+    def find_next(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
         """Find the first PageElement that matches the given criteria and
         appears later in the document than this PageElement.
 
@@ -509,8 +509,6 @@ class PageElement(object):
         :param attrs: A dictionary of filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
     findNext = find_next  #: :meta private: BS3
@@ -551,7 +549,7 @@ class PageElement(object):
     findNextSibling = find_next_sibling  #: :meta private: BS3
 
     def find_next_siblings(self, name=None, attrs={}, string=None, limit=None,
-                           **kwargs):
+                           **kwargs) -> ResultSet[PageElement]:
         """Find all siblings of this PageElement that match the given criteria
         and appear later in the document.
 
@@ -574,7 +572,7 @@ class PageElement(object):
     findNextSiblings = find_next_siblings   #: :meta private: BS3
     fetchNextSiblings = find_next_siblings  #: :meta private: BS2
 
-    def find_previous(self, name=None, attrs={}, string=None, **kwargs):
+    def find_previous(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
         """Look backwards in the document from this PageElement and find the
         first PageElement that matches the given criteria.
 
@@ -593,7 +591,7 @@ class PageElement(object):
     findPrevious = find_previous  #: :meta private: BS3
 
     def find_all_previous(self, name=None, attrs={}, string=None, limit=None,
-                        **kwargs):
+                        **kwargs) -> ResultSet[PageElement]:
         """Look backwards in the document from this PageElement and find all
         PageElements that match the given criteria.
 
@@ -613,12 +611,10 @@ class PageElement(object):
             name, attrs, string, limit, self.previous_elements,
             _stacklevel=_stacklevel+1, **kwargs
         )
-    findAllPrevious = find_all_previous  #: :meta private: BS3
-
-    
+    findAllPrevious = find_all_previous  #: :meta private: BS3    
     fetchPrevious = find_all_previous    #: :meta private: BS2
 
-    def find_previous_sibling(self, name=None, attrs={}, string=None, **kwargs):
+    def find_previous_sibling(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
         """Returns the closest sibling to this PageElement that matches the
         given criteria and appears earlier in the document.
 
@@ -629,15 +625,13 @@ class PageElement(object):
         :param attrs: A dictionary of filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
     findPreviousSibling = find_previous_sibling  #: :meta private: BS3
 
     def find_previous_siblings(self, name=None, attrs={}, string=None,
-                               limit=None, **kwargs):
+                               limit=None, **kwargs) -> ResultSet[PageElement]:
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
 
@@ -660,7 +654,7 @@ class PageElement(object):
     findPreviousSiblings = find_previous_siblings   #: :meta private: BS3
     fetchPreviousSiblings = find_previous_siblings  #: :meta private: BS2
 
-    def find_parent(self, name=None, attrs={}, **kwargs):
+    def find_parent(self, name=None, attrs={}, **kwargs) -> PageElement:
         """Find the closest parent of this PageElement that matches the given
         criteria.
 
@@ -683,7 +677,7 @@ class PageElement(object):
         return r
     findParent = find_parent  #: :meta private: BS3
 
-    def find_parents(self, name=None, attrs={}, limit=None, **kwargs):
+    def find_parents(self, name=None, attrs={}, limit=None, **kwargs) -> ResultSet[PageElement]:
         """Find all parents of this PageElement that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
@@ -704,20 +698,14 @@ class PageElement(object):
     fetchParents = find_parents  #: :meta private: BS2
 
     @property
-    def next(self):
-        """The PageElement, if any, that was parsed just after this one.
-
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
+    def next(self) -> PageElement:
+        """The `PageElement`, if any, that was parsed just after this one.
         """
         return self.next_element
 
     @property
-    def previous(self):
-        """The PageElement, if any, that was parsed just before this one.
-
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
+    def previous(self) -> PageElement:
+        """The `PageElement`, if any, that was parsed just before this one.
         """
         return self.previous_element
 
@@ -789,10 +777,8 @@ class PageElement(object):
     #These generators can be used to navigate starting from both
     #NavigableStrings and Tags.
     @property
-    def next_elements(self):
+    def next_elements(self) -> Iterator[PageElement]:
         """All PageElements that were parsed after this one.
-
-        :yield: A sequence of PageElements.
         """
         i = self.next_element
         while i is not None:
@@ -800,11 +786,9 @@ class PageElement(object):
             i = i.next_element
 
     @property
-    def next_siblings(self):
+    def next_siblings(self) -> Iterator[PageElement]:
         """All PageElements that are siblings of this one but were parsed
         later.
-
-        :yield: A sequence of PageElements.
         """
         i = self.next_sibling
         while i is not None:
@@ -1004,7 +988,7 @@ class NavigableString(str, PageElement):
             yield value
 
     @property
-    def strings(self) -> Iterable[NavigableString]:
+    def strings(self) -> Iterator[NavigableString]:
         """Yield this string, but only if it is interesting.
 
         This is defined the way it is for compatibility with
@@ -2113,7 +2097,7 @@ class Tag(PageElement):
 
     #Generator methods
     @property
-    def children(self):
+    def children(self) -> Iterator[PageElement]:
         """Iterate over all direct children of this PageElement.
 
         :yield: A sequence of PageElements.
@@ -2122,7 +2106,7 @@ class Tag(PageElement):
         return iter(self.contents)  # XXX This seems to be untested.
 
     @property
-    def self_and_descendants(self) -> Iterable[PageElement]:
+    def self_and_descendants(self) -> Iterator[PageElement]:
         """Iterate over this `Tag` and its children in a
         breadth-first sequence.
         """
@@ -2132,7 +2116,7 @@ class Tag(PageElement):
             yield i
 
     @property
-    def descendants(self) -> Iterable[PageElement]:
+    def descendants(self) -> Iterator[PageElement]:
         """Iterate over all children of this `Tag` in a
         breadth-first sequence.
         """
@@ -2186,7 +2170,7 @@ class Tag(PageElement):
         return self.css.select(selector, namespaces, limit, **kwargs)
 
     @property
-    def css(self):
+    def css(self) -> CSS:
         """Return an interface to the CSS selector API."""
         return CSS(self)
 

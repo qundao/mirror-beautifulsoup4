@@ -14,7 +14,7 @@ selected against, since the `CSS` object is permanently scoped to that
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Optional
+from typing import Iterator, Optional
 import warnings
 try:
     import soupsieve
