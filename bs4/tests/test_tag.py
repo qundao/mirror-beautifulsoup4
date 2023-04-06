@@ -194,6 +194,7 @@ class TestMultiValuedAttributes(SoupTest):
     def test_get_attribute_list(self):
         soup = self.soup("<a id='abc def'>")
         assert ['abc def'] == soup.a.get_attribute_list('id')
+        assert [] == soup.a.get_attribute_list('no such attribute')
         
     def test_accept_charset(self):
         soup = self.soup('<form accept-charset="ISO-8859-1 UTF-8">')

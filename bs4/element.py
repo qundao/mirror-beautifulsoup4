@@ -1545,12 +1545,13 @@ class Tag(PageElement):
             else:
                 element.extract()
 
-    def smooth(self):
-        """Smooth out this element's children by consolidating consecutive
+    def smooth(self) -> None:
+        """Smooth out the children of this `Tag` by consolidating consecutive
         strings.
 
-        This makes pretty-printed output look more natural following a
-        lot of operations that modified the tree.
+        If you perform a lot of operations that modify the tree,
+        calling this method afterwards can make pretty-printed output
+        look more natural.
         """
         # Mark the first position of every pair of children that need
         # to be consolidated.  Do this rather than making a copy of
@@ -1584,10 +1585,10 @@ class Tag(PageElement):
             a.replace_with(n)
 
     def index(self, element:PageElement) -> int:
-        """Find the index of a child by identity, not value.
+        """Find the index of a child of this `Tag` (by identity, not value).
 
-        This avoids issues with tag.contents.index(element) getting the
-        index of equal elements.
+        Doing this by identity avoids issues when a `Tag` contains two
+        children that have string equality.
 
         :param element: Look for this `PageElement` in this object's contents.
         """
@@ -1596,27 +1597,36 @@ class Tag(PageElement):
                 return i
         raise ValueError("Tag.index: element not in tag")
 
-    def get(self, key, default=None):
+    def get(self, key:str,
+            default:Optional[Union[str, List[str]]]=None) -> Optional(Union[str, List[str]]):
         """Returns the value of the 'key' attribute for the tag, or
         the value given for 'default' if it doesn't have that
-        attribute."""
+        attribute.
+
+        :param key: The attribute to look for.
+        :param default: Use this value if the attribute is not present
+            on this `Tag`.
+        """
         return self.attrs.get(key, default)
 
-    def get_attribute_list(self, key, default=None):
+    def get_attribute_list(self, key:str,
+                           default:Optional[List[str]]=None) -> List[str]:
         """The same as get(), but always returns a list.
 
         :param key: The attribute to look for.
         :param default: Use this value if the attribute is not present
-            on this PageElement.
-        :return: A list of values, probably containing only a single
+            on this `Tag`.
+        :return: A list of strings, probably containing only a single
             value.
         """
         value = self.get(key, default)
-        if not isinstance(value, list):
+        if value is None:
+            value = []
+        elif not isinstance(value, list):
             value = [value]
         return value
 
-    def has_attr(self, key):
+    def has_attr(self, key) -> bool:
         """Does this PageElement have an attribute with the given name?"""
         return key in self.attrs
 
