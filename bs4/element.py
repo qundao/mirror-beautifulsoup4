@@ -2,7 +2,8 @@
 from __future__ import annotations
 __license__ = "MIT"
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
+from typing import Iterable, Tuple # Python 3.9
 import re
 import sys
 from typing import Optional, Set
@@ -178,6 +179,7 @@ class PageElement(object):
     #: In general, we can't tell just by looking at an element whether
     #: it's contained in an XML document or an HTML document. But for
     #: `Tag` objects (q.v.) we can store this information at parse time.
+    #: :meta private:
     known_xml = None
 
     def setup(self, parent=None, previous_element=None, next_element=None,
@@ -289,16 +291,18 @@ class PageElement(object):
         raise NotImplementedError()
 
     @property
-    def stripped_strings(self):
-        """Yield all strings in this PageElement, stripping them first.
+    def stripped_strings(self) -> Iteratable[Union[NavigableString, CData]]:
+        """Yield all interesting strings in this PageElement, stripping them
+        first.
 
-        :yield: A sequence of stripped strings.
+        See `Tag` for information on which strings are considered
+        interesting in a given context.
         """
         for string in self._all_strings(True):
             yield string
 
-    def get_text(self, separator="", strip=False,
-                 types=default):
+    def get_text(self, separator:str="", strip:bool=False,
+                 types:Tuple[type]=default) -> str:
         """Get all child strings of this PageElement, concatenated using the
         given separator.
 
@@ -431,8 +435,9 @@ class PageElement(object):
     def insert_before(self, *args:Iterable[PageElement]) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
 
-        All the elements will have the same `PageElement.parent`, and
-        the given elements will be immediately before this one.
+        All the elements will have the same `PageElement.parent` as
+        this one, and the given elements will occur immediately before
+        this one.
         """
         parent = self.parent
         if parent is None:
@@ -451,8 +456,9 @@ class PageElement(object):
     def insert_after(self, *args:Iterable[PageElement]) -> None:
         """Makes the given element(s) the immediate successor of this one.
 
-        The elements will have the same `PageElement.parent`, and the
-        given elements will be immediately after this one.
+        The elements will have the same `PageElement.parent` as this
+        one, and the given elements will occur immediately after this
+        one.
         """
         # Do all error checking before modifying the tree.
         parent = self.parent
@@ -849,16 +855,16 @@ class PageElement(object):
 
 
 class NavigableString(str, PageElement):
-    """A Python Unicode string that is part of a parse tree.
+    """A Python string that is part of a parse tree.
 
-    When Beautiful Soup parses the markup <b>penguin</b>, it will
-    create a NavigableString for the string "penguin".
+    When Beautiful Soup parses the markup ``<b>penguin</b>``, it will
+    create a `NavigableString` for the string "penguin".
     """
 
     PREFIX = ''
     SUFFIX = ''
 
-    def __new__(cls, value):
+    def __new__(cls, value:str) -> NavigableString:
         """Create a new NavigableString.
 
         When unpickling a NavigableString, this method is called with
@@ -873,7 +879,7 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __deepcopy__(self, memo, recursive=False):
+    def __deepcopy__(self, memo:dict, recursive:bool=False) -> NavigableString:
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
 
@@ -883,7 +889,7 @@ class NavigableString(str, PageElement):
         """
         return type(self)(self)
 
-    def __copy__(self):
+    def __copy__(self) -> NavigableString:
         """A copy of a NavigableString can only be a deep copy, because
         only one PageElement can occupy a given place in a parse tree.
         """
@@ -893,9 +899,13 @@ class NavigableString(str, PageElement):
         return (str(self),)
 
     def __getattr__(self, attr):
-        """text.string gives you text. This is for backwards
-        compatibility for Navigable*String, but for CData* it lets you
-        get the string without the CData wrapper."""
+        """text.string gives you text. This is for backwards compatibility for
+        Navigable*String, but for classes like CData it lets you get
+        the string without the prefix and suffix.
+
+        TODO: That comment seems really old and this feature is undocumented,
+        it might not be necessary anymore.
+        """
         if attr == 'string':
             return self
         else:
@@ -903,27 +913,34 @@ class NavigableString(str, PageElement):
                 "'%s' object has no attribute '%s'" % (
                     self.__class__.__name__, attr))
 
-    def output_ready(self, formatter:Formatter|str="minimal"):
-        """Run the string through the provided formatter.
+    def output_ready(self, formatter:Formatter|str="minimal") -> str:
+        """Run the string through the provided formatter, making it
+        ready for output as part of an HTML or XML document.
 
-        :param formatter: A Formatter object, or a string naming one of the standard formatters.
+        :param formatter: A `Formatter` object, or a string naming one
+            of the standard formatters.
         """
         output = self.format_string(self, formatter)
         return self.PREFIX + output + self.SUFFIX
 
     @property
-    def name(self):
+    def name(self) -> None:
         """Since a NavigableString is not a Tag, it has no .name.
 
         This property is implemented so that code like this doesn't crash
         when run on a mixture of Tag and NavigableString objects:
             [x.name for x in tag.children]
+
+        :meta private:
         """
         return None
 
     @name.setter
-    def name(self, name):
-        """Prevent NavigableString.name from ever being set."""
+    def name(self, name:str):
+        """Prevent NavigableString.name from ever being set.
+
+        :meta private:
+        """
         raise AttributeError("A NavigableString cannot be given a name.")
 
     def _all_strings(self, strip=False, types=PageElement.default):
@@ -943,7 +960,6 @@ class NavigableString(str, PageElement):
             means no comments, processing instructions, etc.
 
         :yield: A sequence that either contains this string, or is empty.
-
         """
         if types is self.default:
             # This is kept in Tag because it's full of subclasses of
@@ -972,7 +988,18 @@ class NavigableString(str, PageElement):
             value = value.strip()
         if len(value) > 0:
             yield value
-    strings = property(_all_strings)
+
+    @property
+    def strings(self) -> Iterable[NavigableString]:
+        """Yield this string, but only if it is interesting.
+
+        This is defined the way it is for compatibility with
+        `Tag.strings`. See `Tag` for information on which strings are
+        interesting in a given context.
+
+        :yield: A sequence that either contains this string, or is empty.
+        """
+        return self._all_strings()
 
 class PreformattedString(NavigableString):
     """A `NavigableString` not subject to the normal formatting rules.
@@ -984,13 +1011,13 @@ class PreformattedString(NavigableString):
     PREFIX = ''
     SUFFIX = ''
 
-    def output_ready(self, formatter:Optional[str|Formatter]=None):
+    def output_ready(self, formatter:Optional[str|Formatter]=None) -> str:
         """Make this string ready for output by adding any subclass-specific
             prefix or suffix.
 
-        :param formatter: A Formatter object, or a string naming one
+        :param formatter: A `Formatter` object, or a string naming one
             of the standard formatters. The string will be passed into the
-            Formatter, but only to trigger any side effects: the return
+            `Formatter`, but only to trigger any side effects: the return
             value is ignored.
 
         :return: The string, with any subclass-specific prefix and
@@ -1001,7 +1028,7 @@ class PreformattedString(NavigableString):
         return self.PREFIX + self + self.SUFFIX
 
 class CData(PreformattedString):
-    """A CDATA block."""
+    """A `CDATA section <https://dev.w3.org/html5/spec-LC/syntax.html#cdata-sections>`_."""
     PREFIX = '<![CDATA['
     SUFFIX = ']]>'
 
@@ -1012,18 +1039,18 @@ class ProcessingInstruction(PreformattedString):
     SUFFIX = '>'
 
 class XMLProcessingInstruction(ProcessingInstruction):
-    """An XML processing instruction."""
+    """An `XML processing instruction <https://www.w3.org/TR/REC-xml/#sec-pi>`_."""
     PREFIX = '<?'
     SUFFIX = '?>'
 
 class Comment(PreformattedString):
-    """An HTML or XML comment."""
+    """An `HTML comment <https://dev.w3.org/html5/spec-LC/syntax.html#comments>`_ or `XML comment <https://www.w3.org/TR/REC-xml/#sec-comments>`_."""
     PREFIX = '<!--'
     SUFFIX = '-->'
 
 
 class Declaration(PreformattedString):
-    """An XML declaration."""
+    """An `XML declaration <https://www.w3.org/TR/REC-xml/#sec-prolog-dtd>`_."""
     PREFIX = '<?'
     SUFFIX = '?>'
 
@@ -1056,8 +1083,9 @@ class Doctype(PreformattedString):
 
 
 class Stylesheet(NavigableString):
-    """A NavigableString representing an stylesheet (probably
-    CSS).
+    """A `NavigableString` representing the contents of a `<style> HTML
+    tag <https://dev.w3.org/html5/spec-LC/Overview.html#the-style-element>`_
+    (probably CSS).
 
     Used to distinguish embedded stylesheets from textual content.
     """
@@ -1065,8 +1093,10 @@ class Stylesheet(NavigableString):
 
 
 class Script(NavigableString):
-    """A NavigableString representing an executable script (probably
-    Javascript).
+    """A `NavigableString` representing the contents of a `<script>
+    HTML tag
+    <https://dev.w3.org/html5/spec-LC/Overview.html#the-script-element>`_
+    (probably Javascript).
 
     Used to distinguish executable code from textual content.
     """
@@ -1074,8 +1104,9 @@ class Script(NavigableString):
 
 
 class TemplateString(NavigableString):
-    """A NavigableString representing a string found inside an HTML
-    template embedded in a larger document.
+    """A `NavigableString` representing a string found inside an `HTML
+    <template> tag <https://html.spec.whatwg.org/multipage/scripting.html#the-template-element>`_ 
+    embedded in a larger document.
 
     Used to distinguish such strings from the main body of the document.
     """
@@ -1083,10 +1114,8 @@ class TemplateString(NavigableString):
 
 
 class RubyTextString(NavigableString):
-    """A NavigableString representing the contents of the <rt> HTML
-    element.
-
-    https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rt-element
+    """A NavigableString representing the contents of an `<rt> HTML
+    tag <https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rt-element>`_.
 
     Can be used to distinguish such strings from the strings they're
     annotating.
@@ -1095,20 +1124,18 @@ class RubyTextString(NavigableString):
 
 
 class RubyParenthesisString(NavigableString):
-    """A NavigableString representing the contents of the <rp> HTML
-    element.
-
-    https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rp-element
+    """A NavigableString representing the contents of an `<rp> HTML
+    tag <https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rp-element>`_.
     """
     pass
 
 
 class Tag(PageElement):
-    """Represents an HTML or XML tag that is part of a parse tree, along
-    with its attributes and contents.
+    """An HTML or XML tag that is part of a parse tree, along with its
+    attributes, contents, and relationships to other parts of the tree.
 
-    When Beautiful Soup parses the markup <b>penguin</b>, it will
-    create a Tag object representing the <b> tag.
+    When Beautiful Soup parses the markup ``<b>penguin</b>``, it will
+    create a `Tag` object representing the <b> tag.
     """
 
     def __init__(self, parser=None, builder=None, name=None, namespace=None,
@@ -1223,7 +1250,8 @@ class Tag(PageElement):
 
             if self.name in builder.string_containers:
                 # This sort of tag uses a special string container
-                # subclass for most of its strings. When we ask the
+                # subclass for most of its strings. We need to be able
+                # to look up the proper container subclass.
                 self.interesting_string_types = builder.string_containers[self.name]
             else:
                 self.interesting_string_types = self.DEFAULT_INTERESTING_STRING_TYPES
@@ -1328,6 +1356,7 @@ class Tag(PageElement):
         self.clear()
         self.append(string.__class__(string))
 
+    #: :meta private:
     DEFAULT_INTERESTING_STRING_TYPES = (NavigableString, CData)
     def _all_strings(self, strip=False, types=PageElement.default):
         """Yield all strings of certain classes, possibly stripping them.
