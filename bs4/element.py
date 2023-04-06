@@ -1626,8 +1626,8 @@ class Tag(PageElement):
             value = [value]
         return value
 
-    def has_attr(self, key) -> bool:
-        """Does this PageElement have an attribute with the given name?"""
+    def has_attr(self, key:str) -> bool:
+        """Does this `Tag` have an attribute with the given name?"""
         return key in self.attrs
 
     def __hash__(self):
@@ -1668,12 +1668,12 @@ class Tag(PageElement):
         found within this tag."""
         return self.find_all(*args, **kwargs)
 
-    def __getattr__(self, tag):
+    def __getattr__(self, subtag):
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
         #print("Getattr %s.%s" % (self.__class__, tag))
-        if len(tag) > 3 and tag.endswith('Tag'):
-            #: :meta private: BS3: soup.aTag -> "soup.find("a")
-            tag_name = tag[:-3]
+        if len(subtag) > 3 and subtag.endswith('Tag'):
+            # BS3: soup.aTag -> "soup.find("a")
+            tag_name = subtag[:-3]
             warnings.warn(
                 '.%(name)sTag is deprecated, use .find("%(name)s") instead. If you really were looking for a tag called %(name)sTag, use .find("%(name)sTag")' % dict(
                     name=tag_name
@@ -1682,10 +1682,10 @@ class Tag(PageElement):
             )
             return self.find(tag_name)
         # We special case contents to avoid recursion.
-        elif not tag.startswith("__") and not tag == "contents":
-            return self.find(tag)
+        elif not subtag.startswith("__") and not subtag == "contents":
+            return self.find(subtag)
         raise AttributeError(
-            "'%s' object has no attribute '%s'" % (self.__class__, tag))
+            "'%s' object has no attribute '%s'" % (self.__class__, subtag))
 
     def __eq__(self, other):
         """Returns true iff this Tag has the same name, the same attributes,
@@ -1709,15 +1709,8 @@ class Tag(PageElement):
         as defined in __eq__."""
         return not self == other
 
-    def __repr__(self, encoding="unicode-escape"):
-        """Renders this PageElement as a string.
-
-        :param encoding: The encoding to use (Python 2 only).
-            TODO: This is now ignored and a warning should be issued
-            if a value is provided.
-        :return: A (Unicode) string.
-        """
-        # "The return value must be a string object", i.e. Unicode
+    def __repr__(self) -> str:
+        """Renders this `Tag` as a string."""
         return self.decode()
 
     def __unicode__(self):

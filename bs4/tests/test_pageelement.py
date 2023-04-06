@@ -3,6 +3,7 @@ import copy
 import pickle
 import pytest
 import sys
+import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import (
@@ -69,7 +70,7 @@ class TestEncoding(SoupTest):
         html = "<b>\N{SNOWMAN}</b>"
         soup = self.soup(html)
         assert html == repr(soup)
-
+        
         
 class TestFormatters(SoupTest):
     """Test the formatting feature, used by methods like decode() and
