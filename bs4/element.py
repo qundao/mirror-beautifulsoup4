@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Dict, Iterable, Set, Tuple # Python 3.9
+from typing import Callable as CallableType, Dict, Iterable, Set, Tuple, Union # Python 3.9
 import re
 import sys
 from typing import Optional, Set
@@ -1714,7 +1714,7 @@ class Tag(PageElement):
         return self.decode()
 
     def __unicode__(self):
-        """Renders this PageElement as a Unicode string."""
+        """Renders this `Tag` as a string."""
         return self.decode()
 
     __str__ = __repr__ = __unicode__
@@ -1723,9 +1723,11 @@ class Tag(PageElement):
                indent_level:Optional[int]=None,
                formatter:Formatter|str="minimal",
                errors:str="xmlcharrefreplace") -> bytes:
-        """Render this `PageElement` and its contents as a bytestring.
+        """Render this `Tag` and its contents as a bytestring.
 
-        :param encoding: The destination encoding.
+        :param encoding: The encoding to use when converting to
+           a bytestring. This may also affect the text of the document,
+           specifically any encoding declarations within the document.
         :param indent_level: Each line of the rendering will be
            indented this many levels. (The ``formatter`` decides what a
            'level' means, in terms of spaces or other characters
@@ -1745,9 +1747,29 @@ class Tag(PageElement):
         return u.encode(encoding, errors)
 
     def decode(self, indent_level:Optional[int]=None,
-               eventual_encoding=DEFAULT_OUTPUT_ENCODING,
+               eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
                formatter:Formatter|str="minimal",
-               iterator=None):
+               iterator:Iterable=None) -> str:
+        """Render this `Tag` and its contents as a Unicode string.
+
+        :param indent_level: Each line of the rendering will be
+           indented this many levels. (The ``formatter`` decides what a
+           'level' means, in terms of spaces or other characters
+           output.) This is used internally in recursive calls while
+           pretty-printing.
+        :param encoding: The encoding you intend to use when
+           converting the string to a bytestring. decode() is *not*
+           responsible for performing that encoding. This information
+           is needed so that a real encoding can be substituted in if
+           the document contains an encoding declaration (e.g. in a
+           <meta> tag).
+        :param formatter: Either a `Formatter` object, or a string
+            naming one of the standard formatters.
+        :param iterator: The iterator to use when navigating over the
+            parse tree. This is only used by `Tag.decode_contents` and
+            you probably won't need to use it.
+
+        """
         pieces = []
         # First off, turn a non-Formatter `formatter` into a Formatter
         # object. This will stop the lookup from happening over and
@@ -1833,10 +1855,10 @@ class Tag(PageElement):
         return "".join(pieces)
 
     # Names for the different events yielded by _event_stream
-    START_ELEMENT_EVENT = object()
-    END_ELEMENT_EVENT = object()
-    EMPTY_ELEMENT_EVENT = object()
-    STRING_ELEMENT_EVENT = object()
+    START_ELEMENT_EVENT = object() #: :meta private:
+    END_ELEMENT_EVENT = object() #: :meta private:
+    EMPTY_ELEMENT_EVENT = object() #: :meta private:
+    STRING_ELEMENT_EVENT = object() #: :meta private:
 
     def _event_stream(self, iterator=None):
         """Yield a sequence of events that can be used to reconstruct the DOM
@@ -1965,14 +1987,14 @@ class Tag(PageElement):
             )
         )
 
-    def prettify(self, encoding=None, formatter:Formatter|str="minimal"):
-        """Pretty-print this PageElement as a string.
+    def prettify(self, encoding:Optional[str]=None,
+                 formatter:Formatter|str="minimal") -> Union[str, bytes]:
+        """Pretty-print this `Tag` as a string or bytestring.
 
-        :param encoding: The eventual encoding of the string. If this is None,
-            a Unicode string will be returned.
+        :param encoding: The encoding of the string.
         :param formatter: A Formatter object, or a string naming one of
             the standard formatters.
-        :return: A Unicode string (if encoding==None) or a bytestring
+        :return: A string (if no ``encoding`` is provided) or a bytestring
             (otherwise).
         """
         if encoding is None:
@@ -1981,7 +2003,7 @@ class Tag(PageElement):
             return self.encode(encoding, True, formatter=formatter)
 
     def decode_contents(self, indent_level:Optional[int]=None,
-                       eventual_encoding=DEFAULT_OUTPUT_ENCODING,
+                       eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
                        formatter:Formatter|str="minimal"):
         """Renders the contents of this tag as a Unicode string.
 
@@ -1992,15 +2014,14 @@ class Tag(PageElement):
            pretty-printing.
 
         :param eventual_encoding: The tag is destined to be
-           encoded into this encoding. decode_contents() is _not_
+           encoded into this encoding. decode_contents() is *not*
            responsible for performing that encoding. This information
-           is passed in so that it can be substituted in if the
-           document contains a <META> tag that mentions the document's
-           encoding.
+           is needed so that a real encoding can be substituted in if
+           the document contains an encoding declaration (e.g. in a
+           <meta> tag).
 
-        :param formatter: A Formatter object, or a string naming one of
+        :param formatter: A `Formatter` object, or a string naming one of
             the standard Formatters.
-
         """
         return self.decode(indent_level, eventual_encoding, formatter,
                            iterator=self.descendants)
@@ -2101,11 +2122,9 @@ class Tag(PageElement):
         return iter(self.contents)  # XXX This seems to be untested.
 
     @property
-    def self_and_descendants(self):
-        """Iterate over this PageElement and its children in a
+    def self_and_descendants(self) -> Iterable[PageElement]:
+        """Iterate over this `Tag` and its children in a
         breadth-first sequence.
-
-        :yield: A sequence of PageElements.
         """
         if not self.hidden:
             yield self
@@ -2113,11 +2132,9 @@ class Tag(PageElement):
             yield i
 
     @property
-    def descendants(self):
-        """Iterate over all children of this PageElement in a
+    def descendants(self) -> Iterable[PageElement]:
+        """Iterate over all children of this `Tag` in a
         breadth-first sequence.
-
-        :yield: A sequence of PageElements.
         """
         if not len(self.contents):
             return
@@ -2199,6 +2216,67 @@ class Tag(PageElement):
         )
         return self.has_attr(key)
 
+# Define some type aliases to represent the many possibilities for
+# matching bits of a parse tree.
+#
+# This is very complicated because we're applying a formal type system
+# to some very DWIM code.
+
+# TODO In Python 3.10 we can use TypeAlias for this stuff. We can
+# also use Pattern[str] instead of just Pattern.
+
+# A function that takes a Tag and returns a yes-or-no answer.
+_ElementFunction = CallableType[[Tag], bool]
+
+# A function that takes a single attribute value and returns a
+# yes-or-no answer.
+_AttributeFunction = CallableType[[str], bool]
+
+# Either a tag name or an attribute value can be strained with a
+# string, bytestring, regular expression, or None.
+#
+# (But note that None means different things when straining a tag name
+#  versus an attribute value.)
+_BaseStrainable = Union[str, bytes, re.Pattern, bool, None]
+
+# A tag name can also be strained using a function designed to
+# match an element.
+_BaseStrainableElement = Union[_BaseStrainable, _ElementFunction]
+
+# A tag attribute can also be strained using a function designed to
+# match an attribute value.
+_BaseStrainableAttribute = Union[_BaseStrainable, _AttributeFunction]
+
+# Finally, a tag name or attribute can be strained using a single filter
+# or a list of filters.
+_StrainableElement = Union[
+    _BaseStrainableElement, Iterable[_BaseStrainableElement]
+]
+_StrainableAttribute = Union[
+    _BaseStrainableAttribute, Iterable[_BaseStrainableAttribute]
+]
+
+# Now define those types again, without allowing bytes. These are the
+# types used once the values passed into the SoupStrainer constructor
+# have been normalized.
+_BaseNormalizedStrainable = Union[str, re.Pattern, bool, None]
+_BaseNormalizedStrainableElement = Union[
+    _BaseNormalizedStrainable, _ElementFunction
+]
+_BaseNormalizedStrainableAttribute = Union[
+    _BaseNormalizedStrainable, _AttributeFunction
+]
+_NormalizedStrainableElement = Union[
+    _BaseNormalizedStrainableElement,
+    Iterable[_BaseNormalizedStrainableElement]
+]
+_NormalizedStrainableAttribute = Union[
+    _BaseNormalizedStrainableAttribute,
+    Iterable[_BaseNormalizedStrainableAttribute]
+]
+
+
+
 # Next, a couple classes to represent queries and their results.
 class SoupStrainer(object):
     """Encapsulates a number of ways of matching a markup element (tag or
@@ -2209,8 +2287,16 @@ class SoupStrainer(object):
     `BeautifulSoup` constructor, to parse a subset of a large
     document.
     """
-
-    def __init__(self, name=None, attrs={}, string=None, **kwargs):
+    name: _NormalizedStrainableAttribute
+    attrs: dict[str, _NormalizedStrainableElement]
+    string: _NormalizedStrainableAttribute
+                              
+    def __init__(self,
+                 name:Optional[_StrainableElement]=None,
+                 attrs:Union[_StrainableAttribute,
+                             Dict[str, _StrainableAttribute]] = {},
+                 string:Optional[_StrainableAttribute]=None,
+                 **kwargs: dict[str, _StrainableAttribute]) -> None:
         """Constructor.
 
         The SoupStrainer constructor takes the same arguments passed
@@ -2219,7 +2305,7 @@ class SoupStrainer(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
+        :param string: A filter to find a NavigableString with specific text.
         :kwargs: A dictionary of filters on attribute values.
         """
         if string is None and 'text' in kwargs:
@@ -2284,23 +2370,29 @@ class SoupStrainer(object):
             return new_value
 
         # Otherwise, convert it into a Unicode string.
-        # The unicode(str()) thing is so this will do the same thing on Python 2
-        # and Python 3.
-        return str(str(value))
+        return str(value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """A human-readable representation of this SoupStrainer."""
         if self.string:
             return self.string
         else:
             return "%s|%s" % (self.name, self.attrs)
 
-    def search_tag(self, markup_name=None, markup_attrs={}):
+    def search_tag(self, markup_name:Optional[Union[Tag,str]]=None,
+                   markup_attrs={}):
         """Check whether a Tag with the given name and attributes would
         match this SoupStrainer.
 
-        Used prospectively to decide whether to even bother creating a Tag
-        object.
+        When a SoupStrainer is used during the parse phase, this is
+        used prospectively to decide whether to even bother creating a
+        Tag object. When a SoupStrainer is used to perform a search,
+        this is used to match the SoupStrainer's configuration against
+        existing Tag objects.
+
+        TODO: This method signature is confusing and should be
+        reworked. And/or the method itself can probably be made
+        private.
 
         :param markup_name: A tag name as found in some markup.
         :param markup_attrs: A dictionary of attributes as found in some markup.
@@ -2475,16 +2567,15 @@ class SoupStrainer(object):
 
         return match
 
-
+ResultSet: list[PageElement]
 class ResultSet(list):
-    """A ResultSet is just a list that keeps track of the SoupStrainer
-    that created it."""
-    def __init__(self, source, result=()):
-        """Constructor.
-
-        :param source: A SoupStrainer.
-        :param result: A list of PageElements.
-        """
+    """A ResultSet is a list of `PageElement` objects, gathered as the result
+    of matching a `SoupStrainer` against a parse tree. Basically, a list of
+    search results.
+    """
+    source: SoupStrainer
+    
+    def __init__(self, source:SoupStrainer, result: Iterable[PageElement]=()):
         super(ResultSet, self).__init__(result)
         self.source = source
 
