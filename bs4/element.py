@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Iterable, Tuple # Python 3.9
+from typing import Dict, Iterable, Set, Tuple # Python 3.9
 import re
 import sys
 from typing import Optional, Set
@@ -898,20 +898,14 @@ class NavigableString(str, PageElement):
     def __getnewargs__(self):
         return (str(self),)
 
-    def __getattr__(self, attr):
-        """text.string gives you text. This is for backwards compatibility for
-        Navigable*String, but for classes like CData it lets you get
-        the string without the prefix and suffix.
+    @property
+    def string(self) -> Optional[str]:
+        """Convenience property defined to match `Tag.string`.
 
-        TODO: That comment seems really old and this feature is undocumented,
-        it might not be necessary anymore.
+        :return: This property always returns the `NavigableString` it was
+           called on.
         """
-        if attr == 'string':
-            return self
-        else:
-            raise AttributeError(
-                "'%s' object has no attribute '%s'" % (
-                    self.__class__.__name__, attr))
+        return self
 
     def output_ready(self, formatter:Formatter|str="minimal") -> str:
         """Run the string through the provided formatter, making it
@@ -1135,52 +1129,65 @@ class Tag(PageElement):
     attributes, contents, and relationships to other parts of the tree.
 
     When Beautiful Soup parses the markup ``<b>penguin</b>``, it will
-    create a `Tag` object representing the <b> tag.
+    create a `Tag` object representing the ``<b>`` tag. You can
+    instantiate `Tag` objects directly, but it's not necessary unless
+    you're adding entirely new markup to a parsed document. Most of
+    the constructor arguments are intended for use by the `TreeBuilder`
+    that's parsing a document.
+
+    :param parser: A `BeautifulSoup` object representing the parse tree this
+        `Tag` will be part of.
+    :param builder: The `TreeBuilder` being used to build the tree.
+    :param name: The name of the tag.
+    :param namespace: The URI of this tag's XML namespace, if any.
+    :param prefix: The prefix for this tag's XML namespace, if any.
+    :param attrs: A dictionary of attribute values.
+    :param parent: The `Tag` to use as the parent of this `Tag`. May be
+       the `BeautifulSoup` object itself.
+    :param previous: The `PageElement` that was parsed immediately before
+        parsing this tag.
+    :param is_xml: If True, this is an XML tag. Otherwise, this is an
+        HTML tag.
+    :param sourceline: The line number where this tag was found in its
+        source document.
+    :param sourcepos: The character position within ``sourceline`` where this
+        tag was found.
+    :param can_be_empty_element: If True, this tag should be
+        represented as <tag/>. If False, this tag should be represented
+        as <tag></tag>.
+    :param cdata_list_attributes: A dictionary of attributes whose values should
+        be parsed as lists of strings if they ever show up on this tag.
+    :param preserve_whitespace_tags: Names of tags whose contents
+        should have their whitespace preserved if they are encountered inside
+        this tag.
+    :param interesting_string_types: When iterating over this
+        tag's string contesnts in methods like `Tag.strings` or `Tag.get_text`,
+        these are the types of strings that are interesting enough
+        to be considered. By default, `NavigableString` (normal strings)
+        and `CData` (CDATA sections) are the only interesting string subtypes.
+    :param namespaces: A dictionary mapping currently active
+        namespace prefixes to URIs, as of the point in the parsing process when
+        this tag was encountered. This can be used later to
+        construct CSS selectors.
     """
-
-    def __init__(self, parser=None, builder=None, name=None, namespace=None,
-                 prefix=None, attrs=None, parent=None, previous=None,
-                 is_xml=None, sourceline=None, sourcepos=None,
-                 can_be_empty_element=None, cdata_list_attributes=None,
-                 preserve_whitespace_tags=None,
-                 interesting_string_types=None,
-                 namespaces=None
+    def __init__(self,
+                 parser:Optional[BeaufitulSoup]=None,
+                 builder:Optional[TreeBuilder]=None,
+                 name:Optional[str]=None,
+                 namespace:Optional[str]=None,
+                 prefix:Optional[str]=None,
+                 attrs:Optional[dict]=None,
+                 parent:Optional[Union[BeautifulSoup, Tag]]=None,
+                 previous:Optional[PageElement]=None,
+                 is_xml:Optional[bool]=None,
+                 sourceline:Optional[int]=None,
+                 sourcepos:Optional[int]=None,
+                 can_be_empty_element:Optional[bool]=None,
+                 cdata_list_attributes:Optional[Dict[str, Set[str]]]=None,
+                 preserve_whitespace_tags:Optional[Set[str]]=None,
+                 interesting_string_types:Optional[Set[type]]=None,
+                 namespaces:Optional[Dict[str, str]]=None
     ):
-        """Basic constructor.
-
-        :param parser: A BeautifulSoup object.
-        :param builder: A TreeBuilder.
-        :param name: The name of the tag.
-        :param namespace: The URI of this Tag's XML namespace, if any.
-        :param prefix: The prefix for this Tag's XML namespace, if any.
-        :param attrs: A dictionary of this Tag's attribute values.
-        :param parent: The PageElement to use as this Tag's parent.
-        :param previous: The PageElement that was parsed immediately before
-            this tag.
-        :param is_xml: If True, this is an XML tag. Otherwise, this is an
-            HTML tag.
-        :param sourceline: The line number where this tag was found in its
-            source document.
-        :param sourcepos: The character position within ``sourceline`` where this
-            tag was found.
-        :param can_be_empty_element: If True, this tag should be
-            represented as <tag/>. If False, this tag should be represented
-            as <tag></tag>.
-        :param cdata_list_attributes: A list of attributes whose values should
-            be treated as CDATA if they ever show up on this tag.
-        :param preserve_whitespace_tags: A list of tag names whose contents
-            should have their whitespace preserved.
-        :param interesting_string_types: This is a NavigableString
-            subclass or a tuple of them. When iterating over this
-            Tag's strings in methods like Tag.strings or Tag.get_text,
-            these are the types of strings that are interesting enough
-            to be considered. The default is to consider
-            NavigableString and CData the only interesting string
-            subtypes.
-        :param namespaces: A dictionary mapping currently active
-            namespace prefixes to URIs. This can be used later to
-            construct CSS selectors.
-        """
         if parser is None:
             self.parser_class = None
         else:
@@ -1258,7 +1265,7 @@ class Tag(PageElement):
 
     parserClass = _alias("parser_class")  #: :meta private: BS3
 
-    def __deepcopy__(self, memo, recursive=True):
+    def __deepcopy__(self, memo:dict, recursive:bool=True) -> Tag:
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
         """
@@ -1286,13 +1293,13 @@ class Tag(PageElement):
                         tag_stack.append(descendant_clone)
         return clone
 
-    def __copy__(self):
+    def __copy__(self) -> Tag:
         """A copy of a Tag must always be a deep copy, because a Tag's
         children can only have one parent at a time.
         """
         return self.__deepcopy__({})
 
-    def _clone(self):
+    def _clone(self) -> Tag:
         """Create a new Tag just like this one, but with no
         contents and unattached to any parse tree.
 
@@ -1312,53 +1319,57 @@ class Tag(PageElement):
         return clone
     
     @property
-    def is_empty_element(self):
+    def is_empty_element(self) -> bool:
         """Is this tag an empty-element tag? (aka a self-closing tag)
 
         A tag that has contents is never an empty-element tag.
 
         A tag that has no contents may or may not be an empty-element
-        tag. It depends on the builder used to create the tag. If the
-        builder has a designated list of empty-element tags, then only
-        a tag whose name shows up in that list is considered an
-        empty-element tag.
+        tag. It depends on the `TreeBuilder` used to create the
+        tag. If the builder has a designated list of empty-element
+        tags, then only a tag whose name shows up in that list is
+        considered an empty-element tag. This is usually the case
+        for HTML documents.
 
-        If the builder has no designated list of empty-element tags,
-        then any tag with no contents is an empty-element tag.
+        If the builder has no designated list of empty-element, then
+        any tag with no contents is an empty-element tag. This is usually
+        the case for XML documents.
         """
         return len(self.contents) == 0 and self.can_be_empty_element
     isSelfClosing = is_empty_element  #: :meta private: BS3
 
     @property
-    def string(self):
+    def string(self) -> Optional[str]:
         """Convenience property to get the single string within this
-        PageElement.
+        `Tag`, assuming there is just one.
 
-        TODO It might make sense to have NavigableString.string return
-        itself.
+        :return: If this `Tag` has a single child that's a
+         `NavigableString`, the return value is that string. If this
+         element has one child `Tag`, the return value is that child's
+         `Tag.string`, recursively. If this `Tag` has no children,
+         or has more than one child, the return value is ``None``.
 
-        :return: If this element has a single string child, return
-         value is that string. If this element has one child tag,
-         return value is the 'string' attribute of the child tag,
-         recursively. If this element is itself a string, has no
-         children, or has more than one child, return value is None.
+         If this property is unexpectedly returning ``None`` for you,
+         it's probably because your `Tag` has more than one thing
+         inside it.
         """
         if len(self.contents) != 1:
             return None
         child = self.contents[0]
         if isinstance(child, NavigableString):
             return child
+        
         return child.string
 
     @string.setter
-    def string(self, string):
-        """Replace this PageElement's contents with `string`."""
+    def string(self, string:str) -> None:
+        """Replace the `Tag.contents` of this `Tag` with a single string."""
         self.clear()
         self.append(string.__class__(string))
 
     #: :meta private:
-    DEFAULT_INTERESTING_STRING_TYPES = (NavigableString, CData)
-    def _all_strings(self, strip=False, types=PageElement.default):
+    DEFAULT_INTERESTING_STRING_TYPES = {NavigableString, CData}
+    def _all_strings(self, strip:bool=False, types=PageElement.default):
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
@@ -1397,7 +1408,7 @@ class Tag(PageElement):
     strings = property(_all_strings)
 
     def insert(self, position:int, new_child:PageElement) -> None:
-        """Insert a new PageElement in the list of this PageElement's children.
+        """Insert a new PageElement as a child of this `Tag`.
 
         This works the same way as :py:meth:`list.insert`.
 
@@ -1478,12 +1489,13 @@ class Tag(PageElement):
         self.contents.insert(position, new_child)
     
     def append(self, tag:PageElement) -> None:
-        """Appends the given `PageElement` to this `Tag`'s contents.
+        """Appends the given `PageElement` to the contents of this `Tag`.
         """
         self.insert(len(self.contents), tag)
 
     def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
-        """Appends one or more `PageElement` objects to this `Tag`'s contents.
+        """Appends one or more `PageElement` objects to the contents of this
+        `Tag`.
 
         :param tags: If a list of `PageElement` objects is provided,
             they will be appended to this tag's contents, one at a time.
@@ -1499,16 +1511,16 @@ class Tag(PageElement):
         for tag in tags:
             self.append(tag)
     
-    def decompose(self):
+    def decompose(self) -> None:
         """Recursively destroys this PageElement and its children.
 
         This element will be removed from the tree and wiped out; so
         will everything beneath it.
 
-        The behavior of a decomposed PageElement is undefined and you
-        should never use one for anything, but if you need to _check_
+        The behavior of a decomposed `PageElement` is undefined and you
+        should never use one for anything, but if you need to *check*
         whether an element has been decomposed, you can use the
-        `decomposed` property.
+        `PageElement.decomposed` property.
         """
         self.extract()
         i = self
@@ -2361,7 +2373,6 @@ class SoupStrainer(object):
         # If given a list of items, scan it for a text element that
         # matches.
         if hasattr(markup, '__iter__') and not isinstance(markup, (Tag, str)):
-            import pdb; pdb.set_trace()
             for element in markup:
                 if isinstance(element, NavigableString) \
                        and self.search(element):

@@ -431,20 +431,20 @@ class HTMLTreeBuilder(TreeBuilder):
     # a list of values if possible. Upon output, the list will be
     # converted back into a string.
     DEFAULT_CDATA_LIST_ATTRIBUTES = {
-        "*" : ['class', 'accesskey', 'dropzone'],
-        "a" : ['rel', 'rev'],
-        "link" :  ['rel', 'rev'],
-        "td" : ["headers"],
-        "th" : ["headers"],
-        "td" : ["headers"],
-        "form" : ["accept-charset"],
-        "object" : ["archive"],
+        "*" : {'class', 'accesskey', 'dropzone'},
+        "a" : {'rel', 'rev'},
+        "link" :  {'rel', 'rev'},
+        "td" : {"headers"},
+        "th" : {"headers"},
+        "td" : {"headers"},
+        "form" : {"accept-charset"},
+        "object" : {"archive"},
 
         # These are HTML5 specific, as are *.accesskey and *.dropzone above.
-        "area" : ["rel"],
-        "icon" : ["sizes"],
-        "iframe" : ["sandbox"],
-        "output" : ["for"],
+        "area" : {"rel"},
+        "icon" : {"sizes"},
+        "iframe" : {"sandbox"},
+        "output" : {"for"},
         }
 
     DEFAULT_PRESERVE_WHITESPACE_TAGS = set(['pre', 'textarea'])
