@@ -405,11 +405,17 @@ class PageElement(object):
         #this element (and any children) hadn't been parsed. Connect
         #the two.
         last_child = self._last_descendant()
+
+        # This can't happen because we passed accept_self=True into
+        # _last_descendant. Worst case, last_child will be
+        # self. Making this assertion removes several mypy complaints
+        # later on as we manipulate last_child.
+        assert last_child is not None
         next_element = last_child.next_element
 
-        if (self.previous_element is not None and
-            self.previous_element is not next_element):
-            self.previous_element.next_element = next_element
+        if self.previous_element is not None:
+            if self.previous_element is not next_element:
+                self.previous_element.next_element = next_element
         if next_element is not None and next_element is not self.previous_element:
             next_element.previous_element = self.previous_element
         self.previous_element = None
