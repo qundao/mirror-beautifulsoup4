@@ -6,10 +6,7 @@ __all__ = [
     'LXMLTreeBuilder',
     ]
 
-try:
-    from collections.abc import Callable # Python 3.6
-except ImportError as e:
-    from collections import Callable
+from collections.abc import Callable
 
 from io import BytesIO
 from io import StringIO

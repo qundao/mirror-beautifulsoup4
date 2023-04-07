@@ -10,6 +10,9 @@
 * If Tag.get_attribute_list() is used to access an attribute that's not set,
   the return value is now an empty list rather than [None].
 
+* AttributeValueWithCharsetSubstitution.encode() is renamed to
+  substitute_encoding, to avoid confusion with the much different str.encode()
+
 = 4.12.1 (20230405)
 
 NOTE: the following things are likely to be dropped in the next

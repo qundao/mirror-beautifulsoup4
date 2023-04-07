@@ -170,24 +170,26 @@ class TreeBuilder(object):
     soup: BeautifulSoup
         
     NAME = "[Unknown tree builder]"
-    ALTERNATE_NAMES = []
-    features = []
+    ALTERNATE_NAMES: Iterable[str] = []
+    features: Iterable[str] = []
 
     is_xml = False
     picklable = False
-    empty_element_tags = None # A tag will be considered an empty-element
-                              # tag when and only when it has no contents.
+
+    #: A tag will be considered an empty-element
+    #: tag when and only when it has no contents.
+    empty_element_tags: Optional[Set] = None
     
     #: A value for these tag/attribute combinations is a space- or
     #: comma-separated list of CDATA, rather than a single CDATA.
     DEFAULT_CDATA_LIST_ATTRIBUTES : Dict[str, Set] = defaultdict(set)
 
     #: Whitespace should be preserved inside these tags.
-    DEFAULT_PRESERVE_WHITESPACE_TAGS = set()
+    DEFAULT_PRESERVE_WHITESPACE_TAGS : Set[str] = set()
 
     #: The textual contents of tags with these names should be
     #: instantiated with some class other than NavigableString.
-    DEFAULT_STRING_CONTAINERS = {}
+    DEFAULT_STRING_CONTAINERS: Dict[str, type] = {}
     
     #: Most parsers don't keep track of line numbers.
     TRACKS_LINE_NUMBERS = False

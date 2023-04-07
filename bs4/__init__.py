@@ -38,8 +38,8 @@ from .builder import (
     builder_registry,
     ParserRejectedMarkup,
     XMLParsedAsHTMLWarning,
-    HTMLParserTreeBuilder
 )
+from .builder._htmlparser import HTMLParserTreeBuilder
 from .dammit import UnicodeDammit
 from .element import (
     CData,

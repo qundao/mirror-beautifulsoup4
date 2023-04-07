@@ -898,8 +898,13 @@ Hello, world!
 
         # And it will take on a value that reflects its current
         # encoding.
-        assert 'text/html; charset=utf8' == content.encode("utf8")
+        assert 'text/html; charset=utf8' == content.substitute_encoding("utf8")
 
+        # No matter how the <meta> tag is encoded, its charset attribute
+        # will always be accurate.
+        assert b'charset=utf8' in parsed_meta.encode("utf8")
+        assert b'charset=shift-jis' in parsed_meta.encode("shift-jis")
+        
         # For the rest of the story, see TestSubstitutions in
         # test_tree.py.
 
@@ -925,8 +930,13 @@ Hello, world!
 
         # And it will take on a value that reflects its current
         # encoding.
-        assert 'utf8' == charset.encode("utf8")
+        assert 'utf8' == charset.substitute_encoding("utf8")
 
+        # No matter how the <meta> tag is encoded, its charset attribute
+        # will always be accurate.
+        assert b'charset="utf8"' in parsed_meta.encode("utf8")
+        assert b'charset="shift-jis"' in parsed_meta.encode("shift-jis")
+        
     def test_python_specific_encodings_not_used_in_charset(self):
         # You can encode an HTML document using a Python-specific
         # encoding, but that encoding won't be mentioned _inside_ the

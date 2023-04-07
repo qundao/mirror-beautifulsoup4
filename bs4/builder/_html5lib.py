@@ -105,11 +105,9 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             doc.original_encoding = None
         else:
             original_encoding = parser.tokenizer.stream.charEncoding[0]
-            if not isinstance(original_encoding, str):
-                # In 0.99999999 and up, the encoding is an html5lib
-                # Encoding object. We want to use a string for compatibility
-                # with other tree builders.
-                original_encoding = original_encoding.name
+            # The encoding is an html5lib Encoding object. We want to
+            # use a string for compatibility with other tree builders.
+            original_encoding = original_encoding.name
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
 

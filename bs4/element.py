@@ -72,6 +72,10 @@ class NamespacedAttribute(str):
     ('xml') and the name ('lang') that were used to create it.
     """
 
+    prefix: Optional[str]
+    name: Optional[str]
+    namespace: Optional[str]
+    
     def __new__(cls, prefix:str, name:Optional[str]=None, namespace:Optional[str]=None):
         if not name:
             # This is the default namespace. Its name "has no value"
@@ -119,14 +123,14 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         obj.original_value = original_value
         return obj
 
-    def encode(self, encoding:str) -> str:
+    def substitute_encoding(self, eventual_encoding="utf-8") -> str:
         """When an HTML document is being encoded to a given encoding, the
         value of a ``<meta>`` tag's ``charset`` becomes the name of
         the encoding.
         """
-        if encoding in PYTHON_SPECIFIC_ENCODINGS:
+        if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
             return ''
-        return encoding
+        return eventual_encoding
 
 
 class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
@@ -154,15 +158,15 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         obj.original_value = original_value
         return obj
 
-    def encode(self, encoding:str) -> str:
+    def substitute_encoding(self, eventual_encoding="utf-8") -> str:
         """When an HTML document is being encoded to a given encoding, the
         value of the ``charset=`` in a ``<meta>`` tag's ``content`` becomes
         the name of the encoding.
         """
-        if encoding in PYTHON_SPECIFIC_ENCODINGS:
+        if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
             return ''
         def rewrite(match):
-            return match.group(1) + encoding
+            return match.group(1) + eventual_encoding
         return self.CHARSET_RE.sub(rewrite, self.original_value)
 
 
@@ -1175,7 +1179,7 @@ class Tag(PageElement):
         construct CSS selectors.
     """
     def __init__(self,
-                 parser:Optional[BeaufitulSoup]=None,
+                 parser:Optional[BeautifulSoup]=None,
                  builder:Optional[TreeBuilder]=None,
                  name:Optional[str]=None,
                  namespace:Optional[str]=None,
@@ -1582,7 +1586,7 @@ class Tag(PageElement):
         raise ValueError("Tag.index: element not in tag")
 
     def get(self, key:str,
-            default:Optional[Union[str, List[str]]]=None) -> Optional(Union[str, List[str]]):
+            default:Optional[Union[str, List[str]]]=None) -> Optional[Union[str, List[str]]]:
         """Returns the value of the 'key' attribute for the tag, or
         the value given for 'default' if it doesn't have that
         attribute.
@@ -1938,7 +1942,7 @@ class Tag(PageElement):
                             isinstance(val, AttributeValueWithCharsetSubstitution)
                             and eventual_encoding is not None
                     ):
-                        val = val.encode(eventual_encoding)
+                        val = val.substitute_encoding(eventual_encoding)
 
                     text = formatter.attribute_value(val)
                     decoded = (
