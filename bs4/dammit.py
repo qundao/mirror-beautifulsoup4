@@ -18,9 +18,7 @@ import re
 import logging
 import string
 from types import ModuleType
-from typing import Dict, List, Tuple # < Python 3.9
-from typing import Optional, Union # < Python 3.10
-from typing import Iterator # < Python 3.9
+from typing import Dict, Iterator, Optional, List, Set, Union, Tuple
 
 # Import a library to autodetect character encodings. We'll support
 # any of a number of libraries that all support the same API:
@@ -59,7 +57,7 @@ else:
 # a declared encoding inside an XML or HTML document.
 xml_encoding = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
 html_meta = '<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]'
-encoding_res = dict()
+encoding_res: Dict[type, Dict[str, re.Pattern]] = dict()
 encoding_res[bytes] = {
     'html' : re.compile(html_meta.encode("ascii"), re.I),
     'xml' : re.compile(xml_encoding.encode("ascii"), re.I),
@@ -77,22 +75,23 @@ class EntitySubstitution(object):
     #: A map of named HTML entities to the corresponding Unicode string.
     #:
     #: :meta hide-value:
-    HTML_ENTITY_TO_CHARACTER: Dict[str, str] = None
+    HTML_ENTITY_TO_CHARACTER: Dict[str, str]
     
     #: A map of Unicode strings to the corresponding named HTML entities;
     #: the inverse of HTML_ENTITY_TO_CHARACTER.
     #:
     #: :meta hide-value:
-    CHARACTER_TO_HTML_ENTITY: Dict[str, str] = None
+    CHARACTER_TO_HTML_ENTITY: Dict[str, str]
 
     #: A regular expression that matches any character (or, in rare
     #: cases, pair of characters) that can be replaced with a named
     #: HTML entity.
     #:
     #: :meta hide-value:
-    CHARACTER_TO_HTML_ENTITY_RE: re.Pattern = None
-    
-    def _populate_class_variables():
+    CHARACTER_TO_HTML_ENTITY_RE: re.Pattern
+
+    @classmethod
+    def _populate_class_variables(cls):
         """Initialize variables used by this class to manage the plethora of
         HTML5 named entities.
 
@@ -209,9 +208,9 @@ class EntitySubstitution(object):
             character = chr(codepoint)
             unicode_to_name[character] = name
 
-        return unicode_to_name, name_to_unicode, re.compile(re_definition)
-    (CHARACTER_TO_HTML_ENTITY, HTML_ENTITY_TO_CHARACTER,
-     CHARACTER_TO_HTML_ENTITY_RE) = _populate_class_variables()
+        cls.CHARACTER_TO_HTML_ENTITY = unicode_to_name
+        cls.HTML_ENTITY_TO_CHARACTER = name_to_unicode
+        cls.CHARACTER_TO_HTML_ENTITY_RE = re.compile(re_definition)
 
     #: A map of Unicode strings to the corresponding named XML entities.
     #:
@@ -359,6 +358,7 @@ class EntitySubstitution(object):
         """
         return cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
             cls._substitute_html_entity, s)
+EntitySubstitution._populate_class_variables()
 
 class EncodingDetector:
     """This class is capable of guessing a number of possible encodings
@@ -414,10 +414,12 @@ class EncodingDetector:
         even if they otherwise would be.
 
     """
-    def __init__(self, markup:str, known_definite_encodings:List[str]=None,
-                 is_html:bool=False, exclude_encodings:List[str]=None,
-                 user_encodings:List[str]=None,
-                 override_encodings:List[str]=None):
+    def __init__(self, markup:bytes,
+                 known_definite_encodings:Optional[List[str]]=None,
+                 is_html:Optional[bool]=False,
+                 exclude_encodings:Optional[List[str]]=None,
+                 user_encodings:Optional[List[str]]=None,
+                 override_encodings:Optional[List[str]]=None):
         self.known_definite_encodings = list(known_definite_encodings or [])
         if override_encodings:
             self.known_definite_encodings += override_encodings
@@ -425,26 +427,27 @@ class EncodingDetector:
         exclude_encodings = exclude_encodings or []
         self.exclude_encodings = set([x.lower() for x in exclude_encodings])
         self.chardet_encoding = None
-        self.is_html = is_html
-        self.declared_encoding = None
+        self.is_html = False if is_html is None else is_html
+        self.declared_encoding: Optional[str] = None
 
         # First order of business: strip a byte-order mark.
         self.markup, self.sniffed_encoding = self.strip_byte_order_mark(markup)
 
-    def _usable(self, encoding, tried):
+    def _usable(self, encoding:Optional[str], tried:Set[str]):
         """Should we even bother to try this encoding?
 
         :param encoding: Name of an encoding.
         :param tried: Encodings that have already been tried. This will be modified
             as a side effect.
         """
-        if encoding is not None:
-            encoding = encoding.lower()
-            if encoding in self.exclude_encodings:
-                return False
-            if encoding not in tried:
-                tried.add(encoding)
-                return True
+        if encoding is None:
+            return False
+        encoding = encoding.lower()
+        if encoding in self.exclude_encodings:
+            return False
+        if encoding not in tried:
+            tried.add(encoding)
+            return True
         return False
 
     @property
@@ -454,7 +457,7 @@ class EncodingDetector:
         :yield: A sequence of strings. Each is the name of an encoding
            that *might* work to convert a bytestring into Unicode.
         """
-        tried = set()
+        tried:Set[str] = set()
 
         # First, try the known definite encodings
         for e in self.known_definite_encodings:
@@ -463,7 +466,9 @@ class EncodingDetector:
 
         # Did the document originally start with a byte-order mark
         # that indicated its encoding?
-        if self._usable(self.sniffed_encoding, tried):
+        if self.sniffed_encoding is not None and self._usable(
+            self.sniffed_encoding, tried
+        ):
             yield self.sniffed_encoding
 
         # Sniffing the byte-order mark did nothing; try the user
@@ -477,14 +482,18 @@ class EncodingDetector:
         if self.declared_encoding is None:
             self.declared_encoding = self.find_declared_encoding(
                 self.markup, self.is_html)
-        if self._usable(self.declared_encoding, tried):
+        if self.declared_encoding is not None and self._usable(
+            self.declared_encoding, tried
+        ):
             yield self.declared_encoding
 
         # Use third-party character set detection to guess at the
         # encoding.
         if self.chardet_encoding is None:
             self.chardet_encoding = _chardet_dammit(self.markup)
-        if self._usable(self.chardet_encoding, tried):
+        if self.chardet_encoding is not None and self._usable(
+            self.chardet_encoding, tried
+        ):
             yield self.chardet_encoding
 
         # As a last-ditch effort, try utf-8 and windows-1252.
@@ -622,7 +631,7 @@ class UnicodeDammit:
             override_encodings:Optional[List[str]] = None
     ):
         self.smart_quotes_to = smart_quotes_to
-        self.tried_encodings = []
+        self.tried_encodings: List[Tuple[str, str]] = []
         self.contains_replacement_characters = False
         self.is_html = is_html
         self.log = logging.getLogger(__name__)
@@ -823,7 +832,7 @@ class UnicodeDammit:
     #: contains non-horrors like turning “ into ".
     #:
     #: :meta hide-value:
-    MS_CHARS_TO_ASCII: Dict[bytes, str] = {
+    MS_CHARS_TO_ASCII: Dict[bytes, Union[str, Tuple[str, str]]] = {
         b'\x80' : 'EUR',
         b'\x81' : ' ',
         b'\x82' : ',',
