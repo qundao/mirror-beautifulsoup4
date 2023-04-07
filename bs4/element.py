@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Callable as CallableType, Dict, Iterator, Iterable, List, Set, Tuple, TYPE_CHECKING, Union # Python 3.9
+from typing import Callable as CallableType, Dict, Generic, Iterator, Iterable, List, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
 
 import re
 import sys
@@ -2570,10 +2570,8 @@ class SoupStrainer(object):
 
         return match
 
-# TODO: This would be useful to specifically say that a ResultSet
-# contains only PageElements, but it causes mypy errors I don't understand yet.
-ResultSet: List[PageElement]
-class ResultSet(list):
+_PageElementT = TypeVar("_PageElementT", bound=PageElement)
+class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching a `SoupStrainer` against a parse tree. Basically, a list of
     search results.
