@@ -13,6 +13,9 @@
 * AttributeValueWithCharsetSubstitution.encode() is renamed to
   substitute_encoding, to avoid confusion with the much different str.encode()
 
+* Using PageElement.replace_with() to replace an element with itself
+  returns the element instead of None.
+
 = 4.12.1 (20230405)
 
 NOTE: the following things are likely to be dropped in the next

@@ -342,7 +342,8 @@ class PageElement(object):
                 "Cannot replace one element with another when the "
                 "element to be replaced is not part of a tree.")
         if len(args) == 1 and args[0] is self:
-            return
+            # Replacing an element with itself is a no-op.
+            return self
         if any(x is self.parent for x in args):
             raise ValueError("Cannot replace a Tag with its parent.")
         old_parent = self.parent

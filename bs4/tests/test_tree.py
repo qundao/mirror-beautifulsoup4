@@ -776,7 +776,8 @@ class TestTreeModification(SoupTest):
         text = "<a><b></b><c>Foo<d></d></c></a><a><e></e></a>"
         soup = self.soup(text)
         c = soup.c
-        soup.c.replace_with(c)
+        result = soup.c.replace_with(c)
+        assert result == c
         assert soup.decode() == self.document_for(text)
 
     def test_replace_tag_with_its_parent_raises_exception(self):
