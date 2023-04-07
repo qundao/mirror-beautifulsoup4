@@ -3,7 +3,8 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Callable as CallableType, Dict, Iterator, Iterable, List, Set, Tuple, Union # Python 3.9
+from typing import Callable as CallableType, Dict, Iterator, Iterable, List, Set, Tuple, TYPE_CHECKING, Union # Python 3.9
+
 import re
 import sys
 from typing import Optional, Set
@@ -15,6 +16,10 @@ from bs4.formatter import (
     HTMLFormatter,
     XMLFormatter,
 )
+
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
+    from bs4.builder import TreeBuilder
 
 #: Documents output by Beautiful Soup will be encoded with
 #: this encoding unless you specify otherwise.
@@ -1747,7 +1752,7 @@ class Tag(PageElement):
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
                formatter:Formatter|str="minimal",
-               iterator:Iterable=None) -> str:
+               iterator:Optional[Iterable]=None) -> str:
         """Render this `Tag` and its contents as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
@@ -2565,7 +2570,9 @@ class SoupStrainer(object):
 
         return match
 
-ResultSet: list[PageElement]
+# TODO: This would be useful to specifically say that a ResultSet
+# contains only PageElements, but it causes mypy errors I don't understand yet.
+ResultSet: List[PageElement]
 class ResultSet(list):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching a `SoupStrainer` against a parse tree. Basically, a list of

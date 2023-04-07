@@ -24,9 +24,9 @@ from bs4.element import (
 
 from bs4.builder import (
     DetectsXMLParsedAsHTML,
-    HTMLParserTreeBuilder,
     XMLParsedAsHTMLWarning,
 )
+from bs4.builder._htmlparser import HTMLParserTreeBuilder
 default_builder = HTMLParserTreeBuilder
 
 # Some tests depend on specific third-party libraries. We use
@@ -325,6 +325,9 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
             new_tag = soup.new_tag(name)
             assert new_tag.is_empty_element == True
 
+        self.assert_soup('<br/><br/><br/>', "<br/><br/><br/>")
+        self.assert_soup('<br /><br /><br />', "<br/><br/><br/>")
+            
     def test_special_string_containers(self):
         soup = self.soup(
             "<style>Some CSS</style><script>Some Javascript</script>"
@@ -690,13 +693,6 @@ Hello, world!
         assert "p" == soup.h2.string.next_element.name
         assert "p" == soup.p.name
         self.assertConnectedness(soup)
-
-    def test_empty_element_tags(self):
-        """Verify consistent handling of empty-element tags,
-        no matter how they come in through the markup.
-        """
-        self.assert_soup('<br/><br/><br/>', "<br/><br/><br/>")
-        self.assert_soup('<br /><br /><br />', "<br/><br/><br/>")
         
     def test_head_tag_between_head_and_body(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."

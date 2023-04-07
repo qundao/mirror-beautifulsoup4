@@ -6,11 +6,13 @@ import pickle
 import pytest
 import warnings
 from bs4.builder import (
-    HTMLParserTreeBuilder,
     ParserRejectedMarkup,
     XMLParsedAsHTMLWarning,
 )
-from bs4.builder._htmlparser import BeautifulSoupHTMLParser
+from bs4.builder._htmlparser import (
+    BeautifulSoupHTMLParser,
+    HTMLParserTreeBuilder,
+)
 from . import SoupTest, HTMLTreeBuilderSmokeTest
 
 class TestHTMLParserTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):

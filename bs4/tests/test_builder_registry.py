@@ -6,9 +6,9 @@ import warnings
 from bs4 import BeautifulSoup
 from bs4.builder import (
     builder_registry as registry,
-    HTMLParserTreeBuilder,
     TreeBuilderRegistry,
 )
+from bs4.builder._htmlparser import HTMLParserTreeBuilder
 
 from . import (
     HTML5LIB_PRESENT,
@@ -16,10 +16,10 @@ from . import (
 )
 
 if HTML5LIB_PRESENT:
-    from bs4.builder import HTML5TreeBuilder
+    from bs4.builder._html5lib import HTML5TreeBuilder
 
 if LXML_PRESENT:
-    from bs4.builder import (
+    from bs4.builder._lxml import (
         LXMLTreeBuilderForXML,
         LXMLTreeBuilder,
         )

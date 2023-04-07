@@ -5,7 +5,7 @@ __license__ = "MIT"
 from collections import defaultdict
 import itertools
 import re
-from typing import Dict, Iterable, Optional, Set, Tuple, Union
+from typing import Dict, Iterable, Optional, Set, Tuple, TYPE_CHECKING, Union
 import warnings
 import sys
 from bs4.element import (
@@ -18,6 +18,9 @@ from bs4.element import (
     TemplateString,
     nonwhitespace_re
 )
+
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
 
 __all__ = [
     'HTMLTreeBuilder',

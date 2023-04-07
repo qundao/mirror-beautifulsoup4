@@ -143,7 +143,7 @@ class CSS(object):
 
     def select(self, select:str,
                namespaces:Optional[dict[str, str]]=None,
-               limit:int=0, flags:int=0, **kwargs) -> ResultSet[element.Tag]:
+               limit:int=0, flags:int=0, **kwargs) -> ResultSet:
         """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
@@ -265,7 +265,7 @@ class CSS(object):
 
     def filter(self, select:str,
               namespaces:Optional[dict[str, str]]=None,
-              flags:int=0, **kwargs) -> ResultSet[element.Tag]:
+              flags:int=0, **kwargs) -> ResultSet:
         """Filter this `element.Tag`'s direct children based on the given CSS selector.
 
         This uses the Soup Sieve library. It works the same way as

@@ -7,7 +7,7 @@ import warnings
 from . import LXML_PRESENT, LXML_VERSION
 
 if LXML_PRESENT:
-    from bs4.builder import LXMLTreeBuilder, LXMLTreeBuilderForXML
+    from bs4.builder._lxml import LXMLTreeBuilder, LXMLTreeBuilderForXML
 
 from bs4 import (
     BeautifulSoup,

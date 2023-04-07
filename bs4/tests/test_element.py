@@ -57,7 +57,7 @@ class TestAttributeValueWithCharsetSubstitution(object):
     final document substituted into their value.
     """
     
-    def test_content_meta_attribute_value(self):
+    def test_charset_meta_attribute_value(self):
         # The value of a CharsetMetaAttributeValue is whatever
         # encoding the string is in.
         value = CharsetMetaAttributeValue("euc-jp")
