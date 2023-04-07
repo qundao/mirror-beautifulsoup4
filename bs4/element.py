@@ -193,6 +193,8 @@ class PageElement(object):
     #: :meta private:
     known_xml: Optional[bool] = None
 
+    _decomposed: bool
+    
     def setup(self, parent=None, previous_element=None, next_element=None,
               previous_sibling=None, next_sibling=None):
         """Sets up the initial relations between this element and
@@ -293,7 +295,7 @@ class PageElement(object):
     nextSibling = _alias("next_sibling")  #: :meta private: BS3
     previousSibling = _alias("previous_sibling")  #: :meta private: BS3
 
-    default = tuple() #: :meta private:
+    default: Iterable[type] = tuple() #: :meta private:
     def _all_strings(self, strip=False, types:Iterable[type]=default):
         """Yield all strings of certain classes, possibly stripping them.
 
@@ -447,7 +449,8 @@ class PageElement(object):
         while i is not None:
             n = i.next_element
             i.__dict__.clear()
-            i.contents = []
+            if isinstance(i, Tag):
+                i.contents = []
             i._decomposed = True
             i = n
 
@@ -672,7 +675,7 @@ class PageElement(object):
     findPreviousSiblings = find_previous_siblings   #: :meta private: BS3
     fetchPreviousSiblings = find_previous_siblings  #: :meta private: BS2
 
-    def find_parent(self, name=None, attrs={}, **kwargs) -> PageElement:
+    def find_parent(self, name=None, attrs={}, **kwargs) -> Optional[PageElement]:
         """Find the closest parent of this PageElement that matches the given
         criteria.
 
@@ -959,7 +962,7 @@ class NavigableString(str, PageElement):
         """
         raise AttributeError("A NavigableString cannot be given a name.")
 
-    def _all_strings(self, strip=False, types:Iterable[type]=PageElement.default):
+    def _all_strings(self, strip=False, types:Iterable[type]=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         This makes it easy for NavigableString to implement methods
@@ -1001,12 +1004,14 @@ class NavigableString(str, PageElement):
 
         value = self
         if strip:
-            value = value.strip()
-        if len(value) > 0:
-            yield value
+            final_value = value.strip()
+        else:
+            final_value = self
+        if len(final_value) > 0:
+            yield final_value
 
     @property
-    def strings(self) -> Iterator[NavigableString]:
+    def strings(self) -> Iterator[str]:
         """Yield this string, but only if it is interesting.
 
         This is defined the way it is for compatibility with
@@ -1205,9 +1210,9 @@ class Tag(PageElement):
                  sourceline:Optional[int]=None,
                  sourcepos:Optional[int]=None,
                  can_be_empty_element:Optional[bool]=None,
-                 cdata_list_attributes:Optional[Dict[str, Set[str]]]=None,
-                 preserve_whitespace_tags:Optional[Set[str]]=None,
-                 interesting_string_types:Optional[Set[type]]=None,
+                 cdata_list_attributes:Optional[Dict[str, Iterable[str]]]=None,
+                 preserve_whitespace_tags:Optional[Iterable[str]]=None,
+                 interesting_string_types:Optional[Iterable[type]]=None,
                  namespaces:Optional[Dict[str, str]]=None
     ):
         if parser is None:
@@ -1357,7 +1362,7 @@ class Tag(PageElement):
         any tag with no contents is an empty-element tag. This is usually
         the case for XML documents.
         """
-        return len(self.contents) == 0 and self.can_be_empty_element
+        return len(self.contents) == 0 and self.can_be_empty_element is True
     isSelfClosing = is_empty_element  #: :meta private: BS3
 
     @property
@@ -1380,8 +1385,9 @@ class Tag(PageElement):
         child = self.contents[0]
         if isinstance(child, NavigableString):
             return child
-        
-        return child.string
+        elif isinstance(child, Tag):
+            return child.string
+        return None
 
     @string.setter
     def string(self, string:str) -> None:
@@ -1391,7 +1397,7 @@ class Tag(PageElement):
 
     #: :meta private:
     MAIN_CONTENT_STRING_TYPES = {NavigableString, CData}
-    def _all_strings(self, strip:bool=False, types:Iteratable[type]=PageElement.default) -> Iterator[str]:
+    def _all_strings(self, strip:bool=False, types:Iterable[type]=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
