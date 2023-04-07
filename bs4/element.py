@@ -293,8 +293,8 @@ class PageElement(object):
     nextSibling = _alias("next_sibling")  #: :meta private: BS3
     previousSibling = _alias("previous_sibling")  #: :meta private: BS3
 
-    default = object() #: :meta private:
-    def _all_strings(self, strip=False, types=default):
+    default = tuple() #: :meta private:
+    def _all_strings(self, strip=False, types:Iterable[type]=default):
         """Yield all strings of certain classes, possibly stripping them.
 
         This is implemented differently in Tag and NavigableString.
@@ -313,7 +313,7 @@ class PageElement(object):
             yield string
 
     def get_text(self, separator:str="", strip:bool=False,
-                 types:Tuple[type]=default) -> str:
+                 types:Iterable[type]=default) -> str:
         """Get all child strings of this PageElement, concatenated using the
         given separator.
 
@@ -959,7 +959,7 @@ class NavigableString(str, PageElement):
         """
         raise AttributeError("A NavigableString cannot be given a name.")
 
-    def _all_strings(self, strip=False, types=PageElement.default):
+    def _all_strings(self, strip=False, types:Iterable[type]=PageElement.default):
         """Yield all strings of certain classes, possibly stripping them.
 
         This makes it easy for NavigableString to implement methods
@@ -980,7 +980,7 @@ class NavigableString(str, PageElement):
         if types is self.default:
             # This is kept in Tag because it's full of subclasses of
             # this class, which aren't defined until later in the file.
-            types = Tag.DEFAULT_INTERESTING_STRING_TYPES
+            types = Tag.MAIN_CONTENT_STRING_TYPES
 
         # Do nothing if the caller is looking for specific types of
         # string, and we're of a different type.
@@ -1283,7 +1283,7 @@ class Tag(PageElement):
                 # to look up the proper container subclass.
                 self.interesting_string_types = builder.string_containers[self.name]
             else:
-                self.interesting_string_types = self.DEFAULT_INTERESTING_STRING_TYPES
+                self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
     parserClass = _alias("parser_class")  #: :meta private: BS3
 
@@ -1390,8 +1390,8 @@ class Tag(PageElement):
         self.append(string.__class__(string))
 
     #: :meta private:
-    DEFAULT_INTERESTING_STRING_TYPES = {NavigableString, CData}
-    def _all_strings(self, strip:bool=False, types=PageElement.default) -> Iterator[str]:
+    MAIN_CONTENT_STRING_TYPES = {NavigableString, CData}
+    def _all_strings(self, strip:bool=False, types:Iteratable[type]=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
@@ -2584,7 +2584,7 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """
     source: SoupStrainer
     
-    def __init__(self, source:SoupStrainer, result: Iterable[PageElement]=()):
+    def __init__(self, source:SoupStrainer, result: Iterable[_PageElementT]=()):
         super(ResultSet, self).__init__(result)
         self.source = source
 
