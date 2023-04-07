@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Callable as CallableType, Dict, Iterator, Iterable, Set, Tuple, Union # Python 3.9
+from typing import Callable as CallableType, Dict, Iterator, Iterable, List, Set, Tuple, Union # Python 3.9
 import re
 import sys
 from typing import Optional, Set
@@ -148,6 +148,8 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     #: :meta private:
     CHARSET_RE = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
 
+    original_value: str
+    
     def __new__(cls, original_value):
         match = cls.CHARSET_RE.search(original_value)
         if match is None:
@@ -184,7 +186,7 @@ class PageElement(object):
     #: it's contained in an XML document or an HTML document. But for
     #: `Tag` objects (q.v.) we can store this information at parse time.
     #: :meta private:
-    known_xml = None
+    known_xml: Optional[bool] = None
 
     def setup(self, parent=None, previous_element=None, next_element=None,
               previous_sibling=None, next_sibling=None):
@@ -369,8 +371,8 @@ class PageElement(object):
     replace_with_children = unwrap
     replaceWithChildren = unwrap  #: :meta private: BS3
 
-    def wrap(self, wrap_inside:PageElement) -> PageElement:
-        """Wrap this `PageElement` inside another one.
+    def wrap(self, wrap_inside:Tag) -> Tag:
+        """Wrap this `PageElement` inside a `Tag`.
 
         :return: ``wrap_inside``, occupying the position in the tree that used
            to be occupied by this object, and with this object now inside it.
@@ -437,7 +439,7 @@ class PageElement(object):
             i._decomposed = True
             i = n
 
-    def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> PageElement | None:
+    def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> Optional[PageElement]:
         """Finds the last element beneath this object to be parsed.
 
         :param is_initialized: Has ``setup()`` been called on this PageElement
@@ -1230,7 +1232,7 @@ class Tag(PageElement):
         else:
             self.known_xml = is_xml
         self.attrs = attrs
-        self.contents = []
+        self.contents: List[PageElement] = []
         self.setup(parent, previous)
         self.hidden = False
 
@@ -1377,7 +1379,7 @@ class Tag(PageElement):
 
     #: :meta private:
     DEFAULT_INTERESTING_STRING_TYPES = {NavigableString, CData}
-    def _all_strings(self, strip:bool=False, types=PageElement.default):
+    def _all_strings(self, strip:bool=False, types=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
@@ -1390,15 +1392,12 @@ class Tag(PageElement):
             only NavigableString and CData objects will be
             considered. That means no comments, processing
             instructions, etc.
-
-        :yield: A sequence of strings.
-
         """
         if types is self.default:
             types = self.interesting_string_types
 
         for descendant in self.descendants:
-            if (types is None and not isinstance(descendant, NavigableString)):
+            if not isinstance(descendant, NavigableString):
                 continue
             descendant_type = type(descendant)
             if isinstance(types, type):
@@ -1409,10 +1408,12 @@ class Tag(PageElement):
                 # We're not interested in strings of this type.
                 continue
             if strip:
-                descendant = descendant.strip()
-                if len(descendant) == 0:
+                stripped = descendant.strip()
+                if len(stripped) == 0:
                     continue
-            yield descendant
+                yield stripped
+            else:
+                yield descendant
     strings = property(_all_strings)
 
     def insert(self, position:int, new_child:PageElement) -> None:
@@ -1466,8 +1467,16 @@ class Tag(PageElement):
         if new_child.previous_element is not None:
             new_child.previous_element.next_element = new_child
 
-        new_childs_last_element = new_child._last_descendant(False)
-
+        new_childs_last_element = new_child._last_descendant(
+            is_initialized=False, accept_self=True
+        )
+        # This can't happen because we passed accept_self=True into
+        # _last_descendant. Worst case, new_childs_last_element will
+        # be new_child itself. Making this assertion removes several
+        # mypy complaints later on as we manipulate
+        # new_childs_last_element.
+        assert new_childs_last_element is not None
+        
         if position >= len(self.contents):
             new_child.next_sibling = None
 
