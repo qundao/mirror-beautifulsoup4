@@ -15,7 +15,7 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.12.1"
+__version__ = "4.12.2"
 __copyright__ = "Copyright (c) 2004-2023 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
@@ -776,7 +776,7 @@ class BeautifulSoup(Tag):
        
     def decode(self, pretty_print=False,
                eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter="minimal"):
+               formatter="minimal", iterator=None):
         """Returns a string or Unicode representation of the parse tree
             as an HTML or XML document.
 
@@ -803,7 +803,7 @@ class BeautifulSoup(Tag):
         else:
             indent_level = 0
         return prefix + super(BeautifulSoup, self).decode(
-            indent_level, eventual_encoding, formatter)
+            indent_level, eventual_encoding, formatter, iterator)
 
 # Aliases to make it easier to get started quickly, e.g. 'from bs4 import _soup'
 _s = BeautifulSoup

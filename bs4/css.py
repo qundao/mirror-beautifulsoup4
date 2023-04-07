@@ -1,21 +1,26 @@
 """Integration code for CSS selectors using `Soup Sieve <https://facelessuser.github.io/soupsieve/>`_ (pypi: ``soupsieve``).
 
-Acquire a `CSS` object through the `Tag.css` attribute of the `bs4.Tag`
-you want to use as the starting point for a CSS selector, or (if you
-want to run a selector against the entire document) of the
-`BeautifulSoup` object itself.
+Acquire a `CSS` object through the `bs4.element.Tag.css` attribute of
+the starting point of your CSS selector, or (if you want to run a
+selector against the entire document) of the `BeautifulSoup` object
+itself.
 
 The main advantage of doing this instead of using ``soupsieve``
-functions is that you don't need to keep passing the `bs4.Tag` to be
+functions is that you don't need to keep passing the `bs4.element.Tag` to be
 selected against, since the `CSS` object is permanently scoped to that
-`bs4.Tag`.
+`bs4.element.Tag`.
+
 """
 
 from __future__ import annotations
 
 from types import ModuleType
-from typing import Iterator, Optional
+from typing import TYPE_CHECKING, Iterator, Optional
 import warnings
+if TYPE_CHECKING:
+    from bs4 import element
+    from bs4.element import ResultSet, Tag
+
 try:
     import soupsieve
 except ImportError as e:
@@ -29,7 +34,7 @@ class CSS(object):
     CSS selector API.
 
     You don't need to instantiate this class yourself; instead, use
-    `Tag.css`.
+    `element.Tag.css`.
 
     :param tag: All CSS selectors run by this object will use this as
         their starting point.
@@ -37,7 +42,7 @@ class CSS(object):
     :param api: An optional drop-in replacement for the ``soupsieve`` module,
         intended for use in unit tests.
     """
-    def __init__(self, tag: Tag, api:Optional[ModuleType]=None):
+    def __init__(self, tag: element.Tag, api:Optional[ModuleType]=None):
         if api is None:
             api = soupsieve
         if api is None:
@@ -112,7 +117,7 @@ class CSS(object):
             self, select:str,
             namespaces:Optional[dict[str, str]]=None,
             flags:int=0, **kwargs
-    )-> bs4.Tag | None:
+    )-> element.Tag | None:
         """Perform a CSS selection operation on the current Tag and return the
         first result, if any.
 
@@ -138,8 +143,8 @@ class CSS(object):
 
     def select(self, select:str,
                namespaces:Optional[dict[str, str]]=None,
-               limit:int=0, flags:int=0, **kwargs) -> 'ResultSet[bs4.Tag]':
-        """Perform a CSS selection operation on the current `bs4.Tag`.
+               limit:int=0, flags:int=0, **kwargs) -> ResultSet[element.Tag]:
+        """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the `soupsieve.select() <https://facelessuser.github.io/soupsieve/api/#soupsieveselect>`_ method.
@@ -171,8 +176,8 @@ class CSS(object):
 
     def iselect(self, select:str,
                namespaces:Optional[dict[str, str]]=None,
-               limit:int=0, flags:int=0, **kwargs) -> Iterator[bs4.Tag]:
-        """Perform a CSS selection operation on the current `bs4.Tag`.
+               limit:int=0, flags:int=0, **kwargs) -> Iterator[element.Tag]:
+        """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the `soupsieve.iselect()
@@ -201,8 +206,8 @@ class CSS(object):
 
     def closest(self, select:str,
                namespaces:Optional[dict[str, str]]=None,
-               flags:int=0, **kwargs) -> bs4.Tag | None:
-        """Find the `bs4.Tag` closest to this one that matches the given selector.
+               flags:int=0, **kwargs) -> element.Tag | None:
+        """Find the `element.Tag` closest to this one that matches the given selector.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the `soupsieve.closest()
@@ -230,7 +235,7 @@ class CSS(object):
     def match(self, select:str,
               namespaces:Optional[dict[str, str]]=None,
               flags:int=0, **kwargs) -> bool:
-        """Check whether or not this `bs4.Tag` matches the given CSS selector.
+        """Check whether or not this `element.Tag` matches the given CSS selector.
 
         This uses the Soup Sieve library. For more information, see
         that library's documentation for the `soupsieve.match()
@@ -260,11 +265,11 @@ class CSS(object):
 
     def filter(self, select:str,
               namespaces:Optional[dict[str, str]]=None,
-              flags:int=0, **kwargs) -> ResultSet[bs4.Tag]:
-        """Filter this `bs4.Tag`'s direct children based on the given CSS selector.
+              flags:int=0, **kwargs) -> ResultSet[element.Tag]:
+        """Filter this `element.Tag`'s direct children based on the given CSS selector.
 
         This uses the Soup Sieve library. It works the same way as
-        passing a `bs4.Tag` into that library's `soupsieve.filter()
+        passing a `element.Tag` into that library's `soupsieve.filter()
         <https://facelessuser.github.io/soupsieve/api/#soupsievefilter>`_
         method. For more information, see the documentation for
         `soupsieve.filter()
@@ -290,3 +295,4 @@ class CSS(object):
                 select, self.tag, self._ns(namespaces, select), flags, **kwargs
             )
         )
+

@@ -1,4 +1,4 @@
-= 4.13.0 ()
+= 4.13.0 (Unreleased)
 
 * append(), extend(), and insert() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
@@ -16,10 +16,15 @@
 * Using PageElement.replace_with() to replace an element with itself
   returns the element instead of None.
 
+= 4.12.2 (20230407)
+
+* Fixed an unhandled exception in BeautifulSoup.decode_contents
+  and methods that call it. [bug=2015545]
+
 = 4.12.1 (20230405)
 
 NOTE: the following things are likely to be dropped in the next
-release of Beautiful Soup:
+feature release of Beautiful Soup:
 
  Official support for Python 3.6.
  Inclusion of unit tests and test data in the wheel file.
