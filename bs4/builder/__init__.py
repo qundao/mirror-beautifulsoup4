@@ -241,7 +241,7 @@ class TreeBuilder(object):
                        user_specified_encoding:Optional[str]=None,
                        document_declared_encoding:Optional[str]=None,
                        exclude_encodings:Optional[Iterable[str]]=None
-                       ) -> Iterable[Tuple[Union[bytes, str], str, str, bool]]:
+                       ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 

@@ -31,14 +31,7 @@ from bs4.element import (
     Tag,
     )
 
-try:
-    # Pre-0.99999999
-    from html5lib.treebuilders import _base as treebuilder_base
-    new_html5lib = False
-except ImportError as e:
-    # 0.99999999 and up
-    from html5lib.treebuilders import base as treebuilder_base
-    new_html5lib = True
+from html5lib.treebuilders import base as treebuilder_base
 
 class HTML5TreeBuilder(HTMLTreeBuilder):
     """Use `html5lib <https://github.com/html5lib/html5lib-python>`_ to
@@ -66,10 +59,10 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
     TRACKS_LINE_NUMBERS = True
     
     def prepare_markup(self, markup:Union[bytes, str],
-                       user_specified_encoding:str,
+                       user_specified_encoding:Optional[str]=None,
                        document_declared_encoding:Optional[str]=None,
                        exclude_encodings:Optional[Iterable[str]]=None
-        ) -> Iterable[Tuple[Union[bytes, str], str, str, bool]]:
+        ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
         # Store the user-specified encoding for use later on.
         self.user_specified_encoding = user_specified_encoding
 
@@ -102,10 +95,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         self.underlying_builder.parser = parser
         extra_kwargs = dict()
         if not isinstance(markup, str):
-            if new_html5lib:
-                extra_kwargs['override_encoding'] = self.user_specified_encoding
-            else:
-                extra_kwargs['encoding'] = self.user_specified_encoding
+            extra_kwargs['override_encoding'] = self.user_specified_encoding
         doc = parser.parse(markup, **extra_kwargs)
         
         # Set the character encoding detected by the tokenizer.
