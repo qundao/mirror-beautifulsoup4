@@ -1419,7 +1419,10 @@ class Tag(PageElement):
             instructions, etc.
         """
         if types is self.default:
-            types = self.interesting_string_types
+            if self.interesting_string_types is None:
+                types = self.MAIN_CONTENT_STRING_TYPES
+            else:
+                types = self.interesting_string_types
 
         for descendant in self.descendants:
             if not isinstance(descendant, NavigableString):
