@@ -49,7 +49,7 @@ class TestEncoding(SoupTest):
         assert "\N{SNOWMAN}".encode("utf8") == soup.b.encode_contents(
             encoding="utf8"
         )
-
+        
     def test_encode_deeply_nested_document(self):
         # This test verifies that encoding a string doesn't involve
         # any recursive function calls. If it did, this test would
@@ -63,6 +63,7 @@ class TestEncoding(SoupTest):
     def test_deprecated_renderContents(self):
         html = "<b>\N{SNOWMAN}</b>"
         soup = self.soup(html)
+        soup.renderContents()
         assert "\N{SNOWMAN}".encode("utf8") == soup.b.renderContents()
 
     def test_repr(self):
