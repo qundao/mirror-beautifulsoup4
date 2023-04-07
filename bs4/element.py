@@ -1203,7 +1203,7 @@ class Tag(PageElement):
                  name:Optional[str]=None,
                  namespace:Optional[str]=None,
                  prefix:Optional[str]=None,
-                 attrs:Optional[dict]=None,
+                 attrs:Optional[_AttributeDict]=None,
                  parent:Optional[Union[BeautifulSoup, Tag]]=None,
                  previous:Optional[PageElement]=None,
                  is_xml:Optional[bool]=None,
@@ -1231,16 +1231,15 @@ class Tag(PageElement):
             and (sourceline is not None or sourcepos is not None)):
             self.sourceline = sourceline
             self.sourcepos = sourcepos
+
         if attrs is None:
-            attrs = {}
-        elif attrs:
+            self.attrs = dict()
+        else:
             if builder is not None and builder.cdata_list_attributes:
-                attrs = builder._replace_cdata_list_attribute_values(
+                self.attrs = builder._replace_cdata_list_attribute_values(
                     self.name, attrs)
             else:
-                attrs = dict(attrs)
-        else:
-            attrs = dict(attrs)
+                self.attrs = dict(attrs)
 
         # If possible, determine ahead of time whether this tag is an
         # XML tag.
@@ -1248,7 +1247,6 @@ class Tag(PageElement):
             self.known_xml = builder.is_xml
         else:
             self.known_xml = is_xml
-        self.attrs = attrs
         self.contents: List[PageElement] = []
         self.setup(parent, previous)
         self.hidden = False
@@ -1290,6 +1288,11 @@ class Tag(PageElement):
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
+    # Alias for a dictionary of tag attribute values.
+    _AttributeDict = Dict[str, Union[str, Iterable[str]]]
+    name: str
+    attrs: _AttributeDict
+                
     parserClass = _alias("parser_class")  #: :meta private: BS3
 
     def __deepcopy__(self, memo:dict, recursive:bool=True) -> Tag:
@@ -1393,7 +1396,11 @@ class Tag(PageElement):
     def string(self, string:str) -> None:
         """Replace the `Tag.contents` of this `Tag` with a single string."""
         self.clear()
-        self.append(string.__class__(string))
+        if isinstance(string, NavigableString):
+            new_class = string.__class__
+        else:
+            new_class = NavigableString
+        self.append(new_class(string))
 
     #: :meta private:
     MAIN_CONTENT_STRING_TYPES = {NavigableString, CData}
