@@ -1547,12 +1547,15 @@ class Tag(PageElement):
             If a single `Tag` is provided, its `Tag.contents` will be
             used to extend this object's `Tag.contents`.
         """
+        tag_list: Iterable[PageElement]
         if isinstance(tags, Tag):
-            tags = tags.contents
-        if isinstance(tags, list):
+            tag_list = tags.contents
+        else:
+            tag_list = tags
+        if isinstance(tags_list, list):
             # Moving items around the tree may change their position in
             # the original list. Make a list that won't change.
-            tags = list(tags)
+            tag_list = list(tag_list)
         for tag in tags:
             self.append(tag)
     
