@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Dict, Optional
 from bs4.dammit import EntitySubstitution
 
 class Formatter(EntitySubstitution):
@@ -28,10 +30,6 @@ class Formatter(EntitySubstitution):
      * None - Do not perform any substitution. This will be faster
               but may result in invalid markup.
     """
-    # Registries of XML and HTML formatters.
-    XML_FORMATTERS = {}
-    HTML_FORMATTERS = {}
-
     HTML = 'html'
     XML = 'xml'
 
@@ -147,14 +145,14 @@ class Formatter(EntitySubstitution):
    
 class HTMLFormatter(Formatter):
     """A generic Formatter for HTML."""
-    REGISTRY = {}
+    REGISTRY: Dict[Optional[str], HTMLFormatter] = {}
     def __init__(self, *args, **kwargs):
         super(HTMLFormatter, self).__init__(self.HTML, *args, **kwargs)
 
     
 class XMLFormatter(Formatter):
     """A generic Formatter for XML."""
-    REGISTRY = {}
+    REGISTRY: Dict[Optional[str], XMLFormatter] = {}
     def __init__(self, *args, **kwargs):
         super(XMLFormatter, self).__init__(self.XML, *args, **kwargs)
 
@@ -171,15 +169,14 @@ HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
 HTMLFormatter.REGISTRY["minimal"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_xml
 )
-HTMLFormatter.REGISTRY[None] = HTMLFormatter(
-    entity_substitution=None
-)
+HTMLFormatter.REGISTRY[None] = HTMLFormatter(entity_substitution=None)
 XMLFormatter.REGISTRY["html"] =  XMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html
 )
 XMLFormatter.REGISTRY["minimal"] = XMLFormatter(
     entity_substitution=EntitySubstitution.substitute_xml
 )
-XMLFormatter.REGISTRY[None] = Formatter(
-    Formatter(Formatter.XML, entity_substitution=None)
-)
+
+XMLFormatter.REGISTRY[None] = XMLFormatter(entity_substitution=None)
+
+
