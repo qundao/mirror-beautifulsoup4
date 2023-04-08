@@ -26,6 +26,7 @@ from typing import Dict, Iterator, Optional, List, Set, Union, Tuple
 # * cchardet
 # * chardet
 # * charset-normalizer
+chardet_module: Optional[ModuleType]
 try:
     #  PyPI package: cchardet
     import cchardet as chardet_module
