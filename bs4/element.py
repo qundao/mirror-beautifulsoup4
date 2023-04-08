@@ -338,7 +338,7 @@ class PageElement(object):
     getText = get_text
     text = property(get_text)
 
-    def replace_with(self, *args:Iterable[PageElement]) -> PageElement:
+    def replace_with(self, *args:PageElement) -> PageElement:
         """Replace this `PageElement` with one or more other `PageElements`,
         keeping the rest of the tree the same.
 
@@ -473,7 +473,7 @@ class PageElement(object):
     #: :meta private: BS3: Not part of the API!
     _lastRecursiveChild = _last_descendant
 
-    def insert_before(self, *args:Iterable[PageElement]) -> None:
+    def insert_before(self, *args:PageElement) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
 
         All the elements will have the same `PageElement.parent` as
@@ -494,7 +494,7 @@ class PageElement(object):
             index = parent.index(self)
             parent.insert(index, predecessor)
 
-    def insert_after(self, *args:Iterable[PageElement]) -> None:
+    def insert_after(self, *args:PageElement) -> None:
         """Makes the given element(s) the immediate successor of this one.
 
         The elements will have the same `PageElement.parent` as this
