@@ -2,8 +2,7 @@ from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
-from collections.abc import Callable
-from typing import Callable as CallableType, cast, Dict, Generic, Iterator, Iterable, List, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
+from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
 
 import re
 import sys
@@ -265,7 +264,7 @@ class PageElement(object):
             c = XMLFormatter
         else:
             c = HTMLFormatter
-        if isinstance(formatter, Callable):
+        if callable(formatter):
             return c(entity_substitution=formatter)
         return c.REGISTRY[formatter]
 
@@ -2263,11 +2262,11 @@ class Tag(PageElement):
 # also use Pattern[str] instead of just Pattern.
 
 # A function that takes a Tag and returns a yes-or-no answer.
-_ElementFunction = CallableType[[Tag], bool]
+_ElementFunction = Callable[[Tag], bool]
 
 # A function that takes a single attribute value and returns a
 # yes-or-no answer.
-_AttributeFunction = CallableType[[str], bool]
+_AttributeFunction = Callable[[str], bool]
 
 # Either a tag name or an attribute value can be strained with a
 # string, bytestring, regular expression, or None.
@@ -2384,7 +2383,7 @@ class SoupStrainer(object):
     def _normalize_search_value(self, value):
         # Leave it alone if it's a Unicode string, a callable, a
         # regular expression, a boolean, or None.
-        if (isinstance(value, str) or isinstance(value, Callable) or hasattr(value, 'match')
+        if (isinstance(value, str) or callable(value) or hasattr(value, 'match')
             or isinstance(value, bool) or value is None):
             return value
 
@@ -2451,7 +2450,7 @@ class SoupStrainer(object):
                  return False
 
         call_function_with_tag_data = (
-            isinstance(self.name, Callable)
+            callable(self.name)
             and not isinstance(markup_name, Tag))
 
         if ((not self.name)
@@ -2542,7 +2541,7 @@ class SoupStrainer(object):
             # True matches any non-None value.
             return markup is not None
 
-        if isinstance(match_against, Callable):
+        if callable(match_against):
             return match_against(markup)
 
         # Custom callables take the tag as an argument, but all
