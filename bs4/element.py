@@ -1634,7 +1634,7 @@ class Tag(PageElement):
         raise ValueError("Tag.index: element not in tag")
 
     def get(self, key:str,
-            default:Optional[Union[str, List[str]]]=None) -> Optional[Union[str, List[str]]]:
+            default:Optional[Union[str, Iterable[str]]]=None) -> Optional[Union[str, Iterable[str]]]:
         """Returns the value of the 'key' attribute for the tag, or
         the value given for 'default' if it doesn't have that
         attribute.
@@ -1646,21 +1646,25 @@ class Tag(PageElement):
         return self.attrs.get(key, default)
 
     def get_attribute_list(self, key:str,
-                           default:Optional[List[str]]=None) -> List[str]:
-        """The same as get(), but always returns a list.
+                           default:Optional[Iterable[str]]=None) -> List[str]:
+        """The same as get(), but always returns a (possibly empty) list.
 
         :param key: The attribute to look for.
         :param default: Use this value if the attribute is not present
             on this `Tag`.
-        :return: A list of strings, probably containing only a single
+        :return: A list of strings, usually empty or containing only a single
             value.
         """
+        list_value: List[str]
         value = self.get(key, default)
         if value is None:
-            value = []
-        elif not isinstance(value, list):
-            value = [value]
-        return value
+            list_value = []
+        elif isinstance(value, list):
+            list_value = value
+        else:
+            value = cast(str, value)
+            list_value = [value]
+        return list_value
 
     def has_attr(self, key:str) -> bool:
         """Does this `Tag` have an attribute with the given name?"""
