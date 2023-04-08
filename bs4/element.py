@@ -3,7 +3,7 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections.abc import Callable
-from typing import Callable as CallableType, Dict, Generic, Iterator, Iterable, List, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
+from typing import Callable as CallableType, cast, Dict, Generic, Iterator, Iterable, List, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
 
 import re
 import sys
@@ -408,11 +408,11 @@ class PageElement(object):
         #the two.
         last_child = self._last_descendant()
 
-        # This can't happen because we passed accept_self=True into
-        # _last_descendant. Worst case, last_child will be
-        # self. Making this assertion removes several mypy complaints
-        # later on as we manipulate last_child.
-        assert last_child is not None
+        # last_child can't be None because we passed accept_self=True
+        # into _last_descendant. Worst case, last_child will be
+        # self. Making this cast removes several mypy complaints later
+        # on as we manipulate last_child.
+        last_child = cast(PageElement, last_child)
         next_element = last_child.next_element
 
         if self.previous_element is not None:
@@ -1498,12 +1498,12 @@ class Tag(PageElement):
         new_childs_last_element = new_child._last_descendant(
             is_initialized=False, accept_self=True
         )
-        # This can't happen because we passed accept_self=True into
-        # _last_descendant. Worst case, new_childs_last_element will
-        # be new_child itself. Making this assertion removes several
-        # mypy complaints later on as we manipulate
-        # new_childs_last_element.
-        assert new_childs_last_element is not None
+        # new_childs_last_element can't be None because we passed
+        # accept_self=True into _last_descendant. Worst case,
+        # new_childs_last_element will be new_child itself. Making
+        # this cast removes several mypy complaints later on as we
+        # manipulate new_childs_last_element.
+        new_childs_last_element = cast(PageElement, new_childs_last_element)
         
         if position >= len(self.contents):
             new_child.next_sibling = None
@@ -1615,8 +1615,8 @@ class Tag(PageElement):
         # removing items from .contents won't affect the remaining
         # positions.
         for i in reversed(marked):
-            a = self.contents[i]
-            b = self.contents[i+1]
+            a = cast(NavigableString, self.contents[i])
+            b = cast(NavigableString, self.contents[i+1])
             b.extract()
             n = NavigableString(a+b)
             a.replace_with(n)
