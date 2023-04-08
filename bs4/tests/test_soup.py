@@ -23,11 +23,11 @@ from bs4.builder import (
 )
 from bs4.element import (
     Comment,
-    SoupStrainer,
     PYTHON_SPECIFIC_ENCODINGS,
     Tag,
     NavigableString,
 )
+from bs4.strainer import SoupStrainer
 
 from . import (
     default_builder,

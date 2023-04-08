@@ -16,12 +16,11 @@ from bs4.element import (
     ContentMetaAttributeValue,
     Doctype,
     PYTHON_SPECIFIC_ENCODINGS,
-    SoupStrainer,
     Script,
     Stylesheet,
     Tag
 )
-
+from bs4.strainer import SoupStrainer
 from bs4.builder import (
     DetectsXMLParsedAsHTML,
     XMLParsedAsHTMLWarning,

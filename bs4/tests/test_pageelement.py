@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 from bs4.element import (
     Comment,
     ResultSet,
-    SoupStrainer,
 )
+from bs4.strainer import SoupStrainer
 from . import (
     SoupTest,
 )

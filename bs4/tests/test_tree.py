@@ -24,11 +24,11 @@ from bs4.element import (
     Formatter,
     NavigableString,
     Script,
-    SoupStrainer,
     Stylesheet,
     Tag,
     TemplateString,
 )
+from bs4.strainer import SoupStrainer
 from . import (
     SoupTest,
 )

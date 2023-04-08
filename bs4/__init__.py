@@ -55,10 +55,10 @@ from .element import (
     ResultSet,
     Script,
     Stylesheet,
-    SoupStrainer,
     Tag,
     TemplateString,
     )
+from .strainer import SoupStrainer
 
 # Define some custom warnings.
 class GuessedAtParserWarning(UserWarning):
