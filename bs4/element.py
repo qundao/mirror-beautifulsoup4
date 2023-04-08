@@ -2174,7 +2174,13 @@ class Tag(PageElement):
         """
         if not len(self.contents):
             return
-        stopNode = self._last_descendant().next_element
+        # _last_descendant() can't return None here because
+        # accept_self is True. Worst case, last_descendant will end up
+        # as self.
+        last_descendant = cast(
+            PageElement, self._last_descendant(accept_self=True)
+        )
+        stopNode = last_descendant.next_element
         current = self.contents[0]
         while current is not stopNode:
             yield current
