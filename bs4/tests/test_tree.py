@@ -901,13 +901,13 @@ class TestTreeModification(SoupTest):
         soup.a.append(soup.b)
         assert data == soup.decode()
 
-    def test_extend(self):
+    def test_extend_with_a_list_of_elements(self):
         data = "<a><b><c><d><e><f><g></g></f></e></d></c></b></a>"
         soup = self.soup(data)
         l = [soup.g, soup.f, soup.e, soup.d, soup.c, soup.b]
         soup.a.extend(l)
         assert "<a><g></g><f></f><e></e><d></d><c></c><b></b></a>" == soup.decode()
-
+        
     @pytest.mark.parametrize(
         "get_tags", [lambda tag: tag, lambda tag: tag.contents]
     )
@@ -920,6 +920,23 @@ class TestTreeModification(SoupTest):
         d2.extend(tags)
         assert '<div id="d1"></div>' == d1.decode()
         assert '<div id="d2"><a>1</a><a>2</a><a>3</a><a>4</a></div>' == d2.decode()
+
+    @pytest.mark.parametrize(
+        "string_source,result", (
+            [lambda soup: soup.a.string, "<a></a><b>1</b>"],
+        )
+    )
+    def test_extend_with_a_single_non_tag_element(self, string_source, result):
+        data = '<div><a>1</a><b></b></div>'
+        soup = self.soup(data)
+        with warnings.catch_warnings(record=True) as w:
+            string = string_source(soup)
+            soup.b.extend(string)
+            [warning] = w
+            assert warning.filename == __file__
+            msg = str(warning.message)
+            assert "A single item was passed into Tag.extend. Use Tag.append instead."
+            assert soup.div.decode_contents() == result
         
     def test_move_tag_to_beginning_of_parent(self):
         data = "<a><b></b><c></c><d></d></a>"

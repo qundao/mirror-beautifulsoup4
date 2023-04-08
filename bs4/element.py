@@ -1538,8 +1538,8 @@ class Tag(PageElement):
         """
         self.insert(len(self.contents), tag)
 
-    def extend(self, tags:Iterable[PageElement]|PageElement) -> None:
-        """Appends one or more `PageElement` objects to the contents of this
+    def extend(self, tags:Iterable[PageElement]|Tag) -> None:
+        """Appends one or more objects to the contents of this
         `Tag`.
 
         :param tags: If a list of `PageElement` objects is provided,
@@ -1550,13 +1550,22 @@ class Tag(PageElement):
         tag_list: Iterable[PageElement]
         if isinstance(tags, Tag):
             tag_list = tags.contents
-        else:
+        elif isinstance(tags, PageElement):
+            # The caller should really be using append() instead,
+            # but we can make it work.
+            warnings.warn(
+                "A single item was passed into Tag.extend. Use Tag.append instead.",
+                stacklevel=2
+            )
+            tag_list = [tags]
+        elif isinstance(tags, list):
             tag_list = tags
-        if isinstance(tags_list, list):
+
+        if isinstance(tag_list, list):
             # Moving items around the tree may change their position in
             # the original list. Make a list that won't change.
             tag_list = list(tag_list)
-        for tag in tags:
+        for tag in tag_list:
             self.append(tag)
     
     def clear(self, decompose:bool=False) -> None:
