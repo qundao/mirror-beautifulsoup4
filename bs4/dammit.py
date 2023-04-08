@@ -26,22 +26,25 @@ from typing import Dict, Iterator, Optional, List, Set, Union, Tuple
 # * cchardet
 # * chardet
 # * charset-normalizer
-chardet_module: Optional[ModuleType]
+chardet_module: Optional[ModuleType] = None
 try:
     #  PyPI package: cchardet
-    import cchardet as chardet_module
+    import cchardet
+    chardet_module = cchardet
 except ImportError:
     try:
         #  Debian package: python-chardet
         #  PyPI package: chardet
-        import chardet as chardet_module
+        import chardet
+        chardet_module = chardet
     except ImportError:
         try:
             # PyPI package: charset-normalizer
-            import charset_normalizer as chardet_module
+            import charset_normalizer
+            chardet_module = charset_normalizer
         except ImportError:
             # No chardet available.
-            chardet_module = None
+            pass
 
             
 if chardet_module:
