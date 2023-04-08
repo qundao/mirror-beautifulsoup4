@@ -2280,3 +2280,9 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
         raise AttributeError(
             "ResultSet object has no attribute '%s'. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?" % key
         )
+
+# Now that all the classes used by SoupStrainer have been defined,
+# import SoupStrainer itself into this module to preserve the
+# backwards compatibility of anyone who imports
+# bs4.element.SoupStrainer.
+from bs4.strainer import SoupStrainer
