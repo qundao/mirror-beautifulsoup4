@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from bs4 import element
     from bs4.element import ResultSet, Tag
 
+soupsieve: Optional[ModuleType]
 try:
     import soupsieve
 except ImportError as e:
