@@ -247,7 +247,7 @@ class SoupStrainer(object):
                 )
                 print(f"Testing <{tag.name} {attrs}>{tag.string}</{tag.name}> against {rule}")
                 if rule.matches_tag(tag) or (
-                        prefixed_name and rule.matches_string(prefixed_name)
+                    prefixed_name and rule.matches_string(prefixed_name)
                 ):
                     name_matches = True
                     break
@@ -255,6 +255,8 @@ class SoupStrainer(object):
             if not name_matches:
                 return False
 
+
+            
         for attr, rules in self.attribute_rules.items():
             this_attr_match = False
             attr_value = tag.get(attr)
@@ -262,14 +264,23 @@ class SoupStrainer(object):
                 attr_values = attr_value
             else:
                 attr_values = [attr_value]
-            for rule in rules:
-                for attr_value in attr_values:
-                    if rule.matches_string(attr_value):
-                        this_attr_match = True
-                        break
+
+            def _match_attribute_value_helper(attr_values):
+                for rule in rules:
+                    for attr_value in attr_values:
+                        if rule.matches_string(attr_value):
+                            return True
+            this_attr_match = _match_attribute_value_helper(attr_values)
+            if not this_attr_match and len(attr_values) > 1:
+                # Try again but treat the attribute value
+                # as a single string.
+                joined_attr_value = " ".join(attr_values)
+                this_attr_match = _match_attribute_value_helper(
+                    [joined_attr_value]
+                )
             if not this_attr_match:
                 return False
-
+                
         # TODO: should we really be doing tag.string here?
         if self.string_rules:
             string_match = False
