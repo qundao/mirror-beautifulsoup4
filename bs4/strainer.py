@@ -106,22 +106,22 @@ class MatchRule(object):
             return string is None
         
         if self.string is not None and self.string != string:
-            print(f"{self.string} != {string}")
+            #print(f"{self.string} != {string}")
             return False
         if self.pattern is not None:
             if string is None:
                 return False
             if not self.pattern.search(string):
-                print(f"{self.pattern} !~ {string}")
+                #print(f"{self.pattern} !~ {string}")
                 return False
-        print(f"{self.string} == {string}")
+        #print(f"{self.string} == {string}")
         return True
 
     def matches_string(self, string):
         if not self._base_match(string):
             return False
         if self.function is not None and not self.function(string):
-            print(f"{self.function}({string}) == False")
+            #print(f"{self.function}({string}) == False")
             return False
         return True
 
@@ -256,7 +256,7 @@ class SoupStrainer(object):
                 attrs = " ".join(
                     [f"{k}={v}" for k, v in sorted(tag.attrs.items())]
                 )
-                print(f"Testing <{tag.name} {attrs}>{tag.string}</{tag.name}> against {rule}")
+                #print(f"Testing <{tag.name} {attrs}>{tag.string}</{tag.name}> against {rule}")
                 if rule.matches_tag(tag) or (
                     prefixed_name and rule.matches_string(prefixed_name)
                 ):

@@ -1287,7 +1287,6 @@ class Tag(PageElement):
                 self.interesting_string_types = builder.string_containers[self.name]
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
-        self.builder = builder
 
     # Alias for a dictionary of tag attribute values.
     _AttributeDict = Dict[str, Union[str, Iterable[str]]]
@@ -1337,7 +1336,7 @@ class Tag(PageElement):
         This is the first step in the deepcopy process.
         """
         clone = type(self)(
-            None, self.builder, self.name, self.namespace,
+            None, None, self.name, self.namespace,
             self.prefix, self.attrs, is_xml=self._is_xml,
             sourceline=self.sourceline, sourcepos=self.sourcepos,
             can_be_empty_element=self.can_be_empty_element,
