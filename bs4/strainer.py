@@ -300,10 +300,13 @@ class SoupStrainer(object):
             match = self.matches_tag(element)
         else:
             match = False
-            for rule in self.string_rules:
-                if rule.matches_string(element):
-                    match = True
-                    break
+            if not (self.name_rules or self.attribute_rules):
+                # A NavigableString can only match a SoupStrainer that
+                # does not define any name or attribute restrictions.
+                for rule in self.string_rules:
+                    if rule.matches_string(element):
+                        match = True
+                        break
         return element if match else False
             
 class SoupStrainerOld(object):
