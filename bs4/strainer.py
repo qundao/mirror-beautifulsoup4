@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import defaultdict
 import re
 from typing import (
     Callable,
@@ -82,28 +83,33 @@ class MatchRule(object):
     string: Optional[str]
     pattern: Optional[re.Pattern]
     function: Optional[Callable]
-    everything: bool
+    present: bool
     
     def __init__(
             self,
             string:Optional[Union[str, bytes]]=None,
             pattern:Optional[re.Pattern]=None,
             function:Optional[Callable]=None,
-            everything:bool=False,
+            present:bool=None,
     ):
         if isinstance(string, bytes):
             string = string.decode("utf8")
         self.string = string
         self.pattern = pattern
         self.function = function
-        self.everything = everything
+        self.present = present
         
     def _base_match(self, string):
-        if self.everything is True:
-            return True
+        if self.present is True:
+            return string is not None
+        if self.present is False:
+            return string is None
+        
         if self.string is not None and self.string != string:
+            print(f"{self.string} != {string}")
             return False
         if self.pattern is not None and not self.pattern.search(string):
+            print(f"{self.pattern} !~ {string}")
             return False
         return True
 
@@ -111,8 +117,13 @@ class MatchRule(object):
         if not self._base_match(string):
             return False
         if self.function is not None and not self.function(string):
+            print(f"{self.function}({string}) == False")
             return False
         return True
+
+    def __repr__(self):
+        cls = type(self).__name__
+        return f"<{cls} string={self.string} pattern={self.pattern} function={self.function} present={self.present}>"
     
 class TagNameMatchRule(MatchRule):
     function: Callable[['Tag'], bool]    
@@ -141,7 +152,7 @@ class SoupStrainer(object):
     """
 
     name_rules: Iterable[TagNameMatchRule]
-    attribute_rules: Iterable[Tuple[str, AtributeValueMatchRule]]
+    attribute_rules: Dict[str, Iterable[AtributeValueMatchRule]]
     string_rules: Iterable[StringMatchRule]
     
     def __init__(self,
@@ -157,30 +168,41 @@ class SoupStrainer(object):
                 DeprecationWarning, stacklevel=2
             )
         
-        self.name_rules = self.make_match_rules(name, TagNameMatchRule)
-        self.attribute_rules = []
+        self.name_rules = list(self.make_match_rules(name, TagNameMatchRule))
+        self.attribute_rules = defaultdict(list)
+        
         if not isinstance(attrs, dict):
-            for rule_obj in self.make_match_rules(attrs, AttributeValueMatchRule):
-                self.attributes.append('class', rule_obj)
-            self.attribute_rules.append
-        for d in attrs, kwargs:
-            for attr, rule in d.items():
-                if d is kwargs and attr == 'class_':
-                    attr = 'class'
-                for rule_obj in self.make_match_rules(rule, AttributeValueMatchRule):
-                    self.attribute_rules.append((attr, rule_obj))
-        self.string_rules = self.make_match_rules(string, StringMatchRule)
+            # Passing something other than a dictionary as attrs is
+            # sugar for matching that thing against the 'class'
+            # attribute.
+            attrs = { 'class' : attrs }
+
+        for attrdict in attrs, kwargs:
+            for attr, value in attrdict.items():
+                if value is None:
+                    value = False
+                for rule_obj in self.make_match_rules(
+                        value, AttributeValueMatchRule
+                ):
+                    self.attribute_rules[attr].append(rule_obj)
+                                                      
+        self.string_rules = list(
+            self.make_match_rules(string, StringMatchRule)
+        )
 
         # TODO: This is deprecated, get it out of tests at least.
         self.text = string
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
         
     def make_match_rules(self, obj, cls):
         if obj is None:
             return
         if isinstance(obj, (str,bytes)):
             yield cls(string=obj)
-        elif obj is True:
-            yield cls(everything=obj)
+        elif isinstance(obj, bool):
+            yield cls(present=obj)
         elif isinstance(obj, Callable):
             yield cls(function=obj)
         elif isinstance(obj, re.Pattern):
@@ -194,26 +216,53 @@ class SoupStrainer(object):
             
     def matches_tag(self, tag=Tag) -> bool:
 
+        # String rules do not match a Tag on their own.
+        if not self.name_rules and not self.attribute_rules:
+            return False
+        
+        # If there are name rules, at least one must match.
+
+        # If there are attribute rules for a given attribute, at least
+        # one must match. If there are rules for multiple attributes,
+        # each one must have a match.
+
+        # If there are string rules, at least one must match.
         if tag.prefix:
             prefixed_name = tag.prefix + ':' + tag.name
         else:
             prefixed_name = None
-        for rule in self.name_rules:
-            if not rule.matches_tag(tag) and (
-                not prefixed_name or not rule.matches_string(prefixed_name)
-            ):
+        if self.name_rules:
+            name_matches = False
+            for rule in self.name_rules:
+                print(f"Testing {tag.name} {tag.attrs} {tag.string} against {rule}")
+                if rule.matches_tag(tag) or (
+                        prefixed_name and rule.matches_string(prefixed_name)
+                ):
+                    name_matches = True
+                    break
+
+            if not name_matches:
                 return False
-        
-        for attr, attr_rule in self.attribute_rules:
+
+        for attr, rules in self.attribute_rules.items():
+            this_attr_match = False
             attr_value = tag.get(attr)
-            if not attr_rule.matches_string(attr_value):
+            for rule in rules:
+                if rule.matches_string(attr_value):
+                    this_attr_match = True
+                    break
+            if not this_attr_match:
                 return False
 
         # TODO: should we really be doing tag.string here?
-        string = tag.string
-        for string_rule in self.string_rules:
-            if not string_rule.matches_string(string):
-                return False
+        if self.string_rules:
+            string_match = False
+            string = tag.string
+            for string_rule in self.string_rules:
+                if string_rule.matches_string(string):
+                    string_match = True
+                    break
+            return string_match
         return True
 
     def allow_tag_creation(self, name:str, attrs:dict[str, str]) -> bool:
@@ -234,9 +283,10 @@ class SoupStrainer(object):
         if isinstance(element, Tag):
             match = self.matches_tag(element)
         else:
+            match = False
             for rule in self.string_rules:
-                if not rule.matches_string(element):
-                    match = False
+                if rule.matches_string(element):
+                    match = True
                     break
         return element if match else False
             
