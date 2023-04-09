@@ -1287,6 +1287,7 @@ class Tag(PageElement):
                 self.interesting_string_types = builder.string_containers[self.name]
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
+        self.builder = builder
 
     # Alias for a dictionary of tag attribute values.
     _AttributeDict = Dict[str, Union[str, Iterable[str]]]

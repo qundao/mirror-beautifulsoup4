@@ -225,8 +225,8 @@ class SoupStrainer(object):
                     # mistake. This list contains another list, which
                     # opens up the possibility of infinite
                     # self-reference. In the interests of avoiding
-                    # infinite recursion, we'll ignore this item than
-                    # looking inside.
+                    # infinite recursion, we'll ignore this item
+                    # rather than looking inside.
                     continue
                 for x in self.make_match_rules(o, cls):
                     yield x
