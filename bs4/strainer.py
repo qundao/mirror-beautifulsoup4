@@ -78,7 +78,58 @@ _NormalizedStrainableAttribute = Union[
     Iterable[_BaseNormalizedStrainableAttribute]
 ]
 
-# Next, a couple classes to represent queries and their results.
+class MatchRule(object):
+    string: Optional[str]
+    pattern: Optional[re.Pattern]
+    function: Optional[Callable]
+    everything: bool
+    
+    def __init__(
+            self,
+            string:Optional[Union[str, bytes]]=None,
+            pattern:Optional[re.Pattern]=None,
+            function:Optional[Callable]=None,
+            everything:bool=False,
+    ):
+        if isinstance(string, bytes):
+            string = string.decode("utf8")
+        self.string = string
+        self.pattern = pattern
+        self.function = function
+        self.everything = everything
+        
+    def _base_match(self, string):
+        if self.everything is True:
+            return True
+        if self.string is not None and self.string != string:
+            return False
+        if self.pattern is not None and not self.pattern.search(string):
+            return False
+        return True
+
+    def matches_string(self, string):
+        if not self._base_match(string):
+            return False
+        if self.function is not None and not self.function(string):
+            return False
+        return True
+    
+class TagNameMatchRule(MatchRule):
+    function: Callable[['Tag'], bool]    
+
+    def matches_tag(self, tag):
+        if not self._base_match(tag.name):
+            return False
+        if self.function is not None and not self.function(tag):
+            return False
+        return True
+    
+class AttributeValueMatchRule(MatchRule):
+    function: Callable[[str], bool]
+
+class StringMatchRule(MatchRule):
+    function: Callable[[str], bool]
+    
 class SoupStrainer(object):
     """Encapsulates a number of ways of matching a markup element (tag or
     string).
@@ -88,16 +139,114 @@ class SoupStrainer(object):
     `BeautifulSoup` constructor, to parse a subset of a large
     document.
     """
-    name: _NormalizedStrainableAttribute
-    attrs: dict[str, _NormalizedStrainableElement]
-    string: _NormalizedStrainableAttribute
-                              
+
+    name_rules: Iterable[TagNameMatchRule]
+    attribute_rules: Iterable[Tuple[str, AtributeValueMatchRule]]
+    string_rules: Iterable[StringMatchRule]
+    
     def __init__(self,
-                 name:Optional[_StrainableElement]=None,
-                 attrs:Union[_StrainableAttribute,
-                             Dict[str, _StrainableAttribute]] = {},
-                 string:Optional[_StrainableAttribute]=None,
-                 **kwargs: dict[str, _StrainableAttribute]) -> None:
+                 name =None,
+                 attrs = {},
+                 string=None,
+                 **kwargs):
+
+        if string is None and 'text' in kwargs:
+            string = kwargs.pop('text')
+            warnings.warn(
+                "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
+                DeprecationWarning, stacklevel=2
+            )
+        
+        self.name_rules = self.make_match_rules(name, TagNameMatchRule)
+        self.attribute_rules = []
+        if not isinstance(attrs, dict):
+            for rule_obj in self.make_match_rules(attrs, AttributeValueMatchRule):
+                self.attributes.append('class', rule_obj)
+            self.attribute_rules.append
+        for d in attrs, kwargs:
+            for attr, rule in d.items():
+                if d is kwargs and attr == 'class_':
+                    attr = 'class'
+                for rule_obj in self.make_match_rules(rule, AttributeValueMatchRule):
+                    self.attribute_rules.append((attr, rule_obj))
+        self.string_rules = self.make_match_rules(string, StringMatchRule)
+
+        # TODO: This is deprecated, get it out of tests at least.
+        self.text = string
+        
+    def make_match_rules(self, obj, cls):
+        if obj is None:
+            return
+        if isinstance(obj, (str,bytes)):
+            yield cls(string=obj)
+        elif obj is True:
+            yield cls(everything=obj)
+        elif isinstance(obj, Callable):
+            yield cls(function=obj)
+        elif isinstance(obj, re.Pattern):
+            yield cls(pattern=obj)
+        elif hasattr(obj, '__iter__'):
+            for o in obj:
+                for x in self.make_match_rules(o, cls):
+                    yield x
+        else:
+            yield cls(string=str(obj))
+            
+    def matches_tag(self, tag=Tag) -> bool:
+
+        if tag.prefix:
+            prefixed_name = tag.prefix + ':' + tag.name
+        else:
+            prefixed_name = None
+        for rule in self.name_rules:
+            if not rule.matches_tag(tag) and (
+                not prefixed_name or not rule.matches_string(prefixed_name)
+            ):
+                return False
+        
+        for attr, attr_rule in self.attribute_rules:
+            attr_value = tag.get(attr)
+            if not attr_rule.matches_string(attr_value):
+                return False
+
+        # TODO: should we really be doing tag.string here?
+        string = tag.string
+        for string_rule in self.string_rules:
+            if not string_rule.matches_string(string):
+                return False
+        return True
+
+    def allow_tag_creation(self, name:str, attrs:dict[str, str]) -> bool:
+        for rule in self.name_rules:
+            if not rule.matches_string(name):
+                return False
+
+        for attr, rule in self.attribute_rules:
+            attr_value = attrs.get(attr)
+            if not attr_rule.matches_string(attr_value):
+                return False
+
+        return True
+    search_tag = allow_tag_creation
+    
+    def search(self, element:PageElement):
+        match = None
+        if isinstance(element, Tag):
+            match = self.matches_tag(element)
+        else:
+            for rule in self.string_rules:
+                if not rule.matches_string(element):
+                    match = False
+                    break
+        return element if match else False
+            
+class SoupStrainerOld(object):
+    
+    name_rules: Iterable[TagNameMatchRule]
+    attribute_rules: Dict[str, Iterable[AttributeValueMatchRule]]
+    string_rules: Optional[StringMatchRule]
+                              
+    def __init__(self):
         """Constructor.
 
         The SoupStrainer constructor takes the same arguments passed
