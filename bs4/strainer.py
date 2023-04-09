@@ -111,6 +111,7 @@ class MatchRule(object):
         if self.pattern is not None and not self.pattern.search(string):
             print(f"{self.pattern} !~ {string}")
             return False
+        print(f"{self.string} == {string}")
         return True
 
     def matches_string(self, string):
@@ -179,10 +180,17 @@ class SoupStrainer(object):
 
         for attrdict in attrs, kwargs:
             for attr, value in attrdict.items():
+                if attr == 'class_' and attrdict is kwargs:
+                    # If you pass in 'class_' as part of kwargs, it's
+                    # because class is a Python reserved word. If you
+                    # pass it in as part of the attrs dict, it's
+                    # because you really are looking for an attribute
+                    # called 'class_'.
+                    attr = 'class'
                 if value is None:
                     value = False
                 for rule_obj in self.make_match_rules(
-                        value, AttributeValueMatchRule
+                    value, AttributeValueMatchRule
                 ):
                     self.attribute_rules[attr].append(rule_obj)
                                                       
@@ -234,7 +242,10 @@ class SoupStrainer(object):
         if self.name_rules:
             name_matches = False
             for rule in self.name_rules:
-                print(f"Testing {tag.name} {tag.attrs} {tag.string} against {rule}")
+                attrs = " ".join(
+                    [f"{k}={v}" for k, v in sorted(tag.attrs.items())]
+                )
+                print(f"Testing <{tag.name} {attrs}>{tag.string}</{tag.name}> against {rule}")
                 if rule.matches_tag(tag) or (
                         prefixed_name and rule.matches_string(prefixed_name)
                 ):
@@ -247,10 +258,15 @@ class SoupStrainer(object):
         for attr, rules in self.attribute_rules.items():
             this_attr_match = False
             attr_value = tag.get(attr)
+            if isinstance(attr_value, list):
+                attr_values = attr_value
+            else:
+                attr_values = [attr_value]
             for rule in rules:
-                if rule.matches_string(attr_value):
-                    this_attr_match = True
-                    break
+                for attr_value in attr_values:
+                    if rule.matches_string(attr_value):
+                        this_attr_match = True
+                        break
             if not this_attr_match:
                 return False
 
