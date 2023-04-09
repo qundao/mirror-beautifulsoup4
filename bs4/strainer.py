@@ -108,9 +108,12 @@ class MatchRule(object):
         if self.string is not None and self.string != string:
             print(f"{self.string} != {string}")
             return False
-        if self.pattern is not None and not self.pattern.search(string):
-            print(f"{self.pattern} !~ {string}")
-            return False
+        if self.pattern is not None:
+            if string is None:
+                return False
+            if not self.pattern.search(string):
+                print(f"{self.pattern} !~ {string}")
+                return False
         print(f"{self.string} == {string}")
         return True
 
@@ -217,7 +220,14 @@ class SoupStrainer(object):
             yield cls(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
-                print(o)
+                if not isinstance(o, (bytes, str)) and hasattr(obj, '__iter__'):
+                    # This is almost certainly the user's
+                    # mistake. This list contains another list, which
+                    # opens up the possibility of infinite
+                    # self-reference. In the interests of avoiding
+                    # infinite recursion, we'll ignore this item than
+                    # looking inside.
+                    continue
                 for x in self.make_match_rules(o, cls):
                     yield x
         else:
@@ -282,7 +292,6 @@ class SoupStrainer(object):
             if not this_attr_match:
                 return False
                 
-        # TODO: should we really be doing tag.string here?
         if self.string_rules:
             string_match = False
             string = tag.string
