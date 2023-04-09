@@ -217,6 +217,7 @@ class SoupStrainer(object):
             yield cls(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
+                print(o)
                 for x in self.make_match_rules(o, cls):
                     yield x
         else:
