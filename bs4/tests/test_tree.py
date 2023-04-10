@@ -109,7 +109,7 @@ class TestFindAll(SoupTest):
             [warning] = w
             assert warning.filename == __file__
             msg = str(warning.message)
-            assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
+            assert msg == "Ignoring nested list [...] to avoid the possibility of infinite recursion."
 
     def test_find_all_resultset(self):
         """All find_all calls return a ResultSet"""

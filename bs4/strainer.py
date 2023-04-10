@@ -152,16 +152,30 @@ class MatchRule(object):
     def __repr__(self):
         cls = type(self).__name__
         return f"<{cls} string={self.string} pattern={self.pattern} function={self.function} present={self.present}>"
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, MatchRule) and
+            self.string==other.string and
+            self.pattern==other.pattern and
+            self.function==other.function and
+            self.present==other.present
+        )
     
 class TagNameMatchRule(MatchRule):
     function: Callable[['Tag'], bool]    
 
     def matches_tag(self, tag):
-        if not self._base_match(tag.name):
-            return False
-        if self.function is not None and not self.function(tag):
-            return False
-        return True
+        base_value = self._base_match(tag.name)
+        if base_value is not None:
+            return base_value
+
+        # The only remaining possibility is that the match is determined
+        # by a function call. Call the function.
+        assert self.function is not None
+        if self.function(tag):
+            return True
+        return False
     
 class AttributeValueMatchRule(MatchRule):
     function: Callable[[str], bool]
@@ -196,7 +210,7 @@ class SoupStrainer(object):
                 DeprecationWarning, stacklevel=2
             )
         
-        self.name_rules = list(self.make_match_rules(name, TagNameMatchRule))
+        self.name_rules = list(self._make_match_rules(name, TagNameMatchRule))
         self.attribute_rules = defaultdict(list)
         
         if not isinstance(attrs, dict):
@@ -216,37 +230,38 @@ class SoupStrainer(object):
                     attr = 'class'
                 if value is None:
                     value = False
-                for rule_obj in self.make_match_rules(
+                for rule_obj in self._make_match_rules(
                     value, AttributeValueMatchRule
                 ):
                     self.attribute_rules[attr].append(rule_obj)
                                                       
         self.string_rules = list(
-            self.make_match_rules(string, StringMatchRule)
+            self._make_match_rules(string, StringMatchRule)
         )
 
         self.string = string
 
-        # DEPRECATED: use .string instead.
+        # DEPRECATED: Don't check this, check .string instead.
         self.text = string
         
     def __repr__(self):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
-        
-    def make_match_rules(self, obj, cls):
+
+    @classmethod
+    def _make_match_rules(cls, obj, rule_class):
         if obj is None:
             return
         if isinstance(obj, (str,bytes)):
-            yield cls(string=obj)
+            yield rule_class(string=obj)
         elif isinstance(obj, bool):
-            yield cls(present=obj)
+            yield rule_class(present=obj)
         elif isinstance(obj, Callable):
-            yield cls(function=obj)
+            yield rule_class(function=obj)
         elif isinstance(obj, re.Pattern):
-            yield cls(pattern=obj)
+            yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
-                if not isinstance(o, (bytes, str)) and hasattr(obj, '__iter__'):
+                if not isinstance(o, (bytes, str)) and hasattr(o, '__iter__'):
                     # This is almost certainly the user's
                     # mistake. This list contains another list, which
                     # opens up the possibility of infinite
@@ -254,14 +269,14 @@ class SoupStrainer(object):
                     # infinite recursion, we'll ignore this item
                     # rather than looking inside.
                     warnings.warn(
-                        f"Ignoring nested list {obj} to avoid the possibility of infinite recursion.",
+                        f"Ignoring nested list {o} to avoid the possibility of infinite recursion.",
                         stacklevel=5
                     )
                     continue
-                for x in self.make_match_rules(o, cls):
+                for x in cls._make_match_rules(o, rule_class):
                     yield x
         else:
-            yield cls(string=str(obj))
+            yield rule_class(string=str(obj))
             
     def matches_tag(self, tag=Tag) -> bool:
 

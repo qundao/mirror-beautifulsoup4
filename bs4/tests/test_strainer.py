@@ -103,8 +103,9 @@ class TestMatchrule(SoupTest):
     def test_matches_string(self, rule_kwargs, match_against, result):
         rule = MatchRule(**rule_kwargs)
         assert rule.matches_string(match_against) == result
-        
+
 class TestTagNameMatchRule(SoupTest):
+
     @pytest.mark.parametrize(
         "rule_kwargs, tag_kwargs, result",
         [
@@ -134,7 +135,7 @@ class TestTagNameMatchRule(SoupTest):
 
 # AttributeValueMatchRule and StringMatchRule have the same
 # logic as MatchRule.
-        
+
 class TestSoupStrainer(SoupTest):
     
     def test_constructor_string_deprecated_text_argument(self):
@@ -146,3 +147,58 @@ class TestSoupStrainer(SoupTest):
             assert warning.filename == __file__
             assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
 
+    def test_constructor(self):
+        pass
+
+    def match_function(x):
+        pass
+    
+    @pytest.mark.parametrize(
+        "obj, result",
+        [
+            ("a", MatchRule(string="a")),
+            (b"a", MatchRule(string="a")),
+            (True, MatchRule(present=True)),
+            (False, MatchRule(present=False)),
+            (re.compile("a"), MatchRule(pattern=re.compile("a"))),
+            (match_function, MatchRule(function=match_function)),
+
+            # Pass in a list and get back a list of rules.
+            (["a", b"b"], [MatchRule(string="a"), MatchRule(string="b")]),
+            ([re.compile("a"), match_function],
+             [MatchRule(pattern=re.compile("a")), MatchRule(function=match_function)]),
+            
+            # Anything that doesn't fit is converted to a string.
+            (100, MatchRule(string="100")),
+        ]
+    )
+    def test__make_match_rules(self, obj, result):
+        actual = list(SoupStrainer._make_match_rules(obj, MatchRule))
+        # Helper to reduce the number of single-item lists in the
+        # parameters.
+        if len(actual) == 1:
+            [actual] = actual
+        assert result == actual
+
+    def test__make_match_rules_different_classes(self):
+        pass
+        
+    def test__make_match_rules_nested_list(self):
+        # If you pass a nested list into _make_match_rules, it's
+        # ignored, to avoid the possibility of an infinite recursion.
+
+        # Create a self-referential object.
+        l = []
+        l.append(l)
+
+        with warnings.catch_warnings(record=True) as w:
+            rules = SoupStrainer._make_match_rules(["a", l, "b"], MatchRule)
+            assert list(rules) == [MatchRule(string="a"), MatchRule(string="b")]
+            
+            [warning] = w
+            # Don't check the filename because the stacklevel is
+            # designed for normal use and we're testing the private
+            # method directly.
+            msg = str(warning.message)
+            assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
+        
