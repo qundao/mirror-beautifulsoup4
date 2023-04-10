@@ -95,31 +95,55 @@ class MatchRule(object):
         if isinstance(string, bytes):
             string = string.decode("utf8")
         self.string = string
-        self.pattern = pattern
+        if isinstance(pattern, bytes):
+            self.pattern = re.compile(pattern.decode("utf8"))
+        elif isinstance(pattern, str):
+            self.pattern = re.compile(pattern)
+        else:
+            self.pattern = pattern
         self.function = function
         self.present = present
+
+        values = [x for x in (self.string, self.pattern,
+                              self.function, self.present)
+                  if x is not None]
+        if len(values) == 0:
+            raise ValueError(
+                "Either string, pattern, function or present must be provided."
+            )
+        if len(values) > 1:
+            raise ValueError(
+                "At most one of string, pattern, function and present must be provided."
+            )
         
     def _base_match(self, string):
+        # self.present==True matches everything except None.
         if self.present is True:
             return string is not None
+
+        # self.present==False matches _only_ None.
         if self.present is False:
             return string is None
-        
-        if self.string is not None and self.string != string:
-            #print(f"{self.string} != {string}")
-            return False
+
+        # self.string does an exact string match.
+        if self.string is not None:
+            #print(f"{self.string} ?= {string}")
+            return self.string == string
+
+        # self.pattern does a regular expression search.
         if self.pattern is not None:
+            #print(f"{self.pattern} ?~ {string}")
             if string is None:
                 return False
-            if not self.pattern.search(string):
-                #print(f"{self.pattern} !~ {string}")
-                return False
-        #print(f"{self.string} == {string}")
-        return True
+            return self.pattern.search(string) is not None
 
+        return None
+        
     def matches_string(self, string):
-        if not self._base_match(string):
-            return False
+        _base_result = self._base_match(string)
+        if _base_result is not None:
+            # No need to invoke the test function.
+            return _base_result
         if self.function is not None and not self.function(string):
             #print(f"{self.function}({string}) == False")
             return False

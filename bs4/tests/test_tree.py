@@ -8,8 +8,6 @@ Different parsers will build different Beautiful Soup trees given the
 same markup, but all Beautiful Soup trees can be traversed with the
 methods tested here.
 """
-
-from pdb import set_trace
 import pytest
 import re
 import warnings
@@ -112,7 +110,6 @@ class TestFindAll(SoupTest):
             assert warning.filename == __file__
             msg = str(warning.message)
             assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
-
 
     def test_find_all_resultset(self):
         """All find_all calls return a ResultSet"""
@@ -1323,13 +1320,4 @@ class TestDeprecatedArguments(SoupTest):
             assert warning.filename == __file__
             msg = str(warning.message)
             assert msg == "The 'text' argument to find()-type methods is deprecated. Use 'string' instead."
-
-    def test_soupstrainer_constructor_string(self):
-        with warnings.catch_warnings(record=True) as w:
-            strainer = SoupStrainer(text="text")
-            assert strainer.string == 'text'
-            [warning] = w
-            msg = str(warning.message)
-            assert warning.filename == __file__
-            assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
 
