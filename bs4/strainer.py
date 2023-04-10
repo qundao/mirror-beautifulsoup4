@@ -184,25 +184,37 @@ class StringMatchRule(MatchRule):
     function: Callable[[str], bool]
     
 class SoupStrainer(object):
-    """Encapsulates a number of ways of matching a markup element (tag or
-    string).
+    """Encapsulates a number of ways of matching a markup element (a tag
+    or a string).
 
-    This is primarily used to underpin the find_* methods, but you can
-    create one yourself and pass it in as ``parse_only`` to the
-    `BeautifulSoup` constructor, to parse a subset of a large
+    These are primarily created internally and used to underpin the
+    find_* methods, but you can create one yourself and pass it in as
+    ``parse_only`` to the `BeautifulSoup` constructor, to parse a
+    subset of a large document.
+
+    :param name: One or more restrictions on the tags found in a
     document.
-    """
 
+    :param attrs: A dictionary that maps attribute names to
+    restrictions on tags that use those attributes.
+
+    :param string: One or more restrictions on the strings found in a
+    document.
+
+    :param kwargs: A dictionary that maps attribute names to restrictions
+    on tags that use those attributes. These restrictions are additive to
+    any specified in ``attrs``.
+    """
     name_rules: Iterable[TagNameMatchRule]
     attribute_rules: Dict[str, Iterable[AtributeValueMatchRule]]
     string_rules: Iterable[StringMatchRule]
-    
+   
     def __init__(self,
                  name =None,
                  attrs = {},
                  string=None,
                  **kwargs):
-
+        
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
             warnings.warn(
@@ -239,16 +251,26 @@ class SoupStrainer(object):
             self._make_match_rules(string, StringMatchRule)
         )
 
+        # TODO: This is checked by certain tests and may not be
+        # necessary.
         self.string = string
 
-        # DEPRECATED: Don't check this, check .string instead.
+        # DEPRECATED: Definitely don't check this, check .string
+        # instead.
         self.text = string
         
     def __repr__(self):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
 
     @classmethod
-    def _make_match_rules(cls, obj, rule_class):
+    def _make_match_rules(cls, obj, rule_class:type) -> Iterator[MatchRule]:
+        """Convert a vaguely-specific 'object' into one or more well-defined
+        match rules.
+
+        :param obj: Some kind of object that corresponds to one or more
+           matching rules.
+        :param rule_class: Create instances of this MatchRule subclass.
+        """
         if obj is None:
             return
         if isinstance(obj, (str,bytes)):
@@ -279,39 +301,55 @@ class SoupStrainer(object):
             yield rule_class(string=str(obj))
             
     def matches_tag(self, tag=Tag) -> bool:
+        """Do the rules of this SoupStrainer trigger a match against the
+        given `Tag`?
 
-        # String rules do not match a Tag on their own.
+        If the `SoupStrainer` has any `TagNameMatchRule`, at least one
+        must match the `Tag` or its `Tag.name`.
+
+        If there are any `AttributeValueMatchRule` for a given
+        attribute, at least one of them must match the attribute
+        value.
+
+        If there are any `StringMatchRule`, at least one must match,
+        but a `SoupStrainer` that *only* contains `StringMatchRule`
+        cannot match a `Tag`, only a `NavigableString`.
+        """
+        # String rules cannot not match a Tag on their own.
         if not self.name_rules and not self.attribute_rules:
             return False
-        
-        # If there are name rules, at least one must match.
 
+        # Optimization for a very common case where the user is
+        # searching for a tag with one specific name, and we're
+        # looking at a tag with a different name.
+        if not tag.prefix and len(self.name_rules) == 1 and self.name_rules[0].string is not None and tag.name != self.name_rules[0].string:
+            return False
+        
         # If there are attribute rules for a given attribute, at least
         # one must match. If there are rules for multiple attributes,
         # each one must have a match.
 
         # If there are string rules, at least one must match.
+
+        prefixed_name = None
         if tag.prefix:
-            prefixed_name = tag.prefix + ':' + tag.name
-        else:
-            prefixed_name = None
+            prefixed_name = f"{tag.prefix}:{tag.name}"
         if self.name_rules:
             name_matches = False
             for rule in self.name_rules:
-                attrs = " ".join(
-                    [f"{k}={v}" for k, v in sorted(tag.attrs.items())]
-                )
+                # attrs = " ".join(
+                #     [f"{k}={v}" for k, v in sorted(tag.attrs.items())]
+                # )
                 #print(f"Testing <{tag.name} {attrs}>{tag.string}</{tag.name}> against {rule}")
                 if rule.matches_tag(tag) or (
-                    prefixed_name and rule.matches_string(prefixed_name)
+                    prefixed_name is not None
+                        and rule.matches_string(prefixed_name)
                 ):
                     name_matches = True
                     break
 
             if not name_matches:
                 return False
-
-
             
         for attr, rules in self.attribute_rules.items():
             this_attr_match = False
@@ -326,6 +364,7 @@ class SoupStrainer(object):
                     for attr_value in attr_values:
                         if rule.matches_string(attr_value):
                             return True
+                return False
             this_attr_match = _match_attribute_value_helper(attr_values)
             if not this_attr_match and len(attr_values) > 1:
                 # Try again but treat the attribute value

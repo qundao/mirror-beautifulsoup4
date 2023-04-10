@@ -7,8 +7,10 @@ from . import (
 )
 from bs4.element import Tag
 from bs4.strainer import (
+    AttributeValueMatchRule,
     MatchRule,
     SoupStrainer,
+    StringMatchRule,
     TagNameMatchRule,
 )
 
@@ -147,12 +149,63 @@ class TestSoupStrainer(SoupTest):
             assert warning.filename == __file__
             assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
 
+    def _match_function(x):
+        pass
+            
     def test_constructor(self):
-        pass
+        strainer = SoupStrainer(
+            "tagname",
+            {"attr1": "value"},
+            string=self._match_function,
+            attr2=["value1", False]
+        )
+        [name_rule] = strainer.name_rules
+        assert name_rule == TagNameMatchRule(string="tagname")
+        
+        [attr1_rule] = strainer.attribute_rules.pop('attr1')
+        assert attr1_rule == AttributeValueMatchRule(string="value")
+        
+        [attr2_rule1, attr2_rule2] = strainer.attribute_rules.pop('attr2')
+        assert attr2_rule1 == AttributeValueMatchRule(string="value1")
+        assert attr2_rule2 == AttributeValueMatchRule(present=False)
+        
+        assert not strainer.attribute_rules
 
-    def match_function(x):
-        pass
-    
+        [string_rule] = strainer.string_rules
+        assert string_rule == StringMatchRule(function=self._match_function)
+        
+    def test_scalar_attrs_becomes_class_restriction(self):
+        # For the sake of convenience, passing a scalar value as
+        # ``args`` results in a restriction on the 'class' attribute.
+        strainer = SoupStrainer(attrs="mainbody")
+        assert [] == strainer.name_rules
+        assert [] == strainer.string_rules
+        assert { "class": [AttributeValueMatchRule(string="mainbody")] } == (
+            strainer.attribute_rules
+        )
+        
+    def test_constructor_class_attribute(self):
+        # The 'class' HTML attribute is also treated specially because
+        # it's a Python reserved word. Passing in "class_" as a
+        # keyword argument results in a restriction on the 'class'
+        # attribute.
+        strainer = SoupStrainer(class_="mainbody")
+        assert [] == strainer.name_rules
+        assert [] == strainer.string_rules
+        assert { "class": [AttributeValueMatchRule(string="mainbody")] } == (
+            strainer.attribute_rules
+        )
+
+        # But if you pass in "class_" as part of the ``attrs`` dict
+        # it's not changed. (Otherwise there'd be no way to actually put
+        # a restriction on an attribute called "class_".
+        strainer = SoupStrainer(attrs=dict(class_="mainbody"))
+        assert [] == strainer.name_rules
+        assert [] == strainer.string_rules
+        assert { "class_": [AttributeValueMatchRule(string="mainbody")] } == (
+            strainer.attribute_rules
+        )
+        
     @pytest.mark.parametrize(
         "obj, result",
         [
@@ -161,12 +214,13 @@ class TestSoupStrainer(SoupTest):
             (True, MatchRule(present=True)),
             (False, MatchRule(present=False)),
             (re.compile("a"), MatchRule(pattern=re.compile("a"))),
-            (match_function, MatchRule(function=match_function)),
+            (_match_function, MatchRule(function=_match_function)),
 
             # Pass in a list and get back a list of rules.
             (["a", b"b"], [MatchRule(string="a"), MatchRule(string="b")]),
-            ([re.compile("a"), match_function],
-             [MatchRule(pattern=re.compile("a")), MatchRule(function=match_function)]),
+            ([re.compile("a"), _match_function],
+             [MatchRule(pattern=re.compile("a")),
+              MatchRule(function=_match_function)]),
             
             # Anything that doesn't fit is converted to a string.
             (100, MatchRule(string="100")),
@@ -180,8 +234,14 @@ class TestSoupStrainer(SoupTest):
             [actual] = actual
         assert result == actual
 
-    def test__make_match_rules_different_classes(self):
-        pass
+    @pytest.mark.parametrize(
+        "cls, result", [
+            (AttributeValueMatchRule, AttributeValueMatchRule(string="a")),
+            (StringMatchRule, StringMatchRule(string="a")),
+        ])
+    def test__make_match_rules_different_classes(self, cls, result):
+        actual = cls(string="a")
+        assert actual == result
         
     def test__make_match_rules_nested_list(self):
         # If you pass a nested list into _make_match_rules, it's
@@ -202,3 +262,118 @@ class TestSoupStrainer(SoupTest):
             msg = str(warning.message)
             assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
         
+    def test_matches_tag_with_only_string(self):
+
+        # A SoupStrainer that only has StringMatchRules won't ever
+        # match a Tag.
+        strainer = SoupStrainer(string=["a string", re.compile("string")])
+        tag = Tag(name="b", attrs=dict(id="1"))
+        tag.string = "a string"
+        assert not strainer.matches_tag(tag)
+
+        # There has to be a TagNameMatchRule or an
+        # AttributeValueMatchRule as well.
+        strainer.name_rules.append(TagNameMatchRule(string="b"))
+        assert strainer.matches_tag(tag)
+
+        strainer.name_rules = []
+        strainer.attribute_rules['id'] = [AttributeValueMatchRule('1')]
+        assert strainer.matches_tag(tag)
+
+    def test_matches_tag_with_prefix(self):
+        # If a tag has an attached namespace prefix, the tag's name is
+        # tested both with and without the prefix.
+        tag = Tag(name="a", namespace="https://namespace/", prefix="ns")
+
+        assert SoupStrainer(name="a").matches_tag(tag)
+        assert SoupStrainer(name="ns:a").matches_tag(tag)
+        assert not SoupStrainer(name="ns2:a").matches_tag(tag)
+
+    def test_one_name_rule_must_match(self):
+        # If there are TagNameMatchRule, at least one must match.
+        tag = Tag(name="b")
+        assert SoupStrainer(name="b").matches_tag(tag)
+        assert not SoupStrainer(name="c").matches_tag(tag)
+        assert SoupStrainer(name=["c", "d", "d", "b"]).matches_tag(tag)
+        assert SoupStrainer(name=[re.compile("c-f"), re.compile("[ab]$")]).matches_tag(tag)
+        
+    def test_one_attribute_rule_must_match_for_each_attribute(self):
+        # If there is one or more AttributeValueMatchRule for a given
+        # attribute, at least one must match that attribute's
+        # value. This is true for *every* attribute -- just matching one
+        # attribute isn't enough.
+        tag = Tag(name="b", attrs={"class": "main", "id": "1"})
+
+        # 'class' and 'id' match
+        assert SoupStrainer(
+            class_=["other", "main"], id=["20", "a", re.compile("^[0-9]")]
+        ).matches_tag(tag)
+
+        # 'class' and 'id' are present and 'data' attribute is missing
+        assert SoupStrainer(class_=True, id=True, data=False).matches_tag(tag)
+        
+        # 'id' matches, 'class' does not.
+        assert not SoupStrainer(class_=["other"], id=["2"]).matches_tag(tag)
+
+        # 'class' matches, 'id' does not
+        assert not SoupStrainer(class_=["main"], id=["2"]).matches_tag(tag)
+
+        # 'class' and 'id' match but 'data' attribute is missing
+        assert not SoupStrainer(
+            class_=["main"], id=["1"], data=True
+        ).matches_tag(tag)
+        
+    def test_match_against_multi_valued_attribute(self):
+        # If an attribute has multiple values, only one of them
+        # has to match the AttributeValueMatchRule.
+        tag = Tag(name="b", attrs={"class": ["main", "big"]})
+        assert SoupStrainer(attrs="main").matches_tag(tag)
+        assert SoupStrainer(attrs="big").matches_tag(tag)
+        assert SoupStrainer(attrs=["main", "big"]).matches_tag(tag)
+        assert SoupStrainer(attrs=["big", "small"]).matches_tag(tag)
+        assert not SoupStrainer(attrs=["small", "smaller"]).matches_tag(tag)
+        
+    def test_match_against_multi_valued_attribute_as_string(self):
+        # If an attribute has multiple values, you can treat the entire
+        # thing as one string during a match.
+        tag = Tag(name="b", attrs={"class": ["main", "big"]})
+        assert SoupStrainer(attrs="main big").matches_tag(tag)
+
+        # But you can't put them in any order; it's got to be the
+        # order they are present in the Tag, which basically means the
+        # order they were originally present in the document.
+        assert not SoupStrainer(attrs=["big main"]).matches_tag(tag)
+
+    def test_one_string_rule_must_match(self):
+        # If there's a TagNameMatchRule and/or an
+        # AttributeValueMatchRule, then the StringMatchRule is _not_
+        # ignored, and must match as well.
+        tag = Tag(name="b", attrs=dict(id="1"))
+        tag.string = "A string"
+
+        assert SoupStrainer(name="b", string="A string").matches_tag(tag)
+        assert not SoupStrainer(name="a", string="A string").matches_tag(tag)
+        assert not SoupStrainer(name="a", string="Wrong string").matches_tag(tag)
+        assert SoupStrainer(id="1", string="A string").matches_tag(tag)
+        assert not SoupStrainer(id="2", string="A string").matches_tag(tag)
+        assert not SoupStrainer(id="1", string="Wrong string").matches_tag(tag)
+
+        assert SoupStrainer(name="b", id="1", string="A string").matches_tag(tag)
+
+        # If there are multiple string rules, only one needs to match.
+        assert SoupStrainer(
+            name="b", id="1",
+            string=["Wrong string", "Also wrong", re.compile("string")]
+        ).matches_tag(tag)
+
+
+# This is no longer true -- you can have a non-dict value for attrs and
+# also class_="foo". It's treated as two different filters on class.
+
+# In general if you specify the same attribute in attrs and kwargs,
+# both will run.
+
+# Treat class_="foo" as a search for the 'class'
+# attribute, overriding any non-dict value for attrs.
+
+# You can specify a list of anything, not just a list of strings.
