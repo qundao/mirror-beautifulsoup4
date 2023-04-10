@@ -104,9 +104,15 @@ class TestFindAll(SoupTest):
         l = []
         l.append(l)
 
-        # Without special code in _normalize_search_value, this would cause infinite
+        # Without special code in SoupStrainer, this would cause infinite
         # recursion.
-        assert [] == soup.find_all(l)
+        with warnings.catch_warnings(record=True) as w:
+            assert [] == soup.find_all(l)
+            [warning] = w
+            assert warning.filename == __file__
+            msg = str(warning.message)
+            assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
+
 
     def test_find_all_resultset(self):
         """All find_all calls return a ResultSet"""
@@ -935,7 +941,7 @@ class TestTreeModification(SoupTest):
             [warning] = w
             assert warning.filename == __file__
             msg = str(warning.message)
-            assert "A single item was passed into Tag.extend. Use Tag.append instead."
+            assert msg == "A single item was passed into Tag.extend. Use Tag.append instead."
             assert soup.div.decode_contents() == result
         
     def test_move_tag_to_beginning_of_parent(self):
@@ -1321,7 +1327,7 @@ class TestDeprecatedArguments(SoupTest):
     def test_soupstrainer_constructor_string(self):
         with warnings.catch_warnings(record=True) as w:
             strainer = SoupStrainer(text="text")
-            assert strainer.text == 'text'
+            assert strainer.string == 'text'
             [warning] = w
             msg = str(warning.message)
             assert warning.filename == __file__

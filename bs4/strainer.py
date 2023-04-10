@@ -201,9 +201,11 @@ class SoupStrainer(object):
             self.make_match_rules(string, StringMatchRule)
         )
 
-        # TODO: This is deprecated, get it out of tests at least.
-        self.text = string
+        self.string = string
 
+        # DEPRECATED: use .string instead.
+        self.text = string
+        
     def __repr__(self):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
         
@@ -227,6 +229,10 @@ class SoupStrainer(object):
                     # self-reference. In the interests of avoiding
                     # infinite recursion, we'll ignore this item
                     # rather than looking inside.
+                    warnings.warn(
+                        f"Ignoring nested list {obj} to avoid the possibility of infinite recursion.",
+                        stacklevel=5
+                    )
                     continue
                 for x in self.make_match_rules(o, cls):
                     yield x
