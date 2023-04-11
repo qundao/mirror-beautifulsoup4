@@ -410,6 +410,13 @@ class TestSoupStrainer(SoupTest):
             string=["Wrong string", "Also wrong", re.compile("string")]
         ).matches_tag(tag)
 
+    def test_deeply_nested_string(self):
+        markup = "<a><b><div>a string<span>b string</b></div></b></a>"
+        soup = self.soup(markup, parse_only=SoupStrainer(string=["a string", "b string"]))
+        import pdb; pdb.set_trace()
+        pass
+        
+        
     def test_documentation_examples(self):
         """Medium-weight real-world tests based on the Beautiful Soup
         documentation.
