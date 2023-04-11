@@ -277,7 +277,19 @@ class TestSoupStrainer(SoupTest):
             # method directly.
             msg = str(warning.message)
             assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
-        
+
+    def tag_matches(
+            self, strainer, name, attrs=None, string=None, prefix=None,
+            match_valence=True
+    ):
+        # Create a Tag with the given prefix, name and attributes,
+        # then make sure that strainer.matches_tag and allow_tag_creation
+        # both approve it.
+        tag = Tag(prefix=prefix, name=name, attrs=attrs)
+        if string:
+            tag.string = string
+        return strainer.matches_tag(tag) and strainer.allow_tag_creation(prefix, name, attrs)
+
     def test_matches_tag_with_only_string(self):
 
         # A SoupStrainer that only has StringMatchRules won't ever
@@ -299,66 +311,82 @@ class TestSoupStrainer(SoupTest):
     def test_matches_tag_with_prefix(self):
         # If a tag has an attached namespace prefix, the tag's name is
         # tested both with and without the prefix.
-        tag = Tag(name="a", namespace="https://namespace/", prefix="ns")
+        kwargs = dict(name="a", prefix="ns")
 
-        assert SoupStrainer(name="a").matches_tag(tag)
-        assert SoupStrainer(name="ns:a").matches_tag(tag)
-        assert not SoupStrainer(name="ns2:a").matches_tag(tag)
+        assert self.tag_matches(SoupStrainer(name="a"), **kwargs)
+        assert self.tag_matches(SoupStrainer(name="ns:a"), **kwargs)
+        assert not self.tag_matches(SoupStrainer(name="ns2:a"), **kwargs)
 
     def test_one_name_rule_must_match(self):
         # If there are TagNameMatchRule, at least one must match.
-        tag = Tag(name="b")
-        assert SoupStrainer(name="b").matches_tag(tag)
-        assert not SoupStrainer(name="c").matches_tag(tag)
-        assert SoupStrainer(name=["c", "d", "d", "b"]).matches_tag(tag)
-        assert SoupStrainer(name=[re.compile("c-f"), re.compile("[ab]$")]).matches_tag(tag)
+        kwargs = dict(name="b")
+        
+        assert self.tag_matches(SoupStrainer(name="b"), **kwargs)
+        assert not self.tag_matches(SoupStrainer(name="c"), **kwargs)
+        assert self.tag_matches(
+            SoupStrainer(name=["c", "d", "d", "b"]), **kwargs
+        )
+        assert self.tag_matches(
+            SoupStrainer(name=[re.compile("c-f"), re.compile("[ab]$")]),
+            **kwargs
+        )
         
     def test_one_attribute_rule_must_match_for_each_attribute(self):
         # If there is one or more AttributeValueMatchRule for a given
         # attribute, at least one must match that attribute's
         # value. This is true for *every* attribute -- just matching one
         # attribute isn't enough.
-        tag = Tag(name="b", attrs={"class": "main", "id": "1"})
+        kwargs = dict(name="b", attrs={"class": "main", "id": "1"})
 
         # 'class' and 'id' match
-        assert SoupStrainer(
-            class_=["other", "main"], id=["20", "a", re.compile("^[0-9]")]
-        ).matches_tag(tag)
+        assert self.tag_matches(
+            SoupStrainer(
+                class_=["other", "main"], id=["20", "a", re.compile("^[0-9]")]
+            ),
+            **kwargs
+        )
 
         # 'class' and 'id' are present and 'data' attribute is missing
-        assert SoupStrainer(class_=True, id=True, data=False).matches_tag(tag)
+        assert self.tag_matches(
+            SoupStrainer(class_=True, id=True, data=False), **kwargs
+        )
         
         # 'id' matches, 'class' does not.
-        assert not SoupStrainer(class_=["other"], id=["2"]).matches_tag(tag)
+        assert not self.tag_matches(
+            SoupStrainer(class_=["other"], id=["2"]), **kwargs
+        )
 
         # 'class' matches, 'id' does not
-        assert not SoupStrainer(class_=["main"], id=["2"]).matches_tag(tag)
+        assert not self.tag_matches(
+            SoupStrainer(class_=["main"], id=["2"]), **kwargs
+        )
 
         # 'class' and 'id' match but 'data' attribute is missing
-        assert not SoupStrainer(
-            class_=["main"], id=["1"], data=True
-        ).matches_tag(tag)
+        assert not self.tag_matches(
+            SoupStrainer(class_=["main"], id=["1"], data=True),
+            **kwargs
+        )
         
     def test_match_against_multi_valued_attribute(self):
         # If an attribute has multiple values, only one of them
         # has to match the AttributeValueMatchRule.
-        tag = Tag(name="b", attrs={"class": ["main", "big"]})
-        assert SoupStrainer(attrs="main").matches_tag(tag)
-        assert SoupStrainer(attrs="big").matches_tag(tag)
-        assert SoupStrainer(attrs=["main", "big"]).matches_tag(tag)
-        assert SoupStrainer(attrs=["big", "small"]).matches_tag(tag)
-        assert not SoupStrainer(attrs=["small", "smaller"]).matches_tag(tag)
+        kwargs = dict(name="b", attrs={"class": ["main", "big"]})
+        assert self.tag_matches(SoupStrainer(attrs="main"), **kwargs)
+        assert self.tag_matches(SoupStrainer(attrs="big"), **kwargs)
+        assert self.tag_matches(SoupStrainer(attrs=["main", "big"]), **kwargs)
+        assert self.tag_matches(SoupStrainer(attrs=["big", "small"]), **kwargs)
+        assert not self.tag_matches(SoupStrainer(attrs=["small", "smaller"]), **kwargs)
         
     def test_match_against_multi_valued_attribute_as_string(self):
         # If an attribute has multiple values, you can treat the entire
         # thing as one string during a match.
-        tag = Tag(name="b", attrs={"class": ["main", "big"]})
-        assert SoupStrainer(attrs="main big").matches_tag(tag)
+        kwargs = dict(name="b", attrs={"class": ["main", "big"]})
+        assert self.tag_matches(SoupStrainer(attrs="main big"), **kwargs)
 
         # But you can't put them in any order; it's got to be the
         # order they are present in the Tag, which basically means the
         # order they were originally present in the document.
-        assert not SoupStrainer(attrs=["big main"]).matches_tag(tag)
+        assert not self.tag_matches(SoupStrainer(attrs=["big main"]), **kwargs)
 
     def test_one_string_rule_must_match(self):
         # If there's a TagNameMatchRule and/or an

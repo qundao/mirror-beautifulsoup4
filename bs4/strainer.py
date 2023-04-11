@@ -397,7 +397,7 @@ class SoupStrainer(object):
         """
         prefixed_name = None
         if nsprefix:
-            prefixed_name = f"{nsprefix}:{tag.name}"
+            prefixed_name = f"{nsprefix}:{name}"
         if self.name_rules:
             # At least one name rule must match.
             name_match = False
