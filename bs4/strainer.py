@@ -355,15 +355,9 @@ class SoupStrainer(object):
             this_attr_match = self._attribute_match(attr_value, rules)
             if not this_attr_match:
                 return False
-                
-        if self.string_rules:
-            string_match = False
-            string = tag.string
-            for string_rule in self.string_rules:
-                if string_rule.matches_string(string):
-                    string_match = True
-                    break
-            return string_match
+
+        if self.string_rules and not self.matches_any_string_rule(tag.string):
+            return False
         return True
 
     def _attribute_match(self, attr_value, rules):
@@ -413,9 +407,22 @@ class SoupStrainer(object):
             attr_value = attrs.get(attr)
             if not self._attribute_match(attr_value, rules):
                 return False
-
+            
         return True
 
+    def matches_any_string_rule(self, string:str):
+        """Based on the content of a string, see whether it 
+        matches
+
+        """
+        if not self.string_rules:
+            return True
+        for string_rule in self.string_rules:
+            if string_rule.matches_string(string):
+                return True
+        return False
+        
+    
     # DEPRECATED 4.13.0
     def search_tag(self, name, attrs):
         return self.allow_tag_creation(None, name, attrs)

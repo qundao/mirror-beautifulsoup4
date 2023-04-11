@@ -610,7 +610,7 @@ class BeautifulSoup(Tag):
             # Should we add this string to the tree at all?
             if self.parse_only and len(self.tagStack) <= 1 and \
                    (not self.parse_only.string_rules or \
-                    not self.parse_only.search(current_data)):
+                    not self.parse_only.matches_any_string_rule(current_data)):
                 return
 
             containerClass = self.string_container(containerClass)
