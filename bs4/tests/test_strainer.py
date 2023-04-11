@@ -410,12 +410,31 @@ class TestSoupStrainer(SoupTest):
             string=["Wrong string", "Also wrong", re.compile("string")]
         ).matches_tag(tag)
 
-    def test_deeply_nested_string(self):
-        markup = "<a><b><div>a string<span>b string</b></div></b></a>"
-        soup = self.soup(markup, parse_only=SoupStrainer(string=["a string", "b string"]))
-        import pdb; pdb.set_trace()
-        pass
+    def test_parsing_tag_implies_parsing_its_contents(self):
+        markup = "<a><b>one string<div>another string</div></b></a>"
+
+        # Letting the <b> tag through implies parsing the <div> tag
+        # and both strings, even though they wouldn't match the
+        # SoupStrainer on their own.
+        assert "<b>one string<div>another string</div></b>" == self.soup(
+            markup, parse_only=SoupStrainer(name="b")).decode()
+
+        # Weird but understandable.
+        assert "" == self.soup(
+            markup, parse_only=SoupStrainer(name="b", string="No such string")).decode()
+
+        # Weird but kind of understandable.
+        assert "one string" == self.soup(
+            markup, parse_only=SoupStrainer(name="b", string="one string")).decode()
+        # This just seems wrong.
+        assert "another string" == self.soup(
+            markup, parse_only=SoupStrainer(name="div", string="another string")).decode()
+
         
+        soup = self.soup(markup, parse_only=SoupStrainer(name="b", string=["another string"]))
+        assert ["a string", "b string"] == soup.contents
+        soup = self.soup(markup, parse_only=SoupStrainer(string=re.compile("^[bc]")))
+        assert ["b string", "c string"] == soup.contents
         
     def test_documentation_examples(self):
         """Medium-weight real-world tests based on the Beautiful Soup
