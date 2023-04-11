@@ -220,7 +220,14 @@ class BeautifulSoup(Tag):
 
         parse_only = parse_only or deprecated_argument(
             "parseOnlyThese", "parse_only")
-
+        if (parse_only is not None
+            and parse_only.string_rules and
+            (parse_only.name_rules or parse_only.attribute_rules)):
+            warnings.warn(
+                f"Value for parse_only will exclude everything, since it puts restrictions on both tags and strings: {parse_only}",
+                UserWarning, stacklevel=3
+            )
+        
         from_encoding = from_encoding or deprecated_argument(
             "fromEncoding", "from_encoding")
 
