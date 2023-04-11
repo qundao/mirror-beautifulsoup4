@@ -609,7 +609,7 @@ class BeautifulSoup(Tag):
 
             # Should we add this string to the tree at all?
             if self.parse_only and len(self.tagStack) <= 1 and \
-                   (not self.parse_only.string or \
+                   (not self.parse_only.string_rules or \
                     not self.parse_only.search(current_data)):
                 return
 
@@ -742,8 +742,8 @@ class BeautifulSoup(Tag):
         self.endData()
 
         if (self.parse_only and len(self.tagStack) <= 1
-            and (self.parse_only.string
-                 or not self.parse_only.search_tag(name, attrs))):
+            and (self.parse_only.string_rules
+                 or not self.parse_only.allow_tag_creation(nsprefix, name, attrs))):
             return None
 
         tag = self.element_classes.get(Tag, Tag)(

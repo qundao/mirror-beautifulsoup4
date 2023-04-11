@@ -16,6 +16,23 @@
 * Using PageElement.replace_with() to replace an element with itself
   returns the element instead of None.
 
+* When using one of the find() methods or creating a SoupStrainer,
+  if you specify the same attribute value in ``attrs`` and the
+  keyword arguments, you'll end up with two different ways to match that
+  attribute. Previously the value in keyword arguments would override the
+  value in ``attrs``.
+
+* When using one of the find() methods or creating a SoupStrainer, you can
+  pass a list of any accepted object (strings, regular expressions, etc.) for
+  any of the objects. Previously you could only pass in a list of strings.
+
+* A SoupStrainer can now short-circuit tag creation based on a tag's
+  namespaced name. Previously only the unqualified name could be used.
+
+* SoupStrainer.search_tag() has been deprecated. It was never a
+  documented method, but if you use it, you should start using
+  SoupStrainer.allow_tag_creation() instead.
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents

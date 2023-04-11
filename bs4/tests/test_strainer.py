@@ -143,7 +143,7 @@ class TestSoupStrainer(SoupTest):
     def test_constructor_string_deprecated_text_argument(self):
         with warnings.catch_warnings(record=True) as w:
             strainer = SoupStrainer(text="text")
-            assert strainer.string == 'text'
+            assert strainer.text == 'text'
             [warning] = w
             msg = str(warning.message)
             assert warning.filename == __file__
@@ -205,6 +205,22 @@ class TestSoupStrainer(SoupTest):
         assert { "class_": [AttributeValueMatchRule(string="mainbody")] } == (
             strainer.attribute_rules
         )
+
+    def test_constructor_with_overlapping_attributes(self):
+        # If you specify the same attribute in arts and **kwargs, you end up
+        # with two different AttributeValueMatchRule objects.
+
+        # This happens whether you use the 'class' shortcut on attrs...
+        strainer = SoupStrainer(attrs="class1", class_="class2")
+        rule1, rule2 = strainer.attribute_rules['class']
+        assert rule1.string == "class1"
+        assert rule2.string == "class2"
+
+        # Or explicitly specify the same attribute twice.
+        strainer = SoupStrainer(attrs={"id": "id1"}, id="id2")
+        rule1, rule2 = strainer.attribute_rules['id']
+        assert rule1.string == "id1"
+        assert rule2.string == "id2"
         
     @pytest.mark.parametrize(
         "obj, result",
@@ -279,7 +295,7 @@ class TestSoupStrainer(SoupTest):
         strainer.name_rules = []
         strainer.attribute_rules['id'] = [AttributeValueMatchRule('1')]
         assert strainer.matches_tag(tag)
-
+        
     def test_matches_tag_with_prefix(self):
         # If a tag has an attached namespace prefix, the tag's name is
         # tested both with and without the prefix.
@@ -366,14 +382,3 @@ class TestSoupStrainer(SoupTest):
             string=["Wrong string", "Also wrong", re.compile("string")]
         ).matches_tag(tag)
 
-
-# This is no longer true -- you can have a non-dict value for attrs and
-# also class_="foo". It's treated as two different filters on class.
-
-# In general if you specify the same attribute in attrs and kwargs,
-# both will run.
-
-# Treat class_="foo" as a search for the 'class'
-# attribute, overriding any non-dict value for attrs.
-
-# You can specify a list of anything, not just a list of strings.

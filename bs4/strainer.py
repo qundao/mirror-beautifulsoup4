@@ -251,13 +251,12 @@ class SoupStrainer(object):
             self._make_match_rules(string, StringMatchRule)
         )
 
-        # TODO: This is checked by certain tests and may not be
-        # necessary.
-        self.string = string
-
-        # DEPRECATED: Definitely don't check this, check .string
-        # instead.
+        # DEPRECATED: You shouldn't need to check these, and if you do,
+        # you're probably not taking into account all of the types of
+        # values this variable might have. Look at the .string_rules
+        # list instead.
         self.text = string
+        self.string = string
         
     def __repr__(self):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
@@ -352,27 +351,8 @@ class SoupStrainer(object):
                 return False
             
         for attr, rules in self.attribute_rules.items():
-            this_attr_match = False
             attr_value = tag.get(attr)
-            if isinstance(attr_value, list):
-                attr_values = attr_value
-            else:
-                attr_values = [attr_value]
-
-            def _match_attribute_value_helper(attr_values):
-                for rule in rules:
-                    for attr_value in attr_values:
-                        if rule.matches_string(attr_value):
-                            return True
-                return False
-            this_attr_match = _match_attribute_value_helper(attr_values)
-            if not this_attr_match and len(attr_values) > 1:
-                # Try again but treat the attribute value
-                # as a single string.
-                joined_attr_value = " ".join(attr_values)
-                this_attr_match = _match_attribute_value_helper(
-                    [joined_attr_value]
-                )
+            this_attr_match = self._attribute_match(attr_value, rules)
             if not this_attr_match:
                 return False
                 
@@ -386,18 +366,59 @@ class SoupStrainer(object):
             return string_match
         return True
 
-    def allow_tag_creation(self, name:str, attrs:dict[str, str]) -> bool:
-        for rule in self.name_rules:
-            if not rule.matches_string(name):
+    def _attribute_match(self, attr_value, rules):
+        if isinstance(attr_value, list):
+            attr_values = attr_value
+        else:
+            attr_values = [attr_value]
+
+        def _match_attribute_value_helper(attr_values):
+            for rule in rules:
+                for attr_value in attr_values:
+                    if rule.matches_string(attr_value):
+                        return True
+            return False
+        this_attr_match = _match_attribute_value_helper(attr_values)
+        if not this_attr_match and len(attr_values) > 1:
+            # Try again but treat the attribute value
+            # as a single string.
+            joined_attr_value = " ".join(attr_values)
+            this_attr_match = _match_attribute_value_helper(
+                [joined_attr_value]
+            )
+        return this_attr_match
+    
+    def allow_tag_creation(self, nsprefix:str, name:str, attrs:dict[str, str]) -> bool:
+        """Based on the name and attributes of a tag, see whether this
+        SoupStrainer will allow a Tag object to even be created.
+
+        :param name: The name of the prospective tag.
+        :param attrs: The attributes of the prospective tag.
+        """
+        prefixed_name = None
+        if nsprefix:
+            prefixed_name = f"{nsprefix}:{tag.name}"
+        if self.name_rules:
+            # At least one name rule must match.
+            name_match = False
+            for rule in self.name_rules:
+                if any(rule.matches_string(x) for x in (name, prefixed_name)):
+                    name_match = True
+            if not name_match:
                 return False
 
-        for attr, rule in self.attribute_rules:
+        # For each attribute that has rules, at least one rule must
+        # match.
+        for attr, rules in self.attribute_rules.items():
             attr_value = attrs.get(attr)
-            if not attr_rule.matches_string(attr_value):
+            if not self._attribute_match(attr_value, rules):
                 return False
 
         return True
-    search_tag = allow_tag_creation
+
+    # DEPRECATED 4.13.0
+    def search_tag(self, name, attrs):
+        return self.allow_tag_creation(None, name, attrs)
     
     def search(self, element:PageElement):
         match = None
