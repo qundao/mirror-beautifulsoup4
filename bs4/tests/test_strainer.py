@@ -27,9 +27,11 @@ class TestMatchrule(SoupTest):
             rule.present
         )
 
+    @staticmethod
     def tag_function(x:Tag) -> bool:
         return False
 
+    @staticmethod
     def string_function(x:str) -> bool:
         return False
 
@@ -418,8 +420,14 @@ class TestSoupStrainer(SoupTest):
         # SoupStrainer on their own.
         assert "<b>one string<div>another string</div></b>" == self.soup(
             markup, parse_only=SoupStrainer(name="b")).decode()
-        
-    def test_parse_only_combining_tag_and_string(self):
+
+    @pytest.mark.parametrize(
+        "soupstrainer", [
+            SoupStrainer(name="b", string="one string"),
+            SoupStrainer(name="div", string="another string"),
+        ]
+    )
+    def test_parse_only_combining_tag_and_string(self, soupstrainer):
         # If you pass parse_only a SoupStrainer that contains both tag
         # restrictions and string restrictions, you get no results,
         # because the string restrictions can't be evaluated during
@@ -427,10 +435,14 @@ class TestSoupStrainer(SoupTest):
         # any strings from consideration.
         markup = "<a><b>one string<div>another string</div></b></a>"
 
-        assert "" == self.soup(
-            markup, parse_only=SoupStrainer(name="b", string="one string")).decode()
-        assert "" == self.soup(
-            markup, parse_only=SoupStrainer(name="div", string="another string")).decode()
+        with warnings.catch_warnings(record=True) as w:
+            assert "" == self.soup(markup, parse_only=soupstrainer).decode()
+            [warning] = w
+            msg = str(warning.message)
+            assert warning.filename == __file__
+            assert str(warning.message).startswith(
+                "Value for parse_only will exclude everything, since it puts restrictions on both tags and strings:"
+            )
         
     def test_documentation_examples(self):
         """Medium-weight real-world tests based on the Beautiful Soup
