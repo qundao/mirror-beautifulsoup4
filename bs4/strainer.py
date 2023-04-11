@@ -83,14 +83,14 @@ class MatchRule(object):
     string: Optional[str]
     pattern: Optional[re.Pattern]
     function: Optional[Callable]
-    present: bool
+    present: Optional[bool]
     
     def __init__(
             self,
             string:Optional[Union[str, bytes]]=None,
             pattern:Optional[re.Pattern]=None,
             function:Optional[Callable]=None,
-            present:bool=None,
+            present:Optional[bool]=None,
     ):
         if isinstance(string, bytes):
             string = string.decode("utf8")
@@ -205,8 +205,8 @@ class SoupStrainer(object):
     on tags that use those attributes. These restrictions are additive to
     any specified in ``attrs``.
     """
-    name_rules: Iterable[TagNameMatchRule]
-    attribute_rules: Dict[str, Iterable[AtributeValueMatchRule]]
+    name_rules: List[TagNameMatchRule]
+    attribute_rules: Dict[str, Iterable[AttributeValueMatchRule]]
     string_rules: Iterable[StringMatchRule]
    
     def __init__(self,
@@ -276,7 +276,7 @@ class SoupStrainer(object):
             yield rule_class(string=obj)
         elif isinstance(obj, bool):
             yield rule_class(present=obj)
-        elif isinstance(obj, Callable):
+        elif callable(obj):
             yield rule_class(function=obj)
         elif isinstance(obj, re.Pattern):
             yield rule_class(pattern=obj)
