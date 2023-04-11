@@ -26,8 +26,13 @@
   pass a list of any accepted object (strings, regular expressions, etc.) for
   any of the objects. Previously you could only pass in a list of strings.
 
-* A SoupStrainer can now short-circuit tag creation based on a tag's
+* A SoupStrainer can now filter tag creation based on a tag's
   namespaced name. Previously only the unqualified name could be used.
+
+* Issue a warning if a document is parsed using a SoupStrainer that's just
+  going to filter everything. In these cases, filtering everything is the
+  most consistent thing to do, but there was no indication that was
+  happening.
 
 * SoupStrainer.search_tag() has been deprecated. It was never a
   documented method, but if you use it, you should start using
