@@ -410,7 +410,7 @@ class TestSoupStrainer(SoupTest):
             string=["Wrong string", "Also wrong", re.compile("string")]
         ).matches_tag(tag)
 
-    def test_parsing_tag_implies_parsing_its_contents(self):
+    def test_allowing_tag_implies_allowing_its_contents(self):
         markup = "<a><b>one string<div>another string</div></b></a>"
 
         # Letting the <b> tag through implies parsing the <div> tag
@@ -418,23 +418,19 @@ class TestSoupStrainer(SoupTest):
         # SoupStrainer on their own.
         assert "<b>one string<div>another string</div></b>" == self.soup(
             markup, parse_only=SoupStrainer(name="b")).decode()
-
-        # Weird but understandable.
-        assert "" == self.soup(
-            markup, parse_only=SoupStrainer(name="b", string="No such string")).decode()
-
-        # Weird but kind of understandable.
-        assert "one string" == self.soup(
-            markup, parse_only=SoupStrainer(name="b", string="one string")).decode()
-        # This just seems wrong.
-        assert "another string" == self.soup(
-            markup, parse_only=SoupStrainer(name="div", string="another string")).decode()
-
         
-        soup = self.soup(markup, parse_only=SoupStrainer(name="b", string=["another string"]))
-        assert ["a string", "b string"] == soup.contents
-        soup = self.soup(markup, parse_only=SoupStrainer(string=re.compile("^[bc]")))
-        assert ["b string", "c string"] == soup.contents
+    def test_parse_only_combining_tag_and_string(self):
+        # If you pass parse_only a SoupStrainer that contains both tag
+        # restrictions and string restrictions, you get no results,
+        # because the string restrictions can't be evaluated during
+        # the parsing process, and the tag restrictions eliminate
+        # any strings from consideration.
+        markup = "<a><b>one string<div>another string</div></b></a>"
+
+        assert "" == self.soup(
+            markup, parse_only=SoupStrainer(name="b", string="one string")).decode()
+        assert "" == self.soup(
+            markup, parse_only=SoupStrainer(name="div", string="another string")).decode()
         
     def test_documentation_examples(self):
         """Medium-weight real-world tests based on the Beautiful Soup

@@ -389,6 +389,13 @@ class SoupStrainer(object):
         :param name: The name of the prospective tag.
         :param attrs: The attributes of the prospective tag.
         """
+        if self.string_rules:
+            # A SoupStrainer that has string rules can't be used to
+            # manage tag creation, because the string rule can't be
+            # evaluated until after the tag and all of its contents
+            # have been parsed.
+            return False
+        
         prefixed_name = None
         if nsprefix:
             prefixed_name = f"{nsprefix}:{name}"
@@ -410,6 +417,16 @@ class SoupStrainer(object):
             
         return True
 
+    def allow_string_creation(self, string:str):
+        if self.name_rules or self.attribute_rules:
+            # A SoupStrainer that has name or attribute rules won't
+            # match any strings; it's designed to match tags with
+            # certain properties.
+            return False
+        if not self.matches_any_string_rule(string):
+            return False
+        return True
+    
     def matches_any_string_rule(self, string:str):
         """Based on the content of a string, see whether it 
         matches
