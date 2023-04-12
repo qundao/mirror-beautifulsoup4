@@ -14,7 +14,7 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
-from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -259,7 +259,7 @@ class PageElement(object):
         if self.previous_sibling is not None:
             self.previous_sibling.next_sibling = self
 
-    def format_string(self, s, formatter):
+    def format_string(self, s:str, formatter:Optional[Union[str, Formatter]]) -> str:
         """Format the given string using the given formatter.
 
         :param s: A string.
@@ -272,7 +272,7 @@ class PageElement(object):
         output = formatter.substitute(s)
         return output
 
-    def formatter_for_name(self, formatter):
+    def formatter_for_name(self, formatter_name:str) -> Formatter:
         """Look up or create a Formatter for the given identifier,
         if necessary.
 
@@ -282,15 +282,19 @@ class PageElement(object):
             up an XMLFormatter or HTMLFormatter in the appropriate
             registry.
         """
-        if isinstance(formatter, Formatter):
-            return formatter
+        if isinstance(formatter_name, Formatter):
+            return formatter_name
+        c: type[Formatter]
+        registry: Mapping[Optional[str], Formatter]
         if self._is_xml:
             c = XMLFormatter
+            registry = XMLFormatter.REGISTRY
         else:
             c = HTMLFormatter
-        if callable(formatter):
-            return c(entity_substitution=formatter)
-        return c.REGISTRY[formatter]
+            registry = HTMLFormatter.REGISTRY
+        if callable(formatter_name):
+            return c(entity_substitution=formatter_name)
+        return registry[formatter_name]
 
     @property
     def _is_xml(self):
