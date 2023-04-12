@@ -2,7 +2,6 @@ from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
-from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Optional, Set, Tuple, TypeVar, TYPE_CHECKING, Union # Python 3.9
 
 import re
 import sys
@@ -15,6 +14,7 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
+from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -115,7 +115,15 @@ class AttributeValueWithCharsetSubstitution(str):
     This allows Beautiful Soup to replace that part of the HTML file
     with a different encoding when ouputting a tree as a string.
     """
-    pass
+    # The original, un-encoded value of the ``content`` attribute.
+    #: :meta private:
+    original_value: str
+    
+    def substitute_encoding(self, eventual_encoding:str) -> str:
+        """Do whatever's necessary in this implementation-specific
+        portion an HTML document to substitute in a specific encoding.
+        """
+        raise NotImplementedError()
 
 class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     """A generic stand-in for the value of a ``<meta>`` tag's ``charset``
@@ -128,11 +136,13 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
     def __new__(cls, original_value):
+        # We don't need to use the original value for anything, but
+        # it might be useful for the user to know.
         obj = str.__new__(cls, original_value)
         obj.original_value = original_value
         return obj
-
-    def substitute_encoding(self, eventual_encoding="utf-8") -> str:
+    
+    def substitute_encoding(self, eventual_encoding:str="utf-8") -> str:
         """When an HTML document is being encoded to a given encoding, the
         value of a ``<meta>`` tag's ``charset`` becomes the name of
         the encoding.
@@ -156,8 +166,6 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     """
     #: :meta private:
     CHARSET_RE = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
-
-    original_value: str
     
     def __new__(cls, original_value):
         match = cls.CHARSET_RE.search(original_value)
@@ -197,10 +205,21 @@ class PageElement(object):
     #: :meta private:
     known_xml: Optional[bool] = None
 
+    #: Whether or not this element has been decomposed from the tree
+    #: it was created in.
     _decomposed: bool
+
+    parent: Optional[Tag]
+    next_element: Optional[PageElement]
+    previous_element: Optional[PageElement]
+    next_sibling: Optional[PageElement]
+    previous_sibling: Optional[PageElement]
     
-    def setup(self, parent=None, previous_element=None, next_element=None,
-              previous_sibling=None, next_sibling=None):
+    def setup(self, parent:Optional[Tag]=None,
+              previous_element:Optional[PageElement]=None,
+              next_element:Optional[PageElement]=None,
+              previous_sibling:Optional[PageElement]=None,
+              next_sibling:Optional[PageElement]=None):
         """Sets up the initial relations between this element and
         other elements.
 
@@ -221,7 +240,7 @@ class PageElement(object):
         self.parent = parent
 
         self.previous_element = previous_element
-        if previous_element is not None:
+        if self.previous_element is not None:
             self.previous_element.next_element = self
 
         self.next_element = next_element
@@ -237,7 +256,7 @@ class PageElement(object):
             previous_sibling = self.parent.contents[-1]
 
         self.previous_sibling = previous_sibling
-        if previous_sibling is not None:
+        if self.previous_sibling is not None:
             self.previous_sibling.next_sibling = self
 
     def format_string(self, s, formatter):
@@ -440,7 +459,7 @@ class PageElement(object):
     def decompose(self) -> None:
         """Recursively destroys this `PageElement` and its children.
 
-        This element will be removed from the tree and wiped out; so
+        The element will be removed from the tree and wiped out; so
         will everything beneath it.
 
         The behavior of a decomposed `PageElement` is undefined and you
@@ -449,14 +468,15 @@ class PageElement(object):
         `PageElement.decomposed` property.
         """
         self.extract()
-        i = self
-        while i is not None:
-            n = i.next_element
-            i.__dict__.clear()
-            if isinstance(i, Tag):
-                i.contents = []
-            i._decomposed = True
-            i = n
+        e: Optional[PageElement] = self
+        next_up: Optional[PageElement] = None
+        while e is not None:
+            next_up = e.next_element
+            e.__dict__.clear()
+            if isinstance(e, Tag):
+                e.contents = []
+            e._decomposed = True
+            e = next_up
 
     def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> Optional[PageElement]:
         """Finds the last element beneath this object to be parsed.
@@ -723,13 +743,13 @@ class PageElement(object):
     fetchParents = find_parents  #: :meta private: BS2
 
     @property
-    def next(self) -> PageElement:
+    def next(self) -> Optional[PageElement]:
         """The `PageElement`, if any, that was parsed just after this one.
         """
         return self.next_element
 
     @property
-    def previous(self) -> PageElement:
+    def previous(self) -> Optional[PageElement]:
         """The `PageElement`, if any, that was parsed just before this one.
         """
         return self.previous_element
@@ -1513,7 +1533,7 @@ class Tag(PageElement):
         if position >= len(self.contents):
             new_child.next_sibling = None
 
-            parent = self
+            parent: Optional[Tag] = self
             parents_next_sibling = None
             while parents_next_sibling is None and parent is not None:
                 parents_next_sibling = parent.next_sibling
@@ -1970,7 +1990,9 @@ class Tag(PageElement):
 
         return space_before + s + space_after
 
-    def _format_tag(self, eventual_encoding, formatter, opening):
+    def _format_tag(
+            self, eventual_encoding:str, formatter:Formatter, opening:str
+    ) -> str:
         # A tag starts with the < character (see below).
 
         # Then the / character, if this is a closing tag.
@@ -2019,7 +2041,7 @@ class Tag(PageElement):
         # Put it all together.
         return '<' + closing_slash + prefix + self.name + attribute_string + void_element_closing_slash + '>'
 
-    def _should_pretty_print(self, indent_level=1):
+    def _should_pretty_print(self, indent_level:int=1) -> bool:
         """Should this tag be pretty-printed?
 
         Most of them should, but some (such as <pre> in HTML
@@ -2050,7 +2072,7 @@ class Tag(PageElement):
 
     def decode_contents(self, indent_level:Optional[int]=None,
                        eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
-                       formatter:Formatter|str="minimal"):
+                       formatter:Formatter|str="minimal") -> str:
         """Renders the contents of this tag as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
@@ -2109,7 +2131,7 @@ class Tag(PageElement):
              attrs:_StrainableAttributes={},
              recursive:bool=True,
              string:Optional[_StrainableString]=None,
-             **kwargs:_StrainableAttribute):
+             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
         """Look in the children of this PageElement and find the first
         PageElement that matches the given criteria.
 
@@ -2119,12 +2141,11 @@ class Tag(PageElement):
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
         :param recursive: If this is True, find() will perform a
-            recursive search of this PageElement's children. Otherwise,
+            recursive search of this Tag's children. Otherwise,
             only the direct children will be considered.
+        :param string: A filter on the `Tag.string` attribute.
         :param limit: Stop looking after finding this many results.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         r = None
         l = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3,
@@ -2135,7 +2156,7 @@ class Tag(PageElement):
     findChild = find #BS2
 
     def find_all(self, name=None, attrs={}, recursive=True, string=None,
-                 limit=None, **kwargs):
+                 limit=None, **kwargs) -> Sequence[PageElement]:
         """Look in the children of this PageElement and find all
         PageElements that match the given criteria.
 
@@ -2195,8 +2216,8 @@ class Tag(PageElement):
             PageElement, self._last_descendant(accept_self=True)
         )
         stopNode = last_descendant.next_element
-        current = self.contents[0]
-        while current is not stopNode:
+        current: Optional[PageElement] = self.contents[0]
+        while current is not stopNode and current is not None:
             yield current
             current = current.next_element
 

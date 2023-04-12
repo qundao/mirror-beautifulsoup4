@@ -38,6 +38,9 @@
   documented method, but if you use it, you should start using
   SoupStrainer.allow_tag_creation() instead.
 
+* CharsetMetaAttributeValue no longer keeps track of .original_value,
+  since it's never used.
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents
