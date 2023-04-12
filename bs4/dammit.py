@@ -18,7 +18,7 @@ import re
 import logging
 import string
 from types import ModuleType
-from typing import Dict, Iterator, Optional, List, Set, Union, Tuple
+from typing import cast, Dict, Iterator, Optional, List, Set, Union, Tuple
 
 # Import a library to autodetect character encodings. We'll support
 # any of a number of libraries that all support the same API:
@@ -686,21 +686,38 @@ class UnicodeDammit:
         if not u:
             self.original_encoding = None
 
-    def _sub_ms_char(self, match:re.Match) -> str:
+    def _sub_ms_char(self, match:re.Match) -> bytes:
         """Changes a MS smart quote character to an XML or HTML
-        entity, or an ASCII character."""
-        orig = match.group(1)
+        entity, or an ASCII character.
+
+        TODO: Since this is only used to convert smart quotes, it
+        could be simplified, and MS_CHARS_TO_ASCII made much less
+        parochial.
+        """
+        orig: bytes = match.group(1)
+        sub: bytes
         if self.smart_quotes_to == 'ascii':
-            sub = self.MS_CHARS_TO_ASCII.get(orig).encode()
-        else:
-            sub = self.MS_CHARS.get(orig)
-            if type(sub) == tuple:
-                if self.smart_quotes_to == 'xml':
-                    sub = '&#x'.encode() + sub[1].encode() + ';'.encode()
-                else:
-                    sub = '&'.encode() + sub[0].encode() + ';'.encode()
+            if orig in self.MS_CHARS_TO_ASCII:
+                sub = self.MS_CHARS_TO_ASCII[orig].encode()
             else:
-                sub = sub.encode()
+                # Shouldn't happen; substitute the character
+                # with itself.
+                sub = orig
+        else:
+            if orig in self.MS_CHARS:
+                substitutions = self.MS_CHARS[orig]
+                if type(substitutions) == tuple:
+                    if self.smart_quotes_to == 'xml':
+                        sub = b'&#x' + substitutions[1].encode() + b';'
+                    else:
+                        sub = b'&' + substitutions[0].encode() + b';'
+                else:
+                    substitutions = cast(str, substitutions)
+                    sub = substitutions.encode()
+            else:
+                # Shouldn't happen; substitute the character
+                # for itself.
+                sub = orig
         return sub
     
     #: This dictionary maps commonly seen values for "charset" in HTML
