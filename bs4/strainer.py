@@ -26,7 +26,9 @@ from bs4.element import NavigableString, PageElement, Tag
 # matching bits of a parse tree.
 #
 # This is very complicated because we're applying a formal type system
-# to some very DWIM code.
+# to some very DWIM code. The types we end up with will be the types
+# of the arguments to the SoupStrainer constructor and (more
+# familiarly to Beautiful Soup users) the find* methods.
 
 # TODO In Python 3.10 we can use TypeAlias for this stuff. We can
 # also use Pattern[str] instead of just Pattern.
@@ -34,36 +36,34 @@ from bs4.element import NavigableString, PageElement, Tag
 # A function that takes a Tag and returns a yes-or-no answer.
 # A TagNameMatchRule expects this kind of function, if you're
 # going to pass it a function.
-_ElementFunction = Callable[['Tag'], bool]
+_TagMatchFunction = Callable[['Tag'], bool]
 
 # A function that takes a single string and returns a yes-or-no
 # answer. An AttributeValueMatchRule expects this kind of function, if
-# you're going to pass it a function.
-_AttributeFunction = Callable[[str], bool]
+# you're going to pass it a function. So does a StringMatchRule
+_StringMatchFunction = Callable[[str], bool]
 
-# The same as AttributeFunction, but used for StringMatchRule.
-_StringFunction = _AttributeFunction
+# Either a tag name, an attribute value or a string can be matched
+# against a string, bytestring, regular expression, or a boolean.
+_BaseStrainable = Union[str, bytes, re.Pattern, bool]
 
-# Either a tag name or an attribute value can be matched against a
-# string, bytestring, regular expression, or a boolean.
-_BaseStrainable = Union[str, re.Pattern, bool]
+# A tag can also be matched using a function that takes the Tag
+# as its sole argument.
+_BaseStrainableElement = Union[_BaseStrainable, _TagMatchFunction]
 
-# A tag name can also be strained using a function designed to
-# match an element.
-_BaseStrainableElement = Union[_BaseStrainable, _ElementFunction]
+# A tag's attribute value can be matched using a function that takes
+# the value as its sole argument.
+_BaseStrainableAttribute = Union[_BaseStrainable, _StringMatchFunction]
 
-# A tag attribute can also be strained using a function designed to
-# match an attribute value.
-_BaseStrainableAttribute = Union[_BaseStrainable, _AttributeFunction]
-
-# Finally, a tag name or attribute can be strained using a single filter
-# or a list of filters.
+# Finally, a tag name, attribute or string can be matched using either
+# a single criterion or a list of criteria.
 _StrainableElement = Union[
     _BaseStrainableElement, Iterable[_BaseStrainableElement]
 ]
 _StrainableAttribute = Union[
     _BaseStrainableAttribute, Iterable[_BaseStrainableAttribute]
 ]
+_StrainableString = _StrainableAttribute
     
 class MatchRule(object):
     string: Optional[str]
@@ -151,7 +151,7 @@ class MatchRule(object):
         )
     
 class TagNameMatchRule(MatchRule):
-    function: Optional[_ElementFunction]
+    function: Optional[_TagMatchFunction]
 
     def matches_tag(self, tag:Tag) -> bool:
         base_value = self._base_match(tag.name)
@@ -166,10 +166,10 @@ class TagNameMatchRule(MatchRule):
         return False
     
 class AttributeValueMatchRule(MatchRule):
-    function: Optional[_AttributeFunction]
+    function: Optional[_StringMatchFunction]
 
 class StringMatchRule(MatchRule):
-    function: Optional[_StringFunction]
+    function: Optional[_StringMatchFunction]
     
 class SoupStrainer(object):
     """Encapsulates a number of ways of matching a markup element (a tag
@@ -199,8 +199,8 @@ class SoupStrainer(object):
    
     def __init__(self,
                  name: Optional[_StrainableElement]=None,
-                 attrs = {},
-                 string=None,
+                 attrs: Dict[str, _StrainableAttribute]= {},
+                 string: Optional[_StrainableString] = None,
                  **kwargs):
         
         if string is None and 'text' in kwargs:
