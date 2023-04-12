@@ -56,7 +56,9 @@ else:
     def _chardet_dammit(s):
         return None
 
-    
+# Type alias for a list of encodings
+_Encodings = List[str]
+
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
 xml_encoding = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
@@ -243,14 +245,14 @@ class EntitySubstitution(object):
     AMPERSAND_OR_BRACKET: re.Pattern = re.compile("([<>&])")
 
     @classmethod
-    def _substitute_html_entity(cls, matchobj):
+    def _substitute_html_entity(cls, matchobj:re.Match) -> str:
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
         return "&%s;" % entity
 
     @classmethod
-    def _substitute_xml_entity(cls, matchobj):
+    def _substitute_xml_entity(cls, matchobj:re.Match) -> str:
         """Used with a regular expression to substitute the
         appropriate XML entity for a special character string."""
         entity = cls.CHARACTER_TO_XML_ENTITY[matchobj.group(0)]
@@ -419,11 +421,11 @@ class EncodingDetector:
 
     """
     def __init__(self, markup:bytes,
-                 known_definite_encodings:Optional[List[str]]=None,
+                 known_definite_encodings:Optional[_Encodings]=None,
                  is_html:Optional[bool]=False,
-                 exclude_encodings:Optional[List[str]]=None,
-                 user_encodings:Optional[List[str]]=None,
-                 override_encodings:Optional[List[str]]=None):
+                 exclude_encodings:Optional[_Encodings]=None,
+                 user_encodings:Optional[_Encodings]=None,
+                 override_encodings:Optional[_Encodings]=None):
         self.known_definite_encodings = list(known_definite_encodings or [])
         if override_encodings:
             self.known_definite_encodings += override_encodings
@@ -437,7 +439,7 @@ class EncodingDetector:
         # First order of business: strip a byte-order mark.
         self.markup, self.sniffed_encoding = self.strip_byte_order_mark(markup)
 
-    def _usable(self, encoding:Optional[str], tried:Set[str]):
+    def _usable(self, encoding:Optional[str], tried:Set[str]) -> bool:
         """Should we even bother to try this encoding?
 
         :param encoding: Name of an encoding.
@@ -624,15 +626,15 @@ class UnicodeDammit:
     """
     def __init__(
             self, markup:bytes,
-            known_definite_encodings:Optional[List[str]]=[],
+            known_definite_encodings:Optional[_Encodings]=[],
             # TODO PYTHON 3.8 Literal is added to the typing module
             #
             # smart_quotes_to: Literal["ascii", "xml", "html"] | None = None,
             smart_quotes_to: Optional[str] = None,
             is_html: bool = False,
-            exclude_encodings:Optional[List[str]] = [],
-            user_encodings:Optional[List[str]] = None,
-            override_encodings:Optional[List[str]] = None
+            exclude_encodings:Optional[_Encodings] = [],
+            user_encodings:Optional[_Encodings] = None,
+            override_encodings:Optional[_Encodings] = None
     ):
         self.smart_quotes_to = smart_quotes_to
         self.tried_encodings: List[Tuple[str, str]] = []
@@ -684,7 +686,7 @@ class UnicodeDammit:
         if not u:
             self.original_encoding = None
 
-    def _sub_ms_char(self, match):
+    def _sub_ms_char(self, match:re.Match) -> str:
         """Changes a MS smart quote character to an XML or HTML
         entity, or an ASCII character."""
         orig = match.group(1)
@@ -713,7 +715,7 @@ class UnicodeDammit:
     #: A list of encodings that tend to contain Microsoft smart quotes.
     #:
     #: :meta hide-value:
-    ENCODINGS_WITH_SMART_QUOTES: List[str] = [
+    ENCODINGS_WITH_SMART_QUOTES: _Encodings = [
         "windows-1252",
         "iso-8859-1",
         "iso-8859-2",
