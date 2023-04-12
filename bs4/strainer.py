@@ -29,19 +29,23 @@ from bs4.element import NavigableString, PageElement, Tag
 
 # TODO In Python 3.10 we can use TypeAlias for this stuff. We can
 # also use Pattern[str] instead of just Pattern.
+
 # A function that takes a Tag and returns a yes-or-no answer.
+# A TagNameMatchRule expects this kind of function, if you're
+# going to pass it a function.
 _ElementFunction = Callable[['Tag'], bool]
 
-# A function that takes a single attribute value and returns a
-# yes-or-no answer.
+# A function that takes a single string and returns a yes-or-no
+# answer. An AttributeValueMatchRule expects this kind of function, if
+# you're going to pass it a function.
 _AttributeFunction = Callable[[str], bool]
 
-# Either a tag name or an attribute value can be strained with a
-# string, bytestring, regular expression, or None.
-#
-# (But note that None means different things when straining a tag name
-#  versus an attribute value.)
-_BaseStrainable = Union[str, bytes, re.Pattern, bool, None]
+# The same as AttributeFunction, but used for StringMatchRule.
+_StringFunction = _AttributeFunction
+
+# Either a tag name or an attribute value can be matched against a
+# string, bytestring, regular expression, or a boolean.
+_BaseStrainable = Union[str, re.Pattern, bool]
 
 # A tag name can also be strained using a function designed to
 # match an element.
@@ -60,29 +64,10 @@ _StrainableAttribute = Union[
     _BaseStrainableAttribute, Iterable[_BaseStrainableAttribute]
 ]
     
-# Now define those types again, without allowing bytes. These are the
-# types used once the values passed into the SoupStrainer constructor
-# have been normalized.
-_BaseNormalizedStrainable = Union[str, re.Pattern, bool, None]
-_BaseNormalizedStrainableElement = Union[
-    _BaseNormalizedStrainable, _ElementFunction
-]
-_BaseNormalizedStrainableAttribute = Union[
-    _BaseNormalizedStrainable, _AttributeFunction
-]
-_NormalizedStrainableElement = Union[
-    _BaseNormalizedStrainableElement,
-    Iterable[_BaseNormalizedStrainableElement]
-]
-_NormalizedStrainableAttribute = Union[
-    _BaseNormalizedStrainableAttribute,
-    Iterable[_BaseNormalizedStrainableAttribute]
-]
-
 class MatchRule(object):
     string: Optional[str]
     pattern: Optional[re.Pattern]
-    function: Optional[Callable]
+    function: Optional[_AttributeFunction]
     present: Optional[bool]
     
     def __init__(
@@ -139,7 +124,7 @@ class MatchRule(object):
 
         return None
         
-    def matches_string(self, string):
+    def matches_string(self, string:str) -> bool:
         _base_result = self._base_match(string)
         if _base_result is not None:
             # No need to invoke the test function.
@@ -149,7 +134,7 @@ class MatchRule(object):
             return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         cls = type(self).__name__
         return f"<{cls} string={self.string} pattern={self.pattern} function={self.function} present={self.present}>"
 
@@ -163,9 +148,9 @@ class MatchRule(object):
         )
     
 class TagNameMatchRule(MatchRule):
-    function: Callable[['Tag'], bool]    
+    function: Optional[_ElementFunction]
 
-    def matches_tag(self, tag):
+    def matches_tag(self, tag:Tag) -> bool:
         base_value = self._base_match(tag.name)
         if base_value is not None:
             return base_value
@@ -178,10 +163,10 @@ class TagNameMatchRule(MatchRule):
         return False
     
 class AttributeValueMatchRule(MatchRule):
-    function: Callable[[str], bool]
+    function: Optional[_AttributeFunction]
 
 class StringMatchRule(MatchRule):
-    function: Callable[[str], bool]
+    function: Optional[_StringFunction]
     
 class SoupStrainer(object):
     """Encapsulates a number of ways of matching a markup element (a tag
@@ -206,11 +191,11 @@ class SoupStrainer(object):
     any specified in ``attrs``.
     """
     name_rules: List[TagNameMatchRule]
-    attribute_rules: Dict[str, Iterable[AttributeValueMatchRule]]
-    string_rules: Iterable[StringMatchRule]
+    attribute_rules: Dict[str, List[AttributeValueMatchRule]]
+    string_rules: List[StringMatchRule]
    
     def __init__(self,
-                 name =None,
+                 name: Optional[_StrainableElement]=None,
                  attrs = {},
                  string=None,
                  **kwargs):
@@ -222,7 +207,10 @@ class SoupStrainer(object):
                 DeprecationWarning, stacklevel=2
             )
         
-        self.name_rules = list(self._make_match_rules(name, TagNameMatchRule))
+        self.name_rules = cast(
+            List[TagNameMatchRule],
+            list(self._make_match_rules(name, TagNameMatchRule))
+        )
         self.attribute_rules = defaultdict(list)
         
         if not isinstance(attrs, dict):
@@ -245,11 +233,15 @@ class SoupStrainer(object):
                 for rule_obj in self._make_match_rules(
                     value, AttributeValueMatchRule
                 ):
-                    self.attribute_rules[attr].append(rule_obj)
+                    self.attribute_rules[attr].append(
+                        cast(AttributeValueMatchRule, rule_obj)
+                    )
                                                       
-        self.string_rules = list(
-            self._make_match_rules(string, StringMatchRule)
+        self.string_rules = cast(
+            List[StringMatchRule],
+            list(self._make_match_rules(string, StringMatchRule))
         )
+        
 
         # DEPRECATED: You shouldn't need to check these, and if you do,
         # you're probably not taking into account all of the types of
@@ -360,7 +352,8 @@ class SoupStrainer(object):
             return False
         return True
 
-    def _attribute_match(self, attr_value, rules):
+    def _attribute_match(self, attr_value:str,
+                         rules:Iterable[AttributeValueMatchRule]) -> bool:
         if isinstance(attr_value, list):
             attr_values = attr_value
         else:
@@ -403,8 +396,11 @@ class SoupStrainer(object):
             # At least one name rule must match.
             name_match = False
             for rule in self.name_rules:
-                if any(rule.matches_string(x) for x in (name, prefixed_name)):
-                    name_match = True
+                for x in name, prefixed_name:
+                    if x is not None:
+                        if rule.matches_string(x):
+                            name_match = True
+                            break
             if not name_match:
                 return False
 
@@ -417,7 +413,7 @@ class SoupStrainer(object):
             
         return True
 
-    def allow_string_creation(self, string:str):
+    def allow_string_creation(self, string:str) -> bool:
         if self.name_rules or self.attribute_rules:
             # A SoupStrainer that has name or attribute rules won't
             # match any strings; it's designed to match tags with
@@ -427,7 +423,7 @@ class SoupStrainer(object):
             return False
         return True
     
-    def matches_any_string_rule(self, string:str):
+    def matches_any_string_rule(self, string:str) -> bool:
         """Based on the content of a string, see whether it 
         matches
 
@@ -445,10 +441,13 @@ class SoupStrainer(object):
         return self.allow_tag_creation(None, name, attrs)
     
     def search(self, element:PageElement):
+        # TODO: This method needs to be removed or redone. It is
+        # very confusing but it's used everywhere.
         match = None
         if isinstance(element, Tag):
             match = self.matches_tag(element)
         else:
+            assert isinstance(element, NavigableString)
             match = False
             if not (self.name_rules or self.attribute_rules):
                 # A NavigableString can only match a SoupStrainer that
