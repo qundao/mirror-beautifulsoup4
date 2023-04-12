@@ -1173,9 +1173,6 @@ class UnicodeDammit:
         pos = 0
         while pos < len(in_bytes):
             byte = in_bytes[pos]
-            if not isinstance(byte, int):
-                # TODO VERSION Python 2.x
-                byte = ord(byte)
             if (byte >= cls.FIRST_MULTIBYTE_MARKER
                 and byte <= cls.LAST_MULTIBYTE_MARKER):
                 # This is the start of a UTF-8 multibyte character. Skip
