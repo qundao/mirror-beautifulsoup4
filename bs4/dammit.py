@@ -57,7 +57,8 @@ else:
         return None
 
 # Type alias for a list of encodings
-_Encodings = List[str]
+_Encoding = str
+_Encodings = List[_Encoding]
 
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
@@ -624,6 +625,7 @@ class UnicodeDammit:
        even if the sniffing code thinks they might make sense.
 
     """
+    original_encoding:Optional[_Encoding]
     def __init__(
             self, markup:bytes,
             known_definite_encodings:Optional[_Encodings]=[],
@@ -738,14 +740,15 @@ class UnicodeDammit:
         "iso-8859-2",
         ]
 
-    def _convert_from(self, proposed, errors="strict"):
+    def _convert_from(self, proposed:_Encoding, errors="strict"):
         """Attempt to convert the markup to the proposed encoding.
 
         :param proposed: The name of a character encoding.
         """
-        proposed = self.find_codec(proposed)
-        if not proposed or (proposed, errors) in self.tried_encodings:
+        lookup_result = self.find_codec(proposed)
+        if lookup_result is None or (lookup_result, errors) in self.tried_encodings:
             return None
+        proposed = cast(_Encoding, lookup_result)
         self.tried_encodings.append((proposed, errors))
         markup = self.markup
         # Convert smart quotes to HTML if coming from an encoding
@@ -785,7 +788,7 @@ class UnicodeDammit:
             return None
         return self.detector.declared_encoding
 
-    def find_codec(self, charset:str) -> Optional[str]:
+    def find_codec(self, charset:_Encoding) -> Optional[str]:
         """Look up the Python codec corresponding to a given character set.
 
         :param charset: The name of a character set.
