@@ -10,6 +10,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -67,8 +68,10 @@ _StrainableAttribute = Union[
 class MatchRule(object):
     string: Optional[str]
     pattern: Optional[re.Pattern]
-    function: Optional[_AttributeFunction]
     present: Optional[bool]
+
+    # All MatchRule objects also have a function, but the type of
+    # the function depends on the subclass.
     
     def __init__(
             self,
@@ -313,15 +316,15 @@ class SoupStrainer(object):
         # Optimization for a very common case where the user is
         # searching for a tag with one specific name, and we're
         # looking at a tag with a different name.
-        if not tag.prefix and len(self.name_rules) == 1 and self.name_rules[0].string is not None and tag.name != self.name_rules[0].string:
+        if (not tag.prefix
+            and len(self.name_rules) == 1
+            and self.name_rules[0].string is not None
+            and tag.name != self.name_rules[0].string):
             return False
         
-        # If there are attribute rules for a given attribute, at least
-        # one must match. If there are rules for multiple attributes,
-        # each one must have a match.
-
-        # If there are string rules, at least one must match.
-
+        # If there are name rules, at least one must match. It can
+        # match either the Tag object itself or the prefixed name of
+        # the tag.
         prefixed_name = None
         if tag.prefix:
             prefixed_name = f"{tag.prefix}:{tag.name}"
@@ -342,18 +345,23 @@ class SoupStrainer(object):
             if not name_matches:
                 return False
             
+        # If there are attribute rules for a given attribute, at least
+        # one of them must match. If there are rules for multiple
+        # attributes, each attribute must have at least one match.
         for attr, rules in self.attribute_rules.items():
-            attr_value = tag.get(attr)
+            attr_value = tag.get(attr, None)
             this_attr_match = self._attribute_match(attr_value, rules)
             if not this_attr_match:
                 return False
 
+        # If there are string rules, at least one must match.
         if self.string_rules and not self.matches_any_string_rule(tag.string):
             return False
         return True
 
-    def _attribute_match(self, attr_value:str,
+    def _attribute_match(self, attr_value:Optional[str],
                          rules:Iterable[AttributeValueMatchRule]) -> bool:
+        attr_values: Sequence[Optional[str]]
         if isinstance(attr_value, list):
             attr_values = attr_value
         else:
@@ -367,6 +375,15 @@ class SoupStrainer(object):
             return False
         this_attr_match = _match_attribute_value_helper(attr_values)
         if not this_attr_match and len(attr_values) > 1:
+            # This cast converts Optional[str] to plain str.
+            #
+            # We know if there's more than one value, there can't be
+            # any None in the list, because Beautiful Soup never uses
+            # None as a value of a multi-valued attribute, and if None
+            # is passed in as attr_value, it's turned into a list with
+            # a single element (thus len(attr_values) > 1 fails).
+            attr_values = cast(Sequence[str], attr_values)
+            
             # Try again but treat the attribute value
             # as a single string.
             joined_attr_value = " ".join(attr_values)
