@@ -34,7 +34,7 @@ class TestUnicodeDammit(object):
             smart_quotes_to=smart_quotes_to
         ).unicode_markup
         assert converted == "<foo>{}</foo>".format(expect_converted)
-        
+
     def test_detect_utf8(self):
         utf8 = b"Sacr\xc3\xa9 bleu! \xe2\x98\x83"
         dammit = UnicodeDammit(utf8)

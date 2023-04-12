@@ -38,6 +38,9 @@
   documented method, but if you use it, you should start using
   SoupStrainer.allow_tag_creation() instead.
 
+* Fixed an error in the lookup table used when converting
+  ISO-Latin-1 to ASCII, which no one should do anyway.
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents

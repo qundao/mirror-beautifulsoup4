@@ -837,8 +837,11 @@ class UnicodeDammit:
     #: horrors like stripping diacritical marks to turn á into a, but also
     #: contains non-horrors like turning “ into ".
     #:
-    #: :meta hide-value:
-    MS_CHARS_TO_ASCII: Dict[bytes, Union[str, Tuple[str, str]]] = {
+    #: Seriously, don't use this for anything other than removing smart
+    #: quotes.
+    #:
+    #: :meta private:
+    MS_CHARS_TO_ASCII: Dict[bytes, str] = {
         b'\x80' : 'EUR',
         b'\x81' : ' ',
         b'\x82' : ',',
@@ -892,7 +895,7 @@ class UnicodeDammit:
         b'\xb1' : '+-',
         b'\xb2' : '2',
         b'\xb3' : '3',
-        b'\xb4' : ("'", 'acute'),
+        b'\xb4' : "'",
         b'\xb5' : 'u',
         b'\xb6' : 'P',
         b'\xb7' : '*',
