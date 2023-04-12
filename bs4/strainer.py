@@ -63,6 +63,8 @@ _StrainableElement = Union[
 _StrainableAttribute = Union[
     _BaseStrainableAttribute, Iterable[_BaseStrainableAttribute]
 ]
+
+_StrainableAttributes = Dict[str, _StrainableAttribute]
 _StrainableString = _StrainableAttribute
     
 class MatchRule(object):

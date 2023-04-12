@@ -18,7 +18,12 @@ from bs4.formatter import (
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
-
+    from bs4.strainer import (
+        _StrainableElement,
+        _StrainableAttribute,
+        _StrainableAttributes,
+        _StrainableString
+    )
     
 #: Documents output by Beautiful Soup will be encoded with
 #: this encoding unless you specify otherwise.
@@ -2099,8 +2104,12 @@ class Tag(PageElement):
 
     #Soup methods
 
-    def find(self, name=None, attrs={}, recursive=True, string=None,
-             **kwargs):
+    def find(self,
+             name:Optional[_StrainableElement]=None,
+             attrs:_StrainableAttributes={},
+             recursive:bool=True,
+             string:Optional[_StrainableString]=None,
+             **kwargs:_StrainableAttribute):
         """Look in the children of this PageElement and find the first
         PageElement that matches the given criteria.
 
