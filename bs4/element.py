@@ -557,8 +557,15 @@ class PageElement(object):
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
     findNext = find_next  #: :meta private: BS3
 
-    def find_all_next(self, name=None, attrs={}, string=None, limit=None,
-                    **kwargs) -> ResultSet[PageElement]: 
+    def find_all_next(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute
+    ) -> ResultSet[PageElement]: 
         """Find all `PageElement` objects that match the given criteria and
         appear later in the document than this `PageElement`.
 
@@ -569,14 +576,19 @@ class PageElement(object):
         :param attrs: A dictionary of filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
-        :kwargs: A dictionary of filters on attribute values.
+        :param _stacklevel: Used internally to improve warning messages.
+        :kwargs: Additional filters on attribute values.
         """
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, string, limit, self.next_elements,
                               _stacklevel=_stacklevel+1, **kwargs)
     findAllNext = find_all_next  #: :meta private: BS3
 
-    def find_next_sibling(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
+    def find_next_sibling(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
         """Find the closest sibling to this PageElement that matches the
         given criteria and appears later in the document.
 
@@ -585,16 +597,23 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
-        :kwargs: A dictionary of filters on attribute values.
+        :param string: A filter for a `NavigableString` with specific text.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_one(self.find_next_siblings, name, attrs, string,
                              **kwargs)
     findNextSibling = find_next_sibling  #: :meta private: BS3
 
-    def find_next_siblings(self, name=None, attrs={}, string=None, limit=None,
-                           **kwargs) -> ResultSet[PageElement]:
-        """Find all siblings of this PageElement that match the given criteria
+    def find_next_siblings(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute
+    ) -> ResultSet[PageElement]: 
+        """Find all siblings of this `PageElement` that match the given criteria
         and appear later in the document.
 
         All find_* methods take a common set of arguments. See the online
@@ -602,13 +621,11 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
+        :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
+        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A ResultSet of PageElements.
-        :rtype: bs4.element.ResultSet
         """
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(
             name, attrs, string, limit,
             self.next_siblings, _stacklevel=_stacklevel+1, **kwargs
@@ -616,41 +633,49 @@ class PageElement(object):
     findNextSiblings = find_next_siblings   #: :meta private: BS3
     fetchNextSiblings = find_next_siblings  #: :meta private: BS2
 
-    def find_previous(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
-        """Look backwards in the document from this PageElement and find the
-        first PageElement that matches the given criteria.
+    def find_previous(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+        """Look backwards in the document from this `PageElement` and find the
+        first `PageElement` that matches the given criteria.
 
         All find_* methods take a common set of arguments. See the online
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
-        :kwargs: A dictionary of filters on attribute values.
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
+        :param string: A filter for a `NavigableString` with specific text.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_one(
             self.find_all_previous, name, attrs, string, **kwargs)
     findPrevious = find_previous  #: :meta private: BS3
 
-    def find_all_previous(self, name=None, attrs={}, string=None, limit=None,
-                        **kwargs) -> ResultSet[PageElement]:
-        """Look backwards in the document from this PageElement and find all
-        PageElements that match the given criteria.
+    def find_all_previous(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute
+    ) -> ResultSet[PageElement]: 
+        """Look backwards in the document from this `PageElement` and find all
+        `PageElement` that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
+        :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
-        :kwargs: A dictionary of filters on attribute values.
-        :return: A ResultSet of PageElements.
-        :rtype: bs4.element.ResultSet
+        :param _stacklevel: Used internally to improve warning messages.
+        :kwargs: Additional filters on attribute values.
         """
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(
             name, attrs, string, limit, self.previous_elements,
             _stacklevel=_stacklevel+1, **kwargs
@@ -658,8 +683,13 @@ class PageElement(object):
     findAllPrevious = find_all_previous  #: :meta private: BS3    
     fetchPrevious = find_all_previous    #: :meta private: BS2
 
-    def find_previous_sibling(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
-        """Returns the closest sibling to this PageElement that matches the
+    def find_previous_sibling(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+        """Returns the closest sibling to this `PageElement` that matches the
         given criteria and appears earlier in the document.
 
         All find_* methods take a common set of arguments. See the online
@@ -667,15 +697,21 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
-        :param string: A filter for a NavigableString with specific text.
-        :kwargs: A dictionary of filters on attribute values.
+        :param string: A filter for a `NavigableString` with specific text.
+        :kwargs: Filters on attribute values.
         """
         return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
     findPreviousSibling = find_previous_sibling  #: :meta private: BS3
 
-    def find_previous_siblings(self, name=None, attrs={}, string=None,
-                               limit=None, **kwargs) -> ResultSet[PageElement]:
+    def find_previous_siblings(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
 
@@ -686,11 +722,9 @@ class PageElement(object):
         :param attrs: A dictionary of filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
+        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: A dictionary of filters on attribute values.
-        :return: A ResultSet of PageElements.
-        :rtype: bs4.element.ResultSet
         """
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(
             name, attrs, string, limit,
             self.previous_siblings, _stacklevel=_stacklevel+1, **kwargs
@@ -698,7 +732,11 @@ class PageElement(object):
     findPreviousSiblings = find_previous_siblings   #: :meta private: BS3
     fetchPreviousSiblings = find_previous_siblings  #: :meta private: BS2
 
-    def find_parent(self, name=None, attrs={}, **kwargs) -> Optional[PageElement]:
+    def find_parent(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
         """Find the closest parent of this PageElement that matches the given
         criteria.
 
@@ -708,9 +746,6 @@ class PageElement(object):
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
         :kwargs: A dictionary of filters on attribute values.
-
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
@@ -721,8 +756,14 @@ class PageElement(object):
         return r
     findParent = find_parent  #: :meta private: BS3
 
-    def find_parents(self, name=None, attrs={}, limit=None, **kwargs) -> ResultSet[PageElement]:
-        """Find all parents of this PageElement that match the given criteria.
+    def find_parents(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+        """Find all parents of this `PageElement` that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
         documentation for detailed explanations.
@@ -730,12 +771,9 @@ class PageElement(object):
         :param name: A filter on tag name.
         :param attrs: A dictionary of filters on attribute values.
         :param limit: Stop looking after finding this many results.
+        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: A dictionary of filters on attribute values.
-
-        :return: A PageElement.
-        :rtype: bs4.element.Tag | bs4.element.NavigableString
         """
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, None, limit, self.parents,
                               _stacklevel=_stacklevel+1, **kwargs)
     findParents = find_parents   #: :meta private: BS3
