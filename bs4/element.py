@@ -272,14 +272,17 @@ class PageElement(object):
         output = formatter.substitute(s)
         return output
 
-    def formatter_for_name(self, formatter_name:str) -> Formatter:
+    def formatter_for_name(
+        self,
+        formatter_name:Union[str, Formatter, Callable[[str], str]]
+    ) -> Formatter:
         """Look up or create a Formatter for the given identifier,
         if necessary.
 
-        :param formatter: Can be a Formatter object (used as-is), a
+        :param formatter: Can be a `Formatter` object (used as-is), a
             function (used as the entity substitution hook for an
-            XMLFormatter or HTMLFormatter), or a string (used to look
-            up an XMLFormatter or HTMLFormatter in the appropriate
+            `XMLFormatter` or `HTMLFormatter`), or a string (used to look
+            up an `XMLFormatter` or `HTMLFormatter` in the appropriate
             registry.
         """
         if isinstance(formatter_name, Formatter):
@@ -297,7 +300,7 @@ class PageElement(object):
         return registry[formatter_name]
 
     @property
-    def _is_xml(self):
+    def _is_xml(self) -> bool:
         """Is this element part of an XML tree or an HTML tree?
 
         This is used in formatter_for_name, when deciding whether an
@@ -323,15 +326,15 @@ class PageElement(object):
     previousSibling = _alias("previous_sibling")  #: :meta private: BS3
 
     default: Iterable[type] = tuple() #: :meta private:
-    def _all_strings(self, strip=False, types:Iterable[type]=default):
+    def _all_strings(self, strip:bool=False, types:Iterable[type]=default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
-        This is implemented differently in Tag and NavigableString.
+        This is implemented differently in `Tag` and `NavigableString`.
         """
         raise NotImplementedError()
 
     @property
-    def stripped_strings(self) -> Iterator[Union[NavigableString, CData]]:
+    def stripped_strings(self) -> Iterator[str]:
         """Yield all interesting strings in this PageElement, stripping them
         first.
 
@@ -369,7 +372,7 @@ class PageElement(object):
         """Replace this `PageElement` with one or more other `PageElements`,
         keeping the rest of the tree the same.
 
-        :return: This object, no longer part of the tree.
+        :return: This `PageElement`, no longer part of the tree.
         """
         if self.parent is None:
             raise ValueError(
@@ -387,24 +390,6 @@ class PageElement(object):
             old_parent.insert(idx, replace_with)
         return self
     replaceWith = replace_with  #: :meta private: BS3
-
-    def unwrap(self):
-        """Replace this `PageElement` with its contents.
-
-        :return: This object, no longer part of the tree.
-        """
-        my_parent = self.parent
-        if self.parent is None:
-            raise ValueError(
-                "Cannot replace an element with its contents when that"
-                "element is not part of a tree.")
-        my_index = self.parent.index(self)
-        self.extract(_self_index=my_index)
-        for child in reversed(self.contents[:]):
-            my_parent.insert(my_index, child)
-        return self
-    replace_with_children = unwrap
-    replaceWithChildren = unwrap  #: :meta private: BS3
 
     def wrap(self, wrap_inside:Tag) -> Tag:
         """Wrap this `PageElement` inside a `Tag`.
@@ -482,12 +467,16 @@ class PageElement(object):
             e._decomposed = True
             e = next_up
 
-    def _last_descendant(self, is_initialized:bool=True, accept_self:bool=True) -> Optional[PageElement]:
+    def _last_descendant(
+        self, is_initialized:bool=True, accept_self:bool=True
+    ) -> Optional[PageElement]:
         """Finds the last element beneath this object to be parsed.
 
-        :param is_initialized: Has ``setup()`` been called on this PageElement
-            yet?
-        :param accept_self: Is ``self`` an acceptable answer to the question?
+        :param is_initialized: Has `PageElement.setup` been called on
+            this `PageElement` yet?
+
+        :param accept_self: Is ``self`` an acceptable answer to the
+            question?
         """
         if is_initialized and self.next_sibling is not None:
             last_child = self.next_sibling.previous_element
@@ -547,7 +536,13 @@ class PageElement(object):
             parent.insert(index+1+offset, successor)
             offset += 1
 
-    def find_next(self, name=None, attrs={}, string=None, **kwargs) -> PageElement:
+    def find_next(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            string:Optional[_StrainableString]=None,
+            **kwargs:_StrainableAttribute
+    ) -> Optional[PageElement]:
         """Find the first PageElement that matches the given criteria and
         appears later in the document than this PageElement.
 
@@ -1561,7 +1556,25 @@ class Tag(PageElement):
         if new_childs_last_element.next_element is not None:
             new_childs_last_element.next_element.previous_element = new_childs_last_element
         self.contents.insert(position, new_child)
-    
+
+    def unwrap(self) -> PageElement:
+        """Replace this `PageElement` with its contents.
+
+        :return: This object, no longer part of the tree.
+        """
+        my_parent = self.parent
+        if my_parent is None:
+            raise ValueError(
+                "Cannot replace an element with its contents when that"
+                "element is not part of a tree.")
+        my_index = my_parent.index(self)
+        self.extract(_self_index=my_index)
+        for child in reversed(self.contents[:]):
+            my_parent.insert(my_index, child)
+        return self
+    replace_with_children = unwrap
+    replaceWithChildren = unwrap  #: :meta private: BS3
+        
     def append(self, tag:PageElement) -> None:
         """Appends the given `PageElement` to the contents of this `Tag`.
         """
