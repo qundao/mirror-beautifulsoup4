@@ -14,7 +14,7 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
-from typing import Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -550,9 +550,9 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
-        :kwargs: A dictionary of filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
     findNext = find_next  #: :meta private: BS3
@@ -573,7 +573,7 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :param _stacklevel: Used internally to improve warning messages.
@@ -596,7 +596,7 @@ class PageElement(object):
         online documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :kwargs: Additional filters on attribute values.
         """
@@ -620,11 +620,11 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
         :param _stacklevel: Used internally to improve warning messages.
-        :kwargs: A dictionary of filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
             name, attrs, string, limit,
@@ -646,7 +646,7 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :kwargs: Additional filters on attribute values.
         """
@@ -670,7 +670,7 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
         :param _stacklevel: Used internally to improve warning messages.
@@ -696,9 +696,9 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
-        :kwargs: Filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
@@ -719,11 +719,11 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
         :param _stacklevel: Used internally to improve warning messages.
-        :kwargs: A dictionary of filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
             name, attrs, string, limit,
@@ -744,8 +744,8 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
-        :kwargs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
@@ -769,10 +769,10 @@ class PageElement(object):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param limit: Stop looking after finding this many results.
         :param _stacklevel: Used internally to improve warning messages.
-        :kwargs: A dictionary of filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         return self._find_all(name, attrs, None, limit, self.parents,
                               _stacklevel=_stacklevel+1, **kwargs)
@@ -872,6 +872,9 @@ class PageElement(object):
             except StopIteration:
                 break
             if i:
+                # TODO: SoupStrainer.search is a confusing method
+                # that needs to be redone, and this is where
+                # it's being used.
                 found = strainer.search(i)
                 if found:
                     results.append(found)
@@ -1373,7 +1376,8 @@ class Tag(PageElement):
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
     # Alias for a dictionary of tag attribute values.
-    _AttributeDict = Dict[str, Union[str, Iterable[str]]]
+    _AttributeValue = Union[str, Iterable[str]]
+    _AttributeDict = Dict[str, _AttributeValue]
     name: str
     attrs: _AttributeDict
                 
@@ -1660,10 +1664,10 @@ class Tag(PageElement):
                 stacklevel=2
             )
             tag_list = [tags]
-        elif isinstance(tags, list):
+        elif isinstance(tags, Iterable):
             tag_list = tags
 
-        if isinstance(tag_list, list):
+        if isinstance(tag_list, Iterable):
             # Moving items around the tree may change their position in
             # the original list. Make a list that won't change.
             tag_list = list(tag_list)
@@ -1737,7 +1741,8 @@ class Tag(PageElement):
         raise ValueError("Tag.index: element not in tag")
 
     def get(self, key:str,
-            default:Optional[Union[str, Iterable[str]]]=None) -> Optional[Union[str, Iterable[str]]]:
+            default:Optional[_AttributeValue]=None
+            ) -> Optional[_AttributeValue]:
         """Returns the value of the 'key' attribute for the tag, or
         the value given for 'default' if it doesn't have that
         attribute.
@@ -1776,12 +1781,12 @@ class Tag(PageElement):
     def __hash__(self):
         return str(self).__hash__()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> _AttributeValue:
         """tag[key] returns the value of the 'key' attribute for the Tag,
         and throws an exception if it's not there."""
         return self.attrs[key]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[PageElement]:
         "Iterating over a Tag iterates over its contents."
         return iter(self.contents)
 
@@ -1789,10 +1794,10 @@ class Tag(PageElement):
         "The length of a Tag is the length of its list of contents."
         return len(self.contents)
 
-    def __contains__(self, x):
+    def __contains__(self, x:PageElement) -> bool:
         return x in self.contents
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         "A tag is non-None even if it has no contents."
         return True
 
@@ -1805,7 +1810,7 @@ class Tag(PageElement):
         "Deleting tag[key] deletes all 'key' attributes for the tag."
         self.attrs.pop(key, None)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> ResultSet[PageElement]:
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
@@ -1830,11 +1835,13 @@ class Tag(PageElement):
         raise AttributeError(
             "'%s' object has no attribute '%s'" % (self.__class__, subtag))
 
-    def __eq__(self, other):
+    def __eq__(self, other:Any) -> bool:
         """Returns true iff this Tag has the same name, the same attributes,
         and the same contents (recursively) as `other`."""
         if self is other:
             return True
+        if not isinstance(other, Tag):
+            return False
         if (not hasattr(other, 'name') or
             not hasattr(other, 'attrs') or
             not hasattr(other, 'contents') or
@@ -1847,7 +1854,7 @@ class Tag(PageElement):
                 return False
         return True
 
-    def __ne__(self, other):
+    def __ne__(self, other:Any) -> bool:
         """Returns true iff this Tag is not identical to `other`,
         as defined in __eq__."""
         return not self == other
@@ -1856,7 +1863,7 @@ class Tag(PageElement):
         """Renders this `Tag` as a string."""
         return self.decode()
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         """Renders this `Tag` as a string."""
         return self.decode()
 
@@ -2045,8 +2052,8 @@ class Tag(PageElement):
             now_closed_tag = tag_stack.pop()
             yield Tag.END_ELEMENT_EVENT, now_closed_tag
 
-    def _indent_string(self, s, indent_level, formatter,
-                       indent_before, indent_after):
+    def _indent_string(self, s:str, indent_level:int, formatter:Formatter,
+                       indent_before:bool, indent_after:bool):
         """Add indentation whitespace before and/or after a string.
 
         :param s: The string to amend with whitespace.
@@ -2216,13 +2223,13 @@ class Tag(PageElement):
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param recursive: If this is True, find() will perform a
             recursive search of this Tag's children. Otherwise,
             only the direct children will be considered.
         :param string: A filter on the `Tag.string` attribute.
         :param limit: Stop looking after finding this many results.
-        :kwargs: A dictionary of filters on attribute values.
+        :kwargs: Additional filters on attribute values.
         """
         r = None
         l = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3,
@@ -2232,28 +2239,33 @@ class Tag(PageElement):
         return r
     findChild = find #BS2
 
-    def find_all(self, name=None, attrs={}, recursive=True, string=None,
-                 limit=None, **kwargs) -> Sequence[PageElement]:
-        """Look in the children of this PageElement and find all
-        PageElements that match the given criteria.
+    def find_all(
+            self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            recursive:bool=True,
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+        """Look in the children of this `PageElement` and find all
+        `PageElement` objects that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
         documentation for detailed explanations.
 
         :param name: A filter on tag name.
-        :param attrs: A dictionary of filters on attribute values.
+        :param attrs: Additional filters on attribute values.
         :param recursive: If this is True, find_all() will perform a
             recursive search of this PageElement's children. Otherwise,
             only the direct children will be considered.
         :param limit: Stop looking after finding this many results.
-        :kwargs: A dictionary of filters on attribute values.
-        :return: A ResultSet of PageElements.
-        :rtype: bs4.element.ResultSet
+        :param _stacklevel: Used internally to improve warning messages.
+        :kwargs: Additional filters on attribute values.
         """
         generator = self.descendants
         if not recursive:
             generator = self.children
-        _stacklevel = kwargs.pop('_stacklevel', 2)
         return self._find_all(name, attrs, string, limit, generator,
                               _stacklevel=_stacklevel+1, **kwargs)
     findAll = find_all       #: :meta private: BS3
@@ -2296,7 +2308,10 @@ class Tag(PageElement):
             current = current.next_element
 
     # CSS selector code
-    def select_one(self, selector, namespaces=None, **kwargs):
+    def select_one(self,
+                   selector:str,
+                   namespaces:Optional[Dict[str, str]]=None,
+                   **kwargs) -> Optional[Tag]:
         """Perform a CSS selection operation on the current element.
 
         :param selector: A CSS selector.
@@ -2308,13 +2323,11 @@ class Tag(PageElement):
 
         :param kwargs: Keyword arguments to be passed into Soup Sieve's
            soupsieve.select() method.
-
-        :return: A Tag.
-        :rtype: bs4.element.Tag
         """
         return self.css.select_one(selector, namespaces, **kwargs)
 
-    def select(self, selector, namespaces=None, limit=None, **kwargs):
+    def select(self, selector:str, namespaces:Optional[Dict[str, str]]=None,
+               limit:int=0, **kwargs) -> ResultSet[Tag]:
         """Perform a CSS selection operation on the current element.
 
         This uses the SoupSieve library.
@@ -2330,9 +2343,6 @@ class Tag(PageElement):
 
         :param kwargs: Keyword arguments to be passed into SoupSieve's
            soupsieve.select() method.
-
-        :return: A ResultSet of Tags.
-        :rtype: bs4.element.ResultSet
         """
         return self.css.select(selector, namespaces, limit, **kwargs)
 
