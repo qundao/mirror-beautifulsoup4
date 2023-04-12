@@ -14,7 +14,7 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
-from typing import Callable, cast, Dict, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -793,17 +793,36 @@ class PageElement(object):
 
     #These methods do the real heavy lifting.
 
-    def _find_one(self, method, name, attrs, string, **kwargs):
-        r = None
-        l = method(name, attrs, string, 1, _stacklevel=4, **kwargs)
+    def _find_one(
+            self,
+            # TODO: "There is no syntax to indicate optional or keyword
+            # arguments; such function types are rarely used as
+            # callback types." - So, not sure how to get more specific here.
+            method:Callable,
+            name:Optional[_StrainableElement],
+            attrs:_StrainableAttributes,
+            string:Optional[_StrainableString],
+            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+        r: Optional[PageElement] = None
+        l: ResultSet[PageElement] = method(
+            name, attrs, string, 1, _stacklevel=4, **kwargs
+        )
         if l:
             r = l[0]
         return r
 
-    def _find_all(self, name, attrs, string, limit, generator, **kwargs):
-        "Iterates over a generator looking for things that match."
-        _stacklevel = kwargs.pop('_stacklevel', 3)
-
+    def _find_all(
+            self,
+            name:Optional[_StrainableElement],
+            attrs:_StrainableAttributes,
+            string:Optional[_StrainableString],
+            limit:Optional[int],
+            generator:Generator[PageElement, None, None],
+            _stacklevel:int=3,
+            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:        
+        """Iterates over a generator looking for things that match."""
+        results: ResultSet[PageElement]
+        
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
             warnings.warn(
@@ -817,6 +836,7 @@ class PageElement(object):
         else:
             strainer = SoupStrainer(name, attrs, string, **kwargs)
 
+        result: Iterable[PageElement]
         if string is None and not limit and not attrs and not kwargs:
             if name is True or name is None:
                 # Optimization to find all tags.
@@ -833,16 +853,18 @@ class PageElement(object):
                 else:
                     prefix = None
                     local_name = name
-                result = (element for element in generator
-                          if isinstance(element, Tag)
-                          and (
-                              element.name == name
-                          ) or (
-                              element.name == local_name
-                              and (prefix is None or element.prefix == prefix)
-                          )
-                )
+                result = []
+                for element in generator:
+                    if not isinstance(element, Tag):
+                        continue
+                    if (element.name == name or 
+                        (element.name == local_name
+                         and (prefix is None or element.prefix == prefix)
+                         )
+                        ):
+                        result.append(element)
                 return ResultSet(strainer, result)
+
         results = ResultSet(strainer)
         while True:
             try:
@@ -860,7 +882,7 @@ class PageElement(object):
     #These generators can be used to navigate starting from both
     #NavigableStrings and Tags.
     @property
-    def next_elements(self) -> Iterator[PageElement]:
+    def next_elements(self) -> Generator[PageElement, None, None]:
         """All PageElements that were parsed after this one.
         """
         i = self.next_element
@@ -869,7 +891,7 @@ class PageElement(object):
             i = i.next_element
 
     @property
-    def next_siblings(self) -> Iterator[PageElement]:
+    def next_siblings(self) -> Generator[PageElement, None, None]:
         """All PageElements that are siblings of this one but were parsed
         later.
         """
@@ -879,7 +901,7 @@ class PageElement(object):
             i = i.next_sibling
 
     @property
-    def previous_elements(self):
+    def previous_elements(self) -> Generator[PageElement, None, None]:
         """All PageElements that were parsed before this one.
 
         :yield: A sequence of PageElements.
@@ -890,7 +912,7 @@ class PageElement(object):
             i = i.previous_element
 
     @property
-    def previous_siblings(self):
+    def previous_siblings(self) -> Generator[PageElement, None, None]:
         """All PageElements that are siblings of this one but were parsed
         earlier.
 
@@ -902,7 +924,7 @@ class PageElement(object):
             i = i.previous_sibling
 
     @property
-    def parents(self):
+    def parents(self) -> Generator[PageElement, None, None]:
         """All PageElements that are parents of this PageElement.
 
         :yield: A sequence of PageElements.
@@ -2239,16 +2261,13 @@ class Tag(PageElement):
 
     #Generator methods
     @property
-    def children(self) -> Iterator[PageElement]:
-        """Iterate over all direct children of this PageElement.
-
-        :yield: A sequence of PageElements.
+    def children(self) -> Generator[PageElement, None, None]:
+        """Iterate over all direct children of this `PageElement`.
         """
-        # return iter() to make the purpose of the method clear
-        return iter(self.contents)  # XXX This seems to be untested.
+        return (x for x in self.contents)
 
     @property
-    def self_and_descendants(self) -> Iterator[PageElement]:
+    def self_and_descendants(self) -> Generator[PageElement, None, None]:
         """Iterate over this `Tag` and its children in a
         breadth-first sequence.
         """
@@ -2258,7 +2277,7 @@ class Tag(PageElement):
             yield i
 
     @property
-    def descendants(self) -> Iterator[PageElement]:
+    def descendants(self) -> Generator[PageElement, None, None]:
         """Iterate over all children of this `Tag` in a
         breadth-first sequence.
         """
