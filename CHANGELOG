@@ -3,6 +3,14 @@
 * This version drops support for Python 3.6. The minimum supported
   major version for Beautiful Soup is now Python 3.7.
 
+* Deprecation warnings have been added for all deprecated methods and
+  attributes. Most of these were deprecated over ten years ago, and
+  some were deprecated over fifteen years ago.
+
+  Going forward, deprecated names will be subject to removal two
+  feature releases or one major release after the deprecation warning
+  is added.
+
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.

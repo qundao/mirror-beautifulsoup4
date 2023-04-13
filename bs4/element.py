@@ -23,6 +23,25 @@ if TYPE_CHECKING:
         _StrainableAttributes,
         _StrainableString
     )
+
+# Deprecated module-level attributes.
+# See https://peps.python.org/pep-0562/
+_deprecated_names = dict(
+    whitespace_re = 'The {name} attribute was deprecated in version 4.7.0. If you need it, make your own copy.'
+)
+#: :meta private:
+_deprecated_whitespace_re: re.Pattern[str] = re.compile(r"\s+")
+
+def __getattr__(name):
+    if name in _deprecated_names:
+        message = _deprecated_names[name]
+        warnings.warn(
+            message.format(name=name),
+            DeprecationWarning, stacklevel=2
+        )
+        
+        return globals()[f"_deprecated_{name}"]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     
 #: Documents output by Beautiful Soup will be encoded with
 #: this encoding unless you specify otherwise.
@@ -30,10 +49,7 @@ DEFAULT_OUTPUT_ENCODING = "utf-8"
 
 nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
 
-# NOTE: This isn't used as of 4.7.0, but it is used in at least one
-# external project. Need to make access issue a deprecation warning.
-whitespace_re: re.Pattern[str] = re.compile(r"\s+")
-
+    
 from bs4._deprecation import (
     _alias,
     _deprecated,

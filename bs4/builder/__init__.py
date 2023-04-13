@@ -150,6 +150,7 @@ class TreeBuilder(object):
     """
 
     USE_DEFAULT = object() #: :meta private:
+    soup: Optional[BeautifulSoup] #: :meta private:
     
     def __init__(self, multi_valued_attributes=USE_DEFAULT,
                  preserve_whitespace_tags=USE_DEFAULT,
@@ -170,8 +171,6 @@ class TreeBuilder(object):
             string_containers = self.DEFAULT_STRING_CONTAINERS
         self.string_containers = string_containers
 
-    soup: BeautifulSoup
-        
     NAME = "[Unknown tree builder]"
     ALTERNATE_NAMES: Iterable[str] = []
     features: Iterable[str] = []

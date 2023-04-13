@@ -37,6 +37,7 @@ if sys.version_info.major < 3:
 from .builder import (
     builder_registry,
     ParserRejectedMarkup,
+    TreeBuilder,
     XMLParsedAsHTMLWarning,
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
@@ -64,6 +65,9 @@ from .element import (
     )
 from .strainer import SoupStrainer
 from typing import (
+    Any,
+    cast,
+    Dict,
     IO,
     Iterable,
     Sequence,
@@ -128,18 +132,21 @@ class BeautifulSoup(Tag):
     ASCII_SPACES: str = '\x20\x0a\x09\x0c\x0d'
 
     #: :meta private:
-    NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
-   
+    NO_PARSER_SPECIFIED_WARNING: str = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
+
+    #: :meta private:
+    markup:Optional[str|bytes]
+    
     def __init__(
             self,
             markup:str|bytes|IO="",
             features:Optional[str|Sequence[str]]=None,
-            builder=None,
-            parse_only=None,
+            builder:Optional[TreeBuilder|type[TreeBuilder]]=None,
+            parse_only:Optional[SoupStrainer]=None,
             from_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None,
-            element_classes=None,
-            **kwargs
+            element_classes:Optional[Dict[type[PageElement], type[Any]]]=None,
+            **kwargs:Any
     ):
         """Constructor.
 
@@ -286,7 +293,8 @@ class BeautifulSoup(Tag):
             builder = builder_class(**kwargs)
             if not original_builder and not (
                     original_features == builder.NAME or
-                    original_features in builder.ALTERNATE_NAMES
+                    (isinstance(original_features, str)
+                     and original_features in builder.ALTERNATE_NAMES)
             ) and markup:
                 # The user did not tell us which TreeBuilder to use,
                 # and we had to guess. Issue a warning.
@@ -350,6 +358,10 @@ class BeautifulSoup(Tag):
             if not self._markup_is_url(markup):
                 self._markup_resembles_filename(markup)                
 
+        # At this point we know markup is a string or bytestring.  If
+        # it was a file-type object, we've read from it.
+        markup = cast(str|bytes, markup)
+                
         rejections = []
         success = False
         for (self.markup, self.original_encoding, self.declared_html_encoding,
