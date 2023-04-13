@@ -395,7 +395,7 @@ class SoupStrainer(object):
             )
         return this_attr_match
     
-    def allow_tag_creation(self, nsprefix:str, name:str, attrs:dict[str, str]) -> bool:
+    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[dict[str, str]]) -> bool:
         """Based on the name and attributes of a tag, see whether this
         SoupStrainer will allow a Tag object to even be created.
 
@@ -408,7 +408,6 @@ class SoupStrainer(object):
             # evaluated until after the tag and all of its contents
             # have been parsed.
             return False
-        
         prefixed_name = None
         if nsprefix:
             prefixed_name = f"{nsprefix}:{name}"
@@ -426,6 +425,8 @@ class SoupStrainer(object):
 
         # For each attribute that has rules, at least one rule must
         # match.
+        if attrs is None:
+            attrs = {}
         for attr, rules in self.attribute_rules.items():
             attr_value = attrs.get(attr)
             if not self._attribute_match(attr_value, rules):

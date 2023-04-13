@@ -24,6 +24,7 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
+    from bs4.dammit import _Encoding
     from bs4.strainer import (
         _StrainableElement,
         _StrainableAttribute,
@@ -1962,7 +1963,7 @@ class Tag(PageElement):
         return u.encode(encoding, errors)
 
     def decode(self, indent_level:Optional[int]=None,
-               eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
+               eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:Formatter|str="minimal",
                iterator:Optional[Iterable]=None) -> str:
         """Render this `Tag` and its contents as a Unicode string.

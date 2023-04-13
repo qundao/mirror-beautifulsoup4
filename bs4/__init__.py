@@ -65,6 +65,7 @@ from .element import (
     Tag,
     TemplateString,
     )
+from .formatter import Formatter
 from .strainer import SoupStrainer
 from typing import (
     Any,
@@ -145,12 +146,12 @@ class BeautifulSoup(Tag):
 
     # These members are only used while parsing markup.
     markup:Optional[str|bytes] #: :meta private:
-    current_data:Optional[str] #: :meta private:
+    current_data:List[str] #: :meta private:
     currentTag:Optional[Tag] #: :meta private:
-    tagStack:Optional[List[Tag]] #: :meta private:
-    open_tag_counter:Optional[Counter] #: :meta private:
-    preserve_whitespace_tag_stack:Optional[List[Tag]] #: :meta private:
-    string_container_stack:Optional[List[Tag]] #: :meta private:
+    tagStack:List[Tag] #: :meta private:
+    open_tag_counter:Counter[str] #: :meta private:
+    preserve_whitespace_tag_stack:List[Tag] #: :meta private:
+    string_container_stack:List[Tag] #: :meta private:
     
     def __init__(
             self,
@@ -620,20 +621,26 @@ class BeautifulSoup(Tag):
         container = self.string_container(subclass)
         return container(s)
 
-    def insert_before(self, *args):
+    def insert_before(self, *args:PageElement) -> None:
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """
         raise NotImplementedError("BeautifulSoup objects don't support insert_before().")
 
-    def insert_after(self, *args):
+    def insert_after(self, *args:PageElement) -> None:
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """
         raise NotImplementedError("BeautifulSoup objects don't support insert_after().")
 
-    def popTag(self):
-        """Internal method called by _popToTag when a tag is closed."""
+    def popTag(self) -> Optional[Tag]:
+        """Internal method called by _popToTag when a tag is closed.
+
+        :meta private:
+        """
+        if not self.tagStack:
+            # Nothing to pop. This shouldn't happen.
+            return None
         tag = self.tagStack.pop()
         if tag.name in self.open_tag_counter:
             self.open_tag_counter[tag.name] -= 1
@@ -646,8 +653,11 @@ class BeautifulSoup(Tag):
             self.currentTag = self.tagStack[-1]
         return self.currentTag
 
-    def pushTag(self, tag):
-        """Internal method called by handle_starttag when a tag is opened."""
+    def pushTag(self, tag:Tag) -> None:
+        """Internal method called by handle_starttag when a tag is opened.
+
+        :meta private:
+        """
         #print("Push", tag.name)
         if self.currentTag is not None:
             self.currentTag.contents.append(tag)
@@ -660,9 +670,14 @@ class BeautifulSoup(Tag):
         if tag.name in self.builder.string_containers:
             self.string_container_stack.append(tag)
 
-    def endData(self, containerClass=None):
+    def endData(self, containerClass:Optional[type[NavigableString]]=None) -> None:
         """Method called by the TreeBuilder when the end of a data segment
         occurs.
+
+        :param containerClass: The class to use when incorporating the
+        data segment into the parse tree.
+
+        :meta private:
         """       
         if self.current_data:
             current_data = ''.join(self.current_data)
@@ -694,10 +709,19 @@ class BeautifulSoup(Tag):
             o = containerClass(current_data)
             self.object_was_parsed(o)
 
-    def object_was_parsed(self, o, parent=None, most_recent_element=None):
-        """Method called by the TreeBuilder to integrate an object into the parse tree."""
+    def object_was_parsed(
+            self, o:PageElement, parent:Optional[Tag]=None,
+            most_recent_element:Optional[PageElement]=None):
+        """Method called by the TreeBuilder to integrate an object into the
+        parse tree.
+
+        
+
+        :meta private:
+        """
         if parent is None:
             parent = self.currentTag
+        assert parent is not None
         if most_recent_element is not None:
             previous_element = most_recent_element
         else:
@@ -762,7 +786,7 @@ class BeautifulSoup(Tag):
                 break
             target = target.parent
 
-    def _popToTag(self, name, nsprefix=None, inclusivePop=True):
+    def _popToTag(self, name, nsprefix=None, inclusivePop=True) -> None:
         """Pops the tag stack up to and including the most recent
         instance of the given tag.
 
@@ -775,6 +799,7 @@ class BeautifulSoup(Tag):
           to but *not* including the most recent instqance of the
           given tag.
 
+        :meta private:
         """
         #print("Popping to %s" % name)
         if name == self.ROOT_TAG_NAME:
@@ -796,8 +821,11 @@ class BeautifulSoup(Tag):
 
         return most_recently_popped
 
-    def handle_starttag(self, name, namespace, nsprefix, attrs, sourceline=None,
-                        sourcepos=None, namespaces=None):
+    def handle_starttag(
+            self, name:str, namespace:Optional[str],
+            nsprefix:Optional[str], attrs:Optional[Dict[str,str]],
+            sourceline:Optional[int]=None, sourcepos:Optional[int]=None,
+            namespaces:Optional[Dict[str, str]]=None) -> None:
         """Called by the tree builder when a new tag is encountered.
 
         :param name: Name of the tag.
@@ -814,6 +842,8 @@ class BeautifulSoup(Tag):
         SoupStrainer. You should proceed as if the tag had not occurred
         in the document. For instance, if this was a self-closing tag,
         don't call handle_endtag.
+
+        :meta private:
         """
         # print("Start tag %s: %s" % (name, attrs))
         self.endData()
@@ -837,24 +867,31 @@ class BeautifulSoup(Tag):
         self.pushTag(tag)
         return tag
 
-    def handle_endtag(self, name, nsprefix=None):
+    def handle_endtag(self, name:str, nsprefix:Optional[str]=None) -> None:
         """Called by the tree builder when an ending tag is encountered.
 
         :param name: Name of the tag.
         :param nsprefix: Namespace prefix for the tag.
+
+        :meta private:
         """
         #print("End tag: " + name)
         self.endData()
         self._popToTag(name, nsprefix)
         
-    def handle_data(self, data):
-        """Called by the tree builder when a chunk of textual data is encountered."""
+    def handle_data(self, data:str) -> None:
+        """Called by the tree builder when a chunk of textual data is
+        encountered.
+
+        :meta private:
+        """
         self.current_data.append(data)
        
-    def decode(self, pretty_print=False,
-               eventual_encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter="minimal", iterator=None):
-        """Returns a string or Unicode representation of the parse tree
+    def decode(self, pretty_print:bool=False,
+               eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
+               formatter:Formatter|str="minimal",
+               iterator:Optional[Iterable]=None) -> str:
+        """Returns a string representation of the parse tree
             as an HTML or XML document.
 
         :param pretty_print: If this is True, indentation will be used to
@@ -865,13 +902,14 @@ class BeautifulSoup(Tag):
         if self.is_xml:
             # Print the XML declaration
             encoding_part = ''
+            declared_encoding: Optional[str] = eventual_encoding
             if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
                 # This is a special Python encoding; it can't actually
                 # go into an XML document because it means nothing
                 # outside of Python.
-                eventual_encoding = None
-            if eventual_encoding != None:
-                encoding_part = ' encoding="%s"' % eventual_encoding
+                declared_encoding = None
+            if declared_encoding != None:
+                encoding_part = ' encoding="%s"' % declared_encoding
             prefix = '<?xml version="1.0"%s?>\n' % encoding_part
         else:
             prefix = ''
