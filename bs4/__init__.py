@@ -584,7 +584,7 @@ class BeautifulSoup(Tag):
 
     def string_container(self,
                          base_class:Optional[type[NavigableString]]=None
-                         ) -> type[Any]:
+                         ) -> type[NavigableString]:
         """Find the class that should be instantiated to hold a given kind of
         string.
 
@@ -606,9 +606,16 @@ class BeautifulSoup(Tag):
             )
         return container
         
-    def new_string(self, s, subclass=None):
-        """Create a new NavigableString associated with this BeautifulSoup
+    def new_string(self, s:str, subclass:Optional[type[NavigableString]]=None) -> NavigableString:
+        """Create a new `NavigableString` associated with this `BeautifulSoup`
         object.
+
+        :param s: The string content of the `NavigableString`
+
+        :param subclass: The subclass of `NavigableString`, if any, to
+        use. If a document is being processed, an appropriate subclass
+        for the current location in the document will be determined
+        automatically.
         """
         container = self.string_container(subclass)
         return container(s)
