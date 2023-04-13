@@ -19,6 +19,7 @@ from typing import (
 )
 import warnings
 
+from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 
 
@@ -455,8 +456,9 @@ class SoupStrainer(object):
         return False
         
     
-    # DEPRECATED 4.13.0
+    @_deprecated("allow_tag_creation", "4.13.0")
     def search_tag(self, name, attrs):
+        ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
     
     def search(self, element:PageElement):

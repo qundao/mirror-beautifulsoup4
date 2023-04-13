@@ -2,7 +2,6 @@ from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
-from deprecated import deprecated
 import re
 import sys
 import warnings
@@ -31,49 +30,16 @@ DEFAULT_OUTPUT_ENCODING = "utf-8"
 
 nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
 
-# NOTE: This isn't used as of 4.7.0. I'm leaving it for a little bit on
-# the off chance someone imported it for their own use.
+# NOTE: This isn't used as of 4.7.0, but it is used in at least one
+# external project. Need to make access issue a deprecation warning.
 whitespace_re: re.Pattern[str] = re.compile(r"\s+")
 
-def _alias(attr):
-    """Alias one attribute name to another for backward compatibility
-
-    :meta private:
-    """
-    @property
-    def alias(self):
-        return getattr(self, attr)
-
-    @alias.setter
-    def alias(self, value):
-        return setattr(self, attr, value)
-    return alias
-
-
-def _deprecated_alias(old_name, new_name, version):
-    """Alias one attribute name to another for backward compatibility
-
-    :meta private:
-    """
-    @property
-    def alias(self):
-        ":meta private:"
-        warnings.warn(f"Access to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
-        return getattr(self, new_name)
-
-    @alias.setter
-    def alias(self, value):
-        ":meta private:"
-        warnings.warn(f"Write to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
-        return setattr(self, new_name, value)
-    return alias
-
-def _deprecated_function_alias(old_name, new_name, version):
-    def alias(self, *args, **kwargs):
-        ":meta private:"
-        warnings.warn(f"Call to deprecated method {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
-        return getattr(self, new_name)(*args, **kwargs)
-    return alias
+from bs4._deprecation import (
+    _alias,
+    _deprecated,
+    _deprecated_alias,
+    _deprecated_function_alias,
+)
 
 #: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize
@@ -1005,27 +971,27 @@ class PageElement(object):
         """Check whether a PageElement has been decomposed."""
         return getattr(self, '_decomposed', False) or False
    
-    @deprecated(version="4.0.0", reason="Replaced by the next_elements property")
+    @_deprecated("next_elements", "4.0.0")
     def nextGenerator(self):
         ":meta private:"
         return self.next_elements
 
-    @deprecated(version="4.0.0", reason="Replaced by the next_siblings property")
+    @_deprecated("next_siblings", "4.0.0")
     def nextSiblingGenerator(self):
         ":meta private:"
         return self.next_siblings
 
-    @deprecated(version="4.0.0", reason="Replaced by the previous_elements property")
+    @_deprecated("previous_elements", "4.0.0")
     def previousGenerator(self):
         ":meta private:"
         return self.previous_elements
 
-    @deprecated(version="4.0.0", reason="Replaced by the previous_siblings property")
+    @_deprecated("previous_siblings", "4.0.0")
     def previousSiblingGenerator(self):
         ":meta private:"
         return self.previous_siblings
 
-    @deprecated(version="4.0.0", reason="Replaced by the parents property")
+    @_deprecated("parents", "4.0.0")
     def parentGenerator(self):
         ":meta private:"
         return self.parents
@@ -1521,7 +1487,7 @@ class Tag(PageElement):
         """
         return len(self.contents) == 0 and self.can_be_empty_element is True
 
-    @deprecated(version="4.0.0")
+    @_deprecated("is_empty_element", "4.0.0")
     def isSelfClosing(self):
         ": :meta private:"
         return is_empty_element()
@@ -1708,7 +1674,7 @@ class Tag(PageElement):
         return self
     replace_with_children = unwrap
 
-    @deprecated(version="4.0.0")
+    @_deprecated("unwrap", "4.0.0")
     def replaceWithChildren(self):
         ": :meta private:"
         return self.unwrap()
@@ -2270,7 +2236,7 @@ class Tag(PageElement):
         contents = self.decode_contents(indent_level, encoding, formatter)
         return contents.encode(encoding)
 
-    @deprecated(version="4.0.0", reason="Replaced by encode_contents")
+    @_deprecated("encode_contents", "4.0.0")
     def renderContents(self, encoding=DEFAULT_OUTPUT_ENCODING,
                        prettyPrint=False, indentLevel=0):
         """Deprecated method for BS3 compatibility.
@@ -2429,7 +2395,7 @@ class Tag(PageElement):
         return CSS(self)
 
     # Old names for backwards compatibility
-    @deprecated(version="4.0.0", reason="PEP8 compliance")
+    @_deprecated("children", "4.0.0")
     def childGenerator(self):
         """Deprecated generator.
 
@@ -2437,7 +2403,7 @@ class Tag(PageElement):
         """
         return self.children
 
-    @deprecated(version="4.0.0", reason="PEP8 compliance")
+    @_deprecated("descendants", "4.0.0")
     def recursiveChildGenerator(self):
         """Deprecated generator.
 
@@ -2445,6 +2411,7 @@ class Tag(PageElement):
         """
         return self.descendants
 
+    @_deprecated("has_attr", "4.0.0")
     def has_key(self, key):
         """Deprecated method. This was kind of misleading because has_key()
         (attributes) was different from __in__ (contents).
@@ -2453,10 +2420,6 @@ class Tag(PageElement):
 
         :meta private:
         """
-        warnings.warn(
-            'has_key has been deprecated since 4.0.0. Use has_attr(key) instead.',
-            DeprecationWarning, stacklevel=2
-        )
         return self.has_attr(key)
 
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
