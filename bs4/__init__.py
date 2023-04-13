@@ -140,8 +140,10 @@ class BeautifulSoup(Tag):
     known_xml: Optional[bool]
     parse_only: Optional[SoupStrainer] #: :meta private:
 
+    # These members are only used while parsing markup.
     markup:Optional[str|bytes] #: :meta private:
-
+    current_data:Optional[str] #: :meta private:
+    currentTag:Optional[Tag] #: :meta private:
     
     def __init__(
             self,
