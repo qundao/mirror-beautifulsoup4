@@ -63,8 +63,8 @@ from .element import (
     TemplateString,
     )
 from .strainer import SoupStrainer
-from _typeshed import SupportsRead
 from typing import (
+    IO,
     Iterable,
     Sequence,
     Optional,
@@ -132,7 +132,7 @@ class BeautifulSoup(Tag):
    
     def __init__(
             self,
-            markup:str|bytes|SupportsRead[str]|SupportsRead[bytes]="",
+            markup:str|bytes|IO="",
             features:Optional[str|Sequence[str]]=None,
             builder=None,
             parse_only=None,

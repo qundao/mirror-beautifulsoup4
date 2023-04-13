@@ -36,16 +36,44 @@ nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
 whitespace_re: re.Pattern[str] = re.compile(r"\s+")
 
 def _alias(attr):
-    """Alias one attribute name to another for backward compatibility"""
+    """Alias one attribute name to another for backward compatibility
+
+    :meta private:
+    """
     @property
     def alias(self):
         return getattr(self, attr)
 
     @alias.setter
-    def alias(self):
-        return setattr(self, attr)
+    def alias(self, value):
+        return setattr(self, attr, value)
     return alias
 
+
+def _deprecated_alias(old_name, new_name, version):
+    """Alias one attribute name to another for backward compatibility
+
+    :meta private:
+    """
+    @property
+    def alias(self):
+        ":meta private:"
+        warnings.warn(f"Access to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        return getattr(self, new_name)
+
+    @alias.setter
+    def alias(self, value):
+        ":meta private:"
+        warnings.warn(f"Write to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        return setattr(self, new_name, value)
+    return alias
+
+def _deprecated_function_alias(old_name, new_name, version):
+    def alias(self, *args, **kwargs):
+        ":meta private:"
+        warnings.warn(f"Call to deprecated method {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        return getattr(self, new_name)(*args, **kwargs)
+    return alias
 
 #: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize
@@ -326,8 +354,10 @@ class PageElement(object):
             return getattr(self, 'is_xml', False)
         return self.parent._is_xml
 
-    nextSibling = _alias("next_sibling")  #: :meta private: BS3
-    previousSibling = _alias("previous_sibling")  #: :meta private: BS3
+    nextSibling = _deprecated_alias("nextSibling", "next_sibling", "4.0.0")
+    previousSibling = _deprecated_alias(
+        "previousSibling", "previous_sibling", "4.0.0"
+    )
 
     default: Iterable[type] = tuple() #: :meta private:
     def _all_strings(self, strip:bool=False, types:Iterable[type]=default) -> Iterator[str]:
@@ -393,7 +423,9 @@ class PageElement(object):
         for idx, replace_with in enumerate(args, start=my_index):
             old_parent.insert(idx, replace_with)
         return self
-    replaceWith = replace_with  #: :meta private: BS3
+    replaceWith = _deprecated_function_alias(
+        "replaceWith", "replace_with", "4.0.0"
+    )
 
     def wrap(self, wrap_inside:Tag) -> Tag:
         """Wrap this `PageElement` inside a `Tag`.
@@ -491,8 +523,8 @@ class PageElement(object):
         if not accept_self and last_child is self:
             last_child = None
         return last_child
-    #: :meta private: BS3: Not part of the API!
-    _lastRecursiveChild = _last_descendant
+
+    _lastRecursiveChild = _deprecated_alias("_lastRecursiveChild", "_last_descendant", "4.0.0")
 
     def insert_before(self, *args:PageElement) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
@@ -559,7 +591,7 @@ class PageElement(object):
         :kwargs: Additional filters on attribute values.
         """
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
-    findNext = find_next  #: :meta private: BS3
+    findNext = _deprecated_function_alias("findNext", "find_next", "4.0.0")
 
     def find_all_next(
             self,
@@ -585,7 +617,7 @@ class PageElement(object):
         """
         return self._find_all(name, attrs, string, limit, self.next_elements,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findAllNext = find_all_next  #: :meta private: BS3
+    findAllNext = _deprecated_function_alias("findAllNext", "find_all_next", "4.0.0")
 
     def find_next_sibling(
             self,
@@ -606,7 +638,9 @@ class PageElement(object):
         """
         return self._find_one(self.find_next_siblings, name, attrs, string,
                              **kwargs)
-    findNextSibling = find_next_sibling  #: :meta private: BS3
+    findNextSibling = _deprecated_function_alias(
+        "findNextSibling", "find_next_sibling", "4.0.0"
+    )
 
     def find_next_siblings(
             self,
@@ -634,8 +668,12 @@ class PageElement(object):
             name, attrs, string, limit,
             self.next_siblings, _stacklevel=_stacklevel+1, **kwargs
         )
-    findNextSiblings = find_next_siblings   #: :meta private: BS3
-    fetchNextSiblings = find_next_siblings  #: :meta private: BS2
+    findNextSiblings = _deprecated_function_alias(
+        "findNextSiblings", "find_next_siblings", "4.0.0"
+    )
+    fetchNextSiblings = _deprecated_function_alias(
+        "fetchNextSiblings", "find_next_siblings", "3.0.0"
+    )
 
     def find_previous(
             self,
@@ -656,7 +694,10 @@ class PageElement(object):
         """
         return self._find_one(
             self.find_all_previous, name, attrs, string, **kwargs)
-    findPrevious = find_previous  #: :meta private: BS3
+
+    findPrevious = _deprecated_function_alias(
+        "findPrevious", "find_previous", "3.0.0"
+    )
 
     def find_all_previous(
             self,
@@ -684,8 +725,12 @@ class PageElement(object):
             name, attrs, string, limit, self.previous_elements,
             _stacklevel=_stacklevel+1, **kwargs
         )
-    findAllPrevious = find_all_previous  #: :meta private: BS3    
-    fetchPrevious = find_all_previous    #: :meta private: BS2
+    findAllPrevious = _deprecated_function_alias(
+        "findAllPrevious", "find_all_previous", "4.0.0"
+    )
+    fetchAllPrevious = _deprecated_function_alias(
+        "fetchAllPrevious", "find_all_previous", "3.0.0"
+    )
 
     def find_previous_sibling(
             self,
@@ -706,7 +751,10 @@ class PageElement(object):
         """
         return self._find_one(self.find_previous_siblings, name, attrs, string,
                              **kwargs)
-    findPreviousSibling = find_previous_sibling  #: :meta private: BS3
+
+    findPreviousSibling = _deprecated_function_alias(
+        "findPreviousSibling", "find_previous_sibling", "4.0.0"
+    )
 
     def find_previous_siblings(
             self,
@@ -733,8 +781,12 @@ class PageElement(object):
             name, attrs, string, limit,
             self.previous_siblings, _stacklevel=_stacklevel+1, **kwargs
         )
-    findPreviousSiblings = find_previous_siblings   #: :meta private: BS3
-    fetchPreviousSiblings = find_previous_siblings  #: :meta private: BS2
+    findPreviousSiblings = _deprecated_function_alias(
+        "findPreviousSiblings", "find_previous_siblings", "4.0.0"
+    )
+    fetchPreviousSiblings = _deprecated_function_alias(
+        "fetchPreviousSiblings", "find_previous_siblings", "3.0.0"
+    )
 
     def find_parent(
             self,
@@ -758,7 +810,9 @@ class PageElement(object):
         if l:
             r = l[0]
         return r
-    findParent = find_parent  #: :meta private: BS3
+    findParent = _deprecated_function_alias(
+        "findParent", "find_parent", "4.0.0"
+    )
 
     def find_parents(
             self,
@@ -780,8 +834,13 @@ class PageElement(object):
         """
         return self._find_all(name, attrs, None, limit, self.parents,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findParents = find_parents   #: :meta private: BS3
-    fetchParents = find_parents  #: :meta private: BS2
+
+    findParents = _deprecated_function_alias(
+        "findParents", "find_parents", "4.0.0"
+    )
+    fetchParents = _deprecated_function_alias(
+        "fetchParents", "find_parents", "3.0.0"
+    )
 
     @property
     def next(self) -> Optional[PageElement]:
@@ -946,27 +1005,29 @@ class PageElement(object):
         """Check whether a PageElement has been decomposed."""
         return getattr(self, '_decomposed', False) or False
    
-    # Old non-property versions of the generators, for backwards
-    # compatibility with BS3.
-
-    #: :meta private:
+    @deprecated(version="4.0.0", reason="Replaced by the next_elements property")
     def nextGenerator(self):
+        ":meta private:"
         return self.next_elements
 
-    #: :meta private:
+    @deprecated(version="4.0.0", reason="Replaced by the next_siblings property")
     def nextSiblingGenerator(self):
+        ":meta private:"
         return self.next_siblings
 
-    #: :meta private:
+    @deprecated(version="4.0.0", reason="Replaced by the previous_elements property")
     def previousGenerator(self):
+        ":meta private:"
         return self.previous_elements
 
-    #: :meta private:
+    @deprecated(version="4.0.0", reason="Replaced by the previous_siblings property")
     def previousSiblingGenerator(self):
+        ":meta private:"
         return self.previous_siblings
 
-    #: :meta private:
+    @deprecated(version="4.0.0", reason="Replaced by the parents property")
     def parentGenerator(self):
+        ":meta private:"
         return self.parents
 
 
@@ -1384,8 +1445,9 @@ class Tag(PageElement):
     _AttributeDict = Dict[str, _AttributeValue]
     name: str
     attrs: _AttributeDict
-                
-    parserClass = _alias("parser_class")  #: :meta private: BS3
+
+    #: :meta private:
+    parserClass = _deprecated_alias("parserClass", "parser_class", "4.0.0")
 
     def __deepcopy__(self, memo:dict, recursive:bool=True) -> Tag:
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
@@ -1458,7 +1520,11 @@ class Tag(PageElement):
         the case for XML documents.
         """
         return len(self.contents) == 0 and self.can_be_empty_element is True
-    isSelfClosing = is_empty_element  #: :meta private: BS3
+
+    @deprecated(version="4.0.0")
+    def isSelfClosing(self):
+        ": :meta private:"
+        return is_empty_element()
 
     @property
     def string(self) -> Optional[str]:
@@ -1633,7 +1699,7 @@ class Tag(PageElement):
         my_parent = self.parent
         if my_parent is None:
             raise ValueError(
-                "Cannot replace an element with its contents when that"
+                "Cannot replace an element with its contents when that "
                 "element is not part of a tree.")
         my_index = my_parent.index(self)
         self.extract(_self_index=my_index)
@@ -1641,8 +1707,12 @@ class Tag(PageElement):
             my_parent.insert(my_index, child)
         return self
     replace_with_children = unwrap
-    replaceWithChildren = unwrap  #: :meta private: BS3
-        
+
+    @deprecated(version="4.0.0")
+    def replaceWithChildren(self):
+        ": :meta private:"
+        return self.unwrap()
+    
     def append(self, tag:PageElement) -> None:
         """Appends the given `PageElement` to the contents of this `Tag`.
         """
@@ -2200,8 +2270,7 @@ class Tag(PageElement):
         contents = self.decode_contents(indent_level, encoding, formatter)
         return contents.encode(encoding)
 
-    # Old method for BS3 compatibility
-    @deprecated(version="4.0.0", reason="PEP8 compliance")
+    @deprecated(version="4.0.0", reason="Replaced by encode_contents")
     def renderContents(self, encoding=DEFAULT_OUTPUT_ENCODING,
                        prettyPrint=False, indentLevel=0):
         """Deprecated method for BS3 compatibility.
@@ -2273,8 +2342,11 @@ class Tag(PageElement):
             generator = self.children
         return self._find_all(name, attrs, string, limit, generator,
                               _stacklevel=_stacklevel+1, **kwargs)
-    findAll = find_all       #: :meta private: BS3
-    findChildren = find_all  #: :meta private: BS2
+
+    findAll = _deprecated_function_alias("findAll", "find_all", "4.0.0")
+    findChildren = _deprecated_function_alias(
+        "findChildren", "find_all", "3.0.0"
+    )
 
     #Generator methods
     @property
@@ -2373,7 +2445,6 @@ class Tag(PageElement):
         """
         return self.descendants
 
-    @deprecated(version="4.0.0")
     def has_key(self, key):
         """Deprecated method. This was kind of misleading because has_key()
         (attributes) was different from __in__ (contents).
@@ -2383,7 +2454,7 @@ class Tag(PageElement):
         :meta private:
         """
         warnings.warn(
-            'has_key is deprecated. Use has_attr(key) instead.',
+            'has_key has been deprecated since 4.0.0. Use has_attr(key) instead.',
             DeprecationWarning, stacklevel=2
         )
         return self.has_attr(key)
