@@ -1,6 +1,7 @@
 # encoding: utf-8
 import pytest
 import logging
+import warnings
 import bs4
 from bs4 import BeautifulSoup
 from bs4.dammit import (
@@ -173,12 +174,18 @@ class TestEncodingDetector(object):
         # override_encodings is a deprecated alias for
         # known_definite_encodings.
         hebrew = b"\xed\xe5\xec\xf9"
-        dammit = UnicodeDammit(
-            hebrew,
-            known_definite_encodings=["shift-jis"],
-            override_encodings=["utf-8"],
-            user_encodings=["iso-8859-8"],
-        )
+        with warnings.catch_warnings(record=True) as w:
+            dammit = UnicodeDammit(
+                hebrew,
+                known_definite_encodings=["shift-jis"],
+                override_encodings=["utf-8"],
+                user_encodings=["iso-8859-8"],
+            )
+        [warning] = w
+        message = warning.message
+        assert isinstance(message, DeprecationWarning)
+        assert warning.filename == __file__
+        msg = str(message)
         assert "iso-8859-8" == dammit.original_encoding
 
         # known_definite_encodings and override_encodings were tried

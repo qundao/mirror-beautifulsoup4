@@ -19,6 +19,7 @@ import logging
 import string
 from types import ModuleType
 from typing import cast, Dict, Iterator, Optional, List, Set, Union, Tuple
+import warnings
 
 # Import a library to autodetect character encodings. We'll support
 # any of a number of libraries that all support the same API:
@@ -414,7 +415,7 @@ class EncodingDetector:
         immediately after the encodings in
         ``known_definite_encodings``.
 
-    :param is_html: If True, this markup is considered to be
+    :param is_html: If True, this markup is considered to be 
         HTML. Otherwise it's assumed to be XML.
 
     :param exclude_encodings: These encodings will not be tried,
@@ -429,6 +430,11 @@ class EncodingDetector:
                  override_encodings:Optional[_Encodings]=None):
         self.known_definite_encodings = list(known_definite_encodings or [])
         if override_encodings:
+            warnings.warn(
+                "The 'override_encodings' argument was deprecated in 4.10.0. Use 'known_definite_encodings' instead.",
+                DeprecationWarning,
+                stacklevel=3
+            )
             self.known_definite_encodings += override_encodings
         self.user_encodings = user_encodings or []
         exclude_encodings = exclude_encodings or []

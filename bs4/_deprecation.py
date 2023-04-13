@@ -62,5 +62,6 @@ def _deprecated(replaced_by, version):
                 DeprecationWarning,
                 stacklevel=2
             )
+            return func(*args, **kwargs)
         return with_warning
     return deprecate

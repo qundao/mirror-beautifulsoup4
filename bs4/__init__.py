@@ -215,14 +215,14 @@ class BeautifulSoup(Tag):
         if 'selfClosingTags' in kwargs:
             del kwargs['selfClosingTags']
             warnings.warn(
-                "BS4 does not respect the selfClosingTags argument to the "
+                "Beautiful Soup 4 does not respect the selfClosingTags argument to the "
                 "BeautifulSoup constructor. The tree builder is responsible "
                 "for understanding self-closing tags.")
 
         if 'isHTML' in kwargs:
             del kwargs['isHTML']
             warnings.warn(
-                "BS4 does not respect the isHTML argument to the "
+                "Beautiful Soup 4 does not respect the isHTML argument to the "
                 "BeautifulSoup constructor. Suggest you use "
                 "features='lxml' for HTML and features='lxml-xml' for "
                 "XML.")
@@ -231,7 +231,8 @@ class BeautifulSoup(Tag):
             if old_name in kwargs:
                 warnings.warn(
                     'The "%s" argument to the BeautifulSoup constructor '
-                    'has been renamed to "%s."' % (old_name, new_name),
+                    'was renamed to "%s" in Beautiful Soup 4.0.0' % (
+                        old_name, new_name),
                     DeprecationWarning, stacklevel=3
                 )
                 return kwargs.pop(old_name)
@@ -841,7 +842,7 @@ class BeautifulStoneSoup(BeautifulSoup):
     def __init__(self, *args, **kwargs):
         kwargs['features'] = 'xml'
         warnings.warn(
-            'The BeautifulStoneSoup class is deprecated. Instead of using '
+            'The BeautifulStoneSoup class was deprecated in version 4.0.0. Instead of using '
             'it, pass features="xml" into the BeautifulSoup constructor.',
             DeprecationWarning, stacklevel=2
         )
