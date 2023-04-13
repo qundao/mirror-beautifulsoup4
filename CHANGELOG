@@ -1,5 +1,8 @@
 = 4.13.0 (Unreleased)
 
+* This version drops support for Python 3.6. The minimum supported
+  major version for Beautiful Soup is now Python 3.7.
+
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.

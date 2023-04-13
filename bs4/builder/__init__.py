@@ -53,17 +53,17 @@ class TreeBuilderRegistry(object):
         self.builders_for_feature = defaultdict(list)
         self.builders = []
 
-    def register(self, treebuilder_class):
+    def register(self, treebuilder_class:type[TreeBuilder]):
         """Register a treebuilder based on its advertised features.
 
-        :param treebuilder_class: A subclass of Treebuilder. its .features
-           attribute should list its features.
+        :param treebuilder_class: A subclass of `Treebuilder`. its
+           `TreeBuilder.features` attribute should list its features.
         """
         for feature in treebuilder_class.features:
             self.builders_for_feature[feature].insert(0, treebuilder_class)
         self.builders.insert(0, treebuilder_class)
 
-    def lookup(self, *features):
+    def lookup(self, *features:str):
         """Look up a TreeBuilder subclass with the desired features.
 
         :param features: A list of features to look for. If none are
@@ -83,12 +83,12 @@ class TreeBuilderRegistry(object):
 
         # Go down the list of features in order, and eliminate any builders
         # that don't match every feature.
-        features = list(features)
-        features.reverse()
+        feature_list = list(features)
+        feature_list.reverse()
         candidates = None
         candidate_set = None
-        while len(features) > 0:
-            feature = features.pop()
+        while len(feature_list) > 0:
+            feature = feature_list.pop()
             we_have_the_feature = self.builders_for_feature.get(feature, [])
             if len(we_have_the_feature) > 0:
                 if candidates is None:
@@ -102,15 +102,15 @@ class TreeBuilderRegistry(object):
         # The only valid candidates are the ones in candidate_set.
         # Go through the original list of candidates and pick the first one
         # that's in candidate_set.
-        if candidate_set is None:
+        if candidate_set is None or candidates is None:
             return None
         for candidate in candidates:
             if candidate in candidate_set:
                 return candidate
         return None
 
-# The BeautifulSoup class will take feature lists from developers and use them
-# to look up builders in this registry.
+#: The `BeautifulSoup` constructor will take a list of features
+#: and use it to look up `TreeBuilder` classes in this registry.
 builder_registry = TreeBuilderRegistry()
 
 class TreeBuilder(object):
@@ -176,8 +176,8 @@ class TreeBuilder(object):
     ALTERNATE_NAMES: Iterable[str] = []
     features: Iterable[str] = []
 
-    is_xml = False
-    picklable = False
+    is_xml: bool = False
+    picklable: bool = False
 
     #: A tag will be considered an empty-element
     #: tag when and only when it has no contents.
@@ -195,9 +195,9 @@ class TreeBuilder(object):
     DEFAULT_STRING_CONTAINERS: Dict[str, type] = {}
     
     #: Most parsers don't keep track of line numbers.
-    TRACKS_LINE_NUMBERS = False
+    TRACKS_LINE_NUMBERS: bool = False
         
-    def initialize_soup(self, soup):
+    def initialize_soup(self, soup:BeautifulSoup) -> None:
         """The BeautifulSoup object has been initialized and is now
         being associated with the TreeBuilder.
 
@@ -205,7 +205,7 @@ class TreeBuilder(object):
         """
         self.soup = soup
         
-    def reset(self):
+    def reset(self) -> None:
         """Do any work necessary to reset the underlying parser
         for a new document.
 
@@ -213,7 +213,7 @@ class TreeBuilder(object):
         """
         pass
 
-    def can_be_empty_element(self, tag_name):
+    def can_be_empty_element(self, tag_name:str) -> bool:
         """Might a tag with this name be an empty-element tag?
 
         The final markup may or may not actually present this tag as
@@ -236,17 +236,18 @@ class TreeBuilder(object):
             return True
         return tag_name in self.empty_element_tags
     
-    def feed(self, markup) -> None:
+    def feed(self, markup:str) -> None:
         """Run some incoming markup through some parsing process,
         populating the `BeautifulSoup` object in `TreeBuilder.soup`
         """
         raise NotImplementedError()
 
-    def prepare_markup(self, markup:Union[bytes, str],
-                       user_specified_encoding:Optional[str]=None,
-                       document_declared_encoding:Optional[str]=None,
-                       exclude_encodings:Optional[Iterable[str]]=None
-                       ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
+    def prepare_markup(
+            self, markup:Union[bytes, str],
+            user_specified_encoding:Optional[str]=None,
+            document_declared_encoding:Optional[str]=None,
+            exclude_encodings:Optional[Iterable[str]]=None
+    ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -284,7 +285,7 @@ class TreeBuilder(object):
         which run HTML fragments through the parser and compare the
         results against other HTML fragments.
 
-        This method should not be used outside of tests.
+        This method should not be used outside of unit tests.
 
         :param fragment: A fragment of HTML.
         :return: A full HTML document.
@@ -305,7 +306,7 @@ class TreeBuilder(object):
         """
         return False
 
-    def _replace_cdata_list_attribute_values(self, tag_name, attrs):
+    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs):
         """When an attribute value is associated with a tag that can
         have multiple values for that attribute, convert the string
         value to a list of strings.
@@ -616,7 +617,7 @@ class ParserRejectedMarkup(Exception):
     """An Exception to be raised when the underlying parser simply
     refuses to parse the given markup.
     """
-    def __init__(self, message_or_exception):
+    def __init__(self, message_or_exception:str|Exception):
         """Explain why the parser rejected the given markup, either
         with a textual explanation or another exception.
         """

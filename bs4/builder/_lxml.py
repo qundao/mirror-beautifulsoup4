@@ -37,10 +37,10 @@ def _invert(d):
 
 class LXMLTreeBuilderForXML(TreeBuilder):
     DEFAULT_PARSER_CLASS = etree.XMLParser
-
     is_xml = True
-    processing_instruction_class = XMLProcessingInstruction
-
+        
+    processing_instruction_class: ProcessingInstruction
+    
     NAME = "lxml-xml"
     ALTERNATE_NAMES = ["xml"]
 
@@ -362,7 +362,6 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
 
     features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
     is_xml = False
-    processing_instruction_class = ProcessingInstruction
 
     def default_parser(self, encoding):
         return etree.HTMLParser

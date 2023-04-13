@@ -29,11 +29,11 @@ if TYPE_CHECKING:
 #: this encoding unless you specify otherwise.
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 
-nonwhitespace_re = re.compile(r"\S+")
+nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
 
 # NOTE: This isn't used as of 4.7.0. I'm leaving it for a little bit on
 # the off chance someone imported it for their own use.
-whitespace_re = re.compile(r"\s+")
+whitespace_re: re.Pattern[str] = re.compile(r"\s+")
 
 def _alias(attr):
     """Alias one attribute name to another for backward compatibility"""
@@ -164,8 +164,12 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     If the document is later encoded to an encoding other than UTF-8, its
     ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
+    #: Match the 'charset' argument inside the 'content' attribute
+    #: of a <meta> tag.
     #: :meta private:
-    CHARSET_RE = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
+    CHARSET_RE: re.Pattern[str] = re.compile(
+        r"((^|;)\s*charset=)([^;]*)", re.M
+    )
     
     def __new__(cls, original_value):
         match = cls.CHARSET_RE.search(original_value)
