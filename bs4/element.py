@@ -14,6 +14,7 @@ from bs4.formatter import (
 )
 
 from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing_extensions import Self
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -1043,7 +1044,7 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __deepcopy__(self, memo:dict, recursive:bool=False) -> NavigableString:
+    def __deepcopy__(self, memo:dict, recursive:bool=False) -> Self:
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
 
@@ -1053,7 +1054,7 @@ class NavigableString(str, PageElement):
         """
         return type(self)(self)
 
-    def __copy__(self) -> NavigableString:
+    def __copy__(self) -> Self:
         """A copy of a NavigableString can only be a deep copy, because
         only one PageElement can occupy a given place in a parse tree.
         """
@@ -1436,7 +1437,7 @@ class Tag(PageElement):
     #: :meta private:
     parserClass = _deprecated_alias("parserClass", "parser_class", "4.0.0")
 
-    def __deepcopy__(self, memo:dict, recursive:bool=True) -> Tag:
+    def __deepcopy__(self, memo:dict, recursive:bool=True) -> Self:
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
         """
@@ -1464,13 +1465,13 @@ class Tag(PageElement):
                         tag_stack.append(descendant_clone)
         return clone
 
-    def __copy__(self) -> Tag:
+    def __copy__(self) -> Self:
         """A copy of a Tag must always be a deep copy, because a Tag's
         children can only have one parent at a time.
         """
         return self.__deepcopy__({})
 
-    def _clone(self) -> Tag:
+    def _clone(self) -> Self:
         """Create a new Tag just like this one, but with no
         contents and unattached to any parse tree.
 
