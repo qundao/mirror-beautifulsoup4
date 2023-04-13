@@ -2,7 +2,7 @@ from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
-
+from deprecated import deprecated
 import re
 import sys
 import warnings
@@ -2201,6 +2201,7 @@ class Tag(PageElement):
         return contents.encode(encoding)
 
     # Old method for BS3 compatibility
+    @deprecated(version="4.0.0", reason="PEP8 compliance")
     def renderContents(self, encoding=DEFAULT_OUTPUT_ENCODING,
                        prettyPrint=False, indentLevel=0):
         """Deprecated method for BS3 compatibility.
@@ -2356,23 +2357,29 @@ class Tag(PageElement):
         return CSS(self)
 
     # Old names for backwards compatibility
+    @deprecated(version="4.0.0", reason="PEP8 compliance")
     def childGenerator(self):
         """Deprecated generator.
+
         :meta private:
         """
         return self.children
 
+    @deprecated(version="4.0.0", reason="PEP8 compliance")
     def recursiveChildGenerator(self):
         """Deprecated generator.
+
         :meta private:
         """
         return self.descendants
 
+    @deprecated(version="4.0.0")
     def has_key(self, key):
         """Deprecated method. This was kind of misleading because has_key()
         (attributes) was different from __in__ (contents).
 
         has_key() is gone in Python 3, anyway.
+
         :meta private:
         """
         warnings.warn(

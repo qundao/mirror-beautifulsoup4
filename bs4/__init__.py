@@ -40,7 +40,11 @@ from .builder import (
     XMLParsedAsHTMLWarning,
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
-from .dammit import UnicodeDammit
+from .dammit import (
+    _Encoding,
+    _Encodings,
+    UnicodeDammit,
+)
 from .element import (
     CData,
     Comment,
@@ -59,6 +63,12 @@ from .element import (
     TemplateString,
     )
 from .strainer import SoupStrainer
+from _typeshed import SupportsRead
+from typing import (
+    Iterable,
+    Sequence,
+    Optional,
+)
 
 # Define some custom warnings.
 class GuessedAtParserWarning(UserWarning):
@@ -104,24 +114,33 @@ class BeautifulSoup(Tag):
     handle_endtag.
     """
 
-    # Since BeautifulSoup subclasses Tag, it's possible to treat it as
-    # a Tag with a .name. This name makes it clear the BeautifulSoup
-    # object isn't a real markup tag.
-    ROOT_TAG_NAME = '[document]'
+    #: Since `BeautifulSoup` subclasses `Tag`, it's possible to treat it as
+    #: a `Tag` with a `Tag.name`. Hoever, this name makes it clear the
+    #: `BeautifulSoup` object isn't a real markup tag.
+    ROOT_TAG_NAME:str = '[document]'
 
-    # If the end-user gives no indication which tree builder they
-    # want, look for one with these features.
-    DEFAULT_BUILDER_FEATURES = ['html', 'fast']
+    #: If the end-user gives no indication which tree builder they
+    #: want, look for one with these features.
+    DEFAULT_BUILDER_FEATURES: Sequence[str] = ['html', 'fast']
 
-    # A string containing all ASCII whitespace characters, used in
-    # endData() to detect data chunks that seem 'empty'.
-    ASCII_SPACES = '\x20\x0a\x09\x0c\x0d'
+    #: A string containing all ASCII whitespace characters, used in
+    #: `BeautifulSoup.endData` to detect data chunks that seem 'empty'.
+    ASCII_SPACES: str = '\x20\x0a\x09\x0c\x0d'
 
+    #: :meta private:
     NO_PARSER_SPECIFIED_WARNING = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
    
-    def __init__(self, markup="", features=None, builder=None,
-                 parse_only=None, from_encoding=None, exclude_encodings=None,
-                 element_classes=None, **kwargs):
+    def __init__(
+            self,
+            markup:str|bytes|SupportsRead[str]|SupportsRead[bytes]="",
+            features:Optional[str|Sequence[str]]=None,
+            builder=None,
+            parse_only=None,
+            from_encoding:Optional[_Encoding]=None,
+            exclude_encodings:Optional[_Encodings]=None,
+            element_classes=None,
+            **kwargs
+    ):
         """Constructor.
 
         :param markup: A string or a file-like object representing

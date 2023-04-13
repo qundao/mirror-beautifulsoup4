@@ -31,6 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "soupsieve >1.2",
+    "Deprecated >=1.2.13",
 ]
 
 [project.optional-dependencies]
