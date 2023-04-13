@@ -134,8 +134,14 @@ class BeautifulSoup(Tag):
     #: :meta private:
     NO_PARSER_SPECIFIED_WARNING: str = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 
-    #: :meta private:
-    markup:Optional[str|bytes]
+    element_classes:Dict[type[PageElement], type[Any]] #: :meta private:
+    builder:TreeBuilder #: :meta private:
+    is_xml: bool
+    known_xml: Optional[bool]
+    parse_only: Optional[SoupStrainer] #: :meta private:
+
+    markup:Optional[str|bytes] #: :meta private:
+
     
     def __init__(
             self,
@@ -525,7 +531,7 @@ class BeautifulSoup(Tag):
         markup.
         """
         Tag.__init__(self, self, self.builder, self.ROOT_TAG_NAME)
-        self.hidden = 1
+        self.hidden = True
         self.builder.reset()
         self.current_data = []
         self.currentTag = None

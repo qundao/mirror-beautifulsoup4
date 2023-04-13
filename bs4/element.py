@@ -228,6 +228,10 @@ class PageElement(object):
     previous_element: Optional[PageElement]
     next_sibling: Optional[PageElement]
     previous_sibling: Optional[PageElement]
+
+    #: Whether or not this element is hidden from generated output.
+    #: Only the BeautifulSoup object itself is hidden.
+    hidden: bool=False
     
     def setup(self, parent:Optional[Tag]=None,
               previous_element:Optional[PageElement]=None,
@@ -1035,6 +1039,7 @@ class NavigableString(str, PageElement):
             u = str.__new__(cls, value)
         else:
             u = str.__new__(cls, value, DEFAULT_OUTPUT_ENCODING)
+        u.hidden = False
         u.setup()
         return u
 
