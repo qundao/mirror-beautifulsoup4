@@ -70,6 +70,7 @@ from typing import (
     Dict,
     IO,
     Iterable,
+    List,
     Sequence,
     Optional,
 )
@@ -144,6 +145,10 @@ class BeautifulSoup(Tag):
     markup:Optional[str|bytes] #: :meta private:
     current_data:Optional[str] #: :meta private:
     currentTag:Optional[Tag] #: :meta private:
+    tagStack:Optional[List[Tag]] #: :meta private:
+    open_tag_counter:Optional[Counter] #: :meta private:
+    preserve_whitespace_tag_stack:Optional[List[Tag]] #: :meta private:
+    string_container_stack:Optional[List[Tag]] #: :meta private:
     
     def __init__(
             self,
