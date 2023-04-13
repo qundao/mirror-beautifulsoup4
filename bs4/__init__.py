@@ -887,17 +887,25 @@ class BeautifulSoup(Tag):
         """
         self.current_data.append(data)
        
-    def decode(self, pretty_print:bool=False,
+    def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:Formatter|str="minimal",
-               iterator:Optional[Iterable]=None) -> str:
+               iterator:Optional[Iterable]=None, **kwargs) -> str:
         """Returns a string representation of the parse tree
             as an HTML or XML document.
 
-        :param pretty_print: If this is True, indentation will be used to
-            make the document more readable.
+        :param indent_level: Each line of the rendering will be
+           indented this many levels. (The ``formatter`` decides what a
+           'level' means, in terms of spaces or other characters
+           output.) This is used internally in recursive calls while
+           pretty-printing.
         :param eventual_encoding: The encoding of the final document.
             If this is None, the document will be a Unicode string.
+        :param formatter: Either a `Formatter` object, or a string naming one of
+            the standard formatters.
+        :param iterator: The iterator to use when navigating over the
+            parse tree. This is only used by `Tag.decode_contents` and
+            you probably won't need to use it.
         """
         if self.is_xml:
             # Print the XML declaration
@@ -913,10 +921,36 @@ class BeautifulSoup(Tag):
             prefix = '<?xml version="1.0"%s?>\n' % encoding_part
         else:
             prefix = ''
-        if not pretty_print:
-            indent_level = None
+
+        # The first argument to this method used to be a bool called
+        # pretty_print, which gave the method a different signature from its
+        # superclass implementation, Tag.decode.
+        #
+        # The signatures of the two methods now match, but just in
+        # case someone is still passing a boolean in as the first
+        # argument to this method (or a keyword argument with the old
+        # name), we can handle it and put out a DeprecationWarning.
+        warning:Optional[str] = None
+        if isinstance(indent_level, bool):
+            if indent_level is True:
+                indent_level = 0
+            elif indent_level is False:
+                indent_level = None
+            warning = f"As of 4.13.0, the first argument to BeautifulSoup.decode has been changed from bool to int, to match Tag.decode. Pass in a value of {indent_level} instead."
         else:
-            indent_level = 0
+            pretty_print = kwargs.pop("pretty_print", None)
+            assert not kwargs
+            if pretty_print is not None:
+                if pretty_print is True:
+                    indent_level = 0
+                elif pretty_print is False:                
+                    indent_level = None
+                warning = f"As of 4.13.0, the pretty_print argument to BeautifulSoup.decode has been removed, to match Tag.decode. Pass in a value of indent_level={indent_level} instead."
+
+        if warning:
+            warnings.warn(warning, DeprecationWarning, stacklevel=2)
+        elif indent_level is False or pretty_print is False:
+            indent_level = None
         return prefix + super(BeautifulSoup, self).decode(
             indent_level, eventual_encoding, formatter, iterator)
 

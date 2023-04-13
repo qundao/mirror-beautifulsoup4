@@ -1984,7 +1984,6 @@ class Tag(PageElement):
         :param iterator: The iterator to use when navigating over the
             parse tree. This is only used by `Tag.decode_contents` and
             you probably won't need to use it.
-
         """
         pieces = []
         # First off, turn a non-Formatter `formatter` into a Formatter
@@ -2216,9 +2215,9 @@ class Tag(PageElement):
             (otherwise).
         """
         if encoding is None:
-            return self.decode(True, formatter=formatter)
+            return self.decode(indent_level=0, formatter=formatter)
         else:
-            return self.encode(encoding, True, formatter=formatter)
+            return self.encode(encoding=encoding, indent_level=0, formatter=formatter)
 
     def decode_contents(self, indent_level:Optional[int]=None,
                        eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
