@@ -7,6 +7,12 @@ import sys
 import warnings
 
 from bs4.css import CSS
+from bs4._deprecation import (
+    _alias,
+    _deprecated,
+    _deprecated_alias,
+    _deprecated_function_alias,
+)
 from bs4.formatter import (
     Formatter,
     HTMLFormatter,
@@ -24,6 +30,10 @@ if TYPE_CHECKING:
         _StrainableAttributes,
         _StrainableString
     )
+
+# Useful type aliases
+_AttributeValue = Union[str, Sequence[str]]
+_AttributeValues = Dict[str, _AttributeValue]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/
@@ -49,14 +59,7 @@ def __getattr__(name):
 DEFAULT_OUTPUT_ENCODING = "utf-8"
 
 nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
-
-    
-from bs4._deprecation import (
-    _alias,
-    _deprecated,
-    _deprecated_alias,
-    _deprecated_function_alias,
-)
+   
 
 #: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize

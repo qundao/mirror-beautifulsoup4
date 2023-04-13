@@ -47,6 +47,8 @@ from .dammit import (
     UnicodeDammit,
 )
 from .element import (
+    _AttributeValue,
+    _AttributeValues,
     CData,
     Comment,
     CSS,
@@ -549,8 +551,16 @@ class BeautifulSoup(Tag):
         self._most_recent_element = None
         self.pushTag(self)
 
-    def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
-                sourceline=None, sourcepos=None, **kwattrs):
+    def new_tag(
+            self,
+            name:str,
+            namespace:Optional[str]=None,
+            nsprefix:Optional[str]=None,
+            attrs:_AttributeValues={},
+            sourceline:Optional[int]=None,
+            sourcepos:Optional[int]=None,
+            **kwattrs:_AttributeValue,
+    ):
         """Create a new Tag associated with this BeautifulSoup object.
 
         :param name: The name of the new Tag.
@@ -572,9 +582,17 @@ class BeautifulSoup(Tag):
             sourceline=sourceline, sourcepos=sourcepos
         )
 
-    def string_container(self, base_class=None):
+    def string_container(self,
+                         base_class:Optional[type[NavigableString]]=None
+                         ) -> type[Any]:
+        """Find the class that should be instantiated to hold a given kind of
+        string.
+
+        This may be a built-in Beautiful Soup class or a custom class passed
+        in to the BeautifulSoup constructor.
+        """
         container = base_class or NavigableString
-        
+
         # There may be a general override of NavigableString.
         container = self.element_classes.get(
             container, container
