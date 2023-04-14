@@ -801,14 +801,13 @@ class UnicodeDammit:
             #print("Trying to convert document to %s (errors=%s)" % (
             #    proposed, errors))
             u = self._to_unicode(markup, proposed, errors)
-            self.markup = u
             self.original_encoding = proposed
         except Exception as e:
             #print("That didn't work!")
             #print(e)
             return None
         #print("Correct encoding: %s" % proposed)
-        return self.markup
+        return u
 
     def _to_unicode(self, data:bytes, encoding:_Encoding, errors:str="strict") -> str:
         """Given a bytestring and its encoding, decodes the string into Unicode.
