@@ -1,6 +1,14 @@
 from __future__ import annotations
-from typing import Dict, Optional, Union
+from typing import Callable, Dict, Iterable, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing_extensions import TypeAlias
 from bs4.dammit import EntitySubstitution
+
+if TYPE_CHECKING:
+    from bs4.element import Tag, _AttributeValue
+
+#: A function to call to replace special characters with XML or HTML
+#: entities.
+_EntitySubstitution: TypeAlias = Callable[[str], str]
 
 class Formatter(EntitySubstitution):
     """Describes a strategy to use when outputting a parse tree to a string.
@@ -30,29 +38,49 @@ class Formatter(EntitySubstitution):
      * None - Do not perform any substitution. This will be faster
               but may result in invalid markup.
     """
-    HTML = 'html'
-    XML = 'xml'
 
-    HTML_DEFAULTS = dict(
+    #: Constant name denoting HTML markup
+    HTML:str = 'html'
+
+    #: Constant name denoting XML markup
+    XML:str = 'xml'
+
+    # Default values for the various constructor options when the
+    # markup language is HTML.
+    HTML_DEFAULTS: Dict[str, Set[str]] = dict(
         cdata_containing_tags=set(["script", "style"]),
     )
 
-    def _default(self, language, value, kwarg):
+    language:Optional[str] #: :meta private:
+    entity_substitution: Optional[_EntitySubstitution] #: :meta private:
+    void_element_close_prefix: str #: :meta private:
+    cdata_containing_tags: Set[str] #: :meta private:    
+    indent:str #: :meta private:
+    empty_attributes_are_booleans: bool #: :meta private:
+    
+    def _default(self, language:str, value:Optional[Set[str]], kwarg:str) -> Set[str]:
         if value is not None:
             return value
         if language == self.XML:
+            # When XML is the markup language in use, all of the
+            # defaults are the empty list.
             return set()
+
+        # Otherwise, it depends on what's in HTML_DEFAULTS.
         return self.HTML_DEFAULTS[kwarg]
 
     def __init__(
-            self, language=None, entity_substitution=None,
-            void_element_close_prefix='/', cdata_containing_tags=None,
-            empty_attributes_are_booleans=False, indent=1,
+            self,
+            language:Optional[str]=None,
+            entity_substitution:Optional[_EntitySubstitution]=None,
+            void_element_close_prefix:str='/',
+            cdata_containing_tags:Optional[Set[str]]=None,
+            empty_attributes_are_booleans:bool=False, indent:int=1,
     ):
         """Constructor.
 
-        :param language: This should be Formatter.XML if you are formatting
-           XML markup and Formatter.HTML if you are formatting HTML markup.
+        :param language: This should be `Formatter.XML` if you are formatting
+           XML markup and `Formatter.HTML` if you are formatting HTML markup.
 
         :param entity_substitution: A function to call to replace special
            characters with XML/HTML entities. For examples, see 
@@ -60,14 +88,15 @@ class Formatter(EntitySubstitution):
         :param void_element_close_prefix: By default, void elements
            are represented as <tag/> (XML rules) rather than <tag>
            (HTML rules). To get <tag>, pass in the empty string.
-        :param cdata_containing_tags: The list of tags that are defined
+        :param cdata_containing_tags: The set of tags that are defined
            as containing CDATA in this dialect. For example, in HTML,
            <script> and <style> tags are defined as containing CDATA,
            and their contents should not be formatted.
-        :param blank_attributes_are_booleans: Render attributes whose value
-            is the empty string as HTML-style boolean attributes.
-            (Attributes whose value is None are always rendered this way.)
-
+        :param blank_attributes_are_booleans: If this is set to true,
+          then attributes whose values are sent to the empty string
+          will be treated as `HTML boolean
+          attributes<https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#boolean-attributes>`_. (Attributes
+          whose value is None are always rendered this way.)
         :param indent: If indent is a non-negative integer or string,
             then the contents of elements will be indented
             appropriately when pretty-printing. An indent level of 0,
@@ -76,27 +105,29 @@ class Formatter(EntitySubstitution):
             level. If indent is a string (such as "\t"), that string
             is used to indent each level. The default behavior to
             indent one space per level.
+
         """
-        self.language = language
+        self.language = language or self.HTML
         self.entity_substitution = entity_substitution
         self.void_element_close_prefix = void_element_close_prefix
         self.cdata_containing_tags = self._default(
-            language, cdata_containing_tags, 'cdata_containing_tags'
+            self.language, cdata_containing_tags, 'cdata_containing_tags'
         )
         self.empty_attributes_are_booleans=empty_attributes_are_booleans
         if indent is None:
             indent = 0
+        indent_str: str
         if isinstance(indent, int):
             if indent < 0:
                 indent = 0
-            indent = ' ' * indent
+            indent_str = ' ' * indent
         elif isinstance(indent, str):
-            indent = indent
+            indent_str = indent
         else:
-            indent = ' '
-        self.indent = indent
+            indent_str = ' '
+        self.indent = indent_str
 
-    def substitute(self, ns):
+    def substitute(self, ns:str) -> str:
         """Process a string that needs to undergo entity substitution.
         This may be a string encountered in an attribute value or as
         text.
@@ -116,7 +147,7 @@ class Formatter(EntitySubstitution):
         # Substitute.
         return self.entity_substitution(ns)
 
-    def attribute_value(self, value):
+    def attribute_value(self, value:str) -> str:
         """Process the value of an attribute.
 
         :param ns: A string.
@@ -124,8 +155,8 @@ class Formatter(EntitySubstitution):
            or numeric entities.
         """
         return self.substitute(value)
-    
-    def attributes(self, tag):
+
+    def attributes(self, tag:Tag) -> Iterable[Tuple[str, Optional[Union[str, Iterable[str]]]]]:
         """Reorder a tag's attributes however you want.
         
         By default, attributes are sorted alphabetically. This makes
@@ -138,9 +169,11 @@ class Formatter(EntitySubstitution):
         """
         if tag.attrs is None:
             return []
+
+        items: Iterable[Tuple[str, Union[str, Iterable[str]]]] = list(tag.attrs.items())
         return sorted(
             (k, (None if self.empty_attributes_are_booleans and v == '' else v))
-            for k, v in list(tag.attrs.items())
+            for k, v in items
         )
    
 class HTMLFormatter(Formatter):

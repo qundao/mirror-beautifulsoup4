@@ -80,9 +80,10 @@ from typing import (
     Type,
     Union,
 )
+from typing_extensions import TypeAlias
 
 # Define custom types to improve readability
-_IncomingMarkup = Union[str,bytes,IO]
+_IncomingMarkup: TypeAlias = Union[str,bytes,IO]
 
 # Define some custom warnings.
 class GuessedAtParserWarning(UserWarning):

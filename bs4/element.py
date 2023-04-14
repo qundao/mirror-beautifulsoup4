@@ -20,12 +20,15 @@ from bs4.formatter import (
 )
 
 from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
-from typing_extensions import Self
+from typing_extensions import Self, TypeAlias
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
     from bs4.dammit import _Encoding
-    from bs4.formatter import _FormatterOrName
+    from bs4.formatter import (
+        _EntitySubstitution,
+        _FormatterOrName,
+    )
     from bs4.strainer import (
         _StrainableElement,
         _StrainableAttribute,
@@ -34,8 +37,8 @@ if TYPE_CHECKING:
     )
 
 # Define type aliases to improve readability.
-_AttributeValue = Union[str, Sequence[str]]
-_AttributeValues = Dict[str, _AttributeValue]
+_AttributeValue: TypeAlias = Union[str, Sequence[str]]
+_AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/
@@ -241,7 +244,7 @@ class PageElement(object):
               previous_element:Optional[PageElement]=None,
               next_element:Optional[PageElement]=None,
               previous_sibling:Optional[PageElement]=None,
-              next_sibling:Optional[PageElement]=None):
+              next_sibling:Optional[PageElement]=None) -> None:
         """Sets up the initial relations between this element and
         other elements.
 
@@ -296,7 +299,7 @@ class PageElement(object):
 
     def formatter_for_name(
         self,
-        formatter_name:Union[_FormatterOrName, Callable[[str], str]]
+        formatter_name:Union[_FormatterOrName, _EntitySubstitution]
     ) -> Formatter:
         """Look up or create a Formatter for the given identifier,
         if necessary.
