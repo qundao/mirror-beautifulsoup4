@@ -25,14 +25,15 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
     from bs4.dammit import _Encoding
+    from bs4.formatter import _FormatterOrName
     from bs4.strainer import (
         _StrainableElement,
         _StrainableAttribute,
         _StrainableAttributes,
-        _StrainableString
+        _StrainableString,
     )
 
-# Useful type aliases
+# Define type aliases to improve readability.
 _AttributeValue = Union[str, Sequence[str]]
 _AttributeValues = Dict[str, _AttributeValue]
 
@@ -152,7 +153,7 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     If the document is later encoded to an encoding other than UTF-8, its
     ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
-    def __new__(cls, original_value:str):
+    def __new__(cls, original_value:str) -> Self:
         # We don't need to use the original value for anything, but
         # it might be useful for the user to know.
         obj = str.__new__(cls, original_value)
@@ -188,12 +189,8 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         r"((^|;)\s*charset=)([^;]*)", re.M
     )
     
-    def __new__(cls, original_value:str) -> str:
+    def __new__(cls, original_value:str) -> Self:
         match = cls.CHARSET_RE.search(original_value)
-        if match is None:
-            # No substitution necessary.
-            return str.__new__(str, original_value)
-
         obj = str.__new__(cls, original_value)
         obj.original_value = original_value
         return obj
@@ -204,7 +201,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         the name of the encoding.
         """
         if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
-            return ''
+            return self.CHARSET_RE.sub('', self.original_value)
         def rewrite(match):
             return match.group(1) + eventual_encoding
         return self.CHARSET_RE.sub(rewrite, self.original_value)
@@ -284,7 +281,7 @@ class PageElement(object):
         if self.previous_sibling is not None:
             self.previous_sibling.next_sibling = self
 
-    def format_string(self, s:str, formatter:Optional[Union[str, Formatter]]) -> str:
+    def format_string(self, s:str, formatter:Optional[_FormatterOrName]) -> str:
         """Format the given string using the given formatter.
 
         :param s: A string.
@@ -299,7 +296,7 @@ class PageElement(object):
 
     def formatter_for_name(
         self,
-        formatter_name:Union[str, Formatter, Callable[[str], str]]
+        formatter_name:Union[_FormatterOrName, Callable[[str], str]]
     ) -> Formatter:
         """Look up or create a Formatter for the given identifier,
         if necessary.
@@ -1078,7 +1075,7 @@ class NavigableString(str, PageElement):
         """
         return self
 
-    def output_ready(self, formatter:Formatter|str="minimal") -> str:
+    def output_ready(self, formatter:_FormatterOrName="minimal") -> str:
         """Run the string through the provided formatter, making it
         ready for output as part of an HTML or XML document.
 
@@ -1939,7 +1936,7 @@ class Tag(PageElement):
 
     def encode(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
                indent_level:Optional[int]=None,
-               formatter:Formatter|str="minimal",
+               formatter:_FormatterOrName="minimal",
                errors:str="xmlcharrefreplace") -> bytes:
         """Render this `Tag` and its contents as a bytestring.
 
@@ -1966,7 +1963,7 @@ class Tag(PageElement):
 
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter:Formatter|str="minimal",
+               formatter:_FormatterOrName="minimal",
                iterator:Optional[Iterable]=None) -> str:
         """Render this `Tag` and its contents as a Unicode string.
 
@@ -2207,7 +2204,7 @@ class Tag(PageElement):
         )
 
     def prettify(self, encoding:Optional[str]=None,
-                 formatter:Formatter|str="minimal") -> Union[str, bytes]:
+                 formatter:_FormatterOrName="minimal") -> Union[str, bytes]:
         """Pretty-print this `Tag` as a string or bytestring.
 
         :param encoding: The encoding of the string.
@@ -2223,7 +2220,7 @@ class Tag(PageElement):
 
     def decode_contents(self, indent_level:Optional[int]=None,
                        eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
-                       formatter:Formatter|str="minimal") -> str:
+                       formatter:_FormatterOrName="minimal") -> str:
         """Renders the contents of this tag as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
@@ -2248,7 +2245,7 @@ class Tag(PageElement):
     def encode_contents(
         self, indent_level:Optional[int]=None,
             encoding:str=DEFAULT_OUTPUT_ENCODING,
-            formatter:Formatter|str="minimal") -> bytes:
+            formatter:_FormatterOrName="minimal") -> bytes:
         """Renders the contents of this PageElement as a bytestring.
 
         :param indent_level: Each line of the rendering will be

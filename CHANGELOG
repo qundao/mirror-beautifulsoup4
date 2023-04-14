@@ -57,6 +57,10 @@
   attribute, but if you were using it, you probably want to switch to using
   .unicode_markup instead.
 
+* Corrected the markup that's output in the unlikely event that you
+  encode a document to a Python internal encoding (like "palmos")
+  that's not recognized by the HTML or XML standard.
+
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 

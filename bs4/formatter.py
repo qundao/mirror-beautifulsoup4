@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from bs4.dammit import EntitySubstitution
 
 class Formatter(EntitySubstitution):
@@ -179,4 +179,8 @@ XMLFormatter.REGISTRY["minimal"] = XMLFormatter(
 
 XMLFormatter.REGISTRY[None] = XMLFormatter(entity_substitution=None)
 
+# Define type aliases to improve readability.
 
+# Many of the output-centered methods take an argument that can either
+# be a Formatter object or the name of a Formatter to be looked up.
+_FormatterOrName = Union[Formatter,str]

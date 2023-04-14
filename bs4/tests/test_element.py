@@ -66,9 +66,17 @@ class TestAttributeValueWithCharsetSubstitution(object):
         assert "utf8" == value.substitute_encoding("utf8")
         assert "ascii" == value.substitute_encoding("ascii")
 
+        # If the target encoding is a Python internal encoding,
+        # no encoding will be mentioned in the output HTML.
+        assert "" == value.substitute_encoding("palmos")
+
     def test_content_meta_attribute_value(self):
         value = ContentMetaAttributeValue("text/html; charset=euc-jp")
         assert "text/html; charset=euc-jp" == value
         assert "text/html; charset=euc-jp" == value.original_value
         assert "text/html; charset=utf8" == value.substitute_encoding("utf8")
         assert "text/html; charset=ascii" == value.substitute_encoding("ascii")
+
+        # If the target encoding is a Python internal encoding, the
+        # charset argument will be omitted altogether.
+        assert "text/html" == value.substitute_encoding("palmos")
