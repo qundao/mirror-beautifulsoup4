@@ -70,12 +70,15 @@ from .strainer import SoupStrainer
 from typing import (
     Any,
     cast,
+    Counter as CounterType,
     Dict,
     IO,
     Iterable,
     List,
     Sequence,
     Optional,
+    Type,
+    Union,
 )
 
 # Define some custom warnings.
@@ -138,30 +141,31 @@ class BeautifulSoup(Tag):
     #: :meta private:
     NO_PARSER_SPECIFIED_WARNING: str = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 
-    element_classes:Dict[type[PageElement], type[Any]] #: :meta private:
+    # FUTURE PYTHON:
+    element_classes:Dict[Type[PageElement], Type[Any]] #: :meta private:
     builder:TreeBuilder #: :meta private:
     is_xml: bool
     known_xml: Optional[bool]
     parse_only: Optional[SoupStrainer] #: :meta private:
 
     # These members are only used while parsing markup.
-    markup:Optional[str|bytes] #: :meta private:
+    markup:Optional[Union[str,bytes]] #: :meta private:
     current_data:List[str] #: :meta private:
     currentTag:Optional[Tag] #: :meta private:
     tagStack:List[Tag] #: :meta private:
-    open_tag_counter:Counter[str] #: :meta private:
+    open_tag_counter:CounterType[str] #: :meta private:
     preserve_whitespace_tag_stack:List[Tag] #: :meta private:
     string_container_stack:List[Tag] #: :meta private:
     
     def __init__(
             self,
-            markup:str|bytes|IO="",
-            features:Optional[str|Sequence[str]]=None,
-            builder:Optional[TreeBuilder|type[TreeBuilder]]=None,
+            markup:Union[str,bytes,IO]="",
+            features:Optional[Union[str,Sequence[str]]]=None,
+            builder:Optional[Union[TreeBuilder,Type[TreeBuilder]]]=None,
             parse_only:Optional[SoupStrainer]=None,
             from_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None,
-            element_classes:Optional[Dict[type[PageElement], type[Any]]]=None,
+            element_classes:Optional[Dict[Type[PageElement], Type[Any]]]=None,
             **kwargs:Any
     ):
         """Constructor.
@@ -376,7 +380,7 @@ class BeautifulSoup(Tag):
 
         # At this point we know markup is a string or bytestring.  If
         # it was a file-type object, we've read from it.
-        markup = cast(str|bytes, markup)
+        markup = cast(Union[str,bytes], markup)
                 
         rejections = []
         success = False
@@ -584,8 +588,8 @@ class BeautifulSoup(Tag):
         )
 
     def string_container(self,
-                         base_class:Optional[type[NavigableString]]=None
-                         ) -> type[NavigableString]:
+                         base_class:Optional[Type[NavigableString]]=None
+                         ) -> Type[NavigableString]:
         """Find the class that should be instantiated to hold a given kind of
         string.
 
@@ -607,7 +611,7 @@ class BeautifulSoup(Tag):
             )
         return container
         
-    def new_string(self, s:str, subclass:Optional[type[NavigableString]]=None) -> NavigableString:
+    def new_string(self, s:str, subclass:Optional[Type[NavigableString]]=None) -> NavigableString:
         """Create a new `NavigableString` associated with this `BeautifulSoup`
         object.
 
@@ -670,7 +674,7 @@ class BeautifulSoup(Tag):
         if tag.name in self.builder.string_containers:
             self.string_container_stack.append(tag)
 
-    def endData(self, containerClass:Optional[type[NavigableString]]=None) -> None:
+    def endData(self, containerClass:Optional[Type[NavigableString]]=None) -> None:
         """Method called by the TreeBuilder when the end of a data segment
         occurs.
 
@@ -786,7 +790,7 @@ class BeautifulSoup(Tag):
                 break
             target = target.parent
 
-    def _popToTag(self, name, nsprefix=None, inclusivePop=True) -> None:
+    def _popToTag(self, name, nsprefix=None, inclusivePop=True) -> Optional[Tag]:
         """Pops the tag stack up to and including the most recent
         instance of the given tag.
 
@@ -804,7 +808,7 @@ class BeautifulSoup(Tag):
         #print("Popping to %s" % name)
         if name == self.ROOT_TAG_NAME:
             # The BeautifulSoup object itself can never be popped.
-            return
+            return None
 
         most_recently_popped = None
 
@@ -889,10 +893,10 @@ class BeautifulSoup(Tag):
        
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
-               formatter:Formatter|str="minimal",
+               formatter:Union[Formatter,str]="minimal",
                iterator:Optional[Iterable]=None, **kwargs) -> str:
         """Returns a string representation of the parse tree
-            as an HTML or XML document.
+            as a full HTML or XML document.
 
         :param indent_level: Each line of the rendering will be
            indented this many levels. (The ``formatter`` decides what a
@@ -922,9 +926,9 @@ class BeautifulSoup(Tag):
         else:
             prefix = ''
 
-        # The first argument to this method used to be a bool called
-        # pretty_print, which gave the method a different signature from its
-        # superclass implementation, Tag.decode.
+        # Prior to 4.13.0, the first argument to this method was a
+        # bool called pretty_print, which gave the method a different
+        # signature from its superclass implementation, Tag.decode.
         #
         # The signatures of the two methods now match, but just in
         # case someone is still passing a boolean in as the first
