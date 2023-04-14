@@ -14,11 +14,12 @@ __license__ = "MIT"
 from html.entities import codepoint2name
 from collections import defaultdict
 import codecs
+from html.entities import html5
 import re
-import logging
+from logging import Logger, getLogger
 import string
 from types import ModuleType
-from typing import cast, Dict, Iterator, Optional, List, Set, Union, Tuple
+from typing import cast, Dict, Iterable, Iterator, Optional, List, Sequence, Set, Type, Union, Tuple
 import warnings
 
 # Import a library to autodetect character encodings. We'll support
@@ -47,25 +48,23 @@ except ImportError:
             # No chardet available.
             pass
 
-            
-if chardet_module:
-    def _chardet_dammit(s):
-        if isinstance(s, str):
-            return None
-        return chardet_module.detect(s)['encoding']
-else:
-    def _chardet_dammit(s):
-        return None
 
-# Type alias for a list of encodings
+def _chardet_dammit(s:bytes) -> Optional[str]:
+    """Try as hard as possible to detect the encoding of a bytestring."""
+    if chardet_module is None or isinstance(s, str):
+        return None
+    module = cast(ModuleType, chardet_module)
+    return module.detect(s)['encoding']
+
+# Type alias for an encoding and a list of them, to improve readability.
 _Encoding = str
-_Encodings = List[_Encoding]
+_Encodings = Iterable[_Encoding]
 
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
-xml_encoding = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>'
-html_meta = '<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]'
-encoding_res: Dict[type, Dict[str, re.Pattern]] = dict()
+xml_encoding:str = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>' #: :meta private:
+html_meta:str = '<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]' #: :meta private:
+encoding_res: Dict[Type, Dict[str, re.Pattern]] = dict()
 encoding_res[bytes] = {
     'html' : re.compile(html_meta.encode("ascii"), re.I),
     'xml' : re.compile(xml_encoding.encode("ascii"), re.I),
@@ -74,8 +73,6 @@ encoding_res[str] = {
     'html' : re.compile(html_meta, re.I),
     'xml' : re.compile(xml_encoding, re.I)
 }
-
-from html.entities import html5
 
 class EntitySubstitution(object):
     """The ability to substitute XML or HTML entities for certain characters."""
@@ -99,7 +96,7 @@ class EntitySubstitution(object):
     CHARACTER_TO_HTML_ENTITY_RE: re.Pattern
 
     @classmethod
-    def _populate_class_variables(cls):
+    def _populate_class_variables(cls) -> None:
         """Initialize variables used by this class to manage the plethora of
         HTML5 named entities.
 
@@ -261,7 +258,7 @@ class EntitySubstitution(object):
         return "&%s;" % entity
 
     @classmethod
-    def quoted_attribute_value(self, value: str) -> str:
+    def quoted_attribute_value(cls, value: str) -> str:
         """Make a value into a quoted XML attribute, possibly escaping it.
 
          Most strings will be quoted using double quotes.
@@ -421,7 +418,7 @@ class EncodingDetector:
     :param exclude_encodings: These encodings will not be tried,
         even if they otherwise would be.
 
-    """
+    """   
     def __init__(self, markup:bytes,
                  known_definite_encodings:Optional[_Encodings]=None,
                  is_html:Optional[bool]=False,
@@ -446,12 +443,21 @@ class EncodingDetector:
         # First order of business: strip a byte-order mark.
         self.markup, self.sniffed_encoding = self.strip_byte_order_mark(markup)
 
-    def _usable(self, encoding:Optional[str], tried:Set[str]) -> bool:
+    known_definite_encodings:_Encodings
+    user_encodings:_Encodings
+    exclude_encodings:_Encodings
+    chardet_encoding:Optional[_Encoding]
+    is_html:bool
+    declared_encoding:Optional[_Encoding]
+    markup:bytes
+    sniffed_encoding:Optional[_Encoding]
+        
+    def _usable(self, encoding:Optional[_Encoding], tried:Set[_Encoding]) -> bool:
         """Should we even bother to try this encoding?
 
         :param encoding: Name of an encoding.
-        :param tried: Encodings that have already been tried. This will be modified
-            as a side effect.
+        :param tried: Encodings that have already been tried. This
+            will be modified as a side effect.
         """
         if encoding is None:
             return False
@@ -464,13 +470,13 @@ class EncodingDetector:
         return False
 
     @property
-    def encodings(self) -> Iterator[str]:
+    def encodings(self) -> Iterator[_Encoding]:
         """Yield a number of encodings that might work for this markup.
 
         :yield: A sequence of strings. Each is the name of an encoding
            that *might* work to convert a bytestring into Unicode.
         """
-        tried:Set[str] = set()
+        tried:Set[_Encoding] = set()
 
         # First, try the known definite encodings
         for e in self.known_definite_encodings:
@@ -515,7 +521,7 @@ class EncodingDetector:
                 yield e
 
     @classmethod
-    def strip_byte_order_mark(cls, data:bytes) -> Tuple[bytes, Optional[str]]:
+    def strip_byte_order_mark(cls, data:bytes) -> Tuple[bytes, Optional[_Encoding]]:
         """If a byte-order mark is present, strip it and return the encoding it implies.
 
         :param data: A bytestring that may or may not begin with a
@@ -547,7 +553,7 @@ class EncodingDetector:
         return data, encoding
 
     @classmethod
-    def find_declared_encoding(cls, markup:Union[bytes,str], is_html:bool=False, search_entire_document:bool=False) -> Optional[str]:
+    def find_declared_encoding(cls, markup:Union[bytes,str], is_html:bool=False, search_entire_document:bool=False) -> Optional[_Encoding]:
         """Given a document, tries to find an encoding declared within the
         text of the document itself.
 
@@ -631,7 +637,6 @@ class UnicodeDammit:
        even if the sniffing code thinks they might make sense.
 
     """
-    original_encoding:Optional[_Encoding]
     def __init__(
             self, markup:bytes,
             known_definite_encodings:Optional[_Encodings]=[],
@@ -645,10 +650,10 @@ class UnicodeDammit:
             override_encodings:Optional[_Encodings] = None
     ):
         self.smart_quotes_to = smart_quotes_to
-        self.tried_encodings: List[Tuple[str, str]] = []
+        self.tried_encodings = []
         self.contains_replacement_characters = False
         self.is_html = is_html
-        self.log = logging.getLogger(__name__)
+        self.log = getLogger(__name__)
         self.detector = EncodingDetector(
             markup, known_definite_encodings, is_html, exclude_encodings,
             user_encodings, override_encodings
@@ -694,6 +699,33 @@ class UnicodeDammit:
         if not u:
             self.original_encoding = None
 
+    #: The original markup, before it was converted to Unicode.
+    #: This is not necessarily the same as what was passed in to the
+    #: constructor, since any byte-order mark will be stripped.
+    markup:bytes
+
+    #: The Unicode version of the markup, following conversion.
+    unicode_markup:str
+
+    #: This is True if `UnicodeDammit.unicode_markup` contains
+    #: U+FFFD REPLACEMENT_CHARACTER characters which were not present
+    #: in `UnicodeDammit.markup`. These mark character sequences that
+    #: could not be represented in Unicode.
+    contains_replacement_characters: bool
+
+    #: Unicode, Dammit's best guess as to the original character
+    #: encoding of `UnicodeDammit.markup`.
+    original_encoding:Optional[_Encoding]
+
+    #: The strategy used to handle Microsoft smart quotes.
+    smart_quotes_to: Optional[str]
+
+    #: The (encoding, error handling strategy) 2-tuples that were used to
+    #: try and convert the markup to Unicode.
+    tried_encodings: List[Tuple[_Encoding, str]]
+
+    log: Logger #: :meta private:
+            
     def _sub_ms_char(self, match:re.Match) -> bytes:
         """Changes a MS smart quote character to an XML or HTML
         entity, or an ASCII character.
@@ -734,8 +766,8 @@ class UnicodeDammit:
     #: by the heuristics in `find_codec`.
     #:
     #: :meta hide-value:
-    CHARSET_ALIASES: Dict[str, str] = {"macintosh": "mac-roman",
-                                       "x-sjis": "shift-jis"}
+    CHARSET_ALIASES: Dict[str, _Encoding] = {"macintosh": "mac-roman",
+                                             "x-sjis": "shift-jis"}
 
     #: A list of encodings that tend to contain Microsoft smart quotes.
     #:
@@ -778,8 +810,8 @@ class UnicodeDammit:
         #print("Correct encoding: %s" % proposed)
         return self.markup
 
-    def _to_unicode(self, data, encoding, errors="strict"):
-        """Given a string and its encoding, decodes the string into Unicode.
+    def _to_unicode(self, data:bytes, encoding:_Encoding, errors:str="strict") -> str:
+        """Given a bytestring and its encoding, decodes the string into Unicode.
 
         :param encoding: The name of an encoding.
         """
