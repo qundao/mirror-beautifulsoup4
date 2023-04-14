@@ -57,10 +57,10 @@ def __getattr__(name):
     
 #: Documents output by Beautiful Soup will be encoded with
 #: this encoding unless you specify otherwise.
-DEFAULT_OUTPUT_ENCODING = "utf-8"
+DEFAULT_OUTPUT_ENCODING:str = "utf-8"
 
+#: A regular expression that can be used to split on whitespace.
 nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
-   
 
 #: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize
@@ -75,7 +75,7 @@ nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
 #:
 #: Source:
 #: Python documentation, `Python Specific Encodings <https://docs.python.org/3/library/codecs.html#python-specific-encodings>`_
-PYTHON_SPECIFIC_ENCODINGS: Set = set([
+PYTHON_SPECIFIC_ENCODINGS: Set[_Encoding] = set([
     "idna",
     "mbcs",
     "oem",
@@ -92,15 +92,17 @@ PYTHON_SPECIFIC_ENCODINGS: Set = set([
 
 
 class NamespacedAttribute(str):
-    """A namespaced string (e.g. 'xml:lang') that remembers the namespace
-    ('xml') and the name ('lang') that were used to create it.
+    """A namespaced attribute (e.g. the 'xml:lang' in 'xml:lang="en"')
+    which remembers the namespace prefix ('xml') and the name ('lang')
+    that were used to create it.
     """
 
     prefix: Optional[str]
     name: Optional[str]
     namespace: Optional[str]
     
-    def __new__(cls, prefix:str, name:Optional[str]=None, namespace:Optional[str]=None):
+    def __new__(cls, prefix:str,
+                name:Optional[str]=None, namespace:Optional[str]=None):
         if not name:
             # This is the default namespace. Its name "has no value"
             # per https://www.w3.org/TR/xml-names/#defaulting
@@ -150,14 +152,14 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     If the document is later encoded to an encoding other than UTF-8, its
     ``<meta>`` tag will mention the new encoding instead of ``utf8``.
     """
-    def __new__(cls, original_value):
+    def __new__(cls, original_value:str):
         # We don't need to use the original value for anything, but
         # it might be useful for the user to know.
         obj = str.__new__(cls, original_value)
         obj.original_value = original_value
         return obj
     
-    def substitute_encoding(self, eventual_encoding:str="utf-8") -> str:
+    def substitute_encoding(self, eventual_encoding:_Encoding="utf-8") -> str:
         """When an HTML document is being encoded to a given encoding, the
         value of a ``<meta>`` tag's ``charset`` becomes the name of
         the encoding.
@@ -186,7 +188,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         r"((^|;)\s*charset=)([^;]*)", re.M
     )
     
-    def __new__(cls, original_value):
+    def __new__(cls, original_value:str) -> str:
         match = cls.CHARSET_RE.search(original_value)
         if match is None:
             # No substitution necessary.
@@ -196,7 +198,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         obj.original_value = original_value
         return obj
 
-    def substitute_encoding(self, eventual_encoding="utf-8") -> str:
+    def substitute_encoding(self, eventual_encoding:_Encoding="utf-8") -> str:
         """When an HTML document is being encoded to a given encoding, the
         value of the ``charset=`` in a ``<meta>`` tag's ``content`` becomes
         the name of the encoding.
