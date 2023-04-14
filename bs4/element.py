@@ -2460,9 +2460,8 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
 
     def __getattr__(self, key:str):
         """Raise a helpful exception to explain a common code fix."""
-        import pdb; pdb.set_trace()
         raise AttributeError(
-            f"ResultSet object has no attribute {key}. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"
+            f"""ResultSet object has no attribute "{key}". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"""
         )
 
 # Now that all the classes used by SoupStrainer have been defined,

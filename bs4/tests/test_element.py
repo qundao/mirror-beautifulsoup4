@@ -4,10 +4,12 @@ The really big classes -- Tag, PageElement, and NavigableString --
 are tested in separate files.
 """
 
+import pytest
 from bs4.element import (
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
     NamespacedAttribute,
+    ResultSet,
 )
 from . import SoupTest
 
@@ -80,3 +82,13 @@ class TestAttributeValueWithCharsetSubstitution(object):
         # If the target encoding is a Python internal encoding, the
         # charset argument will be omitted altogether.
         assert "text/html" == value.substitute_encoding("palmos")
+
+class TestResultSet(object):
+
+    def test_getattr_exception(self):
+
+        rs = ResultSet(None)
+        with pytest.raises(AttributeError) as e:
+            rs.name
+        assert """ResultSet object has no attribute "name". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?""" == str(e.value)
+
