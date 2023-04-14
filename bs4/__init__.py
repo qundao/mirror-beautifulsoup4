@@ -81,6 +81,9 @@ from typing import (
     Union,
 )
 
+# Define custom types to improve readability
+_IncomingMarkup = Union[str,bytes,IO]
+
 # Define some custom warnings.
 class GuessedAtParserWarning(UserWarning):
     """The warning issued when BeautifulSoup has to guess what parser to
@@ -159,7 +162,7 @@ class BeautifulSoup(Tag):
     
     def __init__(
             self,
-            markup:Union[str,bytes,IO]="",
+            markup:_IncomingMarkup="",
             features:Optional[Union[str,Sequence[str]]]=None,
             builder:Optional[Union[TreeBuilder,Type[TreeBuilder]]]=None,
             parse_only:Optional[SoupStrainer]=None,

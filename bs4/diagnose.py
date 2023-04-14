@@ -7,7 +7,7 @@ import cProfile
 from io import BytesIO
 from html.parser import HTMLParser
 import bs4
-from bs4 import BeautifulSoup, __version__
+from bs4 import BeautifulSoup, __version__, _IncomingMarkup
 from bs4.builder import builder_registry
 
 import os
@@ -19,10 +19,10 @@ import traceback
 import sys
 import cProfile
 
-def diagnose(data):
+def diagnose(data:_IncomingMarkup) -> None:
     """Diagnostic suite for isolating common problems.
 
-    :param data: A string containing markup that needs to be explained.
+    :param data: Some markup that needs to be explained.
     :return: None; diagnostics are printed to standard output.
     """
     print(("Diagnostic running on Beautiful Soup %s" % __version__))
@@ -75,7 +75,7 @@ def diagnose(data):
 
         print(("-" * 80))
 
-def lxml_trace(data, html=True, **kwargs):
+def lxml_trace(data, html:bool=True, **kwargs) -> None:
     """Print out the lxml events that occur during parsing.
 
     This lets you see how lxml parses a document when no Beautiful
@@ -146,11 +146,14 @@ def htmlparser_trace(data):
     parser = AnnouncingParser()
     parser.feed(data)
 
-_vowels = "aeiou"
-_consonants = "bcdfghjklmnpqrstvwxyz"
+_vowels:str = "aeiou"
+_consonants:str = "bcdfghjklmnpqrstvwxyz"
 
-def rword(length=5):
-    "Generate a random word-like string."
+def rword(length:int=5) -> str:
+    """Generate a random word-like string.
+
+    :meta private:
+    """
     s = ''
     for i in range(length):
         if i % 2 == 0:
@@ -160,12 +163,18 @@ def rword(length=5):
         s += random.choice(t)
     return s
 
-def rsentence(length=4):
-    "Generate a random sentence-like string."
+def rsentence(length:int=4) -> str:
+    """Generate a random sentence-like string.
+
+    :meta private:
+    """
     return " ".join(rword(random.randint(4,9)) for i in range(length))
         
-def rdoc(num_elements=1000):
-    """Randomly generate an invalid HTML document."""
+def rdoc(num_elements:int=1000) -> str:
+    """Randomly generate an invalid HTML document.
+
+    :meta private:
+    """
     tag_names = ['p', 'div', 'span', 'i', 'b', 'script', 'table']
     elements = []
     for i in range(num_elements):
@@ -182,24 +191,24 @@ def rdoc(num_elements=1000):
             elements.append("</%s>" % tag_name)
     return "<html>" + "\n".join(elements) + "</html>"
 
-def benchmark_parsers(num_elements=100000):
+def benchmark_parsers(num_elements:int=100000) -> None:
     """Very basic head-to-head performance benchmark."""
     print(("Comparative parser benchmark on Beautiful Soup %s" % __version__))
     data = rdoc(num_elements)
     print(("Generated a large invalid HTML document (%d bytes)." % len(data)))
     
-    for parser in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
+    for parser_name in ["lxml", ["lxml", "html"], "html5lib", "html.parser"]:
         success = False
         try:
             a = time.time()
-            soup = BeautifulSoup(data, parser)
+            soup = BeautifulSoup(data, parser_name)
             b = time.time()
             success = True
         except Exception as e:
-            print(("%s could not parse the markup." % parser))
+            print(("%s could not parse the markup." % parser_name))
             traceback.print_exc()
         if success:
-            print(("BS4+%s parsed the markup in %.2fs." % (parser, b-a)))
+            print(("BS4+%s parsed the markup in %.2fs." % (parser_name, b-a)))
 
     from lxml import etree
     a = time.time()
@@ -214,7 +223,7 @@ def benchmark_parsers(num_elements=100000):
     b = time.time()
     print(("Raw html5lib parsed the markup in %.2fs." % (b-a)))
 
-def profile(num_elements=100000, parser="lxml"):
+def profile(num_elements:int=100000, parser:str="lxml"):
     """Use Python's profiler on a randomly generated document."""
     filehandle = tempfile.NamedTemporaryFile()
     filename = filehandle.name
