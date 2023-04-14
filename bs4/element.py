@@ -2453,15 +2453,16 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     search results.
     """
     source: SoupStrainer
-    
-    def __init__(self, source:SoupStrainer, result: Iterable[_PageElementT]=()):
+
+    def __init__(self, source:SoupStrainer, result: Iterable[_PageElementT]=()) -> None:
         super(ResultSet, self).__init__(result)
         self.source = source
 
-    def __getattr__(self, key):
+    def __getattr__(self, key:str):
         """Raise a helpful exception to explain a common code fix."""
+        import pdb; pdb.set_trace()
         raise AttributeError(
-            "ResultSet object has no attribute '%s'. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?" % key
+            f"ResultSet object has no attribute {key}. You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"
         )
 
 # Now that all the classes used by SoupStrainer have been defined,
