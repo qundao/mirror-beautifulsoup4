@@ -695,17 +695,21 @@ class UnicodeDammit:
         # If none of that worked, we could at this point force it to
         # ASCII, but that would destroy so much data that I think
         # giving up is better.
-        self.unicode_markup = u
-        if not u:
+        if u is None:
             self.original_encoding = None
+            self.unicode_markup = None
+        else:
+            self.unicode_markup = u
 
     #: The original markup, before it was converted to Unicode.
     #: This is not necessarily the same as what was passed in to the
     #: constructor, since any byte-order mark will be stripped.
     markup:bytes
 
-    #: The Unicode version of the markup, following conversion.
-    unicode_markup:str
+    #: The Unicode version of the markup, following conversion. This
+    #: is set to `None` if there was simply no way to convert the
+    #: bytestring to Unicode (as with binary data).
+    unicode_markup:Optional[str]
 
     #: This is True if `UnicodeDammit.unicode_markup` contains
     #: U+FFFD REPLACEMENT_CHARACTER characters which were not present
@@ -778,10 +782,13 @@ class UnicodeDammit:
         "iso-8859-2",
         ]
 
-    def _convert_from(self, proposed:_Encoding, errors="strict"):
+    def _convert_from(self, proposed:_Encoding, errors:str="strict") -> Optional[str]:
         """Attempt to convert the markup to the proposed encoding.
 
         :param proposed: The name of a character encoding.
+        :param errors: An error handling strategy, used when calling `str`.
+        :return: The converted markup, or `None` if the proposed
+           encoding/error handling strategy didn't work.
         """
         lookup_result = self.find_codec(proposed)
         if lookup_result is None or (lookup_result, errors) in self.tried_encodings:
@@ -801,18 +808,20 @@ class UnicodeDammit:
             #print("Trying to convert document to %s (errors=%s)" % (
             #    proposed, errors))
             u = self._to_unicode(markup, proposed, errors)
+            self.unicode_markup = u
             self.original_encoding = proposed
         except Exception as e:
             #print("That didn't work!")
             #print(e)
             return None
         #print("Correct encoding: %s" % proposed)
-        return u
+        return self.unicode_markup
 
     def _to_unicode(self, data:bytes, encoding:_Encoding, errors:str="strict") -> str:
         """Given a bytestring and its encoding, decodes the string into Unicode.
 
         :param encoding: The name of an encoding.
+        :param errors: An error handling strategy, used when calling `str`.
         """
         return str(data, encoding, errors)
 
@@ -841,7 +850,7 @@ class UnicodeDammit:
             return value.lower()
         return None
 
-    def _codec(self, charset):
+    def _codec(self, charset:_Encoding) -> Optional[str]:
         if not charset:
             return charset
         codec = None
@@ -1163,21 +1172,21 @@ class UnicodeDammit:
         }
 
     #: :meta private:
-    MULTIBYTE_MARKERS_AND_SIZES = [
+    MULTIBYTE_MARKERS_AND_SIZES:List[Tuple[int, int, int]] = [
         (0xc2, 0xdf, 2), # 2-byte characters start with a byte C2-DF
         (0xe0, 0xef, 3), # 3-byte characters start with E0-EF
         (0xf0, 0xf4, 4), # 4-byte characters start with F0-F4
         ]
 
     #: :meta private:
-    FIRST_MULTIBYTE_MARKER = MULTIBYTE_MARKERS_AND_SIZES[0][0]
+    FIRST_MULTIBYTE_MARKER:int = MULTIBYTE_MARKERS_AND_SIZES[0][0]
 
     #: :meta private:
-    LAST_MULTIBYTE_MARKER = MULTIBYTE_MARKERS_AND_SIZES[-1][1]
+    LAST_MULTIBYTE_MARKER:int = MULTIBYTE_MARKERS_AND_SIZES[-1][1]
 
     @classmethod
-    def detwingle(cls, in_bytes:bytes, main_encoding:str="utf8",
-                  embedded_encoding:str="windows-1252") -> bytes:
+    def detwingle(cls, in_bytes:bytes, main_encoding:_Encoding="utf8",
+                  embedded_encoding:_Encoding="windows-1252") -> bytes:
         """Fix characters from one encoding embedded in some other encoding.
 
         Currently the only situation supported is Windows-1252 (or its

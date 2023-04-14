@@ -49,6 +49,14 @@
   documented method, but if you use it, you should start using
   SoupStrainer.allow_tag_creation() instead.
 
+* UnicodeDammit.markup is now always a bytestring representing the
+  *original* markup (sans BOM), and UnicodeDammit.unicode_markup is
+  always the same markup, converted to Unicode. Previously,
+  UnicodeDammit.markup was treated inconsistently and would often end
+  up containing Unicode. UnicodeDammit.markup was not a documented
+  attribute, but if you were using it, you probably want to switch to using
+  .unicode_markup instead.
+
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 
