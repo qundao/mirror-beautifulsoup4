@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     )
 
 # Define type aliases to improve readability.
-_AttributeValue: TypeAlias = Union[str, Sequence[str]]
+_AttributeValue: TypeAlias = Union[str, Iterable[str]]
 _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
 # Deprecated module-level attributes.

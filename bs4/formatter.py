@@ -156,7 +156,7 @@ class Formatter(EntitySubstitution):
         """
         return self.substitute(value)
 
-    def attributes(self, tag:Tag) -> Iterable[Tuple[str, Optional[Union[str, Iterable[str]]]]]:
+    def attributes(self, tag:Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
         """Reorder a tag's attributes however you want.
         
         By default, attributes are sorted alphabetically. This makes
@@ -170,7 +170,7 @@ class Formatter(EntitySubstitution):
         if tag.attrs is None:
             return []
 
-        items: Iterable[Tuple[str, Union[str, Iterable[str]]]] = list(tag.attrs.items())
+        items: Iterable[Tuple[str, _AttributeValue]] = list(tag.attrs.items())
         return sorted(
             (k, (None if self.empty_attributes_are_booleans and v == '' else v))
             for k, v in items
