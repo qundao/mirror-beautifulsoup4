@@ -352,6 +352,15 @@ class PageElement(object):
         "previousSibling", "previous_sibling", "4.0.0"
     )
 
+    def __deepcopy__(self, memo:Dict, recursive:bool=False) -> Self:
+        raise NotImplementedError()
+        
+    def __copy__(self) -> Self:
+        """A copy of a PageElement can only be a deep copy, because
+        only one PageElement can occupy a given place in a parse tree.
+        """
+        return self.__deepcopy__({})
+    
     default: Iterable[type[NavigableString]] = tuple() #: :meta private:
     def _all_strings(self, strip:bool=False, types:Iterable[type[NavigableString]]=default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
@@ -1057,7 +1066,7 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __deepcopy__(self, memo:dict, recursive:bool=False) -> Self:
+    def __deepcopy__(self, memo:Dict, recursive:bool=False) -> Self:
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
 
@@ -1066,12 +1075,6 @@ class NavigableString(str, PageElement):
            signature as Tag.__deepcopy__.
         """
         return type(self)(self)
-
-    def __copy__(self) -> Self:
-        """A copy of a NavigableString can only be a deep copy, because
-        only one PageElement can occupy a given place in a parse tree.
-        """
-        return self.__deepcopy__({})
 
     def __getnewargs__(self):
         return (str(self),)
@@ -1473,7 +1476,7 @@ class Tag(PageElement):
         if recursive:
             # Clone this tag's descendants recursively, but without
             # making any recursive function calls.
-            tag_stack = [clone]
+            tag_stack: List[Tag] = [clone]
             for event, element in self._event_stream(self.descendants):
                 if event is Tag.END_ELEMENT_EVENT:
                     # Stop appending incoming Tags to the Tag that was
@@ -1489,14 +1492,8 @@ class Tag(PageElement):
                     if event is Tag.START_ELEMENT_EVENT:
                         # Add the Tag itself to the stack so that its
                         # children will be .appended to it.
-                        tag_stack.append(descendant_clone)
+                        tag_stack.append(cast(Tag, descendant_clone))
         return clone
-
-    def __copy__(self) -> Self:
-        """A copy of a Tag must always be a deep copy, because a Tag's
-        children can only have one parent at a time.
-        """
-        return self.__deepcopy__({})
 
     def _clone(self) -> Self:
         """Create a new Tag just like this one, but with no
@@ -2027,16 +2024,19 @@ class Tag(PageElement):
 
         for event, element in self._event_stream(iterator):
             if event in (Tag.START_ELEMENT_EVENT, Tag.EMPTY_ELEMENT_EVENT):
+                element = cast(Tag, element)
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=True
                 )
             elif event is Tag.END_ELEMENT_EVENT:
+                element = cast(Tag, element)
                 piece = element._format_tag(
                     eventual_encoding, formatter, opening=False
                 )
                 if indent_level is not None:
                     indent_level -= 1
             else:
+                element = cast(NavigableString, element)
                 piece = element.output_ready(formatter)
 
             # Now we need to apply the 'prettiness' -- extra
@@ -2058,7 +2058,7 @@ class Tag(PageElement):
             # put us into or out of string literal mode.
             if (event is Tag.START_ELEMENT_EVENT
                 and not string_literal_tag
-                and not element._should_pretty_print()):
+                and not cast(Tag, element)._should_pretty_print()):
                     # We are about to enter string literal mode. Add
                     # whitespace before this tag, but not after. We
                     # will stay in string literal mode until this tag
@@ -2104,7 +2104,7 @@ class Tag(PageElement):
     EMPTY_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
     STRING_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
 
-    def _event_stream(self, iterator=None) -> Iterator[Tuple[_TreeTraversalEvent, Any]]:
+    def _event_stream(self, iterator=None) -> Iterator[Tuple[_TreeTraversalEvent, PageElement]]:
         """Yield a sequence of events that can be used to reconstruct the DOM
         for this element.
 
@@ -2120,7 +2120,7 @@ class Tag(PageElement):
         :param iterator: An alternate iterator to use when traversing
          the tree.
         """
-        tag_stack = []
+        tag_stack: List[Tag] = []
 
         iterator = iterator or self.self_and_descendants
 
@@ -2169,7 +2169,7 @@ class Tag(PageElement):
         return space_before + s + space_after
 
     def _format_tag(
-            self, eventual_encoding:str, formatter:Formatter, opening:str
+            self, eventual_encoding:str, formatter:Formatter, opening:bool
     ) -> str:
         # A tag starts with the < character (see below).
 
