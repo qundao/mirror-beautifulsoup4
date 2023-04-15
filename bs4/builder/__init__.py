@@ -185,7 +185,7 @@ class TreeBuilder(object):
     empty_element_tags: Optional[Set[str]] = None #: :meta private:
     cdata_list_attributes: Dict[str, Set[str]]
     preserve_whitespace_tags: Set[str] #: :meta private:
-    string_containers: Dict[str, type] #: :meta private:
+    string_containers: Dict[str, Type[NavigableString]] #: :meta private:
     tracks_line_numbers: bool #: :meta private:
     
     #: A value for these tag/attribute combinations is a space- or

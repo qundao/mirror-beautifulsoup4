@@ -352,8 +352,8 @@ class PageElement(object):
         "previousSibling", "previous_sibling", "4.0.0"
     )
 
-    default: Iterable[type] = tuple() #: :meta private:
-    def _all_strings(self, strip:bool=False, types:Iterable[type]=default) -> Iterator[str]:
+    default: Iterable[type[NavigableString]] = tuple() #: :meta private:
+    def _all_strings(self, strip:bool=False, types:Iterable[type[NavigableString]]=default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         This is implemented differently in `Tag` and `NavigableString`.
@@ -372,7 +372,7 @@ class PageElement(object):
             yield string
 
     def get_text(self, separator:str="", strip:bool=False,
-                 types:Iterable[type]=default) -> str:
+                 types:Iterable[Type[NavigableString]]=default) -> str:
         """Get all child strings of this PageElement, concatenated using the
         given separator.
 
@@ -1117,7 +1117,7 @@ class NavigableString(str, PageElement):
         """
         raise AttributeError("A NavigableString cannot be given a name.")
 
-    def _all_strings(self, strip=False, types:Iterable[type]=PageElement.default) -> Iterator[str]:
+    def _all_strings(self, strip=False, types:Iterable[Type[NavigableString]]=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         This makes it easy for NavigableString to implement methods
