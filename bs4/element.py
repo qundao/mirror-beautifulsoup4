@@ -237,7 +237,7 @@ class PageElement(object):
     previous_sibling: Optional[PageElement]
 
     #: Whether or not this element is hidden from generated output.
-    #: Only the BeautifulSoup object itself is hidden.
+    #: Only the `BeautifulSoup` object itself is hidden.
     hidden: bool=False
     
     def setup(self, parent:Optional[Tag]=None,
@@ -1031,10 +1031,17 @@ class NavigableString(str, PageElement):
     create a `NavigableString` for the string "penguin".
     """
 
+    #: A string prepended to the body of the 'real' string
+    #: when formatting it as part of a document, such as the '<!--'
+    #: in an HTML comment.
     PREFIX = ''
+
+    #: A string appended to the body of the 'real' string
+    #: when formatting it as part of a document, such as the '-->'
+    #: in an HTML comment.
     SUFFIX = ''
 
-    def __new__(cls, value:str) -> NavigableString:
+    def __new__(cls, value:str) -> Self:
         """Create a new NavigableString.
 
         When unpickling a NavigableString, this method is called with
@@ -1070,11 +1077,13 @@ class NavigableString(str, PageElement):
         return (str(self),)
 
     @property
-    def string(self) -> Optional[str]:
+    def string(self) -> str:
         """Convenience property defined to match `Tag.string`.
 
         :return: This property always returns the `NavigableString` it was
            called on.
+
+        :meta private:
         """
         return self
 
@@ -1178,7 +1187,7 @@ class PreformattedString(NavigableString):
     PREFIX = ''
     SUFFIX = ''
 
-    def output_ready(self, formatter:Optional[str|Formatter]=None) -> str:
+    def output_ready(self, formatter:Optional[_FormatterOrName]=None) -> str:
         """Make this string ready for output by adding any subclass-specific
             prefix or suffix.
 
@@ -1356,8 +1365,8 @@ class Tag(PageElement):
                  sourceline:Optional[int]=None,
                  sourcepos:Optional[int]=None,
                  can_be_empty_element:Optional[bool]=None,
-                 cdata_list_attributes:Optional[Dict[str, Iterable[str]]]=None,
-                 preserve_whitespace_tags:Optional[Iterable[str]]=None,
+                 cdata_list_attributes:Optional[Dict[str, Set[str]]]=None,
+                 preserve_whitespace_tags:Optional[Set[str]]=None,
                  interesting_string_types:Optional[Iterable[type]]=None,
                  namespaces:Optional[Dict[str, str]]=None
     ):
@@ -1438,8 +1447,19 @@ class Tag(PageElement):
     _AttributeValue = Union[str, Iterable[str]]
     _AttributeDict = Dict[str, _AttributeValue]
     name: str
+    namespace: Optional[str]
+    prefix: Optional[str]
     attrs: _AttributeDict
+    sourceline: Optional[int]
+    sourcepos: Optional[int]
+    known_xml: Optional[bool]
+    contents: List[PageElement]
+    hidden: bool
 
+    can_be_empty_element: Optional[bool]
+    cdata_list_attributes: Optional[Dict[str, Set[str]]]
+    preserve_whitespace_tags: Optional[Set[str]]
+    
     #: :meta private:
     parserClass = _deprecated_alias("parserClass", "parser_class", "4.0.0")
 

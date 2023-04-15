@@ -129,8 +129,8 @@ class TreeBuilder(object):
      probably doesn't make sense to an end-user, so the argument name
      is `multi_valued_attributes`.
 
-    :param preserve_whitespace_tags: A list of tags to treat
-     the way <pre> tags are treated in HTML. Tags in this list
+    :param preserve_whitespace_tags: A set of tags to treat
+     the way <pre> tags are treated in HTML. Tags in this set
      are immune from pretty-printing; their contents will always be
      output as-is.
 
@@ -150,7 +150,6 @@ class TreeBuilder(object):
     """
 
     USE_DEFAULT = object() #: :meta private:
-    soup: Optional[BeautifulSoup] #: :meta private:
     
     def __init__(self, multi_valued_attributes=USE_DEFAULT,
                  preserve_whitespace_tags=USE_DEFAULT,
@@ -178,13 +177,19 @@ class TreeBuilder(object):
     is_xml: bool = False
     picklable: bool = False
 
+    soup: Optional[BeautifulSoup] #: :meta private:
+
     #: A tag will be considered an empty-element
     #: tag when and only when it has no contents.
-    empty_element_tags: Optional[Set] = None
+    empty_element_tags: Optional[Set[str]] = None #: :meta private:
+    cdata_list_attributes: Dict[str, Set[str]]
+    preserve_whitespace_tags: Set[str] #: :meta private:
+    string_containers: Dict[str, type] #: :meta private:
+    tracks_line_numbers: bool #: :meta private:
     
     #: A value for these tag/attribute combinations is a space- or
     #: comma-separated list of CDATA, rather than a single CDATA.
-    DEFAULT_CDATA_LIST_ATTRIBUTES : Dict[str, Set] = defaultdict(set)
+    DEFAULT_CDATA_LIST_ATTRIBUTES : Dict[str, Set[str]] = defaultdict(set)
 
     #: Whitespace should be preserved inside these tags.
     DEFAULT_PRESERVE_WHITESPACE_TAGS : Set[str] = set()
