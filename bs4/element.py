@@ -19,7 +19,7 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
-from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, Type, TypeVar, Union
 from typing_extensions import Self, TypeAlias
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
@@ -1367,7 +1367,7 @@ class Tag(PageElement):
                  can_be_empty_element:Optional[bool]=None,
                  cdata_list_attributes:Optional[Dict[str, Set[str]]]=None,
                  preserve_whitespace_tags:Optional[Set[str]]=None,
-                 interesting_string_types:Optional[Iterable[type]]=None,
+                 interesting_string_types:Optional[Set[Type[NavigableString]]]=None,
                  namespaces:Optional[Dict[str, str]]=None
     ):
         if parser is None:
@@ -1439,7 +1439,7 @@ class Tag(PageElement):
                 # This sort of tag uses a special string container
                 # subclass for most of its strings. We need to be able
                 # to look up the proper container subclass.
-                self.interesting_string_types = builder.string_containers[self.name]
+                self.interesting_string_types = {builder.string_containers[self.name]}
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
@@ -1455,7 +1455,8 @@ class Tag(PageElement):
     known_xml: Optional[bool]
     contents: List[PageElement]
     hidden: bool
-
+    interesting_string_types: Optional[Set[Type[NavigableString]]]
+    
     can_be_empty_element: Optional[bool]
     cdata_list_attributes: Optional[Dict[str, Set[str]]]
     preserve_whitespace_tags: Optional[Set[str]]
@@ -1576,7 +1577,7 @@ class Tag(PageElement):
 
     #: :meta private:
     MAIN_CONTENT_STRING_TYPES = {NavigableString, CData}
-    def _all_strings(self, strip:bool=False, types:Iterable[type]=PageElement.default) -> Iterator[str]:
+    def _all_strings(self, strip:bool=False, types:Iterable[Type[NavigableString]]=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being

@@ -5,7 +5,7 @@ __license__ = "MIT"
 from collections import defaultdict
 import itertools
 import re
-from typing import Dict, Iterable, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Dict, Iterable, Optional, Set, Tuple, Type, TYPE_CHECKING, Union
 import warnings
 import sys
 from bs4.element import (
@@ -21,6 +21,7 @@ from bs4.element import (
 
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
+    from bs4.element import NavigableString
 
 __all__ = [
     'HTMLTreeBuilder',
@@ -196,7 +197,7 @@ class TreeBuilder(object):
 
     #: The textual contents of tags with these names should be
     #: instantiated with some class other than NavigableString.
-    DEFAULT_STRING_CONTAINERS: Dict[str, type] = {}
+    DEFAULT_STRING_CONTAINERS: Dict[str, Type[NavigableString]] = {}
     
     #: Most parsers don't keep track of line numbers.
     TRACKS_LINE_NUMBERS: bool = False
@@ -326,7 +327,7 @@ class TreeBuilder(object):
         if not attrs:
             return attrs
         if self.cdata_list_attributes:
-            universal = self.cdata_list_attributes.get('*', [])
+            universal: Set[str] = self.cdata_list_attributes.get('*', set())
             tag_specific = self.cdata_list_attributes.get(
                 tag_name.lower(), None)
             for attr in list(attrs.keys()):
