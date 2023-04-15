@@ -1867,10 +1867,10 @@ class Tag(PageElement):
         """Does this `Tag` have an attribute with the given name?"""
         return key in self.attrs
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return str(self).__hash__()
 
-    def __getitem__(self, key) -> _AttributeValue:
+    def __getitem__(self, key:str) -> _AttributeValue:
         """tag[key] returns the value of the 'key' attribute for the Tag,
         and throws an exception if it's not there."""
         return self.attrs[key]
@@ -1879,23 +1879,23 @@ class Tag(PageElement):
         "Iterating over a Tag iterates over its contents."
         return iter(self.contents)
 
-    def __len__(self):
+    def __len__(self) -> int:
         "The length of a Tag is the length of its list of contents."
         return len(self.contents)
 
-    def __contains__(self, x:PageElement) -> bool:
+    def __contains__(self, x:Any) -> bool:
         return x in self.contents
 
     def __bool__(self) -> bool:
         "A tag is non-None even if it has no contents."
         return True
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key:str, value:_AttributeValue) -> None:
         """Setting tag[key] sets the value of the 'key' attribute for the
         tag."""
         self.attrs[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key:str) -> None:
         "Deleting tag[key] deletes all 'key' attributes for the tag."
         self.attrs.pop(key, None)
 
@@ -1905,9 +1905,10 @@ class Tag(PageElement):
         found within this tag."""
         return self.find_all(*args, **kwargs)
 
-    def __getattr__(self, subtag):
+    def __getattr__(self, subtag:str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
         #print("Getattr %s.%s" % (self.__class__, tag))
+        result: Optional[PageElement]
         if len(subtag) > 3 and subtag.endswith('Tag'):
             # BS3: soup.aTag -> "soup.find("a")
             tag_name = subtag[:-3]
@@ -1917,12 +1918,14 @@ class Tag(PageElement):
                 ),
                 DeprecationWarning, stacklevel=2
             )
-            return self.find(tag_name)
+            result = self.find(tag_name)
         # We special case contents to avoid recursion.
         elif not subtag.startswith("__") and not subtag == "contents":
-            return self.find(subtag)
-        raise AttributeError(
-            "'%s' object has no attribute '%s'" % (self.__class__, subtag))
+            result = self.find(subtag)
+        else:
+            raise AttributeError(
+                "'%s' object has no attribute '%s'" % (self.__class__, subtag))
+        return cast(Optional[Tag], result)
 
     def __eq__(self, other:Any) -> bool:
         """Returns true iff this Tag has the same name, the same attributes,
@@ -1952,11 +1955,7 @@ class Tag(PageElement):
         """Renders this `Tag` as a string."""
         return self.decode()
 
-    def __unicode__(self) -> str:
-        """Renders this `Tag` as a string."""
-        return self.decode()
-
-    __str__ = __repr__ = __unicode__
+    __str__ = __unicode__ = __repr__
 
     def encode(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
                indent_level:Optional[int]=None,
@@ -2092,13 +2091,20 @@ class Tag(PageElement):
             pieces.append(piece)
         return "".join(pieces)
 
-    # Names for the different events yielded by _event_stream
-    START_ELEMENT_EVENT = object() #: :meta private:
-    END_ELEMENT_EVENT = object() #: :meta private:
-    EMPTY_ELEMENT_EVENT = object() #: :meta private:
-    STRING_ELEMENT_EVENT = object() #: :meta private:
+    class _TreeTraversalEvent(object):
+        """An internal class representing an event in the process
+        of traversing a parse tree.
 
-    def _event_stream(self, iterator=None):
+        :meta private:
+        """
+    
+    # Names for the different events yielded by _event_stream
+    START_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
+    END_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
+    EMPTY_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
+    STRING_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
+
+    def _event_stream(self, iterator=None) -> Iterator[Tuple[_TreeTraversalEvent, Any]]:
         """Yield a sequence of events that can be used to reconstruct the DOM
         for this element.
 
