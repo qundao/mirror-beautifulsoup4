@@ -222,3 +222,19 @@ class TestHTML5LibBuilder(SoupTest, HTML5TreeBuilderSmokeTest):
             with_element = div.encode(formatter="html")
             expect = b"<div>%s</div>" % output_element
             assert with_element == expect
+
+    @pytest.mark.parametrize(
+        "name,value", [("document_declared_encoding", "utf8"),
+                       ("exclude_encodings", ["utf8"])]
+    )
+    def test_prepare_markup_warnings(self, name, value):
+        # html5lib doesn't support a couple of the common arguments to
+        # prepare_markup.
+        builder = self.default_builder()
+        kwargs = {name: value}
+        with warnings.catch_warnings(record=True) as w:
+
+            list(builder.prepare_markup("a", **kwargs))
+        [warning] = w
+        msg = str(warning.message)
+        assert msg == f"You provided a value for {name}, but the html5lib tree builder doesn't support {name}."

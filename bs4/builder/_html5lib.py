@@ -5,7 +5,7 @@ __all__ = [
     'HTML5TreeBuilder',
     ]
 
-from typing import Iterable, Tuple, Union, Optional
+from typing import Iterable, List, Tuple, Union, Optional
 import warnings
 import re
 from bs4.builder import (
@@ -50,13 +50,13 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
     * You can't use a `SoupStrainer` to parse only part of a document.
     """
 
-    NAME = "html5lib"
+    NAME:str = "html5lib"
 
-    features = [NAME, PERMISSIVE, HTML_5, HTML]
+    features:List[str] = [NAME, PERMISSIVE, HTML_5, HTML]
 
     #: html5lib can tell us which line number and position in the
     #: original file is the source of an element.
-    TRACKS_LINE_NUMBERS = True
+    TRACKS_LINE_NUMBERS:bool = True
     
     def prepare_markup(self, markup:Union[bytes, str],
                        user_specified_encoding:Optional[str]=None,
@@ -69,11 +69,15 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         # document_declared_encoding and exclude_encodings aren't used
         # ATM because the html5lib TreeBuilder doesn't use
         # UnicodeDammit.
-        if exclude_encodings:
-            warnings.warn(
-                "You provided a value for exclude_encoding, but the html5lib tree builder doesn't support exclude_encoding.",
-                stacklevel=3
-            )
+        for variable, name in (
+            (document_declared_encoding, 'document_declared_encoding'),
+            (exclude_encodings, 'exclude_encodings'),
+        ):
+            if variable:
+                warnings.warn(
+                    f"You provided a value for {name}, but the html5lib tree builder doesn't support {name}.",
+                    stacklevel=3
+                )
 
         # html5lib only parses HTML, so if it's given XML that's worth
         # noting.
