@@ -5,6 +5,7 @@ __license__ = "MIT"
 from collections import defaultdict
 import itertools
 import re
+from types import ModuleType
 from typing import (
     Any,
     cast,
@@ -562,19 +563,29 @@ class DetectsXMLParsedAsHTML(object):
     This requires being able to observe an incoming processing
     instruction that might be an XML declaration, and also able to
     observe tags as they're opened. If you can't do that for a given
-    TreeBuilder, there's a less reliable implementation based on
+    `TreeBuilder`, there's a less reliable implementation based on
     examining the raw markup.
     """
 
-    # Regular expression for seeing if markup has an <html> tag.
-    LOOKS_LIKE_HTML = re.compile("<[^ +]html", re.I)
-    LOOKS_LIKE_HTML_B = re.compile(b"<[^ +]html", re.I)
+    #: Regular expression for seeing if string markup has an <html> tag.
+    LOOKS_LIKE_HTML:re.Pattern[str] = re.compile("<[^ +]html", re.I)
 
-    XML_PREFIX = '<?xml'
-    XML_PREFIX_B = b'<?xml'
+    #: Regular expression for seeing if byte markup has an <html> tag.
+    LOOKS_LIKE_HTML_B:re.Pattern[bytes] = re.compile(b"<[^ +]html", re.I)
+
+    #: The start of an XML document string.
+    XML_PREFIX:str = '<?xml'
+
+    #: The start of an XML document bytestring.
+    XML_PREFIX_B:bytes = b'<?xml'
+
+    # This is typed as str, not `ProcessingInstruction`, because this
+    # check may be run before any Beautiful Soup objects are created.
+    _first_processing_instruction: Optional[str]
+    _root_tag: Optional[Tag]
     
     @classmethod
-    def warn_if_markup_looks_like_xml(cls, markup):
+    def warn_if_markup_looks_like_xml(cls, markup:Optional[Union[bytes, str]]) -> bool:
         """Perform a check on some markup to see if it looks like XML
         that's not XHTML. If so, issue a warning.
 
@@ -584,34 +595,40 @@ class DetectsXMLParsedAsHTML(object):
         :return: True if the markup looks like non-XHTML XML, False
         otherwise.
         """
+        if markup is None:
+            return False
+        markup = markup[:500]
         if isinstance(markup, bytes):
-            prefix = cls.XML_PREFIX_B
-            looks_like_html = cls.LOOKS_LIKE_HTML_B
+            markup_b = cast(bytes, markup)
+            looks_like_xml = (
+                markup_b.startswith(cls.XML_PREFIX_B)
+                and not cls.LOOKS_LIKE_HTML_B.search(markup)
+            )
         else:
-            prefix = cls.XML_PREFIX
-            looks_like_html = cls.LOOKS_LIKE_HTML
-        
-        if (markup is not None
-            and markup.startswith(prefix)
-            and not looks_like_html.search(markup[:500])
-        ):
+            markup_s = cast(str, markup)
+            looks_like_xml = (
+                markup_s.startswith(cls.XML_PREFIX)
+                and not cls.LOOKS_LIKE_HTML.search(markup)
+            )
+
+        if looks_like_xml:
             cls._warn()
             return True
-        return False
-
+        return False        
+    
     @classmethod
-    def _warn(cls):
+    def _warn(cls) -> None:
         """Issue a warning about XML being parsed as HTML."""
         warnings.warn(
             XMLParsedAsHTMLWarning.MESSAGE, XMLParsedAsHTMLWarning
         )
         
-    def _initialize_xml_detector(self):
+    def _initialize_xml_detector(self) -> None:
         """Call this method before parsing a document."""
         self._first_processing_instruction = None
         self._root_tag = None
        
-    def _document_might_be_xml(self, processing_instruction):
+    def _document_might_be_xml(self, processing_instruction:str):
         """Call this method when encountering an XML declaration, or a
         "processing instruction" that might be an XML declaration.
         """
@@ -646,7 +663,7 @@ class DetectsXMLParsedAsHTML(object):
             self._warn()
 
     
-def register_treebuilders_from(module):
+def register_treebuilders_from(module:ModuleType) -> None:
     """Copy TreeBuilders from the given module into this module."""
     this_module = sys.modules[__name__]
     for name in module.__all__:
@@ -662,7 +679,7 @@ class ParserRejectedMarkup(Exception):
     """An Exception to be raised when the underlying parser simply
     refuses to parse the given markup.
     """
-    def __init__(self, message_or_exception:str|Exception):
+    def __init__(self, message_or_exception:Union[str,Exception]):
         """Explain why the parser rejected the given markup, either
         with a textual explanation or another exception.
         """
