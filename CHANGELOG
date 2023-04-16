@@ -45,10 +45,6 @@
   most consistent thing to do, but there was no indication that was
   happening.
 
-* SoupStrainer.search_tag() has been deprecated. It was never a
-  documented method, but if you use it, you should start using
-  SoupStrainer.allow_tag_creation() instead.
-
 * UnicodeDammit.markup is now always a bytestring representing the
   *original* markup (sans BOM), and UnicodeDammit.unicode_markup is
   always the same markup, converted to Unicode. Previously,
@@ -63,6 +59,21 @@
 
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
+
+New deprecations in 4.13.0:
+
+* The SAXTreeBuilder class, which was never officially supported or tested.
+
+* The first argument to BeautifulSoup.decode has been changed from a bool
+  `pretty_print` to an int `indent_level`, to match the signature of Tag.decode.
+
+* SoupStrainer.text and SoupStrainer.string are both deprecated
+  since a single item can't capture all the possibilities of a SoupStrainer
+  designed to match strings.
+
+* SoupStrainer.search_tag() is deprecated. It was never a
+  documented method, but if you use it, you should start using
+  SoupStrainer.allow_tag_creation() instead.
 
 = 4.12.2 (20230407)
 

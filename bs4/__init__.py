@@ -160,6 +160,21 @@ class BeautifulSoup(Tag):
     open_tag_counter:CounterType[str] #: :meta private:
     preserve_whitespace_tag_stack:List[Tag] #: :meta private:
     string_container_stack:List[Tag] #: :meta private:
+
+    #: Beautiful Soup's best guess as to the character encoding of the
+    #: original document.
+    original_encoding: Optional[_Encoding]
+
+    #: The character encoding, if any, that was explicitly defined
+    #: in the original document. This may or may not match
+    #: `BeautifulSoup.original_encoding`.
+    declared_html_encoding: Optional[_Encoding]
+    
+    #: This is True if the markup that was parsed contains
+    #: U+FFFD REPLACEMENT_CHARACTER characters which were not present
+    #: in the original markup. These mark character sequences that
+    #: could not be represented in Unicode.
+    contains_replacement_characters: bool
     
     def __init__(
             self,
@@ -293,7 +308,8 @@ class BeautifulSoup(Tag):
         # specify a parser' warning.
         original_builder = builder
         original_features = features
-            
+
+        builder_class: Type[TreeBuilder]
         if isinstance(builder, type):
             # A builder class was passed in; it needs to be instantiated.
             builder_class = builder
@@ -303,12 +319,13 @@ class BeautifulSoup(Tag):
                 features = [features]
             if features is None or len(features) == 0:
                 features = self.DEFAULT_BUILDER_FEATURES
-            builder_class = builder_registry.lookup(*features)
-            if builder_class is None:
+            possible_builder_class = builder_registry.lookup(*features)
+            if possible_builder_class is None:
                 raise FeatureNotFound(
                     "Couldn't find a tree builder with the features you "
                     "requested: %s. Do you need to install a parser library?"
                     % ",".join(features))
+            builder_class = cast(Type[TreeBuilder], possible_builder_class)
 
         # At this point either we have a TreeBuilder instance in
         # builder, or we have a builder_class that we can instantiate
