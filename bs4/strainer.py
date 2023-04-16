@@ -14,7 +14,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
-    TypeVar,
+    Type,
     TYPE_CHECKING,
     Union
 )
@@ -255,9 +255,9 @@ class SoupStrainer(object):
         )
         
         # DEPRECATED 4.13.0: You shouldn't need to check this under
-        # any name, and if you do, you're probably not taking into
-        # account all of the types of values this variable might
-        # have. Look at the .string_rules list instead.
+        # any name (.string or .text), and if you do, you're probably
+        # not taking into account all of the types of values this
+        # variable might have. Look at the .string_rules list instead.
         self.__string = string
 
     @property
@@ -276,7 +276,10 @@ class SoupStrainer(object):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
 
     @classmethod
-    def _make_match_rules(cls, obj, rule_class:type) -> Iterator[MatchRule]:
+    def _make_match_rules(
+            cls,
+            obj:Optional[Union[_StrainableElement,_StrainableAttribute]],
+            rule_class:Type[MatchRule]) -> Iterator[MatchRule]:
         """Convert a vaguely-specific 'object' into one or more well-defined
         match rules.
 
@@ -340,7 +343,7 @@ class SoupStrainer(object):
             and self.name_rules[0].string is not None
             and tag.name != self.name_rules[0].string):
             return False
-        
+       
         # If there are name rules, at least one must match. It can
         # match either the Tag object itself or the prefixed name of
         # the tag.
@@ -461,9 +464,8 @@ class SoupStrainer(object):
         return True
     
     def matches_any_string_rule(self, string:str) -> bool:
-        """Based on the content of a string, see whether it 
-        matches
-
+        """See whether the content of a string, matches any of 
+        this SoupStrainer's string rules.
         """
         if not self.string_rules:
             return True

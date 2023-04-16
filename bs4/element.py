@@ -882,7 +882,7 @@ class PageElement(object):
             attrs:_StrainableAttributes,
             string:Optional[_StrainableString],
             limit:Optional[int],
-            generator:Generator[PageElement, None, None],
+            generator:Iterator[PageElement],
             _stacklevel:int=3,
             **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:        
         """Iterates over a generator looking for things that match."""
@@ -950,7 +950,7 @@ class PageElement(object):
     #These generators can be used to navigate starting from both
     #NavigableStrings and Tags.
     @property
-    def next_elements(self) -> Generator[PageElement, None, None]:
+    def next_elements(self) -> Iterator[PageElement]:
         """All PageElements that were parsed after this one.
         """
         i = self.next_element
@@ -959,7 +959,7 @@ class PageElement(object):
             i = i.next_element
 
     @property
-    def next_siblings(self) -> Generator[PageElement, None, None]:
+    def next_siblings(self) -> Iterator[PageElement]:
         """All PageElements that are siblings of this one but were parsed
         later.
         """
@@ -969,7 +969,7 @@ class PageElement(object):
             i = i.next_sibling
 
     @property
-    def previous_elements(self) -> Generator[PageElement, None, None]:
+    def previous_elements(self) -> Iterator[PageElement]:
         """All PageElements that were parsed before this one.
 
         :yield: A sequence of PageElements.
@@ -980,7 +980,7 @@ class PageElement(object):
             i = i.previous_element
 
     @property
-    def previous_siblings(self) -> Generator[PageElement, None, None]:
+    def previous_siblings(self) -> Iterator[PageElement]:
         """All PageElements that are siblings of this one but were parsed
         earlier.
 
@@ -992,7 +992,7 @@ class PageElement(object):
             i = i.previous_sibling
 
     @property
-    def parents(self) -> Generator[PageElement, None, None]:
+    def parents(self) -> Iterator[PageElement]:
         """All PageElements that are parents of this PageElement.
 
         :yield: A sequence of PageElements.
@@ -2375,13 +2375,13 @@ class Tag(PageElement):
 
     #Generator methods
     @property
-    def children(self) -> Generator[PageElement, None, None]:
+    def children(self) -> Iterator[PageElement]:
         """Iterate over all direct children of this `PageElement`.
         """
         return (x for x in self.contents)
 
     @property
-    def self_and_descendants(self) -> Generator[PageElement, None, None]:
+    def self_and_descendants(self) -> Iterator[PageElement]:
         """Iterate over this `Tag` and its children in a
         breadth-first sequence.
         """
@@ -2391,7 +2391,7 @@ class Tag(PageElement):
             yield i
 
     @property
-    def descendants(self) -> Generator[PageElement, None, None]:
+    def descendants(self) -> Iterator[PageElement]:
         """Iterate over all children of this `Tag` in a
         breadth-first sequence.
         """
