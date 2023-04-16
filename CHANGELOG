@@ -18,6 +18,11 @@
 * decompose() was moved from Tag to PageElement, since there's no reason
   it won't also work on NavigableString objects.
 
+* The BeautifulSoupHTMLParser constructor now requires a BeautifulSoup
+  object as its first argument. This almost certainly does not apply
+  to you, since you probably use HTMLParserTreeBuilder, not
+  BeautifulSoupHTMLParser directly.
+
 * If Tag.get_attribute_list() is used to access an attribute that's not set,
   the return value is now an empty list rather than [None].
 

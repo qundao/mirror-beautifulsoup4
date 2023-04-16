@@ -850,7 +850,7 @@ class BeautifulSoup(Tag):
             self, name:str, namespace:Optional[str],
             nsprefix:Optional[str], attrs:Optional[Dict[str,str]],
             sourceline:Optional[int]=None, sourcepos:Optional[int]=None,
-            namespaces:Optional[Dict[str, str]]=None) -> None:
+            namespaces:Optional[Dict[str, str]]=None) -> Optional[Tag]:
         """Called by the tree builder when a new tag is encountered.
 
         :param name: Name of the tag.
