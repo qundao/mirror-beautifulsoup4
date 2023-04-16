@@ -6,9 +6,6 @@ from bs4.dammit import EntitySubstitution
 if TYPE_CHECKING:
     from bs4.element import Tag, _AttributeValue
 
-#: A function to call to replace special characters with XML or HTML
-#: entities.
-_EntitySubstitution: TypeAlias = Callable[[str], str]
 
 class Formatter(EntitySubstitution):
     """Describes a strategy to use when outputting a parse tree to a string.
@@ -52,7 +49,7 @@ class Formatter(EntitySubstitution):
     )
 
     language:Optional[str] #: :meta private:
-    entity_substitution: Optional[_EntitySubstitution] #: :meta private:
+    entity_substitution: Optional[_EntitySubstitutionFunction] #: :meta private:
     void_element_close_prefix: str #: :meta private:
     cdata_containing_tags: Set[str] #: :meta private:    
     indent:str #: :meta private:
@@ -72,7 +69,7 @@ class Formatter(EntitySubstitution):
     def __init__(
             self,
             language:Optional[str]=None,
-            entity_substitution:Optional[_EntitySubstitution]=None,
+            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
             void_element_close_prefix:str='/',
             cdata_containing_tags:Optional[Set[str]]=None,
             empty_attributes_are_booleans:bool=False, indent:int=1,
@@ -213,6 +210,11 @@ XMLFormatter.REGISTRY["minimal"] = XMLFormatter(
 XMLFormatter.REGISTRY[None] = XMLFormatter(entity_substitution=None)
 
 # Define type aliases to improve readability.
+#
+
+#: A function to call to replace special characters with XML or HTML
+#: entities.
+_EntitySubstitutionFunction: TypeAlias = Callable[[str], str]
 
 # Many of the output-centered methods take an argument that can either
 # be a Formatter object or the name of a Formatter to be looked up.

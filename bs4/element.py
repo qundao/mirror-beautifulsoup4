@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from bs4.builder import TreeBuilder
     from bs4.dammit import _Encoding
     from bs4.formatter import (
-        _EntitySubstitution,
+        _EntitySubstitutionFunction,
         _FormatterOrName,
     )
     from bs4.strainer import (
@@ -299,7 +299,7 @@ class PageElement(object):
 
     def formatter_for_name(
         self,
-        formatter_name:Union[_FormatterOrName, _EntitySubstitution]
+        formatter_name:Union[_FormatterOrName, _EntitySubstitutionFunction]
     ) -> Formatter:
         """Look up or create a Formatter for the given identifier,
         if necessary.
