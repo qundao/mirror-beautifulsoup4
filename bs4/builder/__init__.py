@@ -516,11 +516,16 @@ class HTMLTreeBuilder(TreeBuilder):
             return False
 
         # TODO: This cast will fail in the (very unlikely) scenario
-        # that the programmer who instantiates the TreeBuilder gives
-        # <meta> cdata_list_attributes.
-        http_equiv:Optional[str] = cast(Optional[str], tag.get('http-equiv'))
+        # that the programmer who instantiates the TreeBuilder
+        # specifies meta['content'] or meta['charset'] as
+        # cdata_list_attributes.
         content:Optional[str] = cast(Optional[str], tag.get('content'))
         charset:Optional[str] = cast(Optional[str], tag.get('charset'))
+
+        # But we can accommodate meta['http-equiv'] being made a
+        # cdata_list_attribute (again, very unlikely) without much
+        # trouble.
+        http_equiv:List[str] = tag.get_attribute_list('http-equiv')
         
         # We are interested in <meta> tags that say what encoding the
         # document was originally in. This means HTML 5-style <meta>
@@ -539,8 +544,8 @@ class HTMLTreeBuilder(TreeBuilder):
             tag['charset'] = CharsetMetaAttributeValue(charset)
             substituted = True
 
-        elif (content is not None and http_equiv is not None
-              and http_equiv.lower() == 'content-type'):
+        elif (content is not None and
+              any(x.lower() == 'content-type' for x in http_equiv)):
             # HTML 4 style:
             # <meta http-equiv="content-type" content="text/html; charset=utf8">
             tag['content'] = ContentMetaAttributeValue(content)
