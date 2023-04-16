@@ -215,7 +215,7 @@ class SoupStrainer(object):
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
             warnings.warn(
-                "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
+                "As of version 4.11.0, the 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
                 DeprecationWarning, stacklevel=2
             )
         
@@ -254,14 +254,24 @@ class SoupStrainer(object):
             list(self._make_match_rules(string, StringMatchRule))
         )
         
+        # DEPRECATED 4.13.0: You shouldn't need to check this under
+        # any name, and if you do, you're probably not taking into
+        # account all of the types of values this variable might
+        # have. Look at the .string_rules list instead.
+        self.__string = string
 
-        # DEPRECATED: You shouldn't need to check these, and if you do,
-        # you're probably not taking into account all of the types of
-        # values this variable might have. Look at the .string_rules
-        # list instead.
-        self.text = string
-        self.string = string
-        
+    @property
+    def string(self):
+        ":meta private:"
+        warnings.warn(f"Access to deprecated property string. (Look at .string_rules instead) -- Deprecated since version 4.13.0.", DeprecationWarning, stacklevel=2)
+        return self.__string
+
+    @property
+    def text(self):
+        ":meta private:"
+        warnings.warn(f"Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0.", DeprecationWarning, stacklevel=2)
+        return self.__string
+    
     def __repr__(self):
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
 

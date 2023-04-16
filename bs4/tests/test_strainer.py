@@ -200,7 +200,7 @@ class TestSoupStrainer(SoupTest):
 
         # But if you pass in "class_" as part of the ``attrs`` dict
         # it's not changed. (Otherwise there'd be no way to actually put
-        # a restriction on an attribute called "class_".
+        # a restriction on an attribute called "class_".)
         strainer = SoupStrainer(attrs=dict(class_="mainbody"))
         assert [] == strainer.name_rules
         assert [] == strainer.string_rules
