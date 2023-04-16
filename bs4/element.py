@@ -2098,13 +2098,15 @@ class Tag(PageElement):
         :meta private:
         """
     
-    # Names for the different events yielded by _event_stream
+    # Stand-ins for the different events yielded by _event_stream
     START_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
     END_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
     EMPTY_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
     STRING_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
 
-    def _event_stream(self, iterator=None) -> Iterator[Tuple[_TreeTraversalEvent, PageElement]]:
+    def _event_stream(self, iterator=None) -> Iterator[
+            Tuple[_TreeTraversalEvent, PageElement]
+    ]:
         """Yield a sequence of events that can be used to reconstruct the DOM
         for this element.
 
@@ -2147,7 +2149,7 @@ class Tag(PageElement):
             yield Tag.END_ELEMENT_EVENT, now_closed_tag
 
     def _indent_string(self, s:str, indent_level:int, formatter:Formatter,
-                       indent_before:bool, indent_after:bool):
+                       indent_before:bool, indent_after:bool) -> str:
         """Add indentation whitespace before and/or after a string.
 
         :param s: The string to amend with whitespace.
@@ -2237,7 +2239,7 @@ class Tag(PageElement):
                  formatter:_FormatterOrName="minimal") -> Union[str, bytes]:
         """Pretty-print this `Tag` as a string or bytestring.
 
-        :param encoding: The encoding of the string.
+        :param encoding: The encoding of the bytestring, or None if you want Unicode.
         :param formatter: A Formatter object, or a string naming one of
             the standard formatters.
         :return: A string (if no ``encoding`` is provided) or a bytestring
@@ -2331,7 +2333,10 @@ class Tag(PageElement):
         if l:
             r = l[0]
         return r
-    findChild = find #BS2
+
+    findChild = _deprecated_function_alias(
+        "findChild", "find", "3.0.0"
+    )
 
     def find_all(
             self,

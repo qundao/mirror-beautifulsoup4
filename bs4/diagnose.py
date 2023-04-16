@@ -109,7 +109,7 @@ class AnnouncingParser(HTMLParser):
         print(s)
 
     def handle_starttag(self, name, attrs):
-        self._p("%s START" % name)
+        self._p(f"{name} {attrs} START")
 
     def handle_endtag(self, name):
         self._p("%s END" % name)

@@ -2,6 +2,7 @@ from __future__ import annotations
 from collections import defaultdict
 import re
 from typing import (
+    Any,
     Callable,
     cast,
     Dict,
@@ -31,8 +32,7 @@ from bs4.element import NavigableString, PageElement, Tag
 # of the arguments to the SoupStrainer constructor and (more
 # familiarly to Beautiful Soup users) the find* methods.
 
-# TODO In Python 3.10 we can use TypeAlias for this stuff. We can
-# also use Pattern[str] instead of just Pattern.
+# TODO In Python 3.10 we can use TypeAlias for this stuff.
 
 # A function that takes a Tag and returns a yes-or-no answer.
 # A TagNameMatchRule expects this kind of function, if you're
@@ -46,7 +46,7 @@ _StringMatchFunction = Callable[[str], bool]
 
 # Either a tag name, an attribute value or a string can be matched
 # against a string, bytestring, regular expression, or a boolean.
-_BaseStrainable = Union[str, bytes, re.Pattern, bool]
+_BaseStrainable = Union[str, bytes, re.Pattern[str], bool]
 
 # A tag can also be matched using a function that takes the Tag
 # as its sole argument.
@@ -73,8 +73,8 @@ class MatchRule(object):
     pattern: Optional[re.Pattern]
     present: Optional[bool]
 
-    # All MatchRule objects also have a function, but the type of
-    # the function depends on the subclass.
+    # All MatchRule objects also have an attribute ``function``, but
+    # the type of the function depends on the subclass.
     
     def __init__(
             self,
@@ -107,7 +107,13 @@ class MatchRule(object):
                 "At most one of string, pattern, function and present must be provided."
             )
         
-    def _base_match(self, string):
+    def _base_match(self, string:str) -> Optional[bool]:
+        """Run the 'cheap' portion of a match, trying to get an answer without
+        calling a potentially expensive custom function.
+
+        :return: True or False if we have a (positive or negative)
+        match; None if we need to keep trying.
+        """
         # self.present==True matches everything except None.
         if self.present is True:
             return string is not None
@@ -144,7 +150,7 @@ class MatchRule(object):
         cls = type(self).__name__
         return f"<{cls} string={self.string} pattern={self.pattern} function={self.function} present={self.present}>"
 
-    def __eq__(self, other):
+    def __eq__(self, other:Any):
         return (
             isinstance(other, MatchRule) and
             self.string==other.string and
@@ -163,8 +169,8 @@ class TagNameMatchRule(MatchRule):
 
         # The only remaining possibility is that the match is determined
         # by a function call. Call the function.
-        assert self.function is not None
-        if self.function(tag):
+        function = cast(_TagMatchFunction, self.function)
+        if function(tag):
             return True
         return False
     
@@ -204,7 +210,7 @@ class SoupStrainer(object):
                  name: Optional[_StrainableElement]=None,
                  attrs: Dict[str, _StrainableAttribute]= {},
                  string: Optional[_StrainableString] = None,
-                 **kwargs):
+                 **kwargs:_StrainableAttribute):
         
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')

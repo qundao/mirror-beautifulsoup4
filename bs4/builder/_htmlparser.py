@@ -112,6 +112,10 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             closing tag).
         """
         # XXX namespace
+        import pdb; pdb.set_trace()
+
+
+
         attr_dict = {}
         for key, value in attrs:
             # Change None attribute values to the empty string
