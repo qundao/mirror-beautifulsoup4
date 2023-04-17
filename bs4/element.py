@@ -1361,7 +1361,7 @@ class Tag(PageElement):
                  name:Optional[str]=None,
                  namespace:Optional[str]=None,
                  prefix:Optional[str]=None,
-                 attrs:Optional[_AttributeDict]=None,
+                 attrs:Optional[_AttributeValues]=None,
                  parent:Optional[Union[BeautifulSoup, Tag]]=None,
                  previous:Optional[PageElement]=None,
                  is_xml:Optional[bool]=None,
@@ -1446,13 +1446,10 @@ class Tag(PageElement):
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
-    # Alias for a dictionary of tag attribute values.
-    _AttributeValue = Union[str, Iterable[str]]
-    _AttributeDict = Dict[str, _AttributeValue]
     name: str
     namespace: Optional[str]
     prefix: Optional[str]
-    attrs: _AttributeDict
+    attrs: _AttributeValues
     sourceline: Optional[int]
     sourcepos: Optional[int]
     known_xml: Optional[bool]

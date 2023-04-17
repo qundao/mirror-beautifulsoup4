@@ -15,10 +15,12 @@ import sys
 from typing import (
     Callable,
     cast,
+    Dict,
     List,
     Optional,
     TYPE_CHECKING,
     Tuple,
+    Type,
     Union,
 )
 import warnings
@@ -43,10 +45,11 @@ from bs4.builder import (
 from bs4.element import _AttributeValues, Tag
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
+    from bs4.element import NavigableString
 
 HTMLPARSER = 'html.parser'
 
-_DuplicateAttributeHandler = Callable[[_AttributeValues, str, str], None]
+_DuplicateAttributeHandler = Callable[[Dict[str, str], str, str], None]
 
 class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
     """A subclass of the Python standard library's HTMLParser class, which
@@ -89,7 +92,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
     REPLACE:str = 'replace'
 
     on_duplicate_attribute:Union[str, _DuplicateAttributeHandler]
-    already_closed_empty_element: List[Tag]    
+    already_closed_empty_element: List[str]
     soup: BeautifulSoup
     
     def error(self, message:str):
@@ -134,7 +137,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             closing tag).
         """
         # XXX namespace
-        attr_dict: _AttributeValues = {}
+        attr_dict: Dict[str, str] = {}
         for key, value in attrs:
             # Change None attribute values to the empty string
             # for consistency with the other tree builders.
@@ -242,7 +245,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         data = data or "\N{REPLACEMENT CHARACTER}"
         self.handle_data(data)
 
-    def handle_entityref(self, name):
+    def handle_entityref(self, name:str):
         """Handle a named entity reference by converting it to the
         corresponding Unicode character(s) and treating it as textual
         data.
@@ -285,6 +288,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
 
         :param data: The text of the declaration.
         """
+        cls: Type[NavigableString]
         if data.upper().startswith('CDATA['):
             cls = CData
             data = data[len('CDATA['):]
