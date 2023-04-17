@@ -105,7 +105,7 @@ class NamespacedAttribute(str):
     name: Optional[str]
     namespace: Optional[str]
     
-    def __new__(cls, prefix:str,
+    def __new__(cls, prefix:Optional[str],
                 name:Optional[str]=None, namespace:Optional[str]=None):
         if not name:
             # This is the default namespace. Its name "has no value"

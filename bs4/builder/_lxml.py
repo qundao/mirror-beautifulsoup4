@@ -300,8 +300,8 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         
         # Make sure attrs is a mutable dict--lxml may send an immutable dictproxy.
         attrs = dict(attrs)
-        nsprefix = None
-        namespace: Optional[_NamespaceURL]
+        nsprefix: Optional[_NamespacePrefix] = None
+        namespace: Optional[_NamespaceURL] = None
         # Invert each namespace map as it comes in.
         if len(nsmap) == 0 and len(self.nsmaps) > 1:
                 # There are no new namespaces for this tag, but
@@ -361,7 +361,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             namespaces=self.active_namespace_prefixes[-1]
         )
         
-    def _prefix_for_namespace(self, namespace):
+    def _prefix_for_namespace(self, namespace:Optional[_NamespaceURL]) -> Optional[_NamespacePrefix]:
         """Find the currently active prefix for the given namespace."""
         if namespace is None:
             return None
@@ -370,7 +370,8 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 return inverted_nsmap[namespace]
         return None
 
-    def end(self, name):
+    def end(self, name:str) -> None:
+        assert self.soup is not None
         self.soup.endData()
         completed_tag = self.soup.tagStack[-1]
         namespace, name = self._getNsTag(name)
@@ -392,27 +393,31 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 # namespace prefixes.
                 self.active_namespace_prefixes.pop()
             
-    def pi(self, target, data):
+    def pi(self, target:str, data:str) -> None:
+        assert self.soup is not None
         self.soup.endData()
         data = target + ' ' + data
         self.soup.handle_data(data)
         self.soup.endData(self.processing_instruction_class)
         
-    def data(self, content):
+    def data(self, content:str) -> None:
+        assert self.soup is not None
         self.soup.handle_data(content)
 
-    def doctype(self, name, pubid, system):
+    def doctype(self, name:str, pubid:str, system:str) -> None:
+        assert self.soup is not None
         self.soup.endData()
         doctype = Doctype.for_name_and_ids(name, pubid, system)
         self.soup.object_was_parsed(doctype)
 
-    def comment(self, content):
+    def comment(self, content:str) -> None:
         "Handle comments as Comment objects."
+        assert self.soup is not None
         self.soup.endData()
         self.soup.handle_data(content)
         self.soup.endData(Comment)
 
-    def test_fragment_to_document(self, fragment):
+    def test_fragment_to_document(self, fragment:str) -> str:
         """See `TreeBuilder`."""
         return '<?xml version="1.0" encoding="utf-8"?>\n%s' % fragment
 
