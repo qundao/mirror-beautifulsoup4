@@ -384,7 +384,7 @@ class SAXTreeBuilder(TreeBuilder):
             )
         super(SAXTreeBuilder, self).__init__(*args, **kwargs)
     
-    def feed(self, markup):
+    def feed(self, markup:Union[str,bytes]):
         raise NotImplementedError()
 
     def close(self):

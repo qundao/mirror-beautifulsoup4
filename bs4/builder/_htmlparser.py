@@ -13,9 +13,11 @@ from html.parser import HTMLParser
 
 import sys
 from typing import (
+    Any,
     Callable,
     cast,
     Dict,
+    Iterable,
     List,
     Optional,
     TYPE_CHECKING,
@@ -46,7 +48,8 @@ from bs4.element import _AttributeValues, Tag
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString
-
+    from bs4.dammit import _Encoding
+    
 HTMLPARSER = 'html.parser'
 
 _DuplicateAttributeHandler = Callable[[Dict[str, str], str, str], None]
@@ -136,7 +139,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             an empty-element tag (i.e. there is not expected to be any
             closing tag).
         """
-        # XXX namespace
+        # TODO: handle namespaces here?
         attr_dict: Dict[str, str] = {}
         for key, value in attrs:
             # Change None attribute values to the empty string
@@ -313,16 +316,17 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
     """A Beautiful soup `TreeBuilder` that uses the `HTMLParser` parser,
     found in the Python standard library.
     """
-    is_xml = False
-    picklable = True
-    NAME = HTMLPARSER
-    features = [NAME, HTML, STRICT]
+    is_xml:bool = False
+    picklable:bool = True
+    NAME:str = HTMLPARSER
+    features: Iterable[str] = [NAME, HTML, STRICT]
 
     #: The html.parser knows which line number and position in the
     #: original file is the source of an element.
-    TRACKS_LINE_NUMBERS = True
+    TRACKS_LINE_NUMBERS:bool = True
 
-    def __init__(self, parser_args=None, parser_kwargs=None, **kwargs):
+    def __init__(self, parser_args:Optional[Iterable[Any]]=None,
+                 parser_kwargs:Optional[Dict[str, Any]]=None, **kwargs:Any):
         """Constructor.
 
         :param parser_args: Positional arguments to pass into 
@@ -347,9 +351,12 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         parser_kwargs['convert_charrefs'] = False
         self.parser_args = (parser_args, parser_kwargs)
         
-    def prepare_markup(self, markup, user_specified_encoding=None,
-                       document_declared_encoding=None, exclude_encodings=None):
-
+    def prepare_markup(
+            self, markup:Union[bytes, str],
+            user_specified_encoding:Optional[str]=None,
+            document_declared_encoding:Optional[str]=None,
+            exclude_encodings:Optional[Iterable[str]]=None
+    ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -374,14 +381,19 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
 
         # Ask UnicodeDammit to sniff the most likely encoding.
 
-        # This was provided by the end-user; treat it as a known
-        # definite encoding per the algorithm laid out in the HTML5
-        # spec.  (See the EncodingDetector class for details.)
-        known_definite_encodings = [user_specified_encoding]
+        known_definite_encodings: List[_Encoding] = []
+        if user_specified_encoding:
+            # This was provided by the end-user; treat it as a known
+            # definite encoding per the algorithm laid out in the
+            # HTML5 spec. (See the EncodingDetector class for
+            # details.)
+            known_definite_encodings.append(user_specified_encoding)
 
-        # This was found in the document; treat it as a slightly lower-priority
-        # user encoding.
-        user_encodings = [document_declared_encoding]
+        user_encodings: List[_Encoding] = []
+        if document_declared_encoding:
+            # This was found in the document; treat it as a slightly
+            # lower-priority user encoding.
+            user_encodings.append(document_declared_encoding)
 
         try_encodings = [user_specified_encoding, document_declared_encoding]
         dammit = UnicodeDammit(
@@ -391,11 +403,15 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             is_html=True,
             exclude_encodings=exclude_encodings
         )
-        yield (dammit.unicode_markup, dammit.original_encoding,
-               dammit.declared_html_encoding,
-               dammit.contains_replacement_characters)
+        if dammit.unicode_markup is not None:
+            # Almost all the time, Unicode, Dammit is able to convert
+            # the markup into Unicode, but it won't work, e.g. on
+            # binary data.
+            yield (dammit.unicode_markup, dammit.original_encoding,
+                   dammit.declared_html_encoding,
+                   dammit.contains_replacement_characters)
 
-    def feed(self, markup):
+    def feed(self, markup:Union[str, bytes]):
         args, kwargs = self.parser_args
         parser = BeautifulSoupHTMLParser(self.soup, *args, **kwargs)
         try:
