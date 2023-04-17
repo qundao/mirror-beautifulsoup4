@@ -46,7 +46,7 @@ _StringMatchFunction = Callable[[str], bool]
 
 # Either a tag name, an attribute value or a string can be matched
 # against a string, bytestring, regular expression, or a boolean.
-_BaseStrainable = Union[str, bytes, re.Pattern[str], bool]
+_BaseStrainable = Union[str, bytes, re.Pattern, bool]
 
 # A tag can also be matched using a function that takes the Tag
 # as its sole argument.
