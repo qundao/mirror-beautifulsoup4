@@ -146,10 +146,14 @@ class TestSoupStrainer(SoupTest):
         with warnings.catch_warnings(record=True) as w:
             strainer = SoupStrainer(text="text")
             assert strainer.text == 'text'
-            [warning] = w
-            msg = str(warning.message)
-            assert warning.filename == __file__
-            assert msg == "The 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
+            [w1, w2] = w
+            msg = str(w1.message)
+            assert w1.filename == __file__
+            assert msg == "As of version 4.11.0, the 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead."
+
+            msg = str(w2.message)
+            assert w2.filename == __file__
+            assert msg == "Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0."
 
     def _match_function(x):
         pass
