@@ -126,7 +126,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         # just because its name matches a known empty-element tag. We
         # know that this is an empty-element tag, and we want to call
         # handle_endtag ourselves.
-        tag = self.handle_starttag(name, attrs, handle_empty_element=False)
+        self.handle_starttag(name, attrs, handle_empty_element=False)
         self.handle_endtag(name)
         
     def handle_starttag(

@@ -62,6 +62,13 @@
   encode a document to a Python internal encoding (like "palmos")
   that's not recognized by the HTML or XML standard.
 
+* The arguments to LXMLTreeBuilderForXML.prepare_markup have been
+  changed to match the arguments to the superclass,
+  TreeBuilder.prepare_markup. Specifically, document_declared_encoding
+  now appears before exclude_encodings, not after. If you were calling
+  this method yourself, I recomment switching to using keyword
+  arguments instead.
+
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 
@@ -69,6 +76,9 @@
   becomes invisible but its contents are still visible. User manipulation
   of .hidden is not a documented or supported feature, so don't do this,
   but it's not too difficult to keep the old behavior working.
+
+* The unused constant LXMLTreeBuilderForXML.DEFAULT_PARSER_CLASS
+  has been removed.
 
 New deprecations in 4.13.0:
 

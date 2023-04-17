@@ -1,3 +1,6 @@
+# encoding: utf-8
+from __future__ import annotations
+
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
@@ -8,9 +11,24 @@ __all__ = [
 
 from collections.abc import Callable
 
+from typing import (
+    Any,
+    Dict,
+    IO,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TYPE_CHECKING,
+    Union,
+)
+
 from io import BytesIO
 from io import StringIO
 from lxml import etree
+from bs4.dammit import (_Encoding)
 from bs4.element import (
     Comment,
     Doctype,
@@ -28,33 +46,48 @@ from bs4.builder import (
     TreeBuilder,
     XML)
 from bs4.dammit import EncodingDetector
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
 
-LXML = 'lxml'
+LXML:str = 'lxml'
+
+_NamespacePrefix = str
+_NamespaceURL = str
+_NamespaceMapping = Dict[_NamespacePrefix, _NamespaceURL]
+_InvertedNamespaceMapping = Dict[_NamespaceURL, _NamespacePrefix]
 
 def _invert(d):
     "Invert a dictionary."
     return dict((v,k) for k, v in list(d.items()))
 
 class LXMLTreeBuilderForXML(TreeBuilder):
-    DEFAULT_PARSER_CLASS = etree.XMLParser
-    is_xml = True
-        
-    processing_instruction_class: ProcessingInstruction
+
+    DEFAULT_PARSER_CLASS:Type = etree.XMLParser
     
-    NAME = "lxml-xml"
-    ALTERNATE_NAMES = ["xml"]
+    is_xml:bool = True
+        
+    processing_instruction_class:Type[ProcessingInstruction]
+    
+    NAME:str = "lxml-xml"
+    ALTERNATE_NAMES: Iterable[str] = ["xml"]
 
     # Well, it's permissive by XML parser standards.
-    features = [NAME, LXML, XML, FAST, PERMISSIVE]
+    features: Iterable[str] = [NAME, LXML, XML, FAST, PERMISSIVE]
 
-    CHUNK_SIZE = 512
+    CHUNK_SIZE:int = 512
 
     # This namespace mapping is specified in the XML Namespace
     # standard.
-    DEFAULT_NSMAPS = dict(xml='http://www.w3.org/XML/1998/namespace')
+    DEFAULT_NSMAPS: _NamespaceMapping = dict(
+        xml='http://www.w3.org/XML/1998/namespace'
+    )
 
-    DEFAULT_NSMAPS_INVERTED = _invert(DEFAULT_NSMAPS)
+    DEFAULT_NSMAPS_INVERTED:_InvertedNamespaceMapping = _invert(
+        DEFAULT_NSMAPS
+    )
 
+    nsmaps: List[Optional[_InvertedNamespaceMapping]]
+    
     # NOTE: If we parsed Element objects and looked at .sourceline,
     # we'd be able to see the line numbers from the original document.
     # But instead we build an XMLParser or HTMLParser object to serve
@@ -62,16 +95,18 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     # line numbers.
     # See: https://bugs.launchpad.net/lxml/+bug/1846906
     
-    def initialize_soup(self, soup):
+    def initialize_soup(self, soup:BeautifulSoup) -> None:
         """Let the BeautifulSoup object know about the standard namespace
         mapping.
 
         :param soup: A `BeautifulSoup`.
         """
+        # Beyond this point, self.soup is set, so we can assume (and
+        # assert) it's not None whenever necessary.
         super(LXMLTreeBuilderForXML, self).initialize_soup(soup)
         self._register_namespaces(self.DEFAULT_NSMAPS)
 
-    def _register_namespaces(self, mapping):
+    def _register_namespaces(self, mapping:Dict[str, str]) -> None:
         """Let the BeautifulSoup object know about namespaces encountered
         while parsing the document.
 
@@ -84,6 +119,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
         :param mapping: A dictionary mapping namespace prefixes to URIs.
         """
+        assert self.soup is not None
         for key, value in list(mapping.items()):
             # This is 'if key' and not 'if key is not None' because we
             # don't track un-prefixed namespaces. Soupselect will
@@ -95,16 +131,15 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 # prefix, the first one in the document takes precedence.
                 self.soup._namespaces[key] = value
                 
-    def default_parser(self, encoding):
+    def default_parser(self, encoding:_Encoding) -> Any:
         """Find the default parser for the given encoding.
 
-        :param encoding: A string.
         :return: Either a parser object or a class, which
           will be instantiated with default arguments.
         """
         if self._default_parser is not None:
             return self._default_parser
-        return etree.XMLParser(
+        return self.DEFAULT_PARSER_CLASS(
             target=self, strip_cdata=False, recover=True, encoding=encoding)
 
     def parser_for(self, encoding):
@@ -116,14 +151,15 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # Use the default parser.
         parser = self.default_parser(encoding)
 
-        if isinstance(parser, Callable):
+        if callable(parser):
             # Instantiate the parser with default arguments
             parser = parser(
                 target=self, strip_cdata=False, recover=True, encoding=encoding
             )
         return parser
 
-    def __init__(self, parser=None, empty_element_tags=None, **kwargs):
+    def __init__(self, parser:Optional[Any]=None,
+                 empty_element_tags:Optional[Set]=None, **kwargs):
         # TODO: Issue a warning if parser is present but not a
         # callable, since that means there's no way to create new
         # parsers for different encodings.
@@ -135,17 +171,21 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         self.active_namespace_prefixes = [dict(self.DEFAULT_NSMAPS)]
         super(LXMLTreeBuilderForXML, self).__init__(**kwargs)
         
-    def _getNsTag(self, tag):
+    def _getNsTag(self, tag:str) -> Tuple[Optional[str], str]:
         # Split the namespace URL out of a fully-qualified lxml tag
         # name. Copied from lxml's src/lxml/sax.py.
         if tag[0] == '{':
-            return tuple(tag[1:].split('}', 1))
+            namespace, name = tag[1:].split('}', 1)
+            return (namespace, name)
         else:
             return (None, tag)
 
-    def prepare_markup(self, markup, user_specified_encoding=None,
-                       exclude_encodings=None,
-                       document_declared_encoding=None):
+    def prepare_markup(
+            self, markup:Union[bytes, str],
+            user_specified_encoding:Optional[str]=None,
+            document_declared_encoding:Optional[str]=None,
+            exclude_encodings:Optional[Iterable[str]]=None,
+    ) -> Iterable[Tuple[Union[str,bytes], Optional[str], Optional[str], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -196,14 +236,25 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             yield (markup.encode("utf8"), "utf8",
                    document_declared_encoding, False)
 
-        # This was provided by the end-user; treat it as a known
-        # definite encoding per the algorithm laid out in the HTML5
-        # spec.  (See the EncodingDetector class for details.)
-        known_definite_encodings = [user_specified_encoding]
+            # Since the document was Unicode in the first place, there
+            # is no need to try any more strategies; we know this will
+            # work.
+            return
 
-        # This was found in the document; treat it as a slightly lower-priority
-        # user encoding.
-        user_encodings = [document_declared_encoding]
+        known_definite_encodings: List[_Encoding] = []
+        if user_specified_encoding:
+            # This was provided by the end-user; treat it as a known
+            # definite encoding per the algorithm laid out in the
+            # HTML5 spec. (See the EncodingDetector class for
+            # details.)
+            known_definite_encodings.append(user_specified_encoding)
+
+        user_encodings: List[_Encoding] = []
+        if document_declared_encoding:
+            # This was found in the document; treat it as a slightly
+            # lower-priority user encoding.
+            user_encodings.append(document_declared_encoding)
+
         detector = EncodingDetector(
             markup, known_definite_encodings=known_definite_encodings,
             user_encodings=user_encodings, is_html=is_html,
@@ -212,34 +263,45 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         for encoding in detector.encodings:
             yield (detector.markup, encoding, document_declared_encoding, False)
 
-    def feed(self, markup):
+    def feed(self, markup:Union[bytes,str]) -> None:
+        io: IO
         if isinstance(markup, bytes):
-            markup = BytesIO(markup)
+            io = BytesIO(markup)
         elif isinstance(markup, str):
-            markup = StringIO(markup)
+            io = StringIO(markup)
 
+        # initialize_soup is called before feed, so we know this
+        # is not None.
+        assert self.soup is not None
+            
         # Call feed() at least once, even if the markup is empty,
         # or the parser won't be initialized.
-        data = markup.read(self.CHUNK_SIZE)
+        data = io.read(self.CHUNK_SIZE)
         try:
             self.parser = self.parser_for(self.soup.original_encoding)
             self.parser.feed(data)
             while len(data) != 0:
                 # Now call feed() on the rest of the data, chunk by chunk.
-                data = markup.read(self.CHUNK_SIZE)
+                data = io.read(self.CHUNK_SIZE)
                 if len(data) != 0:
                     self.parser.feed(data)
             self.parser.close()
         except (UnicodeDecodeError, LookupError, etree.ParserError) as e:
             raise ParserRejectedMarkup(e)
 
-    def close(self):
+    def close(self) -> None:
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
 
-    def start(self, name, attrs, nsmap={}):
+    def start(self, name:str, attrs:Dict[str, str], nsmap:_NamespaceMapping={}):
+        # This is called by lxml code as a result of calling
+        # BeautifulSoup.feed(), and we know self.soup is set by the time feed()
+        # is called.
+        assert self.soup is not None
+        
         # Make sure attrs is a mutable dict--lxml may send an immutable dictproxy.
         attrs = dict(attrs)
         nsprefix = None
+        namespace: Optional[_NamespaceURL]
         # Invert each namespace map as it comes in.
         if len(nsmap) == 0 and len(self.nsmaps) > 1:
                 # There are no new namespaces for this tag, but
@@ -281,7 +343,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # Namespaces are in play. Find any attributes that came in
         # from lxml with namespaces attached to their names, and
         # turn then into NamespacedAttribute objects.
-        new_attrs = {}
+        new_attrs:Dict[Union[str,NamespacedAttribute], str] = {}
         for attr, value in list(attrs.items()):
             namespace, attr = self._getNsTag(attr)
             if namespace is None:
@@ -379,3 +441,4 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     def test_fragment_to_document(self, fragment):
         """See `TreeBuilder`."""
         return '<html><body>%s</body></html>' % fragment
+
