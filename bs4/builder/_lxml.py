@@ -62,7 +62,7 @@ def _invert(d):
 
 class LXMLTreeBuilderForXML(TreeBuilder):
 
-    DEFAULT_PARSER_CLASS:Type = etree.XMLParser
+    DEFAULT_PARSER_CLASS:Type[Any] = etree.XMLParser
     
     is_xml:bool = True
         
@@ -87,6 +87,8 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     )
 
     nsmaps: List[Optional[_InvertedNamespaceMapping]]
+    empty_element_tags: Set[str]
+    parser: Any
     
     # NOTE: If we parsed Element objects and looked at .sourceline,
     # we'd be able to see the line numbers from the original document.
@@ -131,7 +133,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 # prefix, the first one in the document takes precedence.
                 self.soup._namespaces[key] = value
                 
-    def default_parser(self, encoding:_Encoding) -> Any:
+    def default_parser(self, encoding:Optional[_Encoding]) -> Type:
         """Find the default parser for the given encoding.
 
         :return: Either a parser object or a class, which
@@ -142,7 +144,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         return self.DEFAULT_PARSER_CLASS(
             target=self, strip_cdata=False, recover=True, encoding=encoding)
 
-    def parser_for(self, encoding):
+    def parser_for(self, encoding: Optional[_Encoding]) -> Any:
         """Instantiate an appropriate parser for the given encoding.
 
         :param encoding: A string.
@@ -159,13 +161,15 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         return parser
 
     def __init__(self, parser:Optional[Any]=None,
-                 empty_element_tags:Optional[Set]=None, **kwargs):
+                 empty_element_tags:Optional[Set[str]]=None, **kwargs):
         # TODO: Issue a warning if parser is present but not a
         # callable, since that means there's no way to create new
         # parsers for different encodings.
         self._default_parser = parser
         if empty_element_tags is not None:
             self.empty_element_tags = set(empty_element_tags)
+        else:
+            self.empty_element_tags = set()
         self.soup = None
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
         self.active_namespace_prefixes = [dict(self.DEFAULT_NSMAPS)]
@@ -424,16 +428,18 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
 class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
 
-    NAME = LXML
-    ALTERNATE_NAMES = ["lxml-html"]
+    NAME:str = LXML
+    ALTERNATE_NAMES: Iterable[str] = ["lxml-html"]
 
-    features = ALTERNATE_NAMES + [NAME, HTML, FAST, PERMISSIVE]
-    is_xml = False
+    features: Iterable[str] = list(ALTERNATE_NAMES) + [NAME, HTML, FAST, PERMISSIVE]
+    is_xml: bool = False
 
-    def default_parser(self, encoding):
+    def default_parser(self, encoding) -> Type[Any]:
         return etree.HTMLParser
 
-    def feed(self, markup):
+    def feed(self, markup:Union[bytes, str]) -> None: 
+        # We know self.soup is set by the time feed() is called.
+        assert self.soup is not None
         encoding = self.soup.original_encoding
         try:
             self.parser = self.parser_for(encoding)
@@ -443,7 +449,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
             raise ParserRejectedMarkup(e)
 
 
-    def test_fragment_to_document(self, fragment):
+    def test_fragment_to_document(self, fragment:str) -> str:
         """See `TreeBuilder`."""
         return '<html><body>%s</body></html>' % fragment
 
