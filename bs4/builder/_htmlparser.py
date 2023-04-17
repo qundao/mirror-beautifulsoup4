@@ -356,7 +356,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             user_specified_encoding:Optional[str]=None,
             document_declared_encoding:Optional[str]=None,
             exclude_encodings:Optional[Iterable[str]]=None
-    ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
+    ) -> Iterable[Tuple[str, Optional[str], Optional[str], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -370,9 +370,9 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         :yield: A series of 4-tuples: (markup, encoding, declared encoding,
              has undergone character replacement)
 
-            Each 4-tuple represents a strategy for converting the
-            document to Unicode and parsing it. Each strategy will be tried 
-            in turn.
+            Each 4-tuple represents a strategy for parsing the document.
+            This TreeBuilder uses Unicode, Dammit to convert the markup
+            into Unicode, so the `markup` element will always be a string.
         """
         if isinstance(markup, str):
             # Parse Unicode as-is.
@@ -403,16 +403,24 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             is_html=True,
             exclude_encodings=exclude_encodings
         )
-        if dammit.unicode_markup is not None:
-            # Almost all the time, Unicode, Dammit is able to convert
-            # the markup into Unicode, but it won't work, e.g. on
-            # binary data.
+
+        # In every case I've seen, Unicode, Dammit is able to convert
+        # the markup into Unicode, even if it needs to use REPLACEMENT
+        # CHARACTER. But there is a code path that could result in
+        # unicode_markup being None, and HTMLParser can only parse
+        # Unicode.
+        if dammit.unicode_markup is None:
+            raise ParserRejectedMarkup("Could not convert input to Unicode, and html.parser will not accept bytestrings.")
+        else:
             yield (dammit.unicode_markup, dammit.original_encoding,
                    dammit.declared_html_encoding,
                    dammit.contains_replacement_characters)
 
-    def feed(self, markup:Union[str, bytes]):
+    def feed(self, markup:str):
         args, kwargs = self.parser_args
+        # We know BeautifulSoup calls TreeBuilder.initialize_soup
+        # before calling feed()
+        assert self.soup is not None
         parser = BeautifulSoupHTMLParser(self.soup, *args, **kwargs)
         try:
             parser.feed(markup)

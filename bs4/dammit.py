@@ -689,12 +689,18 @@ class UnicodeDammit:
                             "Some characters could not be decoded, and were "
                             "replaced with REPLACEMENT CHARACTER."
                     )
+
                     self.contains_replacement_characters = True
                     break
 
         # If none of that worked, we could at this point force it to
         # ASCII, but that would destroy so much data that I think
         # giving up is better.
+        #
+        # Note that this is extremely unlikely, probably impossible,
+        # because the "replace" strategy is so powerful. Even running
+        # the Python binary through Unicode, Dammit gives you Unicode,
+        # albeit Unicode riddled with REPLACEMENT CHARACTER.
         if u is None:
             self.original_encoding = None
             self.unicode_markup = None

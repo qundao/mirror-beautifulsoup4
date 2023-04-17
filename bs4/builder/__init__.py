@@ -287,9 +287,9 @@ class TreeBuilder(object):
         :yield: A series of 4-tuples: (markup, encoding, declared encoding,
             has undergone character replacement)
 
-            Each 4-tuple represents a strategy for converting the
-            document to Unicode and parsing it. Each strategy will be tried 
-            in turn.
+            Each 4-tuple represents a strategy that the parser can try
+            to convert the document to Unicode and parse it. Each
+            strategy will be tried in turn.
 
          By default, the only strategy is to parse the markup
          as-is. See `LXMLTreeBuilderForXML` and
@@ -297,6 +297,7 @@ class TreeBuilder(object):
          account the quirks of particular parsers.
 
         :meta private:
+
         """
         yield markup, None, None, False
 
