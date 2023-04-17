@@ -1845,6 +1845,11 @@ class Tag(PageElement):
         return space_before + s + space_after
 
     def _format_tag(self, eventual_encoding, formatter, opening):
+        if self.hidden:
+            # A hidden tag is invisible, although its contents
+            # are visible.
+            return ''
+
         # A tag starts with the < character (see below).
 
         # Then the / character, if this is a closing tag.
