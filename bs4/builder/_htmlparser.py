@@ -180,7 +180,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         if self._root_tag is None:
             self._root_tag_encountered(name)
             
-    def handle_endtag(self, name, check_already_closed=True):
+    def handle_endtag(self, name:str, check_already_closed:bool=True):
         """Handle a closing tag, e.g. '</tag>'
         
         :param name: A tag name.
@@ -198,11 +198,11 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         else:
             self.soup.handle_endtag(name)
             
-    def handle_data(self, data):
+    def handle_data(self, data:str):
         """Handle some textual data that shows up between tags."""
         self.soup.handle_data(data)
 
-    def handle_charref(self, name):
+    def handle_charref(self, name:str):
         """Handle a numeric character reference by converting it to the
         corresponding Unicode character and treating it as textual
         data.
