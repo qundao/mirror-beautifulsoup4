@@ -15,12 +15,18 @@ selected against, since the `CSS` object is permanently scoped to that
 from __future__ import annotations
 
 from types import ModuleType
-from typing import TYPE_CHECKING, Iterator, Optional
+from typing import (
+    Iterable,
+    Iterator,
+    Optional,
+    TYPE_CHECKING,
+)
 import warnings
+from bs4._typing import _NamespaceMapping
 if TYPE_CHECKING:
     from bs4 import element
-    from bs4.element import ResultSet, Tag
-
+    from bs4.element import PageElement, ResultSet, Tag
+    
 soupsieve: Optional[ModuleType]
 try:
     import soupsieve
@@ -65,7 +71,7 @@ class CSS(object):
             )
         return self.api.escape(ident)
 
-    def _ns(self, ns, select):
+    def _ns(self, ns:Optional[_NamespaceMapping], select:str):
         """Normalize a dictionary of namespaces."""
         if not isinstance(select, self.api.SoupSieve) and ns is None:
             # If the selector is a precompiled pattern, it already has
@@ -74,7 +80,7 @@ class CSS(object):
             ns = self.tag._namespaces
         return ns
 
-    def _rs(self, results):
+    def _rs(self, results:Iterable[PageElement]) -> ResultSet:
         """Normalize a list of results to a Resultset.
 
         A ResultSet is more consistent with the rest of Beautiful
@@ -83,12 +89,13 @@ class CSS(object):
         result (a common mistake).
         """
         # Import here to avoid circular import
+        import pdb
         from bs4.element import ResultSet
         return ResultSet(None, results)
 
     def compile(self,
                 select:str,
-                namespaces:Optional[dict[str, str]]=None,
+                namespaces:Optional[_NamespaceMapping]=None,
                 flags:int=0,
                 **kwargs
                 ):
@@ -116,7 +123,7 @@ class CSS(object):
 
     def select_one(
             self, select:str,
-            namespaces:Optional[dict[str, str]]=None,
+            namespaces:Optional[_NamespaceMapping]=None,
             flags:int=0, **kwargs
     )-> element.Tag | None:
         """Perform a CSS selection operation on the current Tag and return the
@@ -143,7 +150,7 @@ class CSS(object):
         )
 
     def select(self, select:str,
-               namespaces:Optional[dict[str, str]]=None,
+               namespaces:Optional[_NamespaceMapping]=None,
                limit:int=0, flags:int=0, **kwargs) -> ResultSet:
         """Perform a CSS selection operation on the current `element.Tag`.
 
@@ -176,7 +183,7 @@ class CSS(object):
         )
 
     def iselect(self, select:str,
-               namespaces:Optional[dict[str, str]]=None,
+               namespaces:Optional[_NamespaceMapping]=None,
                limit:int=0, flags:int=0, **kwargs) -> Iterator[element.Tag]:
         """Perform a CSS selection operation on the current `element.Tag`.
 
@@ -206,7 +213,7 @@ class CSS(object):
         )
 
     def closest(self, select:str,
-               namespaces:Optional[dict[str, str]]=None,
+               namespaces:Optional[_NamespaceMapping]=None,
                flags:int=0, **kwargs) -> element.Tag | None:
         """Find the `element.Tag` closest to this one that matches the given selector.
 
@@ -234,7 +241,7 @@ class CSS(object):
         )
 
     def match(self, select:str,
-              namespaces:Optional[dict[str, str]]=None,
+              namespaces:Optional[_NamespaceMapping]=None,
               flags:int=0, **kwargs) -> bool:
         """Check whether or not this `element.Tag` matches the given CSS selector.
 
@@ -265,7 +272,7 @@ class CSS(object):
         )
 
     def filter(self, select:str,
-              namespaces:Optional[dict[str, str]]=None,
+              namespaces:Optional[_NamespaceMapping]=None,
               flags:int=0, **kwargs) -> ResultSet:
         """Filter this `element.Tag`'s direct children based on the given CSS selector.
 

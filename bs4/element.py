@@ -2506,9 +2506,9 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     of matching a `SoupStrainer` against a parse tree. Basically, a list of
     search results.
     """
-    source: SoupStrainer
+    source: Optional[SoupStrainer]
 
-    def __init__(self, source:SoupStrainer, result: Iterable[_PageElementT]=()) -> None:
+    def __init__(self, source:Optional[SoupStrainer], result: Iterable[_PageElementT]=()) -> None:
         super(ResultSet, self).__init__(result)
         self.source = source
 
