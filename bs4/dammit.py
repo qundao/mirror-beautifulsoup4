@@ -25,6 +25,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Pattern,
     Sequence,
     Set,
     Tuple,
@@ -77,7 +78,9 @@ def _chardet_dammit(s:bytes) -> Optional[str]:
 # a declared encoding inside an XML or HTML document.
 xml_encoding:str = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>' #: :meta private:
 html_meta:str = '<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]' #: :meta private:
-encoding_res: Dict[Type, Dict[str, re.Pattern]] = dict()
+
+# TODO: The Pattern type here could use more refinement, but it's tricky.
+encoding_res: Dict[Type, Dict[str, Pattern]] = dict()
 encoding_res[bytes] = {
     'html' : re.compile(html_meta.encode("ascii"), re.I),
     'xml' : re.compile(xml_encoding.encode("ascii"), re.I),
@@ -106,7 +109,7 @@ class EntitySubstitution(object):
     #: HTML entity.
     #:
     #: :meta hide-value:
-    CHARACTER_TO_HTML_ENTITY_RE: re.Pattern
+    CHARACTER_TO_HTML_ENTITY_RE: Pattern[str]
 
     @classmethod
     def _populate_class_variables(cls) -> None:
@@ -245,7 +248,7 @@ class EntitySubstitution(object):
     #: is not part of an XML or HTML entity.
     #:
     #: :meta hide-value:
-    BARE_AMPERSAND_OR_BRACKET: re.Pattern = re.compile(
+    BARE_AMPERSAND_OR_BRACKET: Pattern[str] = re.compile(
         "([<>]|"
         "&(?!#\\d+;|#x[0-9a-fA-F]+;|\\w+;)"
         ")"
@@ -254,7 +257,7 @@ class EntitySubstitution(object):
     #: A regular expression matching an angle bracket or an ampersand.
     #:
     #: :meta hide-value:    
-    AMPERSAND_OR_BRACKET: re.Pattern = re.compile("([<>&])")
+    AMPERSAND_OR_BRACKET: Pattern[str] = re.compile("([<>&])")
 
     @classmethod
     def _substitute_html_entity(cls, matchobj:re.Match) -> str:

@@ -8,7 +8,6 @@ import warnings
 
 from bs4.css import CSS
 from bs4._deprecation import (
-    _alias,
     _deprecated,
     _deprecated_alias,
     _deprecated_function_alias,
@@ -30,6 +29,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Pattern,
     Sequence,
     Set,
     TYPE_CHECKING,
@@ -63,7 +63,7 @@ _deprecated_names = dict(
     whitespace_re = 'The {name} attribute was deprecated in version 4.7.0. If you need it, make your own copy.'
 )
 #: :meta private:
-_deprecated_whitespace_re: re.Pattern[str] = re.compile(r"\s+")
+_deprecated_whitespace_re: Pattern[str] = re.compile(r"\s+")
 
 def __getattr__(name):
     if name in _deprecated_names:
@@ -81,7 +81,7 @@ def __getattr__(name):
 DEFAULT_OUTPUT_ENCODING:str = "utf-8"
 
 #: A regular expression that can be used to split on whitespace.
-nonwhitespace_re: re.Pattern[str] = re.compile(r"\S+")
+nonwhitespace_re: Pattern[str] = re.compile(r"\S+")
 
 #: These encodings are recognized by Python (so `Tag.encode`
 #: could theoretically support them) but XML and HTML don't recognize
@@ -205,7 +205,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     #: Match the 'charset' argument inside the 'content' attribute
     #: of a <meta> tag.
     #: :meta private:
-    CHARSET_RE: re.Pattern[str] = re.compile(
+    CHARSET_RE: Pattern[str] = re.compile(
         r"((^|;)\s*charset=)([^;]*)", re.M
     )
     

@@ -11,6 +11,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Pattern,
     Sequence,
     Set,
     Tuple,
@@ -33,7 +34,7 @@ from bs4._typing import (
 
 class MatchRule(object):
     string: Optional[str]
-    pattern: Optional[re.Pattern]
+    pattern: Optional[Pattern[str]]
     present: Optional[bool]
 
     # All MatchRule objects also have an attribute ``function``, but
@@ -42,7 +43,7 @@ class MatchRule(object):
     def __init__(
             self,
             string:Optional[Union[str, bytes]]=None,
-            pattern:Optional[re.Pattern]=None,
+            pattern:Optional[Pattern]=None,
             function:Optional[Callable]=None,
             present:Optional[bool]=None,
     ):
@@ -258,7 +259,7 @@ class SoupStrainer(object):
             yield rule_class(present=obj)
         elif callable(obj):
             yield rule_class(function=obj)
-        elif isinstance(obj, re.Pattern):
+        elif isinstance(obj, Pattern):
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:

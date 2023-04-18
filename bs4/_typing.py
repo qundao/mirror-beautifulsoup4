@@ -4,8 +4,6 @@
 # that can be used once Beautiful Soup drops support for older
 # versions:
 #
-# * In 3.9, the re.Pattern type can be made more specific, e.g.
-#   re.Pattern[str].
 # * In 3.10, x|y is an accepted shorthand for Union[x,y].
 # * In 3.10, TypeAlias gains capabilities that can be used to
 #   improve the tree matching types (I don't remember what, exactly).
@@ -17,6 +15,7 @@ from typing import (
     Dict,
     IO,
     Iterable,
+    Pattern,
     TYPE_CHECKING,
     Union,
 )
@@ -73,7 +72,7 @@ _StringMatchFunction:TypeAlias = Callable[[str], bool]
 
 # Either a tag name, an attribute value or a string can be matched
 # against a string, bytestring, regular expression, or a boolean.
-_BaseStrainable:TypeAlias = Union[str, bytes, re.Pattern, bool]
+_BaseStrainable:TypeAlias = Union[str, bytes, Pattern[str], bool]
 
 # A tag can also be matched using a function that takes the Tag
 # as its sole argument.

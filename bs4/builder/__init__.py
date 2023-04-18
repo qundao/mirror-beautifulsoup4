@@ -13,6 +13,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Pattern,
     Set,
     Tuple,
     Type,
@@ -584,10 +585,10 @@ class DetectsXMLParsedAsHTML(object):
     """
 
     #: Regular expression for seeing if string markup has an <html> tag.
-    LOOKS_LIKE_HTML:re.Pattern = re.compile("<[^ +]html", re.I)
+    LOOKS_LIKE_HTML:Pattern[str] = re.compile("<[^ +]html", re.I)
 
     #: Regular expression for seeing if byte markup has an <html> tag.
-    LOOKS_LIKE_HTML_B:re.Pattern = re.compile(b"<[^ +]html", re.I)
+    LOOKS_LIKE_HTML_B:Pattern[bytes] = re.compile(b"<[^ +]html", re.I)
 
     #: The start of an XML document string.
     XML_PREFIX:str = '<?xml'
