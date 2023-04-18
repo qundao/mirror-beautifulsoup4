@@ -38,7 +38,11 @@ if TYPE_CHECKING:
         NavigableString, Tag,
         _AttributeValues, _AttributeValue,
     )
-
+    from bs4._typing import (
+        _Encoding,
+        _Encodings,
+    )
+    
 __all__ = [
     'HTMLTreeBuilder',
     'SAXTreeBuilder',
@@ -268,10 +272,10 @@ class TreeBuilder(object):
 
     def prepare_markup(
             self, markup:Union[bytes, str],
-            user_specified_encoding:Optional[str]=None,
-            document_declared_encoding:Optional[str]=None,
-            exclude_encodings:Optional[Iterable[str]]=None
-    ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
+            user_specified_encoding:Optional[_Encoding]=None,
+            document_declared_encoding:Optional[_Encoding]=None,
+            exclude_encodings:Optional[_Encodings]=None
+    ) -> Iterable[Tuple[Union[bytes, str], Optional[_Encoding], Optional[_Encoding], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -318,14 +322,13 @@ class TreeBuilder(object):
         """
         return fragment
 
-    def set_up_substitutions(self, tag):
+    def set_up_substitutions(self, tag:Tag) -> bool:
         """Set up any substitutions that will need to be performed on 
         a `Tag` when it's output as a string.
 
         By default, this does nothing. See `HTMLTreeBuilder` for a
         case where this is used.
 
-        :param tag: A `Tag`
         :return: Whether or not a substitution was performed.
         :meta private:
         """
@@ -569,10 +572,10 @@ class DetectsXMLParsedAsHTML(object):
     """
 
     #: Regular expression for seeing if string markup has an <html> tag.
-    LOOKS_LIKE_HTML:re.Pattern[str] = re.compile("<[^ +]html", re.I)
+    LOOKS_LIKE_HTML:re.Pattern = re.compile("<[^ +]html", re.I)
 
     #: Regular expression for seeing if byte markup has an <html> tag.
-    LOOKS_LIKE_HTML_B:re.Pattern[bytes] = re.compile(b"<[^ +]html", re.I)
+    LOOKS_LIKE_HTML_B:re.Pattern = re.compile(b"<[^ +]html", re.I)
 
     #: The start of an XML document string.
     XML_PREFIX:str = '<?xml'

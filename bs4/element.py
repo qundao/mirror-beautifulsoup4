@@ -19,8 +19,27 @@ from bs4.formatter import (
     XMLFormatter,
 )
 
-from typing import Any, Callable, cast, Dict, Generator, Generic, Iterator, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, TYPE_CHECKING, Type, TypeVar, Union
-from typing_extensions import Self, TypeAlias
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    TYPE_CHECKING,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
+from typing_extensions import Self
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
@@ -29,16 +48,14 @@ if TYPE_CHECKING:
         _EntitySubstitutionFunction,
         _FormatterOrName,
     )
-    from bs4.strainer import (
+    from bs4._typing import (
+        _AttributeValue,
+        _AttributeValues,
         _StrainableElement,
         _StrainableAttribute,
         _StrainableAttributes,
         _StrainableString,
     )
-
-# Define type aliases to improve readability.
-_AttributeValue: TypeAlias = Union[str, Iterable[str]]
-_AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/

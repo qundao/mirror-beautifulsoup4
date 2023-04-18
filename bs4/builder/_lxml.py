@@ -47,14 +47,17 @@ from bs4.builder import (
     XML)
 from bs4.dammit import EncodingDetector
 if TYPE_CHECKING:
+    from bs4._typing import (
+        _Encoding,
+        _Encodings,
+        _NamespacePrefix,
+        _NamespaceURL,
+        _NamespaceMapping,
+        _InvertedNamespaceMapping,
+    )
     from bs4 import BeautifulSoup
 
 LXML:str = 'lxml'
-
-_NamespacePrefix = str
-_NamespaceURL = str
-_NamespaceMapping = Dict[_NamespacePrefix, _NamespaceURL]
-_InvertedNamespaceMapping = Dict[_NamespaceURL, _NamespacePrefix]
 
 def _invert(d):
     "Invert a dictionary."
@@ -186,10 +189,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
 
     def prepare_markup(
             self, markup:Union[bytes, str],
-            user_specified_encoding:Optional[str]=None,
-            document_declared_encoding:Optional[str]=None,
-            exclude_encodings:Optional[Iterable[str]]=None,
-    ) -> Iterable[Tuple[Union[str,bytes], Optional[str], Optional[str], bool]]:
+            user_specified_encoding:Optional[_Encoding]=None,
+            document_declared_encoding:Optional[_Encoding]=None,
+            exclude_encodings:Optional[_Encodings]=None,
+    ) -> Iterable[Tuple[Union[str,bytes], Optional[_Encoding], Optional[_Encoding], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -434,7 +437,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     features: Iterable[str] = list(ALTERNATE_NAMES) + [NAME, HTML, FAST, PERMISSIVE]
     is_xml: bool = False
 
-    def default_parser(self, encoding) -> Type[Any]:
+    def default_parser(self, encoding:Optional[_Encoding]) -> Type[Any]:
         return etree.HTMLParser
 
     def feed(self, markup:Union[bytes, str]) -> None: 

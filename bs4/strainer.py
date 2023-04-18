@@ -22,52 +22,15 @@ import warnings
 
 from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
+from bs4._typing import (
+    _TagMatchFunction,
+    _StringMatchFunction,
+    _StrainableElement,
+    _StrainableAttribute,
+    _StrainableAttributes,
+    _StrainableString,
+)
 
-
-# Define some type aliases to represent the many possibilities for
-# matching bits of a parse tree.
-#
-# This is very complicated because we're applying a formal type system
-# to some very DWIM code. The types we end up with will be the types
-# of the arguments to the SoupStrainer constructor and (more
-# familiarly to Beautiful Soup users) the find* methods.
-
-# TODO In Python 3.10 we can use TypeAlias for this stuff.
-
-# A function that takes a Tag and returns a yes-or-no answer.
-# A TagNameMatchRule expects this kind of function, if you're
-# going to pass it a function.
-_TagMatchFunction = Callable[['Tag'], bool]
-
-# A function that takes a single string and returns a yes-or-no
-# answer. An AttributeValueMatchRule expects this kind of function, if
-# you're going to pass it a function. So does a StringMatchRule
-_StringMatchFunction = Callable[[str], bool]
-
-# Either a tag name, an attribute value or a string can be matched
-# against a string, bytestring, regular expression, or a boolean.
-_BaseStrainable = Union[str, bytes, re.Pattern, bool]
-
-# A tag can also be matched using a function that takes the Tag
-# as its sole argument.
-_BaseStrainableElement = Union[_BaseStrainable, _TagMatchFunction]
-
-# A tag's attribute value can be matched using a function that takes
-# the value as its sole argument.
-_BaseStrainableAttribute = Union[_BaseStrainable, _StringMatchFunction]
-
-# Finally, a tag name, attribute or string can be matched using either
-# a single criterion or a list of criteria.
-_StrainableElement = Union[
-    _BaseStrainableElement, Iterable[_BaseStrainableElement]
-]
-_StrainableAttribute = Union[
-    _BaseStrainableAttribute, Iterable[_BaseStrainableAttribute]
-]
-
-_StrainableAttributes = Dict[str, _StrainableAttribute]
-_StrainableString = _StrainableAttribute
-    
 class MatchRule(object):
     string: Optional[str]
     pattern: Optional[re.Pattern]

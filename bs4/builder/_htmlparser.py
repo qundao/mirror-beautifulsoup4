@@ -44,11 +44,11 @@ from bs4.builder import (
     STRICT,
     )
 
-from bs4.element import _AttributeValues, Tag
+from bs4.element import Tag
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString
-    from bs4.dammit import _Encoding
+    from bs4._typing import _AttributeValues, _Encoding, _Encodings
     
 HTMLPARSER = 'html.parser'
 
@@ -353,10 +353,10 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         
     def prepare_markup(
             self, markup:Union[bytes, str],
-            user_specified_encoding:Optional[str]=None,
-            document_declared_encoding:Optional[str]=None,
-            exclude_encodings:Optional[Iterable[str]]=None
-    ) -> Iterable[Tuple[str, Optional[str], Optional[str], bool]]:
+            user_specified_encoding:Optional[_Encoding]=None,
+            document_declared_encoding:Optional[_Encoding]=None,
+            exclude_encodings:Optional[_Encodings]=None
+    ) -> Iterable[Tuple[str, Optional[_Encoding], Optional[_Encoding], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 

@@ -41,14 +41,8 @@ from .builder import (
     XMLParsedAsHTMLWarning,
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
-from .dammit import (
-    _Encoding,
-    _Encodings,
-    UnicodeDammit,
-)
+from .dammit import UnicodeDammit
 from .element import (
-    _AttributeValue,
-    _AttributeValues,
     CData,
     Comment,
     CSS,
@@ -72,18 +66,22 @@ from typing import (
     cast,
     Counter as CounterType,
     Dict,
-    IO,
     Iterable,
     List,
     Sequence,
     Optional,
     Type,
+    TYPE_CHECKING,
     Union,
 )
-from typing_extensions import TypeAlias
 
-# Define custom types to improve readability
-_IncomingMarkup: TypeAlias = Union[str,bytes,IO]
+from bs4._typing import (
+    _AttributeValue,
+    _AttributeValues,
+    _Encoding,
+    _Encodings,
+    _IncomingMarkup,
+)
 
 # Define some custom warnings.
 class GuessedAtParserWarning(UserWarning):

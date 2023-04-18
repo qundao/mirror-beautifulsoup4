@@ -5,7 +5,16 @@ __all__ = [
     'HTML5TreeBuilder',
     ]
 
-from typing import Iterable, List, Tuple, Union, Optional
+from typing import (
+    Iterable,
+    List,
+    Optional,
+    TYPE_CHECKING,
+    Tuple,
+    Union,
+)
+from bs4._typing import _Encoding, _Encodings
+
 import warnings
 import re
 from bs4.builder import (
@@ -33,6 +42,7 @@ from bs4.element import (
 
 from html5lib.treebuilders import base as treebuilder_base
 
+
 class HTML5TreeBuilder(HTMLTreeBuilder):
     """Use `html5lib <https://github.com/html5lib/html5lib-python>`_ to
     build a tree.
@@ -52,17 +62,17 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     NAME:str = "html5lib"
 
-    features:List[str] = [NAME, PERMISSIVE, HTML_5, HTML]
+    features:Iterable[str] = [NAME, PERMISSIVE, HTML_5, HTML]
 
     #: html5lib can tell us which line number and position in the
     #: original file is the source of an element.
     TRACKS_LINE_NUMBERS:bool = True
     
     def prepare_markup(self, markup:Union[bytes, str],
-                       user_specified_encoding:Optional[str]=None,
-                       document_declared_encoding:Optional[str]=None,
-                       exclude_encodings:Optional[Iterable[str]]=None
-        ) -> Iterable[Tuple[Union[bytes, str], Optional[str], Optional[str], bool]]:
+                       user_specified_encoding:Optional[_Encoding]=None,
+                       document_declared_encoding:Optional[_Encoding]=None,
+                       exclude_encodings:Optional[_Encodings]=None
+        ) -> Iterable[Tuple[Union[bytes, str], Optional[_Encoding], Optional[_Encoding], bool]]:
         # Store the user-specified encoding for use later on.
         self.user_specified_encoding = user_specified_encoding
 

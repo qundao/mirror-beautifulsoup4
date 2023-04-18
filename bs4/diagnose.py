@@ -7,8 +7,11 @@ import cProfile
 from io import BytesIO
 from html.parser import HTMLParser
 import bs4
-from bs4 import BeautifulSoup, __version__, _IncomingMarkup
+from bs4 import BeautifulSoup, __version__ 
 from bs4.builder import builder_registry
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bs4._typing import _IncomingMarkup
 
 import os
 import pstats

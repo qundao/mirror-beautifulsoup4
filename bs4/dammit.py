@@ -19,7 +19,23 @@ import re
 from logging import Logger, getLogger
 import string
 from types import ModuleType
-from typing import cast, Dict, Iterable, Iterator, Optional, List, Sequence, Set, Type, Union, Tuple
+from typing import (
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
+from bs4._typing import (
+    _Encoding,
+    _Encodings,
+)
 import warnings
 
 # Import a library to autodetect character encodings. We'll support
@@ -55,10 +71,6 @@ def _chardet_dammit(s:bytes) -> Optional[str]:
         return None
     module = cast(ModuleType, chardet_module)
     return module.detect(s)['encoding']
-
-# Type alias for an encoding and a list of them, to improve readability.
-_Encoding = str
-_Encodings = Iterable[_Encoding]
 
 # Build bytestring and Unicode versions of regular expressions for finding
 # a declared encoding inside an XML or HTML document.
