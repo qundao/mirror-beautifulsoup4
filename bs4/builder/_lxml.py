@@ -54,6 +54,7 @@ if TYPE_CHECKING:
         _NamespaceURL,
         _NamespaceMapping,
         _InvertedNamespaceMapping,
+        _RawMarkup,
     )
     from bs4 import BeautifulSoup
 
@@ -184,7 +185,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             return (None, tag)
 
     def prepare_markup(
-            self, markup:Union[bytes, str],
+            self, markup:_RawMarkup,
             user_specified_encoding:Optional[_Encoding]=None,
             document_declared_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None,
@@ -436,7 +437,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     def default_parser(self, encoding:Optional[_Encoding]) -> Type[Any]:
         return etree.HTMLParser
 
-    def feed(self, markup:Union[bytes, str]) -> None: 
+    def feed(self, markup:_RawMarkup) -> None: 
         # We know self.soup is set by the time feed() is called.
         assert self.soup is not None
         encoding = self.soup.original_encoding

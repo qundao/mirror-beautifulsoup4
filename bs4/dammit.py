@@ -35,6 +35,7 @@ from typing import (
 from bs4._typing import (
     _Encoding,
     _Encodings,
+    _RawMarkup,
 )
 import warnings
 

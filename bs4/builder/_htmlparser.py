@@ -48,7 +48,12 @@ from bs4.element import Tag
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString
-    from bs4._typing import _AttributeValues, _Encoding, _Encodings
+    from bs4._typing import (
+        _AttributeValues,
+        _Encoding,
+        _Encodings,
+        _RawMarkup,
+    )
     
 HTMLPARSER = 'html.parser'
 
@@ -352,7 +357,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         self.parser_args = (parser_args, parser_kwargs)
         
     def prepare_markup(
-            self, markup:Union[bytes, str],
+            self, markup:_RawMarkup,
             user_specified_encoding:Optional[_Encoding]=None,
             document_declared_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None

@@ -13,7 +13,11 @@ from typing import (
     Tuple,
     Union,
 )
-from bs4._typing import _Encoding, _Encodings
+from bs4._typing import (
+    _Encoding,
+    _Encodings,
+    _RawMarkup,
+)
 
 import warnings
 import re
@@ -68,11 +72,11 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
     #: original file is the source of an element.
     TRACKS_LINE_NUMBERS:bool = True
     
-    def prepare_markup(self, markup:Union[bytes, str],
+    def prepare_markup(self, markup:_RawMarkup,
                        user_specified_encoding:Optional[_Encoding]=None,
                        document_declared_encoding:Optional[_Encoding]=None,
                        exclude_encodings:Optional[_Encodings]=None
-        ) -> Iterable[Tuple[Union[bytes, str], Optional[_Encoding], Optional[_Encoding], bool]]:
+        ) -> Iterable[Tuple[_RawMarkup, Optional[_Encoding], Optional[_Encoding], bool]]:
         # Store the user-specified encoding for use later on.
         self.user_specified_encoding = user_specified_encoding
 

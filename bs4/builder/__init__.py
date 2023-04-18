@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from bs4._typing import (
         _Encoding,
         _Encodings,
+        _RawMarkup,
     )
     
 __all__ = [
@@ -282,11 +283,11 @@ class TreeBuilder(object):
         raise NotImplementedError()
 
     def prepare_markup(
-            self, markup:Union[bytes, str],
+            self, markup:_RawMarkup,
             user_specified_encoding:Optional[_Encoding]=None,
             document_declared_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None
-    ) -> Iterable[Tuple[Union[bytes, str], Optional[_Encoding], Optional[_Encoding], bool]]:
+    ) -> Iterable[Tuple[_RawMarkup, Optional[_Encoding], Optional[_Encoding], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
 
@@ -399,7 +400,7 @@ class SAXTreeBuilder(TreeBuilder):
             )
         super(SAXTreeBuilder, self).__init__(*args, **kwargs)
     
-    def feed(self, markup:Union[str,bytes]):
+    def feed(self, markup:_RawMarkup):
         raise NotImplementedError()
 
     def close(self):
@@ -600,7 +601,7 @@ class DetectsXMLParsedAsHTML(object):
     _root_tag: Optional[Tag]
     
     @classmethod
-    def warn_if_markup_looks_like_xml(cls, markup:Optional[Union[bytes, str]]) -> bool:
+    def warn_if_markup_looks_like_xml(cls, markup:Optional[_RawMarkup]) -> bool:
         """Perform a check on some markup to see if it looks like XML
         that's not XHTML. If so, issue a warning.
 
