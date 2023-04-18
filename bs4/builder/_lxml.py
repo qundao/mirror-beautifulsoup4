@@ -169,10 +169,6 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # callable, since that means there's no way to create new
         # parsers for different encodings.
         self._default_parser = parser
-        if empty_element_tags is not None:
-            self.empty_element_tags = set(empty_element_tags)
-        else:
-            self.empty_element_tags = set()
         self.soup = None
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
         self.active_namespace_prefixes = [dict(self.DEFAULT_NSMAPS)]

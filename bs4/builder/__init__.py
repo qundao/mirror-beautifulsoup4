@@ -179,6 +179,7 @@ class TreeBuilder(object):
                  preserve_whitespace_tags:Set[str]=USE_DEFAULT,
                  store_line_numbers:bool=USE_DEFAULT,
                  string_containers:Dict[str, Type[NavigableString]]=USE_DEFAULT,
+                 empty_element_tags:Set[str]=USE_DEFAULT
     ):
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
@@ -187,6 +188,10 @@ class TreeBuilder(object):
         if preserve_whitespace_tags is self.USE_DEFAULT:
             preserve_whitespace_tags = self.DEFAULT_PRESERVE_WHITESPACE_TAGS
         self.preserve_whitespace_tags = preserve_whitespace_tags
+        if empty_element_tags is self.USE_DEFAULT:
+            self.empty_element_tags = self.DEFAULT_EMPTY_ELEMENT_TAGS
+        else:
+            self.empty_element_tags = empty_element_tags
         if store_line_numbers == self.USE_DEFAULT:
             store_line_numbers = self.TRACKS_LINE_NUMBERS
         self.store_line_numbers = store_line_numbers 
@@ -221,6 +226,12 @@ class TreeBuilder(object):
     #: The textual contents of tags with these names should be
     #: instantiated with some class other than NavigableString.
     DEFAULT_STRING_CONTAINERS: Dict[str, Type[NavigableString]] = {}
+
+    #: By default, tags are treated as empty-element tags if they have
+    #: no contents--that is, using XML rules. HTMLTreeBuilder
+    #: defines a different set of DEFAULT_EMPTY_ELEMENT_TAGS based on the
+    #: HTML 4 and HTML5 standards.
+    DEFAULT_EMPTY_ELEMENT_TAGS: Optional[Set] = None
     
     #: Most parsers don't keep track of line numbers.
     TRACKS_LINE_NUMBERS: bool = False
@@ -438,7 +449,7 @@ class HTMLTreeBuilder(TreeBuilder):
 
     #: Some HTML tags are defined as having no contents. Beautiful Soup
     #: treats these specially.
-    empty_element_tags: Set[str] = set([
+    DEFAULT_EMPTY_ELEMENT_TAGS: Set[str] = set([
         # These are from HTML5.
         'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr',
         
@@ -450,7 +461,7 @@ class HTMLTreeBuilder(TreeBuilder):
     #: Soup does not treat these elements differently from other elements,
     #: but it may do so eventually, and this information is available if
     #: you need to use it.
-    block_elements: Set[str] = set(["address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video"])
+    DEFAULT_BLOCK_ELEMENTS: Set[str] = set(["address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video"])
 
     #: These HTML tags need special treatment so they can be
     #: represented by a string class other than NavigableString.
