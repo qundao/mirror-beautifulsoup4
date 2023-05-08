@@ -23,13 +23,13 @@ def _deprecated_alias(old_name, new_name, version):
     :meta private:
     """
     @property
-    def alias(self):
+    def alias(self) -> Any:
         ":meta private:"
         warnings.warn(f"Access to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
         return getattr(self, new_name)
 
     @alias.setter
-    def alias(self, value:str):
+    def alias(self, value:str)->Any:
         ":meta private:"
         warnings.warn(f"Write to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
         return setattr(self, new_name, value)
