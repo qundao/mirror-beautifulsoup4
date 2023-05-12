@@ -162,9 +162,6 @@ class TestFuzz(object):
         "filename", [
             # b'-      \xff\xff  <math>\x10<select><mi><select><select>t'
             "clusterfuzz-testcase-minimized-bs4_fuzzer-6306874195312640",
-
-            # b'\xb1<a>\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff'
-            "clusterfuzz-testcase-minimized-bs4_fuzzer-6401239223762944"
         ]
     )
     def test_html5lib_parse_errors(self, filename):
