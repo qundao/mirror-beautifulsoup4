@@ -71,7 +71,7 @@ def _chardet_dammit(s:bytes) -> Optional[str]:
     """Try as hard as possible to detect the encoding of a bytestring."""
     if chardet_module is None or isinstance(s, str):
         return None
-    module = cast(ModuleType, chardet_module)
+    module = chardet_module
     return module.detect(s)['encoding']
 
 # Build bytestring and Unicode versions of regular expressions for finding
@@ -260,14 +260,14 @@ class EntitySubstitution(object):
     AMPERSAND_OR_BRACKET: Pattern[str] = re.compile("([<>&])")
 
     @classmethod
-    def _substitute_html_entity(cls, matchobj:re.Match) -> str:
+    def _substitute_html_entity(cls, matchobj:re.Match[str]) -> str:
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
         return "&%s;" % entity
 
     @classmethod
-    def _substitute_xml_entity(cls, matchobj:re.Match) -> str:
+    def _substitute_xml_entity(cls, matchobj:re.Match[str]) -> str:
         """Used with a regular expression to substitute the
         appropriate XML entity for a special character string."""
         entity = cls.CHARACTER_TO_XML_ENTITY[matchobj.group(0)]
@@ -550,11 +550,11 @@ class EncodingDetector:
             # Unicode data cannot have a byte-order mark.
             return data, encoding
         if (len(data) >= 4) and (data[:2] == b'\xfe\xff') \
-               and (data[2:4] != '\x00\x00'):
+               and (data[2:4] != b'\x00\x00'):
             encoding = 'utf-16be'
             data = data[2:]
         elif (len(data) >= 4) and (data[:2] == b'\xff\xfe') \
-                 and (data[2:4] != '\x00\x00'):
+                 and (data[2:4] != b'\x00\x00'):
             encoding = 'utf-16le'
             data = data[2:]
         elif data[:3] == b'\xef\xbb\xbf':
@@ -676,7 +676,7 @@ class UnicodeDammit:
         )
 
         # Short-circuit if the data is in Unicode to begin with.
-        if isinstance(markup, str) or markup == '':
+        if isinstance(markup, str) or markup == b'':
             self.markup = markup
             self.unicode_markup = str(markup)
             self.original_encoding = None
@@ -752,7 +752,7 @@ class UnicodeDammit:
 
     log: Logger #: :meta private:
             
-    def _sub_ms_char(self, match:re.Match) -> bytes:
+    def _sub_ms_char(self, match:re.Match[bytes]) -> bytes:
         """Changes a MS smart quote character to an XML or HTML
         entity, or an ASCII character.
 
@@ -815,7 +815,7 @@ class UnicodeDammit:
         lookup_result = self.find_codec(proposed)
         if lookup_result is None or (lookup_result, errors) in self.tried_encodings:
             return None
-        proposed = cast(_Encoding, lookup_result)
+        proposed = lookup_result
         self.tried_encodings.append((proposed, errors))
         markup = self.markup
         # Convert smart quotes to HTML if coming from an encoding
