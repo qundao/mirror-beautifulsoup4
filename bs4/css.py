@@ -26,9 +26,9 @@ from typing import (
 import warnings
 from bs4._typing import _NamespaceMapping
 if TYPE_CHECKING:
+    from soupsieve import SoupSieve
     from bs4 import element
     from bs4.element import ResultSet, Tag
-    from soupsieve import SoupSieve
     
 soupsieve: Optional[ModuleType]
 try:
@@ -80,7 +80,7 @@ class CSS(object):
             # If the selector is a precompiled pattern, it already has
             # a namespace context compiled in, which cannot be
             # replaced.
-            ns = str, self.tag._namespaces
+            ns = self.tag._namespaces
         return ns
 
     def _rs(self, results:Iterable[Tag]) -> ResultSet[Tag]:
@@ -119,11 +119,8 @@ class CSS(object):
         :return: A precompiled selector object.
         :rtype: soupsieve.SoupSieve
         """
-        return cast(
-            SoupSieve,
-            self.api.compile(
-                select, self._ns(namespaces, select), flags, **kwargs
-            )
+        return self.api.compile(
+            select, self._ns(namespaces, select), flags, **kwargs
         )
 
     def select_one(
@@ -150,9 +147,9 @@ class CSS(object):
         :param kwargs: Keyword arguments to be passed into Soup Sieve's
            `soupsieve.select_one() <https://facelessuser.github.io/soupsieve/api/#soupsieveselect_one>`_ method.
         """
-        return cast(Tag, self.api.select_one(
+        return self.api.select_one(
             select, self.tag, self._ns(namespaces, select), flags, **kwargs
-        ))
+        )
 
     def select(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
@@ -213,9 +210,9 @@ class CSS(object):
         :param kwargs: Keyword arguments to be passed into Soup Sieve's
            `soupsieve.iselect() <https://facelessuser.github.io/soupsieve/api/#soupsieveiselect>`_ method.
         """
-        return cast(Iterator[Tag], self.api.iselect(
+        return self.api.iselect(
             select, self.tag, self._ns(namespaces, select), limit, flags, **kwargs
-        ))
+        )
 
     def closest(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
@@ -241,9 +238,9 @@ class CSS(object):
            `soupsieve.closest() <https://facelessuser.github.io/soupsieve/api/#soupsieveclosest>`_ method.
 
         """
-        return cast(Optional[Tag], self.api.closest(
+        return self.api.closest(
             select, self.tag, self._ns(namespaces, select), flags, **kwargs
-        ))
+        )
 
     def match(self, select:str,
               namespaces:Optional[_NamespaceMapping]=None,

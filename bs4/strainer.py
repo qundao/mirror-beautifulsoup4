@@ -24,6 +24,7 @@ import warnings
 from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 from bs4._typing import (
+    _AttributeValue,
     _TagMatchFunction,
     _StringMatchFunction,
     _StrainableElement,
@@ -43,7 +44,7 @@ class MatchRule(object):
     def __init__(
             self,
             string:Optional[Union[str, bytes]]=None,
-            pattern:Optional[Pattern]=None,
+            pattern:Optional[Pattern[str]]=None,
             function:Optional[Callable]=None,
             present:Optional[bool]=None,
     ):
@@ -114,7 +115,7 @@ class MatchRule(object):
         cls = type(self).__name__
         return f"<{cls} string={self.string} pattern={self.pattern} function={self.function} present={self.present}>"
 
-    def __eq__(self, other:Any):
+    def __eq__(self, other:Any) -> bool:
         return (
             isinstance(other, MatchRule) and
             self.string==other.string and
@@ -177,7 +178,7 @@ class SoupStrainer(object):
                  **kwargs:_StrainableAttribute):
         
         if string is None and 'text' in kwargs:
-            string = kwargs.pop('text')
+            string = cast(Optional[_StrainableString], kwargs.pop('text'))
             warnings.warn(
                 "As of version 4.11.0, the 'text' argument to the SoupStrainer constructor is deprecated. Use 'string' instead.",
                 DeprecationWarning, stacklevel=2
@@ -225,18 +226,18 @@ class SoupStrainer(object):
         self.__string = string
 
     @property
-    def string(self):
+    def string(self) -> Optional[_StrainableString]:
         ":meta private:"
         warnings.warn(f"Access to deprecated property string. (Look at .string_rules instead) -- Deprecated since version 4.13.0.", DeprecationWarning, stacklevel=2)
         return self.__string
 
     @property
-    def text(self):
+    def text(self) -> Optional[_StrainableString]:
         ":meta private:"
         warnings.warn(f"Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0.", DeprecationWarning, stacklevel=2)
         return self.__string
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} name={self.name_rules} attrs={self.attribute_rules} string={self.string_rules}>"
 
     @classmethod
@@ -280,7 +281,7 @@ class SoupStrainer(object):
         else:
             yield rule_class(string=str(obj))
             
-    def matches_tag(self, tag=Tag) -> bool:
+    def matches_tag(self, tag:Tag) -> bool:
         """Do the rules of this SoupStrainer trigger a match against the
         given `Tag`?
 
@@ -341,17 +342,21 @@ class SoupStrainer(object):
                 return False
 
         # If there are string rules, at least one must match.
-        if self.string_rules and not self.matches_any_string_rule(tag.string):
-            return False
+        if self.string_rules:
+            _str = tag.string
+            if _str is None:
+                return False
+            if not self.matches_any_string_rule(_str):
+                return False
         return True
 
-    def _attribute_match(self, attr_value:Optional[str],
+    def _attribute_match(self, attr_value:Optional[_AttributeValue],
                          rules:Iterable[AttributeValueMatchRule]) -> bool:
         attr_values: Sequence[Optional[str]]
         if isinstance(attr_value, list):
             attr_values = attr_value
         else:
-            attr_values = [attr_value]
+            attr_value = [cast(str, attr_value)]
 
         def _match_attribute_value_helper(attr_values):
             for rule in rules:
