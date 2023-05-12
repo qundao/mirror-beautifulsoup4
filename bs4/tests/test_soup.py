@@ -174,7 +174,7 @@ class TestConstructor(SoupTest):
         # rather than Tag, String, and Comment objects.
         assert all(
             isinstance(x, (TagPlus, StringPlus, CommentPlus))
-            for x in soup.recursiveChildGenerator()
+            for x in soup.descendants
         )
 
     def test_alternate_string_containers(self):

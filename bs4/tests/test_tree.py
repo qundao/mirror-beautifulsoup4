@@ -822,8 +822,8 @@ class TestTreeModification(SoupTest):
 
         # Now replace each one with the empty string.
         left, right = a.contents
-        left.replaceWith('')
-        right.replaceWith('')
+        left.replace_with('')
+        right.replace_with('')
 
         # The <b> tag is still connected to the tree.
         assert "three" == soup.b.string
