@@ -79,6 +79,8 @@
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 
+= 4.12.3 (?)
+
 * Fixed a regression such that if you set .hidden on a tag, the tag
   becomes invisible but its contents are still visible. User manipulation
   of .hidden is not a documented or supported feature, so don't do this,
@@ -102,6 +104,8 @@ New deprecations in 4.13.0:
   documented method, but if you use it, you should start using
   SoupStrainer.allow_tag_creation() instead.
 
+=======
+>>>>>>> master
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents
