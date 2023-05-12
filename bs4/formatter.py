@@ -4,7 +4,8 @@ from typing_extensions import TypeAlias
 from bs4.dammit import EntitySubstitution
 
 if TYPE_CHECKING:
-    from bs4.element import Tag, _AttributeValue
+    from bs4._typing import _AttributeValue
+    from bs4.element import Tag
 
 
 class Formatter(EntitySubstitution):
@@ -176,15 +177,33 @@ class Formatter(EntitySubstitution):
 class HTMLFormatter(Formatter):
     """A generic Formatter for HTML."""
     REGISTRY: Dict[Optional[str], HTMLFormatter] = {}
-    def __init__(self, *args, **kwargs):
-        super(HTMLFormatter, self).__init__(self.HTML, *args, **kwargs)
+    def __init__(
+            self,
+            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
+            void_element_close_prefix:str='/',
+            cdata_containing_tags:Optional[Set[str]]=None,
+            empty_attributes_are_booleans:bool=False, indent:int=1,
+    ):
+        super(HTMLFormatter, self).__init__(
+            self.HTML, entity_substitution, void_element_close_prefix,
+            cdata_containing_tags, empty_attributes_are_booleans
+        )
 
     
 class XMLFormatter(Formatter):
     """A generic Formatter for XML."""
     REGISTRY: Dict[Optional[str], XMLFormatter] = {}
-    def __init__(self, *args, **kwargs):
-        super(XMLFormatter, self).__init__(self.XML, *args, **kwargs)
+    def __init__(
+            self,
+            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
+            void_element_close_prefix:str='/',
+            cdata_containing_tags:Optional[Set[str]]=None,
+            empty_attributes_are_booleans:bool=False, indent:int=1,
+    ):
+        super(XMLFormatter, self).__init__(
+            self.XML, entity_substitution, void_element_close_prefix,
+            cdata_containing_tags, empty_attributes_are_booleans
+        )
 
 
 # Set up aliases for the default formatters.
@@ -193,7 +212,7 @@ HTMLFormatter.REGISTRY['html'] = HTMLFormatter(
 )
 HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html,
-    void_element_close_prefix=None,
+    void_element_close_prefix='',
     empty_attributes_are_booleans=True,
 )
 HTMLFormatter.REGISTRY["minimal"] = HTMLFormatter(
