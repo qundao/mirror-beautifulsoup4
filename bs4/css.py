@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from types import ModuleType
 from typing import (
+    Any,
+    cast,
     Iterable,
     Iterator,
     Optional,
@@ -25,7 +27,8 @@ import warnings
 from bs4._typing import _NamespaceMapping
 if TYPE_CHECKING:
     from bs4 import element
-    from bs4.element import PageElement, ResultSet, Tag
+    from bs4.element import ResultSet, Tag
+    from soupsieve import SoupSieve
     
 soupsieve: Optional[ModuleType]
 try:
@@ -69,18 +72,18 @@ class CSS(object):
             raise NotImplementedError(
                 "Cannot escape CSS identifiers because the soupsieve package is not installed."
             )
-        return self.api.escape(ident)
+        return cast(str, self.api.escape(ident))
 
-    def _ns(self, ns:Optional[_NamespaceMapping], select:str):
+    def _ns(self, ns:Optional[_NamespaceMapping], select:str) -> Optional[_NamespaceMapping]:
         """Normalize a dictionary of namespaces."""
         if not isinstance(select, self.api.SoupSieve) and ns is None:
             # If the selector is a precompiled pattern, it already has
             # a namespace context compiled in, which cannot be
             # replaced.
-            ns = self.tag._namespaces
+            ns = str, self.tag._namespaces
         return ns
 
-    def _rs(self, results:Iterable[PageElement]) -> ResultSet:
+    def _rs(self, results:Iterable[Tag]) -> ResultSet[Tag]:
         """Normalize a list of results to a Resultset.
 
         A ResultSet is more consistent with the rest of Beautiful
@@ -89,7 +92,6 @@ class CSS(object):
         result (a common mistake).
         """
         # Import here to avoid circular import
-        import pdb
         from bs4.element import ResultSet
         return ResultSet(None, results)
 
@@ -97,8 +99,8 @@ class CSS(object):
                 select:str,
                 namespaces:Optional[_NamespaceMapping]=None,
                 flags:int=0,
-                **kwargs
-                ):
+                **kwargs:Any
+                ) -> SoupSieve:
         """Pre-compile a selector and return the compiled object.
 
         :param selector: A CSS selector.
@@ -117,14 +119,17 @@ class CSS(object):
         :return: A precompiled selector object.
         :rtype: soupsieve.SoupSieve
         """
-        return self.api.compile(
-            select, self._ns(namespaces, select), flags, **kwargs
+        return cast(
+            SoupSieve,
+            self.api.compile(
+                select, self._ns(namespaces, select), flags, **kwargs
+            )
         )
 
     def select_one(
             self, select:str,
             namespaces:Optional[_NamespaceMapping]=None,
-            flags:int=0, **kwargs
+            flags:int=0, **kwargs:Any
     )-> element.Tag | None:
         """Perform a CSS selection operation on the current Tag and return the
         first result, if any.
@@ -145,13 +150,13 @@ class CSS(object):
         :param kwargs: Keyword arguments to be passed into Soup Sieve's
            `soupsieve.select_one() <https://facelessuser.github.io/soupsieve/api/#soupsieveselect_one>`_ method.
         """
-        return self.api.select_one(
+        return cast(Tag, self.api.select_one(
             select, self.tag, self._ns(namespaces, select), flags, **kwargs
-        )
+        ))
 
     def select(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
-               limit:int=0, flags:int=0, **kwargs) -> ResultSet:
+               limit:int=0, flags:int=0, **kwargs:Any) -> ResultSet[Tag]:
         """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
@@ -183,8 +188,8 @@ class CSS(object):
         )
 
     def iselect(self, select:str,
-               namespaces:Optional[_NamespaceMapping]=None,
-               limit:int=0, flags:int=0, **kwargs) -> Iterator[element.Tag]:
+                namespaces:Optional[_NamespaceMapping]=None,
+                limit:int=0, flags:int=0, **kwargs:Any) -> Iterator[element.Tag]:
         """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
@@ -208,13 +213,13 @@ class CSS(object):
         :param kwargs: Keyword arguments to be passed into Soup Sieve's
            `soupsieve.iselect() <https://facelessuser.github.io/soupsieve/api/#soupsieveiselect>`_ method.
         """
-        return self.api.iselect(
+        return cast(Iterator[Tag], self.api.iselect(
             select, self.tag, self._ns(namespaces, select), limit, flags, **kwargs
-        )
+        ))
 
     def closest(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
-               flags:int=0, **kwargs) -> element.Tag | None:
+                flags:int=0, **kwargs:Any) -> Optional[element.Tag]:
         """Find the `element.Tag` closest to this one that matches the given selector.
 
         This uses the Soup Sieve library. For more information, see
@@ -236,13 +241,13 @@ class CSS(object):
            `soupsieve.closest() <https://facelessuser.github.io/soupsieve/api/#soupsieveclosest>`_ method.
 
         """
-        return self.api.closest(
+        return cast(Optional[Tag], self.api.closest(
             select, self.tag, self._ns(namespaces, select), flags, **kwargs
-        )
+        ))
 
     def match(self, select:str,
               namespaces:Optional[_NamespaceMapping]=None,
-              flags:int=0, **kwargs) -> bool:
+              flags:int=0, **kwargs:Any) -> bool:
         """Check whether or not this `element.Tag` matches the given CSS selector.
 
         This uses the Soup Sieve library. For more information, see
@@ -267,13 +272,13 @@ class CSS(object):
             <https://facelessuser.github.io/soupsieve/api/#soupsievematch>`_
             method.
         """
-        return self.api.match(
+        return cast(bool, self.api.match(
             select, self.tag, self._ns(namespaces, select), flags, **kwargs
-        )
+        ))
 
     def filter(self, select:str,
-              namespaces:Optional[_NamespaceMapping]=None,
-              flags:int=0, **kwargs) -> ResultSet:
+               namespaces:Optional[_NamespaceMapping]=None,
+               flags:int=0, **kwargs:Any) -> ResultSet[Tag]:
         """Filter this `element.Tag`'s direct children based on the given CSS selector.
 
         This uses the Soup Sieve library. It works the same way as
