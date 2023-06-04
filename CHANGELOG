@@ -5,6 +5,10 @@
   of .hidden is not a documented or supported feature, so don't do this,
   but it's not too difficult to keep the old behavior working.
 
+* Fixed a case found by Mengyuhan where html.parser giving up on
+  markup would result in an AssertionError instead of a
+  ParserRejectedMarkup exception.
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents
