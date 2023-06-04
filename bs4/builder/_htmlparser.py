@@ -431,11 +431,11 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         parser = BeautifulSoupHTMLParser(self.soup, *args, **kwargs)
         try:
             parser.feed(markup)
+            parser.close()
         except AssertionError as e:
             # html.parser raises AssertionError in rare cases to
             # indicate a fatal problem with the markup, especially
             # when there's an error in the doctype declaration.
             raise ParserRejectedMarkup(e)
-        parser.close()
         parser.already_closed_empty_element = []
 
