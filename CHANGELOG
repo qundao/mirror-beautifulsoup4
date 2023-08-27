@@ -9,6 +9,9 @@
   markup would result in an AssertionError instead of a
   ParserRejectedMarkup exception.
 
+* Corrected the syntax of the license definition in pyproject.toml. Patch
+  by Louis Maddox. [bug=2032848]
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents

@@ -7,7 +7,7 @@ name = "beautifulsoup4"
 dynamic = ["version"]
 description = "Screen-scraping library"
 readme = "README.md"
-license = "MIT"
+license = { text = "MIT License" }
 requires-python = ">=3.6.0"
 authors = [
     { name = "Leonard Richardson", email = "leonardr@segfault.org" },
