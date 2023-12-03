@@ -12,6 +12,9 @@
 * Corrected the syntax of the license definition in pyproject.toml. Patch
   by Louis Maddox. [bug=2032848]
 
+* Corrected a typo in a test that was causing test failures when run against
+  libxml2 2.12.1. [bug=2045481]
+
 = 4.12.2 (20230407)
 
 * Fixed an unhandled exception in BeautifulSoup.decode_contents
