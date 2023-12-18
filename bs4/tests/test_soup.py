@@ -390,9 +390,10 @@ class TestNewTag(SoupTest):
     """Test the BeautifulSoup.new_tag() method."""
     def test_new_tag(self):
         soup = self.soup("")
-        new_tag = soup.new_tag("foo", bar="baz", attrs={"name": "a name"})
+        new_tag = soup.new_tag("foo", string="txt", bar="baz", attrs={"name": "a name"})
         assert isinstance(new_tag, Tag)
         assert "foo" == new_tag.name
+        assert new_tag.string == "txt"
         assert dict(bar="baz", name="a name") == new_tag.attrs
         assert None == new_tag.parent
 

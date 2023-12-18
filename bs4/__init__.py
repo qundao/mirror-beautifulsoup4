@@ -498,7 +498,7 @@ class BeautifulSoup(Tag):
         self.pushTag(self)
 
     def new_tag(self, name, namespace=None, nsprefix=None, attrs={},
-                sourceline=None, sourcepos=None, **kwattrs):
+                sourceline=None, sourcepos=None, string=None, **kwattrs):
         """Create a new Tag associated with this BeautifulSoup object.
 
         :param name: The name of the new Tag.
@@ -511,14 +511,18 @@ class BeautifulSoup(Tag):
             (purportedly) found in its source document.
         :param sourcepos: The character position within `sourceline` where this
             tag was (purportedly) found.
+        :param string: Text content for the new Tag, if any.
         :param kwattrs: Keyword arguments for the new Tag's attribute values.
 
         """
         kwattrs.update(attrs)
-        return self.element_classes.get(Tag, Tag)(
+        tag =  self.element_classes.get(Tag, Tag)(
             None, self.builder, name, namespace, nsprefix, kwattrs,
             sourceline=sourceline, sourcepos=sourcepos
         )
+        if string:
+            tag.string = string
+        return tag
 
     def string_container(self, base_class=None):
         container = base_class or NavigableString
