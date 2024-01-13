@@ -228,9 +228,7 @@ Another alternative is the pure-Python `html5lib parser
 web browser does. Depending on your setup, you might install html5lib
 with one of these commands:
 
-:kbd:`$ apt-get install python-html5lib`
-
-:kbd:`$ easy_install html5lib`
+:kbd:`$ apt-get install python3-html5lib`
 
 :kbd:`$ pip install html5lib`
 
