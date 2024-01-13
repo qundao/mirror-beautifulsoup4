@@ -2230,7 +2230,7 @@ in Beautiful Soup 4.10.0.`
 ``wrap()``
 ----------
 
-``PageElement.wrap()`` wraps an element in the :py:class`Tag` object you specify. It
+``PageElement.wrap()`` wraps an element in the :py:class:`Tag` object you specify. It
 returns the new wrapper::
 
  soup = BeautifulSoup("<p>I wish I was bold.</p>", 'html.parser')
@@ -3107,7 +3107,7 @@ three :py:class:`SoupStrainer` objects::
  # ...
  #
 
-The `:py:class:`SoupStrainer`` behavior is as follows:
+The :py:class:`SoupStrainer` behavior is as follows:
 
 * When a tag matches, it is kept (including all its contents, whether they also
   match or not).
@@ -3433,23 +3433,19 @@ Beautiful Soup 3
 ================
 
 Beautiful Soup 3 is the previous release series, and is no longer
-being actively developed. It's currently packaged with all major Linux
-distributions:
-
-:kbd:`$ apt-get install python-beautifulsoup`
-
-It's also published through PyPi as :py:class:`BeautifulSoup`.:
-
-:kbd:`$ easy_install BeautifulSoup`
+supported. Development of Beautiful Soup 3 stopped in 2012, and the
+package was completely discontinued in 2021. There's no reason to
+install it unless you're trying to get very old software to work, but
+it's published through PyPi as :py:class:`BeautifulSoup`:
 
 :kbd:`$ pip install BeautifulSoup`
 
-You can also `download a tarball of Beautiful Soup 3.2.0
-<http://www.crummy.com/software/BeautifulSoup/bs3/download/3.x/BeautifulSoup-3.2.0.tar.gz>`_.
+You can also download `a tarball of the final release, 3.2.2
+<https://www.crummy.com/software/BeautifulSoup/download/3.x/BeautifulSoup-3.2.2.tar.gz>`_.
 
-If you ran ``easy_install beautifulsoup`` or ``easy_install
+If you ran ``pip install beautifulsoup`` or ``pip install
 BeautifulSoup``, but your code doesn't work, you installed Beautiful
-Soup 3 by mistake. You need to run ``easy_install beautifulsoup4``.
+Soup 3 by mistake. You need to run ``pip install beautifulsoup4``.
 
 `The documentation for Beautiful Soup 3 is archived online
 <http://www.crummy.com/software/BeautifulSoup/bs3/documentation.html>`_.
