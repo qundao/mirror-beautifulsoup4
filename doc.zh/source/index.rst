@@ -20,7 +20,7 @@ Beautiful Soup 4.4.0 文档
 * このページは日本語で利用できます(`外部リンク <http://kondou.com/BS4/>`_)
 * `이 문서는 한국어 번역도 가능합니다. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
 * `Este documento também está disponível em Português do Brasil. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr/>`_
-* `Este documento también está disponible en una traducción al español. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.es/>`_
+* `Este documento también está disponible en español. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.es/>`_
 * `Эта документация доступна на русском языке. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ru/>`_
   
 
