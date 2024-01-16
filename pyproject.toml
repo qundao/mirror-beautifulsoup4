@@ -54,6 +54,9 @@ include = [
     "/bs4/**/*.py",
     "/bs4/**/*.testcase",
 
+    # The tox build configuration
+    "tox.ini",
+
     # Metadata.
     "/CHANGELOG",
     "/LICENSE",
