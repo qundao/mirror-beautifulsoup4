@@ -1,7 +1,8 @@
 = 4.12.3 (Unreleased)
 
 * The Beautiful Soup documentation now has a Spanish translation, thanks
-  to Carlos Romero.
+  to Carlos Romero. Delong Wang's Chinese translation has been updated
+  to cover Beautiful Soup 4.12.0.
 
 * Fixed a regression such that if you set .hidden on a tag, the tag
   becomes invisible but its contents are still visible. User manipulation
