@@ -356,9 +356,9 @@ class SoupStrainer(object):
         if isinstance(attr_value, list):
             attr_values = attr_value
         else:
-            attr_value = [cast(str, attr_value)]
+            attr_values = [cast(str, attr_value)]
 
-        def _match_attribute_value_helper(attr_values):
+        def _match_attribute_value_helper(attr_values:Sequence[Optional[str]]):
             for rule in rules:
                 for attr_value in attr_values:
                     if rule.matches_string(attr_value):
