@@ -800,6 +800,8 @@ Hello, world!
         # parsing.
         quote = b"<p>\x91Foo\x92</p>"
         soup = self.soup(quote)
+        if not soup.p:
+            import pdb; pdb.set_trace()
         assert soup.p.string == "\N{LEFT SINGLE QUOTATION MARK}Foo\N{RIGHT SINGLE QUOTATION MARK}"
 
     def test_non_breaking_spaces_converted_on_the_way_in(self):
