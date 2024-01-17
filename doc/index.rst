@@ -2034,8 +2034,8 @@ in order::
  soup.a.contents
  # ['Soup', ''s', ' ', 'on']
 
-``Tag.extend()`` returns the last newly appended element in the list.
-   
+``Tag.extend()`` returns the elements that were appended to the list.
+
 ``NavigableString()`` and ``.new_tag()``
 -------------------------------------------------
 

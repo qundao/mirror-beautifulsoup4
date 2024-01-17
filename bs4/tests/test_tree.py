@@ -749,7 +749,7 @@ class TestTreeModification(SoupTest):
                 '<p id="2">Don\'t leave!<b>here</b></p>'
         )
 
-    def test_insertion_returns_last_inserted_thing(self):
+    def test_insertion_returns_inserted_things(self):
         soup = self.soup("<html></html>")
         html = soup.find('html')
         head = html.append(new_head := soup.new_tag('head'))
@@ -761,11 +761,11 @@ class TestTreeModification(SoupTest):
         text5 = title.append('5')
         assert text5 == '5'
         text4 = text5.insert_before('3', '4')
-        assert text4 == '4'
+        assert text4 == ('3', '4')
         text7 = text5.insert_after('6', '7')
-        assert text7 == '7'
+        assert text7 == ('6', '7')
         text9 = title.extend(['8', '9'])
-        assert text9 == '9'
+        assert text9 == ('8', '9')
         assert title.get_text() == '3456789'
 
     def test_replace_with_returns_thing_that_was_replaced(self):
@@ -957,7 +957,7 @@ class TestTreeModification(SoupTest):
             [warning] = w
             assert warning.filename == __file__
             msg = str(warning.message)
-            assert msg == "A single item was passed into Tag.extend. Use Tag.append instead."
+            assert msg == "A single item (not a Tag) was passed into Tag.extend. Use Tag.append instead."
             assert soup.div.decode_contents() == result
         
     def test_move_tag_to_beginning_of_parent(self):
