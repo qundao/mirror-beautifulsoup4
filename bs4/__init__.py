@@ -583,6 +583,7 @@ class BeautifulSoup(Tag):
             attrs:_AttributeValues={},
             sourceline:Optional[int]=None,
             sourcepos:Optional[int]=None,
+            string:Optional[str]=None,
             **kwattrs:_AttributeValue,
     ):
         """Create a new Tag associated with this BeautifulSoup object.
@@ -597,14 +598,18 @@ class BeautifulSoup(Tag):
             (purportedly) found in its source document.
         :param sourcepos: The character position within ``sourceline`` where this
             tag was (purportedly) found.
+        :param string: String content for the new Tag, if any.
         :param kwattrs: Keyword arguments for the new Tag's attribute values.
 
         """
         kwattrs.update(attrs)
-        return self.element_classes.get(Tag, Tag)(
+        tag =  self.element_classes.get(Tag, Tag)(
             None, self.builder, name, namespace, nsprefix, kwattrs,
             sourceline=sourceline, sourcepos=sourcepos
         )
+        if string is not None:
+            tag.string = string
+        return tag
 
     def string_container(self,
                          base_class:Optional[Type[NavigableString]]=None

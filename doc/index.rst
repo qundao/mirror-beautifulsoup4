@@ -2069,12 +2069,8 @@ call the factory method ``BeautifulSoup.new_tag()``::
  soup = BeautifulSoup("<b></b>", 'html.parser')
  original_tag = soup.b
 
- new_tag = soup.new_tag("a", href="http://www.example.com")
+ new_tag = soup.new_tag("a", string="Link text.", href="http://www.example.com")
  original_tag.append(new_tag)
- original_tag
- # <b><a href="http://www.example.com"></a></b>
-
- new_tag.string = "Link text."
  original_tag
  # <b><a href="http://www.example.com">Link text.</a></b>
 
