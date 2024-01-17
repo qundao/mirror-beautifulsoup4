@@ -352,7 +352,7 @@ class SoupStrainer(object):
 
     def _attribute_match(self, attr_value:Optional[_AttributeValue],
                          rules:Iterable[AttributeValueMatchRule]) -> bool:
-        attr_values: Sequence[Optional[str]]
+        attr_values: Sequence[Optional[str]] = []
         if isinstance(attr_value, list):
             attr_values = attr_value
         else:

@@ -2017,6 +2017,8 @@ like calling ``.append()`` on a Python list::
  soup.a.contents
  # ['Foo', 'Bar']
 
+``Tag.append()`` returns the newly appended element.
+
 ``extend()``
 ------------
 
@@ -2032,6 +2034,8 @@ in order::
  soup.a.contents
  # ['Soup', ''s', ' ', 'on']
 
+``Tag.extend()`` returns the last newly appended element in the list.
+   
 ``NavigableString()`` and ``.new_tag()``
 -------------------------------------------------
 
@@ -2079,6 +2083,14 @@ call the factory method ``BeautifulSoup.new_tag()``::
  # <b><a href="http://www.example.com">Link text.</a></b>
 
 Only the first argument, the tag name, is required.
+
+Because insertion methods return the newly inserted element, you
+can create and insert an element in one step::
+
+ soup = BeautifulSoup("<html></html>", 'html.parser')
+ html = soup.html
+
+ title = html.append(soup.new_tag("title"))
 
 ``insert()``
 ------------
