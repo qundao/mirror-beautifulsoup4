@@ -602,15 +602,19 @@ class DetectsXMLParsedAsHTML(object):
     _root_tag: Optional[Tag]
     
     @classmethod
-    def warn_if_markup_looks_like_xml(cls, markup:Optional[_RawMarkup]) -> bool:
+    def warn_if_markup_looks_like_xml(cls, markup:Optional[_RawMarkup], stacklevel:int=3) -> bool:
         """Perform a check on some markup to see if it looks like XML
         that's not XHTML. If so, issue a warning.
 
         This is much less reliable than doing the check while parsing,
         but some of the tree builders can't do that.
 
+        :param stacklevel: The stacklevel of the code calling this
+        function.
+
         :return: True if the markup looks like non-XHTML XML, False
         otherwise.
+
         """
         if markup is None:
             return False
@@ -629,15 +633,16 @@ class DetectsXMLParsedAsHTML(object):
             )
 
         if looks_like_xml:
-            cls._warn()
+            cls._warn(stacklevel=stacklevel+2)
             return True
         return False        
     
     @classmethod
-    def _warn(cls) -> None:
+    def _warn(cls, stacklevel:int=5) -> None:
         """Issue a warning about XML being parsed as HTML."""
         warnings.warn(
-            XMLParsedAsHTMLWarning.MESSAGE, XMLParsedAsHTMLWarning
+            XMLParsedAsHTMLWarning.MESSAGE, XMLParsedAsHTMLWarning,
+            stacklevel=stacklevel
         )
         
     def _initialize_xml_detector(self) -> None:

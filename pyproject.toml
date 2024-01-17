@@ -40,6 +40,15 @@ html5lib = [
 lxml = [
     "lxml",
 ]
+chardet = [
+    "chardet",
+]
+cchardet = [
+    "cchardet",
+]
+charset-normalizer = [
+    "charset-normalizer",
+]
 
 [project.urls]
 Download = "https://www.crummy.com/software/BeautifulSoup/bs4/download/"
@@ -53,6 +62,9 @@ include = [
     # The module itself, and its unit tests.
     "/bs4/**/*.py",
     "/bs4/**/*.testcase",
+
+    # The tox build configuration
+    "tox.ini",
 
     # Metadata.
     "/CHANGELOG",

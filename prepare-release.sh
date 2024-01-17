@@ -27,7 +27,7 @@ rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
-python -m pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
@@ -55,7 +55,7 @@ pip install pytest lxml html5lib
 
 # First, install from source and run the tests.
 pip install -i https://testpypi.python.org/pypi beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
-python -m pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
@@ -84,7 +84,7 @@ rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
 pip install pytest lxml html5lib beautifulsoup4 --no-binary beautifulsoup4
-python -m pytest ../py3-install-test-virtualenv/lib/python3.10/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'html.parser'))")
 # That should print something like:
