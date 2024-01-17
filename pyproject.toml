@@ -40,6 +40,15 @@ html5lib = [
 lxml = [
     "lxml",
 ]
+chardet = [
+    "chardet",
+]
+cchardet = [
+    "cchardet",
+]
+charset-normalizer = [
+    "charset-normalizer",
+]
 
 [project.urls]
 Download = "https://www.crummy.com/software/BeautifulSoup/bs4/download/"
