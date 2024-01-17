@@ -799,7 +799,7 @@ Hello, world!
         # Microsoft smart quotes are converted to Unicode characters during
         # parsing.
         quote = b"<p>\x91Foo\x92</p>"
-        soup = self.soup(quote)
+        soup = self.soup(quote, from_encoding="windows-1252")
         assert soup.p.string == "\N{LEFT SINGLE QUOTATION MARK}Foo\N{RIGHT SINGLE QUOTATION MARK}"
 
     def test_non_breaking_spaces_converted_on_the_way_in(self):
