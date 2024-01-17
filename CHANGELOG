@@ -11,6 +11,10 @@
   feature releases or one major release after the deprecation warning
   is added.
 
+* The new_tag() method now takes a 'string' argument. This allows you to
+  set the string contents of a Tag when creating it. Patch by Chris
+  Papademetrious. [bug=2044599]
+
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.
