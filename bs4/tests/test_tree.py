@@ -358,6 +358,9 @@ class TestFindAllByAttribute(SoupTest):
         self.assert_selects(tree.find_all(id=["1", "3", "4"]),
                            ["1", "3"])
 
+        # If you pass in an empty list, you get nothing.
+        self.assert_selects(tree.find_all(id=[]), [])
+
     def test_find_all_with_regular_expression_attribute_value(self):
         # You can pass a regular expression as an attribute value, and
         # you'll get tags whose values for that attribute match the

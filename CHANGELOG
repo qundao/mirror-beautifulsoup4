@@ -40,6 +40,13 @@
 * Using PageElement.replace_with() to replace an element with itself
   returns the element instead of None.
 
+* If you pass an empty list as the attribute value when searching the
+  tree, you will now find all tags which have that attribute set to a value in
+  the empty list--that is, you will find nothing. This is consistent with other
+  situations where a list of acceptable values is provided. Previously, an
+  empty list was treated the same as None and False, and you would have
+  found the tags which did not have that attribute set at all. [bug=2045469]
+
 * When using one of the find() methods or creating a SoupStrainer,
   if you specify the same attribute value in ``attrs`` and the
   keyword arguments, you'll end up with two different ways to match that
