@@ -60,6 +60,10 @@ _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 # of the arguments to the SoupStrainer constructor and (more
 # familiarly to Beautiful Soup users) the find* methods.
 
+# A function that takes a PageElement and returns a yes-or-no answer.
+# A
+_PageElementMatchFunction:TypeAlias = Callable[['PageElement'], bool]
+
 # A function that takes a Tag and returns a yes-or-no answer.
 # A TagNameMatchRule expects this kind of function, if you're
 # going to pass it a function.

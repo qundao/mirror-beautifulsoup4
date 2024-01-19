@@ -912,11 +912,11 @@ class PageElement(object):
                 DeprecationWarning, stacklevel=_stacklevel
             )
 
-        from bs4.strainer import SoupStrainer
-        if isinstance(name, SoupStrainer):
-            strainer = name
+        from bs4.strainer import ElementMatcher
+        if isinstance(name, ElementMatcher):
+            matcher = name
         else:
-            strainer = SoupStrainer(name, attrs, string, **kwargs)
+            matcher = SoupStrainer(name, attrs, string, **kwargs)
 
         result: Iterable[PageElement]
         if string is None and not limit and not attrs and not kwargs:
@@ -924,7 +924,7 @@ class PageElement(object):
                 # Optimization to find all tags.
                 result = (element for element in generator
                           if isinstance(element, Tag))
-                return ResultSet(strainer, result)
+                return ResultSet(matcher, result)
             elif isinstance(name, str):
                 # Optimization to find all tags with a given name.
                 if name.count(':') == 1:
@@ -945,21 +945,17 @@ class PageElement(object):
                          )
                         ):
                         result.append(element)
-                return ResultSet(strainer, result)
+                return ResultSet(matcher, result)
 
-        results = ResultSet(strainer)
+        results = ResultSet(matcher)
         while True:
             try:
                 i = next(generator)
             except StopIteration:
                 break
             if i:
-                # TODO: SoupStrainer.search is a confusing method
-                # that needs to be redone, and this is where
-                # it's being used.
-                found = strainer.search(i)
-                if found:
-                    results.append(found)
+                if matcher.match(i):
+                    results.append(i)
                     if limit and len(results) >= limit:
                         break
         return results
@@ -2503,12 +2499,12 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
-    of matching a `SoupStrainer` against a parse tree. Basically, a list of
+    of matching an `ElementMatcher` against a parse tree. Basically, a list of
     search results.
     """
-    source: Optional[SoupStrainer]
+    source: Optional[ElementMatcher]
 
-    def __init__(self, source:Optional[SoupStrainer], result: Iterable[_PageElementT]=()) -> None:
+    def __init__(self, source:Optional[ElementMatcher], result: Iterable[_PageElementT]=()) -> None:
         super(ResultSet, self).__init__(result)
         self.source = source
 

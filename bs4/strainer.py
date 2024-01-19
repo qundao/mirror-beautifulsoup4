@@ -25,6 +25,7 @@ from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 from bs4._typing import (
     _AttributeValue,
+    _PageElementMatchFunction,
     _TagMatchFunction,
     _StringMatchFunction,
     _StrainableElement,
@@ -144,11 +145,29 @@ class AttributeValueMatchRule(MatchRule):
 
 class StringMatchRule(MatchRule):
     function: Optional[_StringMatchFunction]
-    
-class SoupStrainer(object):
-    """Encapsulates a number of ways of matching a markup element (a tag
-    or a string).
 
+class ElementMatcher(object):
+    """ElementMatchers encapsulate the logic necessary to decide
+    whether or not a PageElement (a tag or a string) matches a
+    user-specified query.
+
+    The simplest ElementMatcher takes a user-defined function that
+    makes the decision.
+    """
+    
+    def __init__(self, match_function:_PageElementMatchFunction):
+        self.match = match_function
+
+    def match(self, element:PageElement) -> bool:
+        """Delegate to the function passed in to the constructor."""
+        return self.match(element)
+
+    # TODO: allow_tag_creation and allow_string_creation can be moved
+    # here, or to an abstract superclass.
+    
+class SoupStrainer(ElementMatcher):
+    """The ElementMatcher used internally by Beautiful Soup.
+    
     These are primarily created internally and used to underpin the
     find_* methods, but you can create one yourself and pass it in as
     ``parse_only`` to the `BeautifulSoup` constructor, to parse a
@@ -442,28 +461,34 @@ class SoupStrainer(object):
             if string_rule.matches_string(string):
                 return True
         return False
-        
-    
+            
+    def match(self, element:PageElement) -> bool:
+        """Does the given PageElement match the rules set down by this
+        SoupStrainer?
+
+        :param element: A PageElement.
+        :return: True if the element matches this SoupStrainer's rules; False otherwise.
+        """
+        if isinstance(element, Tag):
+            return self.matches_tag(element)
+        assert isinstance(element, NavigableString)
+        if not (self.name_rules or self.attribute_rules):
+            # A NavigableString can only match a SoupStrainer that
+            # does not define any name or attribute restrictions.
+            for rule in self.string_rules:
+                if rule.matches_string(element):
+                    return True
+        return False
+
     @_deprecated("allow_tag_creation", "4.13.0")
     def search_tag(self, name, attrs):
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
     
-    def search(self, element:PageElement):
-        # TODO: This method needs to be removed or redone. It is
-        # very confusing but it's used everywhere.
-        match = None
-        if isinstance(element, Tag):
-            match = self.matches_tag(element)
-        else:
-            assert isinstance(element, NavigableString)
-            match = False
-            if not (self.name_rules or self.attribute_rules):
-                # A NavigableString can only match a SoupStrainer that
-                # does not define any name or attribute restrictions.
-                for rule in self.string_rules:
-                    if rule.matches_string(element):
-                        match = True
-                        break
-        return element if match else False
+    @_deprecated("match", "4.13.0")        
+    def search(self, element:PageElement) -> Optional[element:PageElement]:
+        """A less elegant version of match().
 
+        :meta private:
+        """
+        return element if self.match(element) else False
