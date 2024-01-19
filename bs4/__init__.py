@@ -284,13 +284,14 @@ class BeautifulSoup(Tag):
 
         parse_only = parse_only or deprecated_argument(
             "parseOnlyThese", "parse_only")
-        if (parse_only is not None
-            and parse_only.string_rules and
-            (parse_only.name_rules or parse_only.attribute_rules)):
-            warnings.warn(
-                f"Value for parse_only will exclude everything, since it puts restrictions on both tags and strings: {parse_only}",
-                UserWarning, stacklevel=3
-            )
+        if parse_only is not None:
+            # Issue a warning if we can tell in advance that
+            # parse_only will exclude the entire tree.
+            if parse_only.excludes_everything:
+                warnings.warn(
+                    f"The given value for parse_only will exclude everything: {parse_only}",
+                    UserWarning, stacklevel=3
+                )
         
         from_encoding = from_encoding or deprecated_argument(
             "fromEncoding", "from_encoding")
@@ -728,9 +729,8 @@ class BeautifulSoup(Tag):
             self.current_data = []
 
             # Should we add this string to the tree at all?
-            if self.parse_only and len(self.tagStack) <= 1 and \
-                   (not self.parse_only.string_rules or \
-                    not self.parse_only.allow_string_creation(current_data)):
+            if (self.parse_only and len(self.tagStack) <= 1 and 
+                (not self.parse_only.allow_string_creation(current_data))):
                 return
 
             containerClass = self.string_container(containerClass)
@@ -877,8 +877,7 @@ class BeautifulSoup(Tag):
         self.endData()
 
         if (self.parse_only and len(self.tagStack) <= 1
-            and (self.parse_only.string_rules
-                 or not self.parse_only.allow_tag_creation(nsprefix, name, attrs))):
+            and not self.parse_only.allow_tag_creation(nsprefix, name, attrs)):
             return None
 
         tag = self.element_classes.get(Tag, Tag)(

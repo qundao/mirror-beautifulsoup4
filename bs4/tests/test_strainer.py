@@ -445,7 +445,7 @@ class TestSoupStrainer(SoupTest):
             msg = str(warning.message)
             assert warning.filename == __file__
             assert str(warning.message).startswith(
-                "Value for parse_only will exclude everything, since it puts restrictions on both tags and strings:"
+                "The given value for parse_only will exclude everything:"
             )
         
     def test_documentation_examples(self):

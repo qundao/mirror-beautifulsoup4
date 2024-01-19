@@ -15,6 +15,7 @@ from typing import (
     Dict,
     IO,
     Iterable,
+    Optional,
     Pattern,
     TYPE_CHECKING,
     Union,
@@ -61,8 +62,15 @@ _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 # familiarly to Beautiful Soup users) the find* methods.
 
 # A function that takes a PageElement and returns a yes-or-no answer.
-# A
 _PageElementMatchFunction:TypeAlias = Callable[['PageElement'], bool]
+
+# A function that takes the raw parsed ingredients of a markup tag
+# and returns a yes-or-no answer.
+_AllowTagCreationFunction:TypeAlias = Callable[[Optional[str], str, Optional[dict[str, str]]], bool]
+
+# A function that takes the raw parsed ingredients of a markup string node
+# and returns a yes-or-no answer.
+_AllowStringCreationFunction:TypeAlias = Callable[[Optional[str]], bool]
 
 # A function that takes a Tag and returns a yes-or-no answer.
 # A TagNameMatchRule expects this kind of function, if you're

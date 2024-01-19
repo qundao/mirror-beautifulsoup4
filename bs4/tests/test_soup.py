@@ -293,7 +293,7 @@ class TestWarnings(SoupTest):
             soup = self.soup("<a><b></b></a>", parse_only=strainer)
         warning = self._assert_warning(w, UserWarning)
         msg = str(warning.message)
-        assert msg.startswith("Value for parse_only will exclude everything, since it puts restrictions on both tags and strings:")
+        assert msg.startswith("The given value for parse_only will exclude everything:")
         
     def test_parseOnlyThese_renamed_to_parse_only(self):
         with warnings.catch_warnings(record=True) as w:

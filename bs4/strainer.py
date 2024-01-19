@@ -25,6 +25,8 @@ from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 from bs4._typing import (
     _AttributeValue,
+    _AllowStringCreationFunction,
+    _AllowTagCreationFunction,
     _PageElementMatchFunction,
     _TagMatchFunction,
     _StringMatchFunction,
@@ -33,6 +35,55 @@ from bs4._typing import (
     _StrainableAttributes,
     _StrainableString,
 )
+
+class ElementMatcher(object):
+    """ElementMatchers encapsulate the logic necessary to decide:
+
+    1. whether a PageElement (a tag or a string) matches a
+    user-specified query.
+
+    2. whether a given sequence of markup found during initial parsing
+    should be turned into a PageElement in the first place, or simply
+    discarded.
+
+    This is the simplest ElementMatcher, which makes these decisions
+    using user-defined functions.
+    """
+    
+    def __init__(
+            self, match_function:Optional[_PageElementMatchFunction]=None,
+            allow_tag_creation_function:Optional[_AllowTagCreationFunction]=None,
+            allow_string_creation_function:Optional[_AllowStringCreationFunction]=None):
+        self.match_hook = match_function
+        self.allow_tag_creation_hook = allow_tag_creation_hook
+        self.allow_string_creation_hook = allow_string_creation_hook
+
+    @property
+    def excludes_everything(self) -> bool:
+        # The default ElementMatcher excludes *nothing*, and we don't
+        # have any way of answering questions about more complicated
+        # ElementMatchers without running the code.
+        return False
+        
+    def match(self, element:PageElement) -> bool:
+        """Delegate to the function passed in to the constructor."""
+        if not self.match_function:
+            return True
+        return self.match_function(element)
+
+    def allow_tag_creation(
+            self, nsprefix:Optional[str], name:str,
+            attrs:Optional[dict[str, str]]
+    ) -> bool:
+        if not self.allow_tag_creation_hook:
+            return True
+        return self.allow_tag_creation_hook(nsprefix, name, attrs)
+
+    def allow_string_creation(self, string:str) -> bool:
+        if not self.allow_string_creation_hook:
+            return True
+        return self.allow_string_creation_hook(string)
+
 
 class MatchRule(object):
     string: Optional[str]
@@ -145,25 +196,6 @@ class AttributeValueMatchRule(MatchRule):
 
 class StringMatchRule(MatchRule):
     function: Optional[_StringMatchFunction]
-
-class ElementMatcher(object):
-    """ElementMatchers encapsulate the logic necessary to decide
-    whether or not a PageElement (a tag or a string) matches a
-    user-specified query.
-
-    The simplest ElementMatcher takes a user-defined function that
-    makes the decision.
-    """
-    
-    def __init__(self, match_function:_PageElementMatchFunction):
-        self.match = match_function
-
-    def match(self, element:PageElement) -> bool:
-        """Delegate to the function passed in to the constructor."""
-        return self.match(element)
-
-    # TODO: allow_tag_creation and allow_string_creation can be moved
-    # here, or to an abstract superclass.
     
 class SoupStrainer(ElementMatcher):
     """The ElementMatcher used internally by Beautiful Soup.
@@ -244,6 +276,13 @@ class SoupStrainer(ElementMatcher):
         # variable might have. Look at the .string_rules list instead.
         self.__string = string
 
+    @property
+    def excludes_everything(self) -> bool:
+        return True if (
+            self.string_rules and
+            (self.name_rules or self.attribute_rules)
+        ) else False
+        
     @property
     def string(self) -> Optional[_StrainableString]:
         ":meta private:"
@@ -447,6 +486,10 @@ class SoupStrainer(ElementMatcher):
             # match any strings; it's designed to match tags with
             # certain properties.
             return False
+        if not self.string_rules:
+            # A SoupStrainer with no string rules will match
+            # all strings.
+            return True
         if not self.matches_any_string_rule(string):
             return False
         return True
