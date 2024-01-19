@@ -47,7 +47,8 @@ class ElementMatcher(object):
     discarded.
 
     This is the simplest ElementMatcher, which makes these decisions
-    using user-defined functions.
+    using user-defined functions. By default, it matches everything
+    and allows all PageElements to be created.
     """
     
     def __init__(

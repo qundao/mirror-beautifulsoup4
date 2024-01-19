@@ -26,7 +26,7 @@ from bs4.element import (
     Tag,
     TemplateString,
 )
-from bs4.strainer import SoupStrainer
+from bs4.match import SoupStrainer
 from . import (
     SoupTest,
 )

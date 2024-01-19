@@ -1,5 +1,7 @@
 = 4.13.0 (Unreleased)
 
+TODO: we could stand to put limit inside ResultSet
+
 * This version drops support for Python 3.6. The minimum supported
   major Python version for Beautiful Soup is now Python 3.7.
 
@@ -46,6 +48,10 @@
   situations where a list of acceptable values is provided. Previously, an
   empty list was treated the same as None and False, and you would have
   found the tags which did not have that attribute set at all. [bug=2045469]
+
+* For similar reasons, if you pass in limit=0 to a find() method for some
+  reason, you will now get zero results. Previously, you would get all
+  matching results.
 
 * When using one of the find() methods or creating a SoupStrainer,
   if you specify the same attribute value in ``attrs`` and the

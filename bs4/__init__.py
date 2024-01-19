@@ -60,7 +60,10 @@ from .element import (
     TemplateString,
     )
 from .formatter import Formatter
-from .strainer import SoupStrainer
+from .match import (
+    ElementMatcher,
+    SoupStrainer,
+)
 from typing import (
     Any,
     cast,
@@ -867,7 +870,7 @@ class BeautifulSoup(Tag):
             currently in scope in the document.
 
         If this method returns None, the tag was rejected by an active
-        SoupStrainer. You should proceed as if the tag had not occurred
+        `ElementMatcher`. You should proceed as if the tag had not occurred
         in the document. For instance, if this was a self-closing tag,
         don't call handle_endtag.
 

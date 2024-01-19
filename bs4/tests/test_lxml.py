@@ -14,7 +14,7 @@ from bs4 import (
     BeautifulStoneSoup,
     )
 from bs4.element import Comment, Doctype
-from bs4.strainer import SoupStrainer
+from bs4.match import SoupStrainer
 from . import (
     HTMLTreeBuilderSmokeTest,
     XMLTreeBuilderSmokeTest,

@@ -6,7 +6,7 @@ from . import (
     SoupTest,
 )
 from bs4.element import Tag
-from bs4.strainer import (
+from bs4.match import (
     AttributeValueMatchRule,
     MatchRule,
     SoupStrainer,

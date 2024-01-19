@@ -901,7 +901,7 @@ class PageElement(object):
             limit:Optional[int],
             generator:Iterator[PageElement],
             _stacklevel:int=3,
-            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:        
+            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
         """Iterates over a generator looking for things that match."""
         results: ResultSet[PageElement]
         
@@ -912,7 +912,7 @@ class PageElement(object):
                 DeprecationWarning, stacklevel=_stacklevel
             )
 
-        from bs4.strainer import ElementMatcher
+        from bs4.match import ElementMatcher
         if isinstance(name, ElementMatcher):
             matcher = name
         else:
@@ -946,7 +946,14 @@ class PageElement(object):
                         ):
                         result.append(element)
                 return ResultSet(matcher, result)
+        return self.match(generator, matcher, limit)
 
+    def match(self, generator:Iterator[PageElement], matcher:ElementMatcher, limit:Optional[int]=None) -> ResultSet[PageElement]:
+        """The most generic search method offered by Beautiful Soup.
+
+        You can pass in your own technique for iterating over the tree, and your own
+        technique for matching items.
+        """
         results = ResultSet(matcher)
         while True:
             try:
@@ -956,7 +963,7 @@ class PageElement(object):
             if i:
                 if matcher.match(i):
                     results.append(i)
-                    if limit and len(results) >= limit:
+                    if limit is not None and len(results) >= limit:
                         break
         return results
 
@@ -2518,4 +2525,4 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
 # import SoupStrainer itself into this module to preserve the
 # backwards compatibility of anyone who imports
 # bs4.element.SoupStrainer.
-from bs4.strainer import SoupStrainer
+from bs4.match import SoupStrainer
