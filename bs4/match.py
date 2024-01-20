@@ -319,7 +319,10 @@ class SoupStrainer(ElementMatcher):
             yield rule_class(present=obj)
         elif callable(obj):
             yield rule_class(function=obj)
-        elif isinstance(obj, Pattern):
+        elif isinstance(obj, Pattern) or hasattr(obj, 'search'):
+            # We do a little duck typing here to detect usage of the
+            # third-party regex library, whose pattern objects doesn't
+            # derive from re.Pattern.
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
