@@ -912,7 +912,7 @@ class PageElement(object):
                 DeprecationWarning, stacklevel=_stacklevel
             )
 
-        from bs4.match import ElementSelector
+        from bs4.select import ElementSelector
         if isinstance(name, ElementSelector):
             matcher = name
         else:
@@ -2525,4 +2525,4 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
 # import SoupStrainer itself into this module to preserve the
 # backwards compatibility of anyone who imports
 # bs4.element.SoupStrainer.
-from bs4.match import SoupStrainer
+from bs4.select import SoupStrainer

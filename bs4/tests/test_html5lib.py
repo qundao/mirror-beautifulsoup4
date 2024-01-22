@@ -4,7 +4,7 @@ import pytest
 import warnings
 
 from bs4 import BeautifulSoup
-from bs4.match import SoupStrainer
+from bs4.select import SoupStrainer
 from . import (
     HTML5LIB_PRESENT,
     HTML5TreeBuilderSmokeTest,
@@ -24,7 +24,7 @@ class TestHTML5LibBuilder(SoupTest, HTML5TreeBuilderSmokeTest):
         return HTML5TreeBuilder
 
     def test_soupstrainer(self):
-        # The html5lib tree builder does not support SoupStrainers.
+        # The html5lib tree builder does not support parse_only.
         strainer = SoupStrainer("b")
         markup = "<p>A <b>bold</b> statement.</p>"
         with warnings.catch_warnings(record=True) as w:

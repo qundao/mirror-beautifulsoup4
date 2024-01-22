@@ -20,7 +20,7 @@ from bs4.element import (
     Stylesheet,
     Tag
 )
-from bs4.match import SoupStrainer
+from bs4.select import SoupStrainer
 from bs4.builder import (
     DetectsXMLParsedAsHTML,
     XMLParsedAsHTMLWarning,

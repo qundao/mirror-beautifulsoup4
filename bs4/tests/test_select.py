@@ -6,7 +6,7 @@ from . import (
     SoupTest,
 )
 from bs4.element import Tag
-from bs4.match import (
+from bs4.select import (
     AttributeValueMatchRule,
     ElementSelector,
     MatchRule,
@@ -108,9 +108,6 @@ class TestElementSelector(SoupTest):
 class TestMatchRule(SoupTest):
 
     def _tuple(self, rule):
-        if isinstance(rule.pattern, str):
-            import pdb; pdb.set_trace()
-
         return (
             rule.string,
             rule.pattern.pattern if rule.pattern else None,

@@ -20,7 +20,7 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.12.2. The examples in
+This document covers Beautiful Soup version 4.13.0. The examples in
 this documentation were written for Python 3.8.
 
 You might be looking for the documentation for `Beautiful Soup 3
@@ -2577,6 +2577,11 @@ the human-visible content of the page.*
 either return the object itself, or nothing, so the only reason to do
 this is when you're iterating over a mixed list.*
 
+*As of Beautiful Soup version 4.13.0, you can call .string on a
+NavigableString object. It will return the object itself, so again,
+the only reason to do this is when you're iterating over a mixed
+list.*
+
 Specifying the parser to use
 ============================
 
@@ -2604,8 +2609,9 @@ specifying one of the following:
 
 The section `Installing a parser`_ contrasts the supported parsers.
 
-If you don't have an appropriate parser installed, Beautiful Soup will
-ignore your request and pick a different parser. Right now, the only
+If you ask for a parser that isn't installed, Beautiful Soup will
+raise an exception so that you don't inadvertently parse a document
+under an unknown set of rules. For example, right now, the only
 supported XML parser is lxml. If you don't have lxml installed, asking
 for an XML parser won't give you one, and asking for "lxml" won't work
 either.
@@ -3017,6 +3023,21 @@ been called on it::
 
 This is because two different :py:class:`Tag` objects can't occupy the same
 space at the same time.
+
+Advanced search techniques
+==========================
+
+Almost everyone who uses Beautiful Soup to extract information from a
+document can get what they need using the methods described in
+`Searching the tree`_. However, there's a lower-level interface--the
+:py:class:`ElementSelector` class-- which lets you define any matching
+behavior you want.
+
+To use :py:class:`ElementSelector`, define a function that takes a
+:py:class:`PageElement` object (i.e. either a :py:class:`Tag` or a
+:py:class`NavigableString`) and returns True (if the element matches
+your custom criteria) or False (if it doesn't).
+
 
 Advanced parser customization
 =============================

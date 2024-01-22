@@ -60,7 +60,7 @@ from .element import (
     TemplateString,
     )
 from .formatter import Formatter
-from .match import (
+from .select import (
     ElementSelector,
     SoupStrainer,
 )
