@@ -36,21 +36,29 @@ from bs4._typing import (
     _StrainableString,
 )
 
-class ElementMatcher(object):
-    """ElementMatchers encapsulate the logic necessary to decide:
+class ElementSelector(object):
+    """ElementSelectors encapsulate the logic necessary to decide:
 
     1. whether a PageElement (a tag or a string) matches a
     user-specified query.
 
     2. whether a given sequence of markup found during initial parsing
-    should be turned into a PageElement in the first place, or simply
-    discarded.
+    should be turned into a PageElement, or simply discarded.
 
-    This is the simplest ElementMatcher, which makes these decisions
-    using user-defined functions. By default, it matches everything
-    and allows all PageElements to be created.
+    The base class is the simplest ElementSelector. By default, it
+    matches everything and allows all PageElements to be created. You
+    can make it more selective by passing in user-defined functions.
+
+    Most users of Beautiful Soup will never need to use
+    ElementSelector, or its more capable subclass
+    SoupStrainer. Instead, they will use the find_* methods, which
+    will convert their arguments into SoupStrainer objects and run them
+    against the tree.
     """
-    
+    match_hook: Optional[_PageElementMatchFunction]
+    allow_tag_creation_function: Optional[_AllowTagCreationFunction]
+    allow_string_creation_function: Optional[_AllowStringCreationFunction]
+
     def __init__(
             self, match_function:Optional[_PageElementMatchFunction]=None,
             allow_tag_creation_function:Optional[_AllowTagCreationFunction]=None,
@@ -61,13 +69,27 @@ class ElementMatcher(object):
 
     @property
     def excludes_everything(self) -> bool:
-        # The default ElementMatcher excludes *nothing*, and we don't
-        # have any way of answering questions about more complicated
-        # ElementMatchers without running the code.
+        """Does this ElementSelector obviously exclude everything? If
+        so, Beautiful Soup will issue a warning if you try to use it
+        when parsing a document.
+
+        The ElementSelector might turn out to exclude everything even
+        if this returns False, but it won't do so in an obvious way.
+
+        The default ElementSelector excludes *nothing*, and we don't
+        have any way of answering questions about more complex
+        ElementSelectors without running their hook functions, so the
+        base implementation always returns False.
+        """
         return False
         
     def match(self, element:PageElement) -> bool:
-        """Delegate to the function passed in to the constructor."""
+        """Does the given PageElement match the rules set down by this
+        ElementSelector?
+
+        The base implementation delegates to the function passed in to
+        the constructor.
+        """
         if not self.match_function:
             return True
         return self.match_function(element)
@@ -76,6 +98,12 @@ class ElementMatcher(object):
             self, nsprefix:Optional[str], name:str,
             attrs:Optional[dict[str, str]]
     ) -> bool:
+        """Based on the name and attributes of a tag, see whether this
+        ElementSelector will allow a Tag object to even be created.
+
+        :param name: The name of the prospective tag.
+        :param attrs: The attributes of the prospective tag.
+        """
         if not self.allow_tag_creation_hook:
             return True
         return self.allow_tag_creation_hook(nsprefix, name, attrs)
@@ -87,10 +115,13 @@ class ElementMatcher(object):
 
 
 class MatchRule(object):
+    """Each MatchRule encapsulates the logic behind a single argument
+    passed in to one of the Beautiful Soup find* methods.
+    """
+
     string: Optional[str]
     pattern: Optional[Pattern[str]]
     present: Optional[bool]
-
     # All MatchRule objects also have an attribute ``function``, but
     # the type of the function depends on the subclass.
     
@@ -178,6 +209,7 @@ class MatchRule(object):
         )
     
 class TagNameMatchRule(MatchRule):
+    """A MatchRule implementing the rules for matches against tag name."""
     function: Optional[_TagMatchFunction]
 
     def matches_tag(self, tag:Tag) -> bool:
@@ -193,18 +225,25 @@ class TagNameMatchRule(MatchRule):
         return False
     
 class AttributeValueMatchRule(MatchRule):
+    """A MatchRule implementing the rules for matches against attribute value."""
     function: Optional[_StringMatchFunction]
 
 class StringMatchRule(MatchRule):
+    """A MatchRule implementing the rules for matches against a NavigableString."""
     function: Optional[_StringMatchFunction]
     
-class SoupStrainer(ElementMatcher):
-    """The ElementMatcher used internally by Beautiful Soup.
-    
-    These are primarily created internally and used to underpin the
-    find_* methods, but you can create one yourself and pass it in as
-    ``parse_only`` to the `BeautifulSoup` constructor, to parse a
-    subset of a large document.
+class SoupStrainer(ElementSelector):
+    """The ElementSelector subclass used internally by Beautiful Soup.
+
+    A SoupStrainer encapsulates the logic necessary to perform the
+    kind of matches supported by the find_* methods. SoupStrainers are
+    primarily created internally, but you can create one yourself and
+    pass it in as ``parse_only`` to the `BeautifulSoup` constructor,
+    to parse a subset of a large document.
+
+    Internally, SoupStrainer objects work by converting the
+    constructor arguments into MatchRule objects. Incoming
+    tags/markup are matched against those rules.
 
     :param name: One or more restrictions on the tags found in a
     document.
@@ -279,6 +318,10 @@ class SoupStrainer(ElementMatcher):
 
     @property
     def excludes_everything(self) -> bool:
+        """Check whether the provided rules will obviously exclude
+        everything. (They might exclude everything even if this returns False,
+        but not in an obvious way.)
+        """
         return True if (
             self.string_rules and
             (self.name_rules or self.attribute_rules)
@@ -485,6 +528,10 @@ class SoupStrainer(ElementMatcher):
         return True
 
     def allow_string_creation(self, string:str) -> bool:
+        """Based on the content of a markup string, see whether this
+        SoupStrainer will allow it to be instantiated as a
+        NavigableString object, or whether it should be ignored.
+        """
         if self.name_rules or self.attribute_rules:
             # A SoupStrainer that has name or attribute rules won't
             # match any strings; it's designed to match tags with
@@ -499,7 +546,7 @@ class SoupStrainer(ElementMatcher):
         return True
     
     def matches_any_string_rule(self, string:str) -> bool:
-        """See whether the content of a string, matches any of 
+        """See whether the content of a string matches any of
         this SoupStrainer's string rules.
         """
         if not self.string_rules:
@@ -512,6 +559,8 @@ class SoupStrainer(ElementMatcher):
     def match(self, element:PageElement) -> bool:
         """Does the given PageElement match the rules set down by this
         SoupStrainer?
+
+        The find_* methods rely heavily on this method to find matches.
 
         :param element: A PageElement.
         :return: True if the element matches this SoupStrainer's rules; False otherwise.
@@ -529,6 +578,7 @@ class SoupStrainer(ElementMatcher):
 
     @_deprecated("allow_tag_creation", "4.13.0")
     def search_tag(self, name, attrs):
+        """A less elegant version of allow_tag_creation()."""
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
     
