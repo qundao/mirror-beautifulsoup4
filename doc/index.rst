@@ -3031,13 +3031,36 @@ Almost everyone who uses Beautiful Soup to extract information from a
 document can get what they need using the methods described in
 `Searching the tree`_. However, there's a lower-level interface--the
 :py:class:`ElementSelector` class-- which lets you define any matching
-behavior you want.
+behavior whatsoever.
 
 To use :py:class:`ElementSelector`, define a function that takes a
-:py:class:`PageElement` object (i.e. either a :py:class:`Tag` or a
-:py:class`NavigableString`) and returns True (if the element matches
-your custom criteria) or False (if it doesn't).
+:py:class:`PageElement` object (that is, it might be either a
+:py:class:`Tag` or a :py:class`NavigableString`) and returns ``True``
+(if the element matches your custom criteria) or ``False`` (if it
+doesn't)::
 
+  [example goes here]
+
+Then, pass the function into an :py:class:`ElementSelector`::
+
+ from bs4.select import ElementSelector
+ selector = ElementSelector(f)
+
+You can then pass the :py:class:`ElementSelector` object as the first
+argument to any of the `Searching the tree`_ methods::
+
+ [examples go here]
+
+Every potential match will be run through your function, and the only
+:py:class:`PageElement` objects returned will be the one where your
+function returned ``True``.
+
+Note that this is different from simply passing `a function`_ as the
+first argument to one of the search methods. That's an easy way to
+find a tag, but _only_ tags will be considered. With an
+:py:class:`ElementSelector` you can write a single function that makes
+decisions about both tags and strings.
+ 
 
 Advanced parser customization
 =============================
@@ -3132,14 +3155,6 @@ The :py:class:`SoupStrainer` behavior is as follows:
 * When a tag does not match, the tag itself is not kept, but parsing continues
   into its contents to look for other tags that do match.
 
-You can also pass a :py:class:`SoupStrainer` into any of the methods covered
-in `Searching the tree`_. This probably isn't terribly useful, but I
-thought I'd mention it::
-
- soup = BeautifulSoup(html_doc, 'html.parser')
- soup.find_all(only_short_strings)
- # ['\n\n', '\n\n', 'Elsie', ',\n', 'Lacie', ' and\n', 'Tillie',
- #  '\n\n', '...', '\n']
 
 Customizing multi-valued attributes
 -----------------------------------
