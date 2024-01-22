@@ -8,13 +8,104 @@ from . import (
 from bs4.element import Tag
 from bs4.match import (
     AttributeValueMatchRule,
+    ElementSelector,
     MatchRule,
     SoupStrainer,
     StringMatchRule,
     TagNameMatchRule,
 )
 
-class TestMatchrule(SoupTest):
+class TestElementSelector(SoupTest):
+
+    def test_default_behavior(self):
+        # An unconfigured ElementSelector matches absolutely everything.
+        selector = ElementSelector()
+        assert not selector.excludes_everything
+        soup = self.soup("<a>text</a>")
+        tag = soup.a
+        string = tag.string
+        assert True == selector.match(soup)
+        assert True == selector.match(tag)
+        assert True == selector.match(string)
+        assert soup.find(selector).name == "a"
+
+        # And allows any incoming markup to be turned into PageElements.
+        assert True == selector.allow_tag_creation(None, "tag", None)
+        assert True == selector.allow_string_creation("some string")
+
+    def test_match(self):
+        def m(pe):
+            return (pe.string == "allow" or (
+                isinstance(pe, Tag) and pe.name=="allow"))
+
+        soup = self.soup("<allow>deny</allow>allow<deny>deny</deny>")
+        allow_tag = soup.allow
+        allow_string = soup.find(string="allow")
+        deny_tag = soup.deny
+        deny_string = soup.find(string="deny")
+
+        selector = ElementSelector(match_function=m)
+        assert True == selector.match(allow_tag)
+        assert True == selector.match(allow_string)
+        assert False == selector.match(deny_tag)
+        assert False == selector.match(deny_string)
+
+        # Since only the match function was provided, there is
+        # no effect on tag or string creation.
+        soup = self.soup("<a>text</a>", parse_only=selector)
+        assert "text" == soup.a.string
+
+    def test_allow_tag_creation(self):
+        def m(nsprefix, name, attrs):
+            return nsprefix=="allow" or name=="allow" or "allow" in attrs
+        selector = ElementSelector(allow_tag_creation_function=m)
+        f = selector.allow_tag_creation
+        assert True == f("allow", "ignore", {})
+        assert True == f("ignore", "allow", {})
+        assert True == f(None, "ignore", {"allow": "1"})
+        assert False == f("no", "no", {"no" : "nope"})
+
+        # Test the ElementSelector as a value for parse_only.
+        soup = self.soup(
+            "<deny>deny</deny> <allow>deny</allow> allow",
+            parse_only=selector
+        )
+
+        # The <deny> tag was filtered out, but there was no effect on
+        # the strings, since only allow_tag_creation_function was
+        # defined.
+        assert 'deny <allow>deny</allow> allow' == soup.decode()
+
+        # Similarly, since match_function was not defined, this
+        # ElementSelector matches everything.
+        assert soup.find(selector) == "deny"
+
+    def test_allow_string_creation(self):
+        def m(s):
+            return s=="allow"
+        selector = ElementSelector(allow_string_creation_function=m)
+        f = selector.allow_string_creation
+        assert True == f("allow")
+        assert False == f("deny")
+        assert False == f("please allow")
+
+        # Test the ElementSelector as a value for parse_only.
+        soup = self.soup(
+            "<deny>deny</deny> <allow>deny</allow> allow",
+            parse_only=selector
+        )
+
+        # All incoming strings other than "allow" (even whitespace)
+        # were filtered out, but there was no effect on the tags,
+        # since only allow_string_creation_function was defined.
+        assert '<deny>deny</deny><allow>deny</allow>' == soup.decode()
+
+        # Similarly, since match_function was not defined, this
+        # ElementSelector matches everything.
+        assert soup.find(selector).name == "deny"
+
+
+class TestMatchRule(SoupTest):
 
     def _tuple(self, rule):
         if isinstance(rule.pattern, str):
@@ -155,6 +246,28 @@ class TestSoupStrainer(SoupTest):
             assert w2.filename == __file__
             assert msg == "Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0."
 
+    def test_search_tag_deprecated(self):
+        strainer = SoupStrainer(name="a")
+        with warnings.catch_warnings(record=True) as w:
+            assert False == strainer.search_tag("b", {})
+            [w1] = w
+            msg = str(w1.message)
+            assert w1.filename == __file__
+            assert msg == "Call to deprecated method search_tag. (Replaced by allow_tag_creation) -- Deprecated since version 4.13.0."
+
+    def test_search_deprecated(self):
+        strainer = SoupStrainer(name="a")
+        soup = self.soup("<a></a><b></b>")
+        with warnings.catch_warnings(record=True) as w:
+            assert soup.a == strainer.search(soup.a)
+            assert None == strainer.search(soup.b)
+            [w1, w2] = w
+            msg = str(w1.message)
+            assert msg == str(w2.message)
+            assert w1.filename == __file__
+            assert msg == "Call to deprecated method search. (Replaced by match) -- Deprecated since version 4.13.0."
+
+    # Dummy function used within tests.
     def _match_function(x):
         pass
             
@@ -213,7 +326,7 @@ class TestSoupStrainer(SoupTest):
         )
 
     def test_constructor_with_overlapping_attributes(self):
-        # If you specify the same attribute in arts and **kwargs, you end up
+        # If you specify the same attribute in args and **kwargs, you end up
         # with two different AttributeValueMatchRule objects.
 
         # This happens whether you use the 'class' shortcut on attrs...
@@ -437,9 +550,13 @@ class TestSoupStrainer(SoupTest):
         # because the string restrictions can't be evaluated during
         # the parsing process, and the tag restrictions eliminate
         # any strings from consideration.
+        #
+        # We can detect this ahead of time, and warn about it,
+        # thanks to SoupStrainer.excludes_everything
         markup = "<a><b>one string<div>another string</div></b></a>"
 
         with warnings.catch_warnings(record=True) as w:
+            assert True, soupstrainer.excludes_everything
             assert "" == self.soup(markup, parse_only=soupstrainer).decode()
             [warning] = w
             msg = str(warning.message)
@@ -447,7 +564,10 @@ class TestSoupStrainer(SoupTest):
             assert str(warning.message).startswith(
                 "The given value for parse_only will exclude everything:"
             )
-        
+
+        # The average SoupStrainer has excludes_everything=False
+        assert not SoupStrainer().excludes_everything
+
     def test_documentation_examples(self):
         """Medium-weight real-world tests based on the Beautiful Soup
         documentation.

@@ -63,9 +63,9 @@ class ElementSelector(object):
             self, match_function:Optional[_PageElementMatchFunction]=None,
             allow_tag_creation_function:Optional[_AllowTagCreationFunction]=None,
             allow_string_creation_function:Optional[_AllowStringCreationFunction]=None):
-        self.match_hook = match_function
-        self.allow_tag_creation_hook = allow_tag_creation_hook
-        self.allow_string_creation_hook = allow_string_creation_hook
+        self.match_function = match_function
+        self.allow_tag_creation_function = allow_tag_creation_function
+        self.allow_string_creation_function = allow_string_creation_function
 
     @property
     def excludes_everything(self) -> bool:
@@ -104,14 +104,14 @@ class ElementSelector(object):
         :param name: The name of the prospective tag.
         :param attrs: The attributes of the prospective tag.
         """
-        if not self.allow_tag_creation_hook:
+        if not self.allow_tag_creation_function:
             return True
-        return self.allow_tag_creation_hook(nsprefix, name, attrs)
+        return self.allow_tag_creation_function(nsprefix, name, attrs)
 
     def allow_string_creation(self, string:str) -> bool:
-        if not self.allow_string_creation_hook:
+        if not self.allow_string_creation_function:
             return True
-        return self.allow_string_creation_hook(string)
+        return self.allow_string_creation_function(string)
 
 
 class MatchRule(object):
@@ -588,4 +588,4 @@ class SoupStrainer(ElementSelector):
 
         :meta private:
         """
-        return element if self.match(element) else False
+        return element if self.match(element) else None

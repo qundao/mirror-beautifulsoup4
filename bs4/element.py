@@ -912,8 +912,8 @@ class PageElement(object):
                 DeprecationWarning, stacklevel=_stacklevel
             )
 
-        from bs4.match import ElementMatcher
-        if isinstance(name, ElementMatcher):
+        from bs4.match import ElementSelector
+        if isinstance(name, ElementSelector):
             matcher = name
         else:
             matcher = SoupStrainer(name, attrs, string, **kwargs)
@@ -948,7 +948,7 @@ class PageElement(object):
                 return ResultSet(matcher, result)
         return self.match(generator, matcher, limit)
 
-    def match(self, generator:Iterator[PageElement], matcher:ElementMatcher, limit:Optional[int]=None) -> ResultSet[PageElement]:
+    def match(self, generator:Iterator[PageElement], matcher:ElementSelector, limit:Optional[int]=None) -> ResultSet[PageElement]:
         """The most generic search method offered by Beautiful Soup.
 
         You can pass in your own technique for iterating over the tree, and your own
@@ -2506,12 +2506,12 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
-    of matching an `ElementMatcher` against a parse tree. Basically, a list of
+    of matching an `ElementSelector` against a parse tree. Basically, a list of
     search results.
     """
-    source: Optional[ElementMatcher]
+    source: Optional[ElementSelector]
 
-    def __init__(self, source:Optional[ElementMatcher], result: Iterable[_PageElementT]=()) -> None:
+    def __init__(self, source:Optional[ElementSelector], result: Iterable[_PageElementT]=()) -> None:
         super(ResultSet, self).__init__(result)
         self.source = source
 
