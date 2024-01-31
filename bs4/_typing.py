@@ -7,6 +7,8 @@
 # * In 3.10, x|y is an accepted shorthand for Union[x,y].
 # * In 3.10, TypeAlias gains capabilities that can be used to
 #   improve the tree matching types (I don't remember what, exactly).
+# * 3.8 defines the Protocol type, which can be used to do duck typing
+#   in a statically checkable way.
 
 import re
 from typing_extensions import TypeAlias

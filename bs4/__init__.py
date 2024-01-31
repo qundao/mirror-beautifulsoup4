@@ -166,6 +166,7 @@ class BeautifulSoup(Tag):
     open_tag_counter:CounterType[str] #: :meta private:
     preserve_whitespace_tag_stack:List[Tag] #: :meta private:
     string_container_stack:List[Tag] #: :meta private:
+    _most_recent_element:Optional[PageElement] #: :meta private:
 
     #: Beautiful Soup's best guess as to the character encoding of the
     #: original document.
@@ -787,6 +788,7 @@ class BeautifulSoup(Tag):
         if parent is None:
             parent = self.currentTag
         assert parent is not None
+        previous_element: Optional[PageElement]
         if most_recent_element is not None:
             previous_element = most_recent_element
         else:
@@ -811,12 +813,12 @@ class BeautifulSoup(Tag):
         if fix:
             self._linkage_fixer(parent)
 
-    def _linkage_fixer(self, el):
+    def _linkage_fixer(self, el:Tag) -> None:
         """Make sure linkage of this fragment is sound."""
 
         first = el.contents[0]
         child = el.contents[-1]
-        descendant = child
+        descendant:PageElement = child
 
         if child is first and el.parent is not None:
             # Parent should be linked to first child
@@ -834,14 +836,18 @@ class BeautifulSoup(Tag):
 
         # This index is a tag, dig deeper for a "last descendant"
         if isinstance(child, Tag) and child.contents:
-            descendant = child._last_descendant(False)
+            # _last_decendant is typed as returning Optional[PageElement],
+            # but the value can't be None here, because el is a Tag
+            # which we know has contents.
+            descendant = cast(PageElement, child._last_descendant(False))
 
         # As the final step, link last descendant. It should be linked
         # to the parent's next sibling (if found), else walk up the chain
         # and find a parent with a sibling. It should have no next sibling.
         descendant.next_element = None
         descendant.next_sibling = None
-        target = el
+
+        target:Optional[Tag] = el
         while True:
             if target is None:
                 break
@@ -851,7 +857,7 @@ class BeautifulSoup(Tag):
                 break
             target = target.parent
 
-    def _popToTag(self, name, nsprefix=None, inclusivePop=True) -> Optional[Tag]:
+    def _popToTag(self, name:str, nsprefix:Optional[str]=None, inclusivePop:bool=True) -> Optional[Tag]:
         """Pops the tag stack up to and including the most recent
         instance of the given tag.
 
@@ -888,7 +894,7 @@ class BeautifulSoup(Tag):
 
     def handle_starttag(
             self, name:str, namespace:Optional[str],
-            nsprefix:Optional[str], attrs:Optional[Dict[str,str]],
+            nsprefix:Optional[str], attrs:_AttributeValues,
             sourceline:Optional[int]=None, sourcepos:Optional[int]=None,
             namespaces:Optional[Dict[str, str]]=None) -> Optional[Tag]:
         """Called by the tree builder when a new tag is encountered.
@@ -917,7 +923,11 @@ class BeautifulSoup(Tag):
             and not self.parse_only.allow_tag_creation(nsprefix, name, attrs)):
             return None
 
-        tag = self.element_classes.get(Tag, Tag)(
+        tag_class = self.element_classes.get(Tag, Tag)
+        # Assume that this is either Tag or a subclass of Tag. If not,
+        # the user brought type-unsafety upon themselves.
+        tag_class = cast(Type[Tag], tag_class)
+        tag = tag_class(
             self, self.builder, name, namespace, nsprefix, attrs,
             self.currentTag, self._most_recent_element,
             sourceline=sourceline, sourcepos=sourcepos,
@@ -954,7 +964,8 @@ class BeautifulSoup(Tag):
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:Union[Formatter,str]="minimal",
-               iterator:Optional[Iterable]=None, **kwargs) -> str:
+               iterator:Optional[Iterable[PageElement]]=None,
+               **kwargs:Any) -> str:
         """Returns a string representation of the parse tree
             as a full HTML or XML document.
 
@@ -1025,7 +1036,7 @@ _soup = BeautifulSoup
 class BeautifulStoneSoup(BeautifulSoup):
     """Deprecated interface to an XML parser."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args:Any, **kwargs:Any):
         kwargs['features'] = 'xml'
         warnings.warn(
             'The BeautifulStoneSoup class was deprecated in version 4.0.0. Instead of using '

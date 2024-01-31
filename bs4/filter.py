@@ -25,6 +25,7 @@ from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 from bs4._typing import (
     _AttributeValue,
+    _AttributeValues,
     _AllowStringCreationFunction,
     _AllowTagCreationFunction,
     _PageElementMatchFunction,
@@ -35,6 +36,7 @@ from bs4._typing import (
     _StrainableAttributes,
     _StrainableString,
 )
+
 
 class ElementFilter(object):
     """ElementFilters encapsulate the logic necessary to decide:
@@ -96,7 +98,7 @@ class ElementFilter(object):
 
     def allow_tag_creation(
             self, nsprefix:Optional[str], name:str,
-            attrs:Optional[dict[str, str]]
+            attrs:Optional[_AttributeValues]
     ) -> bool:
         """Based on the name and attributes of a tag, see whether this
         ElementFilter will allow a Tag object to even be created.
@@ -370,7 +372,9 @@ class SoupStrainer(ElementFilter):
             # third-party regex library, whose pattern objects doesn't
             # derive from re.Pattern.
             #
-            # TODO-TYPING: mypy complains about this; can anything be done?
+            # TODO-TYPING: Once we drop support for Python 3.7, we
+            # might be able to address this by defining an appropriate
+            # Protocol.
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
@@ -492,8 +496,8 @@ class SoupStrainer(ElementFilter):
                 [joined_attr_value]
             )
         return this_attr_match
-    
-    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[_RawAttributeValues]) -> bool:
+
+    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[_AttributeValues]) -> bool:
         """Based on the name and attributes of a tag, see whether this
         SoupStrainer will allow a Tag object to even be created.
 
@@ -582,7 +586,7 @@ class SoupStrainer(ElementFilter):
         return False
 
     @_deprecated("allow_tag_creation", "4.13.0")
-    def search_tag(self, name:str, attrs:Optional[_RawAttributeValues]) -> bool:
+    def search_tag(self, name:str, attrs:Optional[_AttributeValues]) -> bool:
         """A less elegant version of allow_tag_creation()."""
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
