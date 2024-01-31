@@ -76,6 +76,7 @@ from typing import (
     List,
     Sequence,
     Optional,
+    Tuple,
     Type,
     TYPE_CHECKING,
     Union,
@@ -151,7 +152,7 @@ class BeautifulSoup(Tag):
     NO_PARSER_SPECIFIED_WARNING: str = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
 
     # FUTURE PYTHON:
-    element_classes:Dict[Type[PageElement], Type[Any]] #: :meta private:
+    element_classes:Dict[Type[PageElement], Type[PageElement]] #: :meta private:
     builder:TreeBuilder #: :meta private:
     is_xml: bool
     known_xml: Optional[bool]
@@ -189,7 +190,7 @@ class BeautifulSoup(Tag):
             parse_only:Optional[SoupStrainer]=None,
             from_encoding:Optional[_Encoding]=None,
             exclude_encodings:Optional[_Encodings]=None,
-            element_classes:Optional[Dict[Type[PageElement], Type[Any]]]=None,
+            element_classes:Optional[Dict[Type[PageElement], Type[PageElement]]]=None,
             **kwargs:Any
     ):
         """Constructor.
@@ -503,26 +504,37 @@ class BeautifulSoup(Tag):
         :return: Whether or not the markup resembled a URL
             closely enough to justify issuing a warning.
         """
+        problem: bool = False
         if isinstance(markup, bytes):
-            space = b' '
-            cant_start_with = (b"http:", b"https:")
+            cant_start_with_b: Tuple[bytes, bytes] = (b"http:", b"https:")
+            problem = (
+                any(
+                    markup.startswith(prefix) for prefix in
+                    (b"http:", b"https:")
+                )
+                and not b' ' in markup
+            )
         elif isinstance(markup, str):
-            space = ' '
-            cant_start_with = ("http:", "https:")
+            problem = (
+                any(
+                    markup.startswith(prefix) for prefix in
+                    ("http:", "https:")
+                )
+                and not ' ' in markup
+            )
         else:
             return False
 
-        if any(markup.startswith(prefix) for prefix in cant_start_with):
-            if not space in markup:
-                warnings.warn(
-                    'The input looks more like a URL than markup. You may want to use'
-                    ' an HTTP client like requests to get the document behind'
-                    ' the URL, and feed that document to Beautiful Soup.',
-                    MarkupResemblesLocatorWarning,
-                    stacklevel=3
-                )
-                return True
-        return False
+        if not problem:
+            return False
+        warnings.warn(
+            'The input looks more like a URL than markup. You may want to use'
+            ' an HTTP client like requests to get the document behind'
+            ' the URL, and feed that document to Beautiful Soup.',
+            MarkupResemblesLocatorWarning,
+            stacklevel=3
+        )
+        return True
 
     @classmethod
     def _markup_resembles_filename(cls, markup:_RawMarkup) -> bool:
@@ -533,18 +545,27 @@ class BeautifulSoup(Tag):
         :return: Whether or not the markup resembled a filename
             closely enough to justify issuing a warning.
         """
-        path_characters = '/\\'
-        extensions = ['.html', '.htm', '.xml', '.xhtml', '.txt']
-        if isinstance(markup, bytes):
-            path_characters = path_characters.encode("utf8")
-            extensions = [x.encode('utf8') for x in extensions]
+        path_characters_b = b'/\\'
+        path_characters_s = '/\\'
+        extensions_b = [b'.html', b'.htm', b'.xml', b'.xhtml', b'.txt']
+        extensions_s = ['.html', '.htm', '.xml', '.xhtml', '.txt']
+
         filelike = False
-        if any(x in markup for x in path_characters):
-            filelike = True
-        else:
-            lower = markup.lower()
-            if any(lower.endswith(ext) for ext in extensions):
+        if isinstance(markup, bytes):
+            if any(x in markup for x in path_characters_b):
                 filelike = True
+            else:
+                lower_b = markup.lower()
+                if any(lower_b.endswith(ext) for ext in extensions_b):
+                    filelike = True
+        else:
+            if any(x in markup for x in path_characters_s):
+                filelike = True
+            else:
+                lower_s = markup.lower()
+                if any(lower_s.endswith(ext) for ext in extensions_s):
+                    filelike = True
+
         if filelike:
             warnings.warn(
                 'The input looks more like a filename than markup. You may'
@@ -562,10 +583,12 @@ class BeautifulSoup(Tag):
         # Convert the document to Unicode.
         self.builder.reset()
 
-        self.builder.feed(self.markup)
+        if self.markup is not None:
+            self.builder.feed(self.markup)
         # Close out any unfinished strings and close all the open tags.
         self.endData()
-        while self.currentTag.name != self.ROOT_TAG_NAME:
+        while (self.currentTag is not None and
+               self.currentTag.name != self.ROOT_TAG_NAME):
             self.popTag()
 
     def reset(self) -> None:
@@ -612,10 +635,16 @@ class BeautifulSoup(Tag):
 
         """
         kwattrs.update(attrs)
-        tag =  self.element_classes.get(Tag, Tag)(
+        tag_class = self.element_classes.get(Tag, Tag)
+
+        # Assume that this is either Tag or a subclass of Tag. If not,
+        # the user brought type-unsafety upon themselves.
+        tag_class = cast(Type[Tag], tag_class)
+        tag = tag_class(
             None, self.builder, name, namespace, nsprefix, kwattrs,
             sourceline=sourceline, sourcepos=sourcepos
         )
+
         if string is not None:
             tag.string = string
         return tag
@@ -631,9 +660,11 @@ class BeautifulSoup(Tag):
         """
         container = base_class or NavigableString
 
-        # There may be a general override of NavigableString.
-        container = self.element_classes.get(
-            container, container
+        # The user may want us to use some other class (hopefully a
+        # custom subclass) instead of the one we'd use normally.
+        container = cast(
+            type[NavigableString],
+            self.element_classes.get(container, container)
         )
 
         # On top of that, we may be inside a tag that needs a special
@@ -747,11 +778,9 @@ class BeautifulSoup(Tag):
 
     def object_was_parsed(
             self, o:PageElement, parent:Optional[Tag]=None,
-            most_recent_element:Optional[PageElement]=None):
+            most_recent_element:Optional[PageElement]=None) -> None:
         """Method called by the TreeBuilder to integrate an object into the
         parse tree.
-
-        
 
         :meta private:
         """
