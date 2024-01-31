@@ -33,6 +33,13 @@ TODO: we could stand to put limit inside ResultSet
   you, since you probably use HTMLParserTreeBuilder, not
   BeautifulSoupHTMLParser directly.
 
+* The TreeBuilderForHtml5lib methods fragmentClass and getFragment
+  now raise NotImplementedError. These methods are called only by
+  html5lib's HTMLParser.parseFragment() method, which Beautiful Soup
+  doesn't use, so they were untested and should have never been called.
+  The getFragment() implementation was also slightly incorrect in a way
+  that should have caused obvious problems for anyone using it.
+
 * If Tag.get_attribute_list() is used to access an attribute that's not set,
   the return value is now an empty list rather than [None].
 
@@ -94,7 +101,7 @@ TODO: we could stand to put limit inside ResultSet
   changed to match the arguments to the superclass,
   TreeBuilder.prepare_markup. Specifically, document_declared_encoding
   now appears before exclude_encodings, not after. If you were calling
-  this method yourself, I recomment switching to using keyword
+  this method yourself, I recommend switching to using keyword
   arguments instead.
 
 * Fixed an error in the lookup table used when converting

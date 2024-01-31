@@ -1258,7 +1258,7 @@ class Declaration(PreformattedString):
 class Doctype(PreformattedString):
     """A `document type declaration <https://www.w3.org/TR/REC-xml/#dt-doctype>`_."""
     @classmethod
-    def for_name_and_ids(cls, name:str, pub_id:str, system_id:str) -> Doctype:
+    def for_name_and_ids(cls, name:str, pub_id:Optional[str], system_id:Optional[str]) -> Doctype:
         """Generate an appropriate document type declaration for a given
         public ID and system ID.
 

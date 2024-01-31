@@ -6,6 +6,7 @@ __all__ = [
     ]
 
 from typing import (
+    Any,
     cast,
     Dict,
     Iterable,
@@ -156,9 +157,12 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
 
 class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
-    
-    def __init__(self, namespaceHTMLElements, soup=None,
-                 store_line_numbers=True, **kwargs):
+
+    soup:'BeautifulSoup' #: :meta private:
+
+    def __init__(self, namespaceHTMLElements,
+                 soup:Optional['BeautifulSoup']=None,
+                 store_line_numbers:bool=True, **kwargs):
         if soup:
             self.soup = soup
         else:
@@ -183,7 +187,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         self.soup.reset()
         return Element(self.soup, self.soup, None)
 
-    def insertDoctype(self, token:Dict[str, any]) -> None:
+    def insertDoctype(self, token:Dict[str, Any]) -> None:
         name:str = cast(str, token["name"])
         publicId:Optional[str] = cast(Optional[str], token["publicId"])
         systemId:Optional[str] = cast(Optional[str], token["systemId"])
@@ -207,37 +211,38 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
     def commentClass(self, data:str) -> 'TextNode':
         return TextNode(Comment(data), self.soup)
 
-    def fragmentClass(self):
-        from bs4 import BeautifulSoup
-        # TODO: Why is the parser 'html.parser' here? To avoid an
-        # infinite loop?
-        self.soup = BeautifulSoup("", "html.parser")
-        self.soup.name = "[document_fragment]"
-        return Element(self.soup, self.soup, None)
+    def fragmentClass(self) -> 'Element':
+        """This is only used by html5lib HTMLParser.parseFragment(),
+        which is never used by Beautiful Soup."""
+        raise NotImplementedError()
 
-    def appendChild(self, node):
-        # XXX This code is not covered by the BS4 tests.
+    def getFragment(self) -> 'Element':
+        """This is only used by html5lib HTMLParser.parseFragment,
+        which is never used by Beautiful Soup."""
+        raise NotImplementedError()
+
+    def appendChild(self, node:'Element') -> None:
+        # TODO: This code is not covered by the BS4 tests.
         self.soup.append(node.element)
 
-    def getDocument(self):
+    def getDocument(self) -> 'BeautifulSoup':
         return self.soup
 
-    def getFragment(self):
-        return treebuilder_base.TreeBuilder.getFragment(self).element
-
-    def testSerializer(self, element):
+    # TODO: typeshed stubs are incorrect about this;
+    # cloneNode returns a str, not None.
+    def testSerializer(self, element:'Element') -> str:
         from bs4 import BeautifulSoup
         rv = []
         doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
 
-        def serializeElement(element, indent=0):
+        def serializeElement(element, indent=0) -> None:
             if isinstance(element, BeautifulSoup):
                 pass
             if isinstance(element, Doctype):
                 m = doctype_re.match(element)
-                if m:
+                if m is not None:
                     name = m.group(1)
-                    if m.lastindex > 1:
+                    if m.lastindex is not None and m.lastindex > 1:
                         publicId = m.group(2) or ""
                         systemId = m.group(3) or m.group(4) or ""
                         rv.append("""|%s<!DOCTYPE %s "%s" "%s">""" %
@@ -276,11 +281,12 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         return "\n".join(rv)
 
 class AttrList(object):
+    """Represents a Tag's attributes in a way compatible with html5lib."""
 
-    element: PageElement
+    element: Tag
     attrs: _AttributeValues
 
-    def __init__(self, element:PageElement):
+    def __init__(self, element:Tag):
         self.element = element
         self.attrs = dict(self.element.attrs)
 
@@ -300,19 +306,19 @@ class AttrList(object):
                 value = nonwhitespace_re.findall(value)
         self.element[name] = value
 
-    def items(self):
+    def items(self) -> Iterable[Tuple[str, _AttributeValue]]:
         return list(self.attrs.items())
 
-    def keys(self):
+    def keys(self) -> Iterable[str]:
         return list(self.attrs.keys())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.attrs)
 
-    def __getitem__(self, name):
+    def __getitem__(self, name:str) -> _AttributeValue:
         return self.attrs[name]
 
-    def __contains__(self, name):
+    def __contains__(self, name:str) -> bool:
         return name in list(self.attrs.keys())
 
 
@@ -342,7 +348,7 @@ class Element(treebuilder_base.Node):
             child = node.element
             node.parent = self
 
-        if not isinstance(child, str) and child.parent is not None:
+        if not isinstance(child, str) and child is not None and child.parent is not None:
             node.element.extract()
 
         if (string_child is not None and self.element.contents
@@ -382,7 +388,7 @@ class Element(treebuilder_base.Node):
             return {}
         return AttrList(self.element)
 
-    def setAttributes(self, attributes:Optional[Dict]):
+    def setAttributes(self, attributes:Optional[Dict]) -> None:
         if attributes is not None and len(attributes) > 0:
             for name, value in list(attributes.items()):
                 if isinstance(name, tuple):
