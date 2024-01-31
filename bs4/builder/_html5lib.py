@@ -6,6 +6,8 @@ __all__ = [
     ]
 
 from typing import (
+    cast,
+    Dict,
     Iterable,
     List,
     Optional,
@@ -14,6 +16,8 @@ from typing import (
     Union,
 )
 from bs4._typing import (
+    _AttributeValue,
+    _AttributeValues,
     _Encoding,
     _Encodings,
     _RawMarkup,
@@ -30,6 +34,7 @@ from bs4.builder import (
     )
 from bs4.element import (
     NamespacedAttribute,
+    PageElement,
     nonwhitespace_re,
 )
 import html5lib
@@ -42,7 +47,9 @@ from bs4.element import (
     Doctype,
     NavigableString,
     Tag,
-    )
+)
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
 
 from html5lib.treebuilders import base as treebuilder_base
 
@@ -106,7 +113,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         """Run some incoming markup through some parsing process,
         populating the `BeautifulSoup` object in `HTML5TreeBuilder.soup`.
         """
-        if self.soup.parse_only is not None:
+        if self.soup is not None and self.soup.parse_only is not None:
             warnings.warn(
                 "You provided a value for parse_only, but the html5lib tree builder doesn't support parse_only. The entire document will be parsed.",
                 stacklevel=4
@@ -131,7 +138,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
 
-    def create_treebuilder(self, namespaceHTMLElements):
+    def create_treebuilder(self, namespaceHTMLElements) -> 'TreeBuilderForHtml5lib':
         """Called by html5lib to instantiate the kind of class it
         calls a 'TreeBuilder'.
         
@@ -143,7 +150,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         )
         return self.underlying_builder
 
-    def test_fragment_to_document(self, fragment):
+    def test_fragment_to_document(self, fragment:str) -> str:
         """See `TreeBuilder`."""
         return '<html><head></head><body>%s</body></html>' % fragment
 
@@ -172,19 +179,19 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         self.parser = None
         self.store_line_numbers = store_line_numbers
         
-    def documentClass(self):
+    def documentClass(self) -> 'Element':
         self.soup.reset()
         return Element(self.soup, self.soup, None)
 
-    def insertDoctype(self, token):
-        name = token["name"]
-        publicId = token["publicId"]
-        systemId = token["systemId"]
+    def insertDoctype(self, token:Dict[str, any]) -> None:
+        name:str = cast(str, token["name"])
+        publicId:Optional[str] = cast(Optional[str], token["publicId"])
+        systemId:Optional[str] = cast(Optional[str], token["systemId"])
 
         doctype = Doctype.for_name_and_ids(name, publicId, systemId)
         self.soup.object_was_parsed(doctype)
 
-    def elementClass(self, name, namespace):
+    def elementClass(self, name:str, namespace:str) -> 'Element':
         kwargs = {}
         if self.parser and self.store_line_numbers:
             # This represents the point immediately after the end of the
@@ -197,7 +204,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
         return Element(tag, self.soup, namespace)
 
-    def commentClass(self, data):
+    def commentClass(self, data:str) -> 'TextNode':
         return TextNode(Comment(data), self.soup)
 
     def fragmentClass(self):
@@ -269,12 +276,18 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         return "\n".join(rv)
 
 class AttrList(object):
-    def __init__(self, element):
+
+    element: PageElement
+    attrs: _AttributeValues
+
+    def __init__(self, element:PageElement):
         self.element = element
         self.attrs = dict(self.element.attrs)
-    def __iter__(self):
+
+    def __iter__(self) -> Iterable[Tuple[str, _AttributeValue]]:
         return list(self.attrs.items()).__iter__()
-    def __setitem__(self, name, value):
+
+    def __setitem__(self, name:str, value:_AttributeValue) -> None:
         # If this attribute is a multi-valued attribute for this element,
         # turn its value into a list.
         list_attr = self.element.cdata_list_attributes or {}
@@ -282,18 +295,23 @@ class AttrList(object):
             or (self.element.name in list_attr
                 and name in list_attr.get(self.element.name, []))):
             # A node that is being cloned may have already undergone
-            # this procedure.
+            # this procedure. Check for this and skip it.
             if not isinstance(value, list):
                 value = nonwhitespace_re.findall(value)
         self.element[name] = value
+
     def items(self):
         return list(self.attrs.items())
+
     def keys(self):
         return list(self.attrs.keys())
+
     def __len__(self):
         return len(self.attrs)
+
     def __getitem__(self, name):
         return self.attrs[name]
+
     def __contains__(self, name):
         return name in list(self.attrs.keys())
 
@@ -305,7 +323,7 @@ class Element(treebuilder_base.Node):
         self.soup = soup
         self.namespace = namespace
 
-    def appendChild(self, node):
+    def appendChild(self, node:'Element') -> None:
         string_child = child = None
         if isinstance(node, str):
             # Some other piece of code decided to pass in a string
@@ -359,14 +377,13 @@ class Element(treebuilder_base.Node):
                 child, parent=self.element,
                 most_recent_element=most_recent_element)
 
-    def getAttributes(self):
+    def getAttributes(self) -> AttrList:
         if isinstance(self.element, Comment):
             return {}
         return AttrList(self.element)
 
-    def setAttributes(self, attributes):
+    def setAttributes(self, attributes:Optional[Dict]):
         if attributes is not None and len(attributes) > 0:
-            converted_attributes = []
             for name, value in list(attributes.items()):
                 if isinstance(name, tuple):
                     new_name = NamespacedAttribute(*name)
@@ -386,14 +403,14 @@ class Element(treebuilder_base.Node):
             self.soup.builder.set_up_substitutions(self.element)
     attributes = property(getAttributes, setAttributes)
 
-    def insertText(self, data, insertBefore=None):
+    def insertText(self, data:str, insertBefore:Optional['Element']=None) -> None:
         text = TextNode(self.soup.new_string(data), self.soup)
         if insertBefore:
             self.insertBefore(text, insertBefore)
         else:
             self.appendChild(text)
 
-    def insertBefore(self, node, refNode):
+    def insertBefore(self, node:'Element', refNode:'Element') -> None:
         index = self.element.index(refNode.element)
         if (node.element.__class__ == NavigableString and self.element.contents
             and self.element.contents[index-1].__class__ == NavigableString):
@@ -405,10 +422,10 @@ class Element(treebuilder_base.Node):
             self.element.insert(index, node.element)
             node.parent = self
 
-    def removeChild(self, node):
+    def removeChild(self, node:'Element') -> None:
         node.element.extract()
 
-    def reparentChildren(self, new_parent):
+    def reparentChildren(self, new_parent:'Element') -> None:
         """Move all of this tag's children into another tag."""
         # print("MOVE", self.element.contents)
         # print("FROM", self.element)
@@ -474,17 +491,21 @@ class Element(treebuilder_base.Node):
         # print("FROM", self.element)
         # print("TO", new_parent_element)
 
-    def cloneNode(self):
+    # TODO: typeshed stubs are incorrect about this;
+    # cloneNode returns a new Node, not None.
+    def cloneNode(self) -> treebuilder_base.Node:
         tag = self.soup.new_tag(self.element.name, self.namespace)
         node = Element(tag, self.soup, self.namespace)
         for key,value in self.attributes:
             node.attributes[key] = value
         return node
 
-    def hasContent(self):
-        return self.element.contents
+    # TODO: typeshed stubs are incorrect about this;
+    # cloneNode returns a boolean, not None.
+    def hasContent(self) -> bool:
+        return len(self.element.contents) > 0
 
-    def getNameTuple(self):
+    def getNameTuple(self) -> Tuple[str, str]:
         if self.namespace == None:
             return namespaces["html"], self.name
         else:
@@ -493,10 +514,10 @@ class Element(treebuilder_base.Node):
     nameTuple = property(getNameTuple)
 
 class TextNode(Element):
-    def __init__(self, element, soup):
+    def __init__(self, element:PageElement, soup:'BeautifulSoup'):
         treebuilder_base.Node.__init__(self, None)
         self.element = element
         self.soup = soup
 
-    def cloneNode(self):
-        raise NotImplementedError
+    def cloneNode(self) -> treebuilder_base.Node:
+        raise NotImplementedError()
