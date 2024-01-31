@@ -188,7 +188,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             # later on. If so, we want to ignore it.
             self.already_closed_empty_element.append(name)
 
-        if self._root_tag is None:
+        if self._root_tag_name is None:
             self._root_tag_encountered(name)
             
     def handle_endtag(self, name:str, check_already_closed:bool=True) -> None:
@@ -422,13 +422,23 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
                    dammit.declared_html_encoding,
                    dammit.contains_replacement_characters)
 
-    def feed(self, markup:str):
+    def feed(self, markup:_RawMarkup) -> None:
         args, kwargs = self.parser_args
+
+        # HTMLParser.feed will only handle str, but
+        # BeautifulSoup.markup is allowed to be _RawMarkup, because
+        # it's set by the yield value of
+        # TreeBuilder.prepare_markup. Fortunately,
+        # HTMLParserTreeBuilder.prepare_markup always yields a str
+        # (UnicodeDammit.unicode_markup).
+        assert isinstance(markup, str)
+
         # We know BeautifulSoup calls TreeBuilder.initialize_soup
         # before calling feed(), so we can assume self.soup
         # is set.
         assert self.soup is not None
         parser = BeautifulSoupHTMLParser(self.soup, *args, **kwargs)
+
         try:
             parser.feed(markup)
             parser.close()

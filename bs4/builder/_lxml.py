@@ -269,7 +269,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         for encoding in detector.encodings:
             yield (detector.markup, encoding, document_declared_encoding, False)
 
-    def feed(self, markup:Union[bytes,str]) -> None:
+    def feed(self, markup:_RawMarkup) -> None:
         io: IO
         if isinstance(markup, bytes):
             io = BytesIO(markup)

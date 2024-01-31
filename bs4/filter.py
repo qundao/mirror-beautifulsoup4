@@ -122,8 +122,9 @@ class MatchRule(object):
     string: Optional[str]
     pattern: Optional[Pattern[str]]
     present: Optional[bool]
-    # All MatchRule objects also have an attribute ``function``, but
-    # the type of the function depends on the subclass.
+    # TODO-TYPING: All MatchRule objects also have an attribute
+    # ``function``, but the type of the function depends on the
+    # subclass.
     
     def __init__(
             self,
@@ -369,7 +370,7 @@ class SoupStrainer(ElementFilter):
             # third-party regex library, whose pattern objects doesn't
             # derive from re.Pattern.
             #
-            # TODO: mypy complains about this; can anything be done?
+            # TODO-TYPING: mypy complains about this; can anything be done?
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
@@ -467,7 +468,7 @@ class SoupStrainer(ElementFilter):
         else:
             attr_values = [cast(str, attr_value)]
 
-        def _match_attribute_value_helper(attr_values:Sequence[Optional[str]]):
+        def _match_attribute_value_helper(attr_values:Sequence[Optional[str]]) -> bool:
             for rule in rules:
                 for attr_value in attr_values:
                     if rule.matches_string(attr_value):
@@ -492,7 +493,7 @@ class SoupStrainer(ElementFilter):
             )
         return this_attr_match
     
-    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[dict[str, str]]) -> bool:
+    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[_RawAttributeValues]) -> bool:
         """Based on the name and attributes of a tag, see whether this
         SoupStrainer will allow a Tag object to even be created.
 
@@ -581,7 +582,7 @@ class SoupStrainer(ElementFilter):
         return False
 
     @_deprecated("allow_tag_creation", "4.13.0")
-    def search_tag(self, name:str, attrs) -> bool:
+    def search_tag(self, name:str, attrs:Optional[_RawAttributeValues]) -> bool:
         """A less elegant version of allow_tag_creation()."""
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)

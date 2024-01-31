@@ -53,6 +53,10 @@ _InvertedNamespaceMapping:TypeAlias = Dict[_NamespaceURL, _NamespacePrefix]
 _AttributeValue: TypeAlias = Union[str, Iterable[str]]
 _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
+# The most common form in which attribute values are passed in from a
+# parser.
+_RawAttributeValues: TypeAlias = dict[str, str]
+
 # Aliases to represent the many possibilities for matching bits of a
 # parse tree.
 #
@@ -66,7 +70,7 @@ _PageElementMatchFunction:TypeAlias = Callable[['PageElement'], bool]
 
 # A function that takes the raw parsed ingredients of a markup tag
 # and returns a yes-or-no answer.
-_AllowTagCreationFunction:TypeAlias = Callable[[Optional[str], str, Optional[dict[str, str]]], bool]
+_AllowTagCreationFunction:TypeAlias = Callable[[Optional[str], str, Optional[_RawAttributeValues]], bool]
 
 # A function that takes the raw parsed ingredients of a markup string node
 # and returns a yes-or-no answer.

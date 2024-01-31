@@ -9,7 +9,15 @@ from html.parser import HTMLParser
 import bs4
 from bs4 import BeautifulSoup, __version__ 
 from bs4.builder import builder_registry
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    IO,
+    List,
+    Optional,
+    Tuple,
+    TYPE_CHECKING,
+)
+
 if TYPE_CHECKING:
     from bs4._typing import _IncomingMarkup
 
@@ -78,7 +86,7 @@ def diagnose(data:_IncomingMarkup) -> None:
 
         print(("-" * 80))
 
-def lxml_trace(data, html:bool=True, **kwargs) -> None:
+def lxml_trace(data:_IncomingMarkup, html:bool=True, **kwargs:Any) -> None:
     """Print out the lxml events that occur during parsing.
 
     This lets you see how lxml parses a document when no Beautiful
@@ -94,7 +102,8 @@ def lxml_trace(data, html:bool=True, **kwargs) -> None:
     recover = kwargs.pop('recover', True)
     if isinstance(data, str):
         data = data.encode("utf8")
-    reader = BytesIO(data)
+    if not isinstance(data, IO):
+        reader = BytesIO(data)
     for event, element in etree.iterparse(
         reader, html=html, recover=recover, **kwargs
     ):
@@ -108,37 +117,40 @@ class AnnouncingParser(HTMLParser):
     document. The easiest way to do this is to call `htmlparser_trace`.
     """
 
-    def _p(self, s):
+    def _p(self, s:str) -> None:
         print(s)
 
-    def handle_starttag(self, name, attrs):
+    def handle_starttag(
+            self, name:str, attrs:List[Tuple[str, Optional[str]]],
+            handle_empty_element:bool=True
+    ) -> None:
         self._p(f"{name} {attrs} START")
 
-    def handle_endtag(self, name):
+    def handle_endtag(self, name:str, check_already_closed:bool=True) -> None:
         self._p("%s END" % name)
 
-    def handle_data(self, data):
+    def handle_data(self, data:str) -> None:
         self._p("%s DATA" % data)
 
-    def handle_charref(self, name):
+    def handle_charref(self, name:str) -> None:
         self._p("%s CHARREF" % name)
 
-    def handle_entityref(self, name):
+    def handle_entityref(self, name:str) -> None:
         self._p("%s ENTITYREF" % name)
 
-    def handle_comment(self, data):
+    def handle_comment(self, data:str) -> None:
         self._p("%s COMMENT" % data)
 
-    def handle_decl(self, data):
+    def handle_decl(self, data:str) -> None:
         self._p("%s DECL" % data)
 
-    def unknown_decl(self, data):
+    def unknown_decl(self, data:str) -> None:
         self._p("%s UNKNOWN-DECL" % data)
 
-    def handle_pi(self, data):
+    def handle_pi(self, data:str) -> None:
         self._p("%s PI" % data)
 
-def htmlparser_trace(data):
+def htmlparser_trace(data:str) -> None:
     """Print out the HTMLParser events that occur during parsing.
 
     This lets you see how HTMLParser parses a document when no
@@ -226,7 +238,7 @@ def benchmark_parsers(num_elements:int=100000) -> None:
     b = time.time()
     print(("Raw html5lib parsed the markup in %.2fs." % (b-a)))
 
-def profile(num_elements:int=100000, parser:str="lxml"):
+def profile(num_elements:int=100000, parser:str="lxml") -> None:
     """Use Python's profiler on a randomly generated document."""
     filehandle = tempfile.NamedTemporaryFile()
     filename = filehandle.name

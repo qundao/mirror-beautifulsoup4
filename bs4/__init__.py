@@ -84,6 +84,7 @@ from bs4._typing import (
     _Encoding,
     _Encodings,
     _IncomingMarkup,
+    _RawMarkup,
 )
 
 # Define some custom warnings.
@@ -154,7 +155,7 @@ class BeautifulSoup(Tag):
     parse_only: Optional[SoupStrainer] #: :meta private:
 
     # These members are only used while parsing markup.
-    markup:Optional[Union[str,bytes]] #: :meta private:
+    markup:Optional[_RawMarkup] #: :meta private:
     current_data:List[str] #: :meta private:
     currentTag:Optional[Tag] #: :meta private:
     tagStack:List[Tag] #: :meta private:
@@ -403,7 +404,7 @@ class BeautifulSoup(Tag):
 
         # At this point we know markup is a string or bytestring.  If
         # it was a file-type object, we've read from it.
-        markup = cast(Union[str,bytes], markup)
+        markup = cast(_RawMarkup, markup)
                 
         rejections = []
         success = False

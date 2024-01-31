@@ -277,7 +277,7 @@ class TreeBuilder(object):
             return True
         return tag_name in self.empty_element_tags
     
-    def feed(self, markup:str) -> None:
+    def feed(self, markup:_RawMarkup) -> None:
         """Run some incoming markup through some parsing process,
         populating the `BeautifulSoup` object in `TreeBuilder.soup`
         """
@@ -598,8 +598,8 @@ class DetectsXMLParsedAsHTML(object):
 
     # This is typed as str, not `ProcessingInstruction`, because this
     # check may be run before any Beautiful Soup objects are created.
-    _first_processing_instruction: Optional[str]
-    _root_tag: Optional[Tag]
+    _first_processing_instruction: Optional[str] #: :meta private:
+    _root_tag_name: Optional[str] #: :meta private:
     
     @classmethod
     def warn_if_markup_looks_like_xml(cls, markup:Optional[_RawMarkup], stacklevel:int=3) -> bool:
@@ -648,14 +648,14 @@ class DetectsXMLParsedAsHTML(object):
     def _initialize_xml_detector(self) -> None:
         """Call this method before parsing a document."""
         self._first_processing_instruction = None
-        self._root_tag = None
+        self._root_tag_name = None
        
     def _document_might_be_xml(self, processing_instruction:str):
         """Call this method when encountering an XML declaration, or a
         "processing instruction" that might be an XML declaration.
         """
         if (self._first_processing_instruction is not None
-            or self._root_tag is not None):
+            or self._root_tag_name is not None):
             # The document has already started. Don't bother checking
             # anymore.
             return
@@ -665,18 +665,18 @@ class DetectsXMLParsedAsHTML(object):
         # We won't know until we encounter the first tag whether or
         # not this is actually a problem.
         
-    def _root_tag_encountered(self, name):
+    def _root_tag_encountered(self, name:str) -> None:
         """Call this when you encounter the document's root tag.
 
         This is where we actually check whether an XML document is
         being incorrectly parsed as HTML, and issue the warning.
         """
-        if self._root_tag is not None:
+        if self._root_tag_name is not None:
             # This method was incorrectly called multiple times. Do
             # nothing.
             return
 
-        self._root_tag = name
+        self._root_tag_name = name
         if (name != 'html' and self._first_processing_instruction is not None
             and self._first_processing_instruction.lower().startswith('xml ')):
             # We encountered an XML declaration and then a tag other

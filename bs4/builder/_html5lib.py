@@ -102,7 +102,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
         yield (markup, None, None, False)
 
     # These methods are defined by Beautiful Soup.
-    def feed(self, markup):
+    def feed(self, markup:_RawMarkup) -> None:
         """Run some incoming markup through some parsing process,
         populating the `BeautifulSoup` object in `HTML5TreeBuilder.soup`.
         """
