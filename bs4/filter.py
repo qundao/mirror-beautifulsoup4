@@ -581,13 +581,13 @@ class SoupStrainer(ElementFilter):
         return False
 
     @_deprecated("allow_tag_creation", "4.13.0")
-    def search_tag(self, name, attrs):
+    def search_tag(self, name:str, attrs) -> bool:
         """A less elegant version of allow_tag_creation()."""
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
     
     @_deprecated("match", "4.13.0")        
-    def search(self, element:PageElement) -> Optional[element:PageElement]:
+    def search(self, element:PageElement) -> Optional[PageElement]:
         """A less elegant version of match().
 
         :meta private:

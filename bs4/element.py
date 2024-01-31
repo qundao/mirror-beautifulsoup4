@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
     from bs4.dammit import _Encoding
+    from bs4.filter import ElementFilter
     from bs4.formatter import (
         _EntitySubstitutionFunction,
         _FormatterOrName,
@@ -954,7 +955,7 @@ class PageElement(object):
         You can pass in your own technique for iterating over the tree, and your own
         technique for matching items.
         """
-        results = ResultSet(matcher)
+        results:ResultSet = ResultSet(matcher)
         while True:
             try:
                 i = next(generator)
