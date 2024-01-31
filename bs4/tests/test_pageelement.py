@@ -10,7 +10,7 @@ from bs4.element import (
     Comment,
     ResultSet,
 )
-from bs4.select import SoupStrainer
+from bs4.filter import SoupStrainer
 from . import (
     SoupTest,
 )

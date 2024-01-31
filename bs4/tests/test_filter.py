@@ -6,20 +6,20 @@ from . import (
     SoupTest,
 )
 from bs4.element import Tag
-from bs4.select import (
+from bs4.filter import (
     AttributeValueMatchRule,
-    ElementSelector,
+    ElementFilter,
     MatchRule,
     SoupStrainer,
     StringMatchRule,
     TagNameMatchRule,
 )
 
-class TestElementSelector(SoupTest):
+class TestElementFilter(SoupTest):
 
     def test_default_behavior(self):
-        # An unconfigured ElementSelector matches absolutely everything.
-        selector = ElementSelector()
+        # An unconfigured ElementFilter matches absolutely everything.
+        selector = ElementFilter()
         assert not selector.excludes_everything
         soup = self.soup("<a>text</a>")
         tag = soup.a
@@ -44,7 +44,7 @@ class TestElementSelector(SoupTest):
         deny_tag = soup.deny
         deny_string = soup.find(string="deny")
 
-        selector = ElementSelector(match_function=m)
+        selector = ElementFilter(match_function=m)
         assert True == selector.match(allow_tag)
         assert True == selector.match(allow_string)
         assert False == selector.match(deny_tag)
@@ -58,14 +58,14 @@ class TestElementSelector(SoupTest):
     def test_allow_tag_creation(self):
         def m(nsprefix, name, attrs):
             return nsprefix=="allow" or name=="allow" or "allow" in attrs
-        selector = ElementSelector(allow_tag_creation_function=m)
+        selector = ElementFilter(allow_tag_creation_function=m)
         f = selector.allow_tag_creation
         assert True == f("allow", "ignore", {})
         assert True == f("ignore", "allow", {})
         assert True == f(None, "ignore", {"allow": "1"})
         assert False == f("no", "no", {"no" : "nope"})
 
-        # Test the ElementSelector as a value for parse_only.
+        # Test the ElementFilter as a value for parse_only.
         soup = self.soup(
             "<deny>deny</deny> <allow>deny</allow> allow",
             parse_only=selector
@@ -77,19 +77,19 @@ class TestElementSelector(SoupTest):
         assert 'deny <allow>deny</allow> allow' == soup.decode()
 
         # Similarly, since match_function was not defined, this
-        # ElementSelector matches everything.
+        # ElementFilter matches everything.
         assert soup.find(selector) == "deny"
 
     def test_allow_string_creation(self):
         def m(s):
             return s=="allow"
-        selector = ElementSelector(allow_string_creation_function=m)
+        selector = ElementFilter(allow_string_creation_function=m)
         f = selector.allow_string_creation
         assert True == f("allow")
         assert False == f("deny")
         assert False == f("please allow")
 
-        # Test the ElementSelector as a value for parse_only.
+        # Test the ElementFilter as a value for parse_only.
         soup = self.soup(
             "<deny>deny</deny> <allow>deny</allow> allow",
             parse_only=selector
@@ -101,7 +101,7 @@ class TestElementSelector(SoupTest):
         assert '<deny>deny</deny><allow>deny</allow>' == soup.decode()
 
         # Similarly, since match_function was not defined, this
-        # ElementSelector matches everything.
+        # ElementFilter matches everything.
         assert soup.find(selector).name == "deny"
 
 

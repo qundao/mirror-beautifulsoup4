@@ -22,7 +22,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from bs4.element import Tag
+    from bs4.element import PageElement, Tag
 
 # Aliases for markup in various stages of processing.
 #

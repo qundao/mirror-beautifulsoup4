@@ -4,7 +4,7 @@ import pytest
 import warnings
 
 from bs4 import BeautifulSoup
-from bs4.select import SoupStrainer
+from bs4.filter import SoupStrainer
 from . import (
     HTML5LIB_PRESENT,
     HTML5TreeBuilderSmokeTest,

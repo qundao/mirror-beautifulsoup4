@@ -912,8 +912,8 @@ class PageElement(object):
                 DeprecationWarning, stacklevel=_stacklevel
             )
 
-        from bs4.select import ElementSelector
-        if isinstance(name, ElementSelector):
+        from bs4.filter import ElementFilter
+        if isinstance(name, ElementFilter):
             matcher = name
         else:
             matcher = SoupStrainer(name, attrs, string, **kwargs)
@@ -948,7 +948,7 @@ class PageElement(object):
                 return ResultSet(matcher, result)
         return self.match(generator, matcher, limit)
 
-    def match(self, generator:Iterator[PageElement], matcher:ElementSelector, limit:Optional[int]=None) -> ResultSet[PageElement]:
+    def match(self, generator:Iterator[PageElement], matcher:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
         """The most generic search method offered by Beautiful Soup.
 
         You can pass in your own technique for iterating over the tree, and your own
@@ -2506,12 +2506,12 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
-    of matching an `ElementSelector` against a parse tree. Basically, a list of
+    of matching an `ElementFilter` against a parse tree. Basically, a list of
     search results.
     """
-    source: Optional[ElementSelector]
+    source: Optional[ElementFilter]
 
-    def __init__(self, source:Optional[ElementSelector], result: Iterable[_PageElementT]=()) -> None:
+    def __init__(self, source:Optional[ElementFilter], result: Iterable[_PageElementT]=()) -> None:
         super(ResultSet, self).__init__(result)
         self.source = source
 
@@ -2525,4 +2525,4 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
 # import SoupStrainer itself into this module to preserve the
 # backwards compatibility of anyone who imports
 # bs4.element.SoupStrainer.
-from bs4.select import SoupStrainer
+from bs4.filter import SoupStrainer

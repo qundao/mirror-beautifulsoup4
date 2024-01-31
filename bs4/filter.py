@@ -36,8 +36,8 @@ from bs4._typing import (
     _StrainableString,
 )
 
-class ElementSelector(object):
-    """ElementSelectors encapsulate the logic necessary to decide:
+class ElementFilter(object):
+    """ElementFilters encapsulate the logic necessary to decide:
 
     1. whether a PageElement (a tag or a string) matches a
     user-specified query.
@@ -45,12 +45,12 @@ class ElementSelector(object):
     2. whether a given sequence of markup found during initial parsing
     should be turned into a PageElement, or simply discarded.
 
-    The base class is the simplest ElementSelector. By default, it
+    The base class is the simplest ElementFilter. By default, it
     matches everything and allows all PageElements to be created. You
     can make it more selective by passing in user-defined functions.
 
     Most users of Beautiful Soup will never need to use
-    ElementSelector, or its more capable subclass
+    ElementFilter, or its more capable subclass
     SoupStrainer. Instead, they will use the find_* methods, which
     will convert their arguments into SoupStrainer objects and run them
     against the tree.
@@ -69,23 +69,23 @@ class ElementSelector(object):
 
     @property
     def excludes_everything(self) -> bool:
-        """Does this ElementSelector obviously exclude everything? If
+        """Does this ElementFilter obviously exclude everything? If
         so, Beautiful Soup will issue a warning if you try to use it
         when parsing a document.
 
-        The ElementSelector might turn out to exclude everything even
+        The ElementFilter might turn out to exclude everything even
         if this returns False, but it won't do so in an obvious way.
 
-        The default ElementSelector excludes *nothing*, and we don't
+        The default ElementFilter excludes *nothing*, and we don't
         have any way of answering questions about more complex
-        ElementSelectors without running their hook functions, so the
+        ElementFilters without running their hook functions, so the
         base implementation always returns False.
         """
         return False
         
     def match(self, element:PageElement) -> bool:
         """Does the given PageElement match the rules set down by this
-        ElementSelector?
+        ElementFilter?
 
         The base implementation delegates to the function passed in to
         the constructor.
@@ -99,7 +99,7 @@ class ElementSelector(object):
             attrs:Optional[dict[str, str]]
     ) -> bool:
         """Based on the name and attributes of a tag, see whether this
-        ElementSelector will allow a Tag object to even be created.
+        ElementFilter will allow a Tag object to even be created.
 
         :param name: The name of the prospective tag.
         :param attrs: The attributes of the prospective tag.
@@ -156,7 +156,7 @@ class MatchRule(object):
                 "At most one of string, pattern, function and present must be provided."
             )
         
-    def _base_match(self, string:str) -> Optional[bool]:
+    def _base_match(self, string:Optional[str]) -> Optional[bool]:
         """Run the 'cheap' portion of a match, trying to get an answer without
         calling a potentially expensive custom function.
 
@@ -185,7 +185,7 @@ class MatchRule(object):
 
         return None
         
-    def matches_string(self, string:str) -> bool:
+    def matches_string(self, string:Optional[str]) -> bool:
         _base_result = self._base_match(string)
         if _base_result is not None:
             # No need to invoke the test function.
@@ -232,8 +232,8 @@ class StringMatchRule(MatchRule):
     """A MatchRule implementing the rules for matches against a NavigableString."""
     function: Optional[_StringMatchFunction]
     
-class SoupStrainer(ElementSelector):
-    """The ElementSelector subclass used internally by Beautiful Soup.
+class SoupStrainer(ElementFilter):
+    """The ElementFilter subclass used internally by Beautiful Soup.
 
     A SoupStrainer encapsulates the logic necessary to perform the
     kind of matches supported by the find_* methods. SoupStrainers are
@@ -362,10 +362,14 @@ class SoupStrainer(ElementSelector):
             yield rule_class(present=obj)
         elif callable(obj):
             yield rule_class(function=obj)
-        elif isinstance(obj, Pattern) or hasattr(obj, 'search'):
+        elif isinstance(obj, Pattern):
+            yield rule_class(pattern=obj)
+        elif hasattr(obj, 'search'):
             # We do a little duck typing here to detect usage of the
             # third-party regex library, whose pattern objects doesn't
             # derive from re.Pattern.
+            #
+            # TODO: mypy complains about this; can anything be done?
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:

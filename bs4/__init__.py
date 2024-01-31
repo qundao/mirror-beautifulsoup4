@@ -60,8 +60,8 @@ from .element import (
     TemplateString,
     )
 from .formatter import Formatter
-from .select import (
-    ElementSelector,
+from .filter import (
+    ElementFilter,
     SoupStrainer,
 )
 from typing import (
@@ -870,7 +870,7 @@ class BeautifulSoup(Tag):
             currently in scope in the document.
 
         If this method returns None, the tag was rejected by an active
-        `ElementSelector`. You should proceed as if the tag had not occurred
+        `ElementFilter`. You should proceed as if the tag had not occurred
         in the document. For instance, if this was a self-closing tag,
         don't call handle_endtag.
 
