@@ -107,8 +107,12 @@ New deprecations in 4.13.0:
 
 * The SAXTreeBuilder class, which was never officially supported or tested.
 
+* The private class method BeautifulSoup._decode_markup(), which has not
+  been used inside Beautiful Soup for many years.
+
 * The first argument to BeautifulSoup.decode has been changed from a bool
   `pretty_print` to an int `indent_level`, to match the signature of Tag.decode.
+  Using a bool will still work but will give you a DeprecationWarning.
 
 * SoupStrainer.text and SoupStrainer.string are both deprecated
   since a single item can't capture all the possibilities of a SoupStrainer

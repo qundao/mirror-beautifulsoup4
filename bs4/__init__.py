@@ -42,10 +42,13 @@ from .builder import (
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
 from .dammit import UnicodeDammit
+from .css import (
+    CSS
+)
+from ._deprecation import _deprecated
 from .element import (
     CData,
     Comment,
-    CSS,
     DEFAULT_OUTPUT_ENCODING,
     Declaration,
     Doctype,
@@ -275,7 +278,7 @@ class BeautifulSoup(Tag):
                 "features='lxml' for HTML and features='lxml-xml' for "
                 "XML.")
 
-        def deprecated_argument(old_name, new_name):
+        def deprecated_argument(old_name:str, new_name:str) -> Optional[Any]:
             if old_name in kwargs:
                 warnings.warn(
                     'The "%s" argument to the BeautifulSoup constructor '
@@ -328,7 +331,7 @@ class BeautifulSoup(Tag):
                     "Couldn't find a tree builder with the features you "
                     "requested: %s. Do you need to install a parser library?"
                     % ",".join(features))
-            builder_class = cast(Type[TreeBuilder], possible_builder_class)
+            builder_class = possible_builder_class
 
         # At this point either we have a TreeBuilder instance in
         # builder, or we have a builder_class that we can instantiate
@@ -433,7 +436,7 @@ class BeautifulSoup(Tag):
         self.markup = None
         self.builder.soup = None
 
-    def _clone(self):
+    def _clone(self) -> "BeautifulSoup":
         """Create a new BeautifulSoup object with the same TreeBuilder,
         but not associated with any markup.
 
@@ -446,7 +449,7 @@ class BeautifulSoup(Tag):
         clone.original_encoding = self.original_encoding
         return clone
         
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         # Frequently a tree builder can't be pickled.
         d = dict(self.__dict__)
         if 'builder' in d and d['builder'] is not None and not self.builder.picklable:
@@ -462,7 +465,7 @@ class BeautifulSoup(Tag):
             del d['_most_recent_element']
         return d
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict[str, Any]) -> None:
         # If necessary, restore the TreeBuilder by looking it up.
         self.__dict__ = state
         if isinstance(self.builder, type):
@@ -474,15 +477,16 @@ class BeautifulSoup(Tag):
         self.builder.soup = self
         self.reset()
         self._feed()
-        return state
 
     
     @classmethod
-    def _decode_markup(cls, markup):
-        """Ensure `markup` is bytes so it's safe to send into warnings.warn.
+    @_deprecated(replaced_by="nothing (private method, will be removed)", version="4.13.0")
+    def _decode_markup(cls, markup:_RawMarkup) -> str:
+        """Ensure `markup` is Unicode so it's safe to send into warnings.warn.
 
-        TODO: warnings.warn had this problem back in 2010 but it might not
-        anymore.
+        warnings.warn had this problem back in 2010 but fortunately
+        not anymore. This has not been used for a long time; I just
+        noticed that fact while working on 4.13.0.
         """
         if isinstance(markup, bytes):
             decoded = markup.decode('utf-8', 'replace')
@@ -491,13 +495,13 @@ class BeautifulSoup(Tag):
         return decoded
 
     @classmethod
-    def _markup_is_url(cls, markup):
+    def _markup_is_url(cls, markup:_RawMarkup) -> bool:
         """Error-handling method to raise a warning if incoming markup looks
         like a URL.
 
-        :param markup: A string.
-        :return: Whether or not the markup resembles a URL
-            closely enough to justify a warning.
+        :param markup: A string of markup.
+        :return: Whether or not the markup resembled a URL
+            closely enough to justify issuing a warning.
         """
         if isinstance(markup, bytes):
             space = b' '
@@ -521,13 +525,13 @@ class BeautifulSoup(Tag):
         return False
 
     @classmethod
-    def _markup_resembles_filename(cls, markup):
-        """Error-handling method to raise a warning if incoming markup
+    def _markup_resembles_filename(cls, markup:_RawMarkup) -> bool:
+        """Error-handling method to issue a warning if incoming markup
         resembles a filename.
 
-        :param markup: A bytestring or string.
-        :return: Whether or not the markup resembles a filename
-            closely enough to justify a warning.
+        :param markup: A string of markup.
+        :return: Whether or not the markup resembled a filename
+            closely enough to justify issuing a warning.
         """
         path_characters = '/\\'
         extensions = ['.html', '.htm', '.xml', '.xhtml', '.txt']
@@ -551,7 +555,7 @@ class BeautifulSoup(Tag):
             return True
         return False
     
-    def _feed(self):
+    def _feed(self) -> None:
         """Internal method that parses previously set markup, creating a large
         number of Tag and NavigableString objects.
         """
@@ -564,7 +568,7 @@ class BeautifulSoup(Tag):
         while self.currentTag.name != self.ROOT_TAG_NAME:
             self.popTag()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset this object to a state as though it had never parsed any
         markup.
         """
@@ -590,7 +594,7 @@ class BeautifulSoup(Tag):
             sourcepos:Optional[int]=None,
             string:Optional[str]=None,
             **kwattrs:_AttributeValue,
-    ):
+    ) -> Tag:
         """Create a new Tag associated with this BeautifulSoup object.
 
         :param name: The name of the new Tag.
