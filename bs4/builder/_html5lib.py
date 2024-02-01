@@ -12,6 +12,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    TypeAlias,
     TYPE_CHECKING,
     Tuple,
     Union,
@@ -139,6 +140,14 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             # HTMLBinaryInputStream.__init__.
             extra_kwargs['override_encoding'] = self.user_specified_encoding
 
+        # TODO-TYPING: typeshed stub says the second argument to
+        # HTMLParser.parse is scripting:bool, but the implementation
+        # treats scripting as one of the kwargs. scripting:bool isn't
+        # called out separately until we get down into _parse(), and
+        # there it's the fourth argument, not the second.  I'm not
+        # sure what the stub ought to look like, but I'm confident
+        # enough that it's better to leave this alone, rather than
+        # change this call to get rid of the warning.
         doc = parser.parse(markup, **extra_kwargs)
         
         # Set the character encoding detected by the tokenizer.
@@ -147,6 +156,10 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             # charEncoding to UTF-8 if it gets Unicode input.
             doc.original_encoding = None
         else:
+            # TODO-TYPING HTMLParser.tokenizer is set by
+            # HTMLParser._parse(), so it's definitely set by this
+            # point, but it's not defined as an instance variable, so
+            # this line gives a warning.
             original_encoding = parser.tokenizer.stream.charEncoding[0]
             # The encoding is an html5lib Encoding object. We want to
             # use a string for compatibility with other tree builders.
@@ -304,19 +317,10 @@ class AttrList(object):
     def __contains__(self, name:str) -> bool:
         return name in list(self.attrs.keys())
 
-
-class Element(treebuilder_base.Node):
-
-    element:Tag
+class BeautifulSoupNode(treebuilder_base.Node):
+    element:PageElement
     soup:'BeautifulSoup'
     namespace:Optional[_NamespaceURL]
-
-    def __init__(self, element:Tag, soup:'BeautifulSoup',
-                 namespace:Optional[_NamespaceURL]):
-        treebuilder_base.Node.__init__(self, element.name)
-        self.element = element
-        self.soup = soup
-        self.namespace = namespace
 
     @property
     def nodeType(self) -> int:
@@ -328,34 +332,36 @@ class Element(treebuilder_base.Node):
         """
         raise NotImplementedError()
 
-    @property
-    def firstChild(self):
-        return self.element.contents[0]
+    # TODO-TYPING: typeshed stubs are incorrect about this;
+    # cloneNode returns a new Node, not None.
+    def cloneNode(self) -> treebuilder_base.Node:
+        raise NotImplementedError()
 
-    def appendChild(self, node:'Element') -> None:
-        string_child = child = None
-        if isinstance(node, str):
-            # Some other piece of code decided to pass in a string
-            # instead of creating a TextElement object to contain the
-            # string. This should not ever happen.
-            string_child = child = node
-        elif isinstance(node, Tag):
-            # Some other piece of code decided to pass in a Tag
-            # instead of creating an Element object to contain the
-            # Tag. This should not ever happen.
-            child = node
-        elif node.element.__class__ == NavigableString:
+class Element(BeautifulSoupNode):
+    element:Tag
+    namespace:Optional[_NamespaceURL]
+
+    def __init__(self, element:Tag, soup:'BeautifulSoup',
+                 namespace:Optional[_NamespaceURL]):
+        treebuilder_base.Node.__init__(self, element.name)
+        self.element = element
+        self.soup = soup
+        self.namespace = namespace
+
+    def appendChild(self, node:'BeautifulSoupNode') -> None:
+        string_child:Optional[NavigableString] = None
+        child:PageElement
+        if type(node.element) == NavigableString:
             string_child = child = node.element
-            node.parent = self
         else:
             child = node.element
-            node.parent = self
+        node.parent = self
 
-        if not isinstance(child, str) and child is not None and child.parent is not None:
+        if child is not None and child.parent is not None and not isinstance(child, str):
             node.element.extract()
 
         if (string_child is not None and self.element.contents
-            and self.element.contents[-1].__class__ == NavigableString):
+            and type(self.element.contents[-1]) == NavigableString):
             # We are appending a string onto another string.
             # TODO This has O(n^2) performance, for input like
             # "a</a>a</a>a</a>..."
@@ -391,18 +397,36 @@ class Element(treebuilder_base.Node):
             return {}
         return AttrList(self.element)
 
-    def setAttributes(self, attributes:Optional[Dict]) -> None:
+    # An HTML5lib attribute name may either be a single string,
+    # or a tuple (namespace, name).
+    _Html5libAttributeName: TypeAlias = Union[str, Tuple[str, str]]
+    # Now we can define the type this method accepts as a dictionary
+    # mapping those attribute names to single string values.
+    _Html5libAttributes: TypeAlias = Dict[_Html5libAttributeName, str]
+    def setAttributes(self, attributes:Optional[_Html5libAttributes]) -> None:
         if attributes is not None and len(attributes) > 0:
+
+            # Replace any namespaced attributes with
+            # NamespacedAttribute objects.
             for name, value in list(attributes.items()):
                 if isinstance(name, tuple):
                     new_name = NamespacedAttribute(*name)
                     del attributes[name]
                     attributes[new_name] = value
 
+            # We can now cast attributes to the type of Dict
+            # used by Beautiful Soup.
+            normalized_attributes = cast(_AttributeValues, attributes)
+
+            # Values for tags like 'class' came in as single strings;
+            # replace them with lists of strings as appropriate.
             self.soup.builder._replace_cdata_list_attribute_values(
-                self.name, attributes)
-            for name, value in list(attributes.items()):
-                self.element[name] = value
+                self.name, normalized_attributes)
+
+            # Then set the attributes on the Tag associated with this
+            # BeautifulSoupNode.
+            for name, value_or_values in list(normalized_attributes.items()):
+                self.element[name] = value_or_values
 
             # The attributes may contain variables that need substitution.
             # Call set_up_substitutions manually.
@@ -412,19 +436,20 @@ class Element(treebuilder_base.Node):
             self.soup.builder.set_up_substitutions(self.element)
     attributes = property(getAttributes, setAttributes)
 
-    def insertText(self, data:str, insertBefore:Optional['Element']=None) -> None:
+    def insertText(self, data:str, insertBefore:Optional['BeautifulSoupNode']=None) -> None:
         text = TextNode(self.soup.new_string(data), self.soup)
         if insertBefore:
             self.insertBefore(text, insertBefore)
         else:
             self.appendChild(text)
 
-    def insertBefore(self, node:'Element', refNode:'Element') -> None:
+    def insertBefore(self, node:'BeautifulSoupNode', refNode:'BeautifulSoupNode') -> None:
         index = self.element.index(refNode.element)
-        if (node.element.__class__ == NavigableString and self.element.contents
-            and self.element.contents[index-1].__class__ == NavigableString):
+        if (type(node.element) == NavigableString and self.element.contents
+            and type(self.element.contents[index-1]) == NavigableString):
             # (See comments in appendChild)
             old_node = self.element.contents[index-1]
+            assert type(old_node) == NavigableString
             new_str = self.soup.new_string(old_node + node.element)
             old_node.replace_with(new_str)
         else:
@@ -482,13 +507,19 @@ class Element(treebuilder_base.Node):
             # parent's last descendant. It has no .next_sibling and
             # its .next_element is whatever the previous last
             # descendant had.
-            last_childs_last_descendant = to_append[-1]._last_descendant(False, True)
+            last_childs_last_descendant = to_append[-1]._last_descendant(
+                is_initialized=False, accept_self=True
+            )
 
+            # Since we passed accept_self=True into _last_descendant,
+            # there's no possibility that the result is None.
+            assert last_childs_last_descendant is not None
             last_childs_last_descendant.next_element = new_parents_last_descendant_next_element
             if new_parents_last_descendant_next_element is not None:
-                # TODO: This code has no test coverage and I'm not sure
-                # how to get html5lib to go through this path, but it's
-                # just the other side of the previous line.
+                # TODO-COVERAGE: This code has no test coverage and
+                # I'm not sure how to get html5lib to go through this
+                # path, but it's just the other side of the previous
+                # line.
                 new_parents_last_descendant_next_element.previous_element = last_childs_last_descendant
             last_childs_last_descendant.next_sibling = None
 
@@ -505,6 +536,11 @@ class Element(treebuilder_base.Node):
         # print("TO", new_parent_element)
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
+    # hasContent returns a boolean, not None.
+    def hasContent(self) -> bool:
+        return len(self.element.contents) > 0
+
+    # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a new Node, not None.
     def cloneNode(self) -> treebuilder_base.Node:
         tag = self.soup.new_tag(self.element.name, self.namespace)
@@ -513,24 +549,17 @@ class Element(treebuilder_base.Node):
             node.attributes[key] = value
         return node
 
-    # TODO-TYPING: typeshed stubs are incorrect about this;
-    # hasContent returns a boolean, not None.
-    def hasContent(self) -> bool:
-        return len(self.element.contents) > 0
-
-    def getNameTuple(self) -> Tuple[str, str]:
+    def getNameTuple(self) -> Tuple[Optional[_NamespaceURL], str]:
         if self.namespace == None:
             return namespaces["html"], self.name
         else:
             return self.namespace, self.name
-
     nameTuple = property(getNameTuple)
 
-class TextNode(Element):
-    def __init__(self, element:PageElement, soup:'BeautifulSoup'):
+class TextNode(BeautifulSoupNode):
+    element:NavigableString
+
+    def __init__(self, element:NavigableString, soup:'BeautifulSoup'):
         treebuilder_base.Node.__init__(self, None)
         self.element = element
         self.soup = soup
-
-    def cloneNode(self) -> treebuilder_base.Node:
-        raise NotImplementedError()

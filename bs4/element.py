@@ -528,6 +528,13 @@ class PageElement(object):
     ) -> Optional[PageElement]:
         """Finds the last element beneath this object to be parsed.
 
+        Special note to help you figure things out if your type
+        checking is tripped up by the fact that this method returns
+        Optional[PageElement] instead of PageElement: the only time
+        this method returns None is if `accept_self` is False and the
+        `PageElement` has no children--either it's a NavigableString
+        of an empty Tag.
+
         :param is_initialized: Has `PageElement.setup` been called on
             this `PageElement` yet?
 
