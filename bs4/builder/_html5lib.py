@@ -154,11 +154,6 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
 
-    def create_treewalker(self, document):
-        # Used only by the html5lib test suite
-        # document is a BeautifulSoup object.
-        return BeautifulSoupTreeWalker(document)
-
     def create_treebuilder(self, namespaceHTMLElements:bool) -> 'TreeBuilderForHtml5lib':
         """Called by html5lib to instantiate the kind of class it
         calls a 'TreeBuilder'.
@@ -331,30 +326,7 @@ class Element(treebuilder_base.Node):
         NOTE: This property is only accessed by the html5lib test
         suite, not by Beautiful Soup proper.
         """
-        from bs4 import (
-            BeautifulSoup,
-            Doctype,
-            Comment,
-            NavigableString
-        )
-        from html5lib.treewalkers.base import (
-            DOCUMENT,
-            DOCTYPE,
-            COMMENT,
-            TEXT,
-            ELEMENT,
-        )
-
-        if isinstance(self.element, BeautifulSoup):
-            return DOCUMENT
-        elif isinstance(self.element, Doctype):
-            return DOCTYPE
-        elif isinstance(self.element, Comment):
-            return COMMENT
-        elif isinstance(self.element, NavigableString):
-            return TEXT
-        elif isinstance(self.element, Tag):
-            return ELEMENT
+        raise NotImplementedError()
 
     @property
     def firstChild(self):
