@@ -237,18 +237,18 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
     def fragmentClass(self) -> 'Element':
         """This is only used by html5lib HTMLParser.parseFragment(),
-        which is never used by Beautiful Soup. This implementation
-        is solely for use with the html5lib unit tests.
+        which is never used by Beautiful Soup, only by the html5lib
+        unit tests. Since we don't currently hook into those tests,
+        the implementation is left blank.
         """
-        from bs4 import BeautifulSoup
-        self.soup = BeautifulSoup("", "html5lib")
-        self.soup.name = "[document_fragment]"
-        return self.soup
+        raise NotImplementedError()
 
     def getFragment(self) -> 'Element':
-        """This is only used by html5lib HTMLParser.parseFragment,
-        which is never used by Beautiful Soup."""
-        return self.soup
+        """This is only used by the html5lib unit tests. Since we
+        don't currently hook into those tests, the implementation is
+        left blank.
+        """
+        raise NotImplementedError()
 
     def appendChild(self, node:'Element') -> None:
         # TODO: This code is not covered by the BS4 tests, and
@@ -260,54 +260,12 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
     # testSerializer returns a str, not None.
-    # Used only by the html5lib unit tests.
     def testSerializer(self, element:'Element') -> str:
-        from bs4 import BeautifulSoup
-        rv = []
-        doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
-        def serializeElement(element:Union['Element', PageElement], indent=0) -> None:
-            if isinstance(element, BeautifulSoup):
-                pass
-            if isinstance(element, Doctype):
-                m = doctype_re.match(element)
-                if m is not None:
-                    name = m.group(1)
-                    if m.lastindex is not None and m.lastindex > 1:
-                        publicId = m.group(2) or ""
-                        systemId = m.group(3) or m.group(4) or ""
-                        rv.append("""|%s<!DOCTYPE %s "%s" "%s">""" %
-                                  (' ' * indent, name, publicId, systemId))
-                    else:
-                        rv.append("|%s<!DOCTYPE %s>" % (' ' * indent, name))
-                else:
-                    rv.append("|%s<!DOCTYPE >" % (' ' * indent,))
-            elif isinstance(element, Comment):
-                rv.append("|%s<!-- %s -->" % (' ' * indent, element))
-            elif isinstance(element, NavigableString):
-                rv.append("|%s\"%s\"" % (' ' * indent, element))
-            elif isinstance(element, Element):
-                if element.namespace:
-                    name = "%s %s" % (prefixes[element.namespace],
-                                      element.name)
-                else:
-                    name = element.name
-                rv.append("|%s<%s>" % (' ' * indent, name))
-                if element.attrs:
-                    attributes = []
-                    for name, value in list(element.attrs.items()):
-                        if isinstance(name, NamespacedAttribute):
-                            name = "%s %s" % (prefixes[name.namespace], name.name)
-                        if isinstance(value, list):
-                            value = " ".join(value)
-                        attributes.append((name, value))
-
-                    for name, value in sorted(attributes):
-                        rv.append('|%s%s="%s"' % (' ' * (indent + 2), name, value))
-                indent += 2
-                for child in element.children:
-                    serializeElement(child, indent)
-        serializeElement(element, 0)
-        return "\n".join(rv)
+        """This is only used by the html5lib unit tests. Since we
+        don't currently hook into those tests, the implementation is
+        left blank.
+        """
+        raise NotImplementedError()
 
 class AttrList(object):
     """Represents a Tag's attributes in a way compatible with html5lib."""
@@ -574,7 +532,7 @@ class Element(treebuilder_base.Node):
         # print("FROM", self.element)
         # print("TO", new_parent_element)
 
-    # TODO: typeshed stubs are incorrect about this;
+    # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a new Node, not None.
     def cloneNode(self) -> treebuilder_base.Node:
         tag = self.soup.new_tag(self.element.name, self.namespace)
@@ -604,10 +562,3 @@ class TextNode(Element):
 
     def cloneNode(self) -> treebuilder_base.Node:
         raise NotImplementedError()
-
-
-class BeautifulSoupTreeWalker(treewalker_base.TreeWalker):
-    "Used only by the html5lib unit tests."
-
-    def __iter__(self):
-        return self.tree.next_elements
