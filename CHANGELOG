@@ -76,6 +76,11 @@ TODO: we could stand to put limit inside ResultSet
 * A SoupStrainer can now filter tag creation based on a tag's
   namespaced name. Previously only the unqualified name could be used.
 
+* Some of the arguments in the methods of LXMLTreeBuilderForXML
+  have been renamed for consistency with the names lxml uses for those
+  arguments in the superclass. This won't affect you unless you were
+  calling methods like LXMLTreeBuilderForXML.start() directly.
+
 * All TreeBuilder constructors now take the empty_element_tags
   argument. The sets of tags found in HTMLTreeBuilder.empty_element_tags and
   HTMLTreeBuilder.block_elements are now in

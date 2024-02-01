@@ -311,9 +311,18 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         assert self.soup is not None
         assert isinstance(tag, str)
 
-        # Make sure attrs is a mutable dict--lxml may send an immutable dictproxy.
+        # We need to recreate the attribute dict for three
+        # reasons. First, for type checking, so we can assert there
+        # are no bytestrings in the keys or values. Second, because we
+        # need a mutable dict--lxml might send us an immutable
+        # dictproxy. Third, so we can handle namespaced attribute
+        # names by converting the keys to NamespacedAttributes.
+        new_attrs:Dict[Union[str,NamespacedAttribute], str] = {}
+        for k, v in attrs.items():
+            assert isinstance(k, str)
+            assert isinstance(v, str)
+            new_attrs[k] = v
 
-        attrs = dict(attrs)
         nsprefix: Optional[_NamespacePrefix] = None
         namespace: Optional[_NamespaceURL] = None
         # Invert each namespace map as it comes in.
@@ -348,30 +357,28 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             
             # Also treat the namespace mapping as a set of attributes on the
             # tag, so we can recreate it later.
-            attrs = attrs.copy()
             for prefix, namespace in list(nsmap.items()):
                 attribute = NamespacedAttribute(
                     "xmlns", prefix, "http://www.w3.org/2000/xmlns/")
-                attrs[attribute] = namespace
+                new_attrs[attribute] = namespace
 
         # Namespaces are in play. Find any attributes that came in
         # from lxml with namespaces attached to their names, and
         # turn then into NamespacedAttribute objects.
-        new_attrs:Dict[Union[str,NamespacedAttribute], str] = {}
-        for attr, value in list(attrs.items()):
+        final_attrs:Dict[Union[str,NamespacedAttribute], str] = {}
+        for attr, value in list(new_attrs.items()):
             namespace, attr = self._getNsTag(attr)
             if namespace is None:
-                new_attrs[attr] = value
+                final_attrs[attr] = value
             else:
                 nsprefix = self._prefix_for_namespace(namespace)
                 attr = NamespacedAttribute(nsprefix, attr, namespace)
-                new_attrs[attr] = value
-        attrs = new_attrs
+                final_attrs[attr] = value
 
         namespace, tag = self._getNsTag(tag)
         nsprefix = self._prefix_for_namespace(namespace)
         self.soup.handle_starttag(
-            tag, namespace, nsprefix, attrs,
+            tag, namespace, nsprefix, final_attrs,
             namespaces=self.active_namespace_prefixes[-1]
         )
         
