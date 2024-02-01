@@ -13,6 +13,7 @@ from collections.abc import Callable
 
 from typing import (
     Any,
+    cast,
     Dict,
     IO,
     Iterable,
@@ -21,6 +22,7 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeAlias,
     TYPE_CHECKING,
     Union,
 )
@@ -28,7 +30,6 @@ from typing import (
 from io import BytesIO
 from io import StringIO
 from lxml import etree
-from bs4.dammit import (_Encoding)
 from bs4.element import (
     Comment,
     Doctype,
@@ -60,13 +61,17 @@ if TYPE_CHECKING:
 
 LXML:str = 'lxml'
 
-def _invert(d):
+def _invert(d:dict[Any, Any]) -> dict[Any, Any]:
     "Invert a dictionary."
     return dict((v,k) for k, v in list(d.items()))
 
+_XMLParserOrParserClass:TypeAlias = Union[Type[etree.XMLParser], etree.XMLParser]
+_HTMLParserOrParserClass:TypeAlias = Union[Type[etree.HTMLParser], etree.HTMLParser]
+
+
 class LXMLTreeBuilderForXML(TreeBuilder):
 
-    DEFAULT_PARSER_CLASS:Type[Any] = etree.XMLParser
+    DEFAULT_PARSER_CLASS:Type[etree.XMLParser] = etree.XMLParser
     
     is_xml:bool = True
         
@@ -93,6 +98,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     nsmaps: List[Optional[_InvertedNamespaceMapping]]
     empty_element_tags: Set[str]
     parser: Any
+    _default_parser: Optional[etree.XMLParser]
     
     # NOTE: If we parsed Element objects and looked at .sourceline,
     # we'd be able to see the line numbers from the original document.
@@ -137,7 +143,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 # prefix, the first one in the document takes precedence.
                 self.soup._namespaces[key] = value
                 
-    def default_parser(self, encoding:Optional[_Encoding]) -> Type:
+    def default_parser(self, encoding:Optional[_Encoding]) -> _XMLParserOrParserClass:
         """Find the default parser for the given encoding.
 
         :return: Either a parser object or a class, which
@@ -164,8 +170,8 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             )
         return parser
 
-    def __init__(self, parser:Optional[Any]=None,
-                 empty_element_tags:Optional[Set[str]]=None, **kwargs):
+    def __init__(self, parser:Optional[etree.XMLParser]=None,
+                 empty_element_tags:Optional[Set[str]]=None, **kwargs:Any):
         # TODO: Issue a warning if parser is present but not a
         # callable, since that means there's no way to create new
         # parsers for different encodings.
@@ -298,12 +304,13 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def close(self) -> None:
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
 
-    def start(self, name:str, attrs:Dict[str, str], nsmap:_NamespaceMapping={}):
+    def start(self, name:str|bytes, attrs:Dict[str|bytes, str|bytes], nsmap:_NamespaceMapping={}) -> None:
         # This is called by lxml code as a result of calling
         # BeautifulSoup.feed(), and we know self.soup is set by the time feed()
         # is called.
         assert self.soup is not None
-        
+        assert isinstance(name, str)
+
         # Make sure attrs is a mutable dict--lxml may send an immutable dictproxy.
         attrs = dict(attrs)
         nsprefix: Optional[_NamespacePrefix] = None
@@ -376,8 +383,9 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 return inverted_nsmap[namespace]
         return None
 
-    def end(self, name:str) -> None:
+    def end(self, name:str|bytes) -> None:
         assert self.soup is not None
+        assert isinstance(name, str)
         self.soup.endData()
         completed_tag = self.soup.tagStack[-1]
         namespace, name = self._getNsTag(name)
@@ -406,9 +414,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         self.soup.handle_data(data)
         self.soup.endData(self.processing_instruction_class)
         
-    def data(self, content:str) -> None:
+    def data(self, data:str|bytes) -> None:
         assert self.soup is not None
-        self.soup.handle_data(content)
+        assert isinstance(data, str)
+        self.soup.handle_data(data)
 
     def doctype(self, name:str, pubid:str, system:str) -> None:
         assert self.soup is not None
@@ -416,11 +425,12 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         doctype = Doctype.for_name_and_ids(name, pubid, system)
         self.soup.object_was_parsed(doctype)
 
-    def comment(self, content:str) -> None:
+    def comment(self, text:str|bytes) -> None:
         "Handle comments as Comment objects."
         assert self.soup is not None
+        assert isinstance(text, str)
         self.soup.endData()
-        self.soup.handle_data(content)
+        self.soup.handle_data(text)
         self.soup.endData(Comment)
 
     def test_fragment_to_document(self, fragment:str) -> str:
@@ -436,7 +446,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
     features: Iterable[str] = list(ALTERNATE_NAMES) + [NAME, HTML, FAST, PERMISSIVE]
     is_xml: bool = False
 
-    def default_parser(self, encoding:Optional[_Encoding]) -> Type[Any]:
+    def default_parser(self, encoding:Optional[_Encoding]) -> _HTMLParserOrParserClass:
         return etree.HTMLParser
 
     def feed(self, markup:_RawMarkup) -> None: 
