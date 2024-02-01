@@ -54,6 +54,7 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
 
 from html5lib.treebuilders import base as treebuilder_base
+from html5lib.treewalkers import base as treewalker_base
 
 
 class HTML5TreeBuilder(HTMLTreeBuilder):
@@ -153,6 +154,11 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
 
+    def create_treewalker(self, document):
+        # Used only by the html5lib test suite
+        # document is a BeautifulSoup object.
+        return BeautifulSoupTreeWalker(document)
+
     def create_treebuilder(self, namespaceHTMLElements:bool) -> 'TreeBuilderForHtml5lib':
         """Called by html5lib to instantiate the kind of class it
         calls a 'TreeBuilder'.
@@ -231,28 +237,34 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
     def fragmentClass(self) -> 'Element':
         """This is only used by html5lib HTMLParser.parseFragment(),
-        which is never used by Beautiful Soup."""
-        raise NotImplementedError()
+        which is never used by Beautiful Soup. This implementation
+        is solely for use with the html5lib unit tests.
+        """
+        from bs4 import BeautifulSoup
+        self.soup = BeautifulSoup("", "html5lib")
+        self.soup.name = "[document_fragment]"
+        return self.soup
 
     def getFragment(self) -> 'Element':
         """This is only used by html5lib HTMLParser.parseFragment,
         which is never used by Beautiful Soup."""
-        raise NotImplementedError()
+        return self.soup
 
     def appendChild(self, node:'Element') -> None:
-        # TODO: This code is not covered by the BS4 tests.
+        # TODO: This code is not covered by the BS4 tests, and
+        # apparently not triggered by the html5lib test suite either.
         self.soup.append(node.element)
 
     def getDocument(self) -> 'BeautifulSoup':
         return self.soup
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
-    # cloneNode returns a str, not None.
+    # testSerializer returns a str, not None.
+    # Used only by the html5lib unit tests.
     def testSerializer(self, element:'Element') -> str:
         from bs4 import BeautifulSoup
         rv = []
         doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
-
         def serializeElement(element:Union['Element', PageElement], indent=0) -> None:
             if isinstance(element, BeautifulSoup):
                 pass
@@ -295,7 +307,6 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
                 for child in element.children:
                     serializeElement(child, indent)
         serializeElement(element, 0)
-
         return "\n".join(rv)
 
 class AttrList(object):
@@ -353,6 +364,43 @@ class Element(treebuilder_base.Node):
         self.element = element
         self.soup = soup
         self.namespace = namespace
+
+    @property
+    def nodeType(self) -> int:
+        """Return the html5lib constant corresponding to the type of
+        the underlying DOM object.
+
+        NOTE: This property is only accessed by the html5lib test
+        suite, not by Beautiful Soup proper.
+        """
+        from bs4 import (
+            BeautifulSoup,
+            Doctype,
+            Comment,
+            NavigableString
+        )
+        from html5lib.treewalkers.base import (
+            DOCUMENT,
+            DOCTYPE,
+            COMMENT,
+            TEXT,
+            ELEMENT,
+        )
+
+        if isinstance(self.element, BeautifulSoup):
+            return DOCUMENT
+        elif isinstance(self.element, Doctype):
+            return DOCTYPE
+        elif isinstance(self.element, Comment):
+            return COMMENT
+        elif isinstance(self.element, NavigableString):
+            return TEXT
+        elif isinstance(self.element, Tag):
+            return ELEMENT
+
+    @property
+    def firstChild(self):
+        return self.element.contents[0]
 
     def appendChild(self, node:'Element') -> None:
         string_child = child = None
@@ -536,7 +584,7 @@ class Element(treebuilder_base.Node):
         return node
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
-    # cloneNode returns a boolean, not None.
+    # hasContent returns a boolean, not None.
     def hasContent(self) -> bool:
         return len(self.element.contents) > 0
 
@@ -556,3 +604,10 @@ class TextNode(Element):
 
     def cloneNode(self) -> treebuilder_base.Node:
         raise NotImplementedError()
+
+
+class BeautifulSoupTreeWalker(treewalker_base.TreeWalker):
+    "Used only by the html5lib unit tests."
+
+    def __iter__(self):
+        return self.tree.next_elements
