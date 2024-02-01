@@ -304,14 +304,15 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def close(self) -> None:
         self.nsmaps = [self.DEFAULT_NSMAPS_INVERTED]
 
-    def start(self, name:str|bytes, attrs:Dict[str|bytes, str|bytes], nsmap:_NamespaceMapping={}) -> None:
+    def start(self, tag:str|bytes, attrs:Dict[str|bytes, str|bytes], nsmap:_NamespaceMapping={}) -> None:
         # This is called by lxml code as a result of calling
         # BeautifulSoup.feed(), and we know self.soup is set by the time feed()
         # is called.
         assert self.soup is not None
-        assert isinstance(name, str)
+        assert isinstance(tag, str)
 
         # Make sure attrs is a mutable dict--lxml may send an immutable dictproxy.
+
         attrs = dict(attrs)
         nsprefix: Optional[_NamespacePrefix] = None
         namespace: Optional[_NamespaceURL] = None
@@ -367,10 +368,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 new_attrs[attr] = value
         attrs = new_attrs
 
-        namespace, name = self._getNsTag(name)
+        namespace, tag = self._getNsTag(tag)
         nsprefix = self._prefix_for_namespace(namespace)
         self.soup.handle_starttag(
-            name, namespace, nsprefix, attrs,
+            tag, namespace, nsprefix, attrs,
             namespaces=self.active_namespace_prefixes[-1]
         )
         
