@@ -894,14 +894,16 @@ class BeautifulSoup(Tag):
 
     def handle_starttag(
             self, name:str, namespace:Optional[str],
-            nsprefix:Optional[str], attrs:_AttributeValues,
+            nsprefix:Optional[str], attrs:Dict[str, str],
             sourceline:Optional[int]=None, sourcepos:Optional[int]=None,
             namespaces:Optional[Dict[str, str]]=None) -> Optional[Tag]:
         """Called by the tree builder when a new tag is encountered.
 
         :param name: Name of the tag.
         :param nsprefix: Namespace prefix for the tag.
-        :param attrs: A dictionary of attribute values.
+        :param attrs: A dictionary of attribute values. Note that
+           attribute values are expected to be simple strings; processing
+           of multi-valued attributes such as "class" comes later.
         :param sourceline: The line number where this tag was found in its
             source document.
         :param sourcepos: The character position within `sourceline` where this

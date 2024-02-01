@@ -533,7 +533,7 @@ class PageElement(object):
         Optional[PageElement] instead of PageElement: the only time
         this method returns None is if `accept_self` is False and the
         `PageElement` has no children--either it's a NavigableString
-        of an empty Tag.
+        or an empty Tag.
 
         :param is_initialized: Has `PageElement.setup` been called on
             this `PageElement` yet?

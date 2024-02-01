@@ -49,7 +49,6 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString
     from bs4._typing import (
-        _AttributeValues,
         _Encoding,
         _Encodings,
         _RawMarkup,
@@ -60,6 +59,14 @@ HTMLPARSER = 'html.parser'
 _DuplicateAttributeHandler = Callable[[Dict[str, str], str, str], None]
 
 class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
+    #: Constant to handle duplicate attributes by ignoring later values
+    #: and keeping the earlier ones.
+    REPLACE:str = 'replace'
+
+    #: Constant to handle duplicate attributes by replacing earlier values
+    #: with later ones.
+    IGNORE:str = 'ignore'
+
     """A subclass of the Python standard library's HTMLParser class, which
     listens for HTMLParser events and translates them into calls
     to Beautiful Soup's tree construction API.
@@ -73,11 +80,13 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             the name of the duplicate attribute, and the most recent value
             encountered.
     """
-    def __init__(self, soup:BeautifulSoup, *args, **kwargs):
+    def __init__(
+            self, soup:BeautifulSoup, *args:Any,
+            on_duplicate_attribute:Union[str, _DuplicateAttributeHandler]=REPLACE,
+            **kwargs:Any
+    ):
         self.soup = soup
-        self.on_duplicate_attribute = kwargs.pop(
-            'on_duplicate_attribute', self.REPLACE
-        )
+        self.on_duplicate_attribute = on_duplicate_attribute
         HTMLParser.__init__(self, *args, **kwargs)
 
         # Keep a list of empty-element tags that were encountered
@@ -90,14 +99,6 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         self.already_closed_empty_element = []
 
         self._initialize_xml_detector()
-    
-    #: Constant to handle duplicate attributes by replacing earlier values
-    #: with later ones.
-    IGNORE:str = 'ignore'
-
-    #: Constant to handle duplicate attributes by ignoring later values
-    #: and keeping the earlier ones.    
-    REPLACE:str = 'replace'
 
     on_duplicate_attribute:Union[str, _DuplicateAttributeHandler]
     already_closed_empty_element: List[str]
@@ -145,7 +146,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             closing tag).
         """
         # TODO: handle namespaces here?
-        attr_dict: Dict[str, str] = {}
+        attr_dict:Dict[str, str] = {}
         for key, value in attrs:
             # Change None attribute values to the empty string
             # for consistency with the other tree builders.
