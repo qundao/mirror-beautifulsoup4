@@ -21,6 +21,7 @@ from bs4._typing import (
     _AttributeValues,
     _Encoding,
     _Encodings,
+    _NamespaceURL,
     _RawMarkup,
 )
 
@@ -79,7 +80,9 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
     #: html5lib can tell us which line number and position in the
     #: original file is the source of an element.
     TRACKS_LINE_NUMBERS:bool = True
-    
+
+    underlying_builder:'TreeBuilderForHtml5lib' #: :meta private:
+
     def prepare_markup(self, markup:_RawMarkup,
                        user_specified_encoding:Optional[_Encoding]=None,
                        document_declared_encoding:Optional[_Encoding]=None,
@@ -119,11 +122,22 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
                 "You provided a value for parse_only, but the html5lib tree builder doesn't support parse_only. The entire document will be parsed.",
                 stacklevel=4
             )
+
+        # self.underlying_parser is probably None now, but it'll be set
+        # when self.create_treebuilder is called by html5lib.
+        #
+        # TODO-TYPING: typeshed stubs are incorrect about the return
+        # value of HTMLParser.__init__; it is HTMLParser, not None.
         parser = html5lib.HTMLParser(tree=self.create_treebuilder)
+        assert self.underlying_builder is not None
         self.underlying_builder.parser = parser
         extra_kwargs = dict()
         if not isinstance(markup, str):
+            # kwargs, specifically override_encoding, will eventually
+            # be passed in to html5lib's
+            # HTMLBinaryInputStream.__init__.
             extra_kwargs['override_encoding'] = self.user_specified_encoding
+
         doc = parser.parse(markup, **extra_kwargs)
         
         # Set the character encoding detected by the tokenizer.
@@ -139,10 +153,12 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             doc.original_encoding = original_encoding
         self.underlying_builder.parser = None
 
-    def create_treebuilder(self, namespaceHTMLElements) -> 'TreeBuilderForHtml5lib':
+    def create_treebuilder(self, namespaceHTMLElements:bool) -> 'TreeBuilderForHtml5lib':
         """Called by html5lib to instantiate the kind of class it
         calls a 'TreeBuilder'.
-        
+
+        :param namespaceHTMLElements: Whether or not to namespace HTML elements.
+
         :meta private:
         """
         self.underlying_builder = TreeBuilderForHtml5lib(
@@ -160,9 +176,9 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
     soup:'BeautifulSoup' #: :meta private:
 
-    def __init__(self, namespaceHTMLElements,
+    def __init__(self, namespaceHTMLElements:bool,
                  soup:Optional['BeautifulSoup']=None,
-                 store_line_numbers:bool=True, **kwargs):
+                 store_line_numbers:bool=True, **kwargs:Any):
         if soup:
             self.soup = soup
         else:
@@ -196,15 +212,17 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         self.soup.object_was_parsed(doctype)
 
     def elementClass(self, name:str, namespace:str) -> 'Element':
-        kwargs = {}
+        sourceline:Optional[int] = None
+        sourcepos:Optional[int] = None
         if self.parser and self.store_line_numbers:
             # This represents the point immediately after the end of the
             # tag. We don't know when the tag started, but we do know
             # where it ended -- the character just before this one.
             sourceline, sourcepos = self.parser.tokenizer.stream.position()
-            kwargs['sourceline'] = sourceline
-            kwargs['sourcepos'] = sourcepos-1
-        tag = self.soup.new_tag(name, namespace, **kwargs)
+            sourcepos = sourcepos-1
+        tag = self.soup.new_tag(
+            name, namespace, sourceline=sourceline, sourcepos=sourcepos
+        )
 
         return Element(tag, self.soup, namespace)
 
@@ -228,14 +246,14 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
     def getDocument(self) -> 'BeautifulSoup':
         return self.soup
 
-    # TODO: typeshed stubs are incorrect about this;
+    # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a str, not None.
     def testSerializer(self, element:'Element') -> str:
         from bs4 import BeautifulSoup
         rv = []
         doctype_re = re.compile(r'^(.*?)(?: PUBLIC "(.*?)"(?: "(.*?)")?| SYSTEM "(.*?)")?$')
 
-        def serializeElement(element, indent=0) -> None:
+        def serializeElement(element:Union['Element', PageElement], indent=0) -> None:
             if isinstance(element, BeautifulSoup):
                 pass
             if isinstance(element, Doctype):
@@ -255,7 +273,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
                 rv.append("|%s<!-- %s -->" % (' ' * indent, element))
             elif isinstance(element, NavigableString):
                 rv.append("|%s\"%s\"" % (' ' * indent, element))
-            else:
+            elif isinstance(element, Element):
                 if element.namespace:
                     name = "%s %s" % (prefixes[element.namespace],
                                       element.name)
@@ -283,8 +301,8 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 class AttrList(object):
     """Represents a Tag's attributes in a way compatible with html5lib."""
 
-    element: Tag
-    attrs: _AttributeValues
+    element:Tag
+    attrs:_AttributeValues
 
     def __init__(self, element:Tag):
         self.element = element
@@ -303,6 +321,7 @@ class AttrList(object):
             # A node that is being cloned may have already undergone
             # this procedure. Check for this and skip it.
             if not isinstance(value, list):
+                assert isinstance(value, str)
                 value = nonwhitespace_re.findall(value)
         self.element[name] = value
 
@@ -323,7 +342,13 @@ class AttrList(object):
 
 
 class Element(treebuilder_base.Node):
-    def __init__(self, element, soup, namespace):
+
+    element:Tag
+    soup:'BeautifulSoup'
+    namespace:Optional[_NamespaceURL]
+
+    def __init__(self, element:Tag, soup:'BeautifulSoup',
+                 namespace:Optional[_NamespaceURL]):
         treebuilder_base.Node.__init__(self, element.name)
         self.element = element
         self.soup = soup
@@ -334,12 +359,12 @@ class Element(treebuilder_base.Node):
         if isinstance(node, str):
             # Some other piece of code decided to pass in a string
             # instead of creating a TextElement object to contain the
-            # string.
+            # string. This should not ever happen.
             string_child = child = node
         elif isinstance(node, Tag):
             # Some other piece of code decided to pass in a Tag
             # instead of creating an Element object to contain the
-            # Tag.
+            # Tag. This should not ever happen.
             child = node
         elif node.element.__class__ == NavigableString:
             string_child = child = node.element
@@ -447,6 +472,10 @@ class Element(treebuilder_base.Node):
         if len(new_parent_element.contents) > 0:
             # The new parent already contains children. We will be
             # appending this tag's children to the end.
+
+            # We can make this assertion since we know new_parent has
+            # children.
+            assert new_parents_last_descendant is not None
             new_parents_last_child = new_parent_element.contents[-1]
             new_parents_last_descendant_next_element = new_parents_last_descendant.next_element
         else:
@@ -506,7 +535,7 @@ class Element(treebuilder_base.Node):
             node.attributes[key] = value
         return node
 
-    # TODO: typeshed stubs are incorrect about this;
+    # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a boolean, not None.
     def hasContent(self) -> bool:
         return len(self.element.contents) > 0
