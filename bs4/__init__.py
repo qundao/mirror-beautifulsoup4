@@ -84,10 +84,11 @@ from typing import (
 
 from bs4._typing import (
     _AttributeValue,
-    _AttributeValues,
     _Encoding,
     _Encodings,
     _IncomingMarkup,
+    _RawAttributeValue,
+    _RawAttributeValues,
     _RawMarkup,
 )
 
@@ -613,11 +614,11 @@ class BeautifulSoup(Tag):
             name:str,
             namespace:Optional[str]=None,
             nsprefix:Optional[str]=None,
-            attrs:_AttributeValues={},
+            attrs:_RawAttributeValues={},
             sourceline:Optional[int]=None,
             sourcepos:Optional[int]=None,
             string:Optional[str]=None,
-            **kwattrs:_AttributeValue,
+            **kwattrs:_RawAttributeValue,
     ) -> Tag:
         """Create a new Tag associated with this BeautifulSoup object.
 
@@ -894,7 +895,7 @@ class BeautifulSoup(Tag):
 
     def handle_starttag(
             self, name:str, namespace:Optional[str],
-            nsprefix:Optional[str], attrs:Dict[str, str],
+            nsprefix:Optional[str], attrs:_RawAttributeValues,
             sourceline:Optional[int]=None, sourcepos:Optional[int]=None,
             namespaces:Optional[Dict[str, str]]=None) -> Optional[Tag]:
         """Called by the tree builder when a new tag is encountered.

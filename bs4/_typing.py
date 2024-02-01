@@ -57,7 +57,8 @@ _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
 # The most common form in which attribute values are passed in from a
 # parser.
-_RawAttributeValues: TypeAlias = dict[str, str]
+_RawAttributeValue: TypeAlias = str
+_RawAttributeValues: TypeAlias = dict[str, _RawAttributeValue]
 
 # Aliases to represent the many possibilities for matching bits of a
 # parse tree.

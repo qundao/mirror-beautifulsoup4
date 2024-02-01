@@ -25,10 +25,10 @@ from bs4._deprecation import _deprecated
 from bs4.element import NavigableString, PageElement, Tag
 from bs4._typing import (
     _AttributeValue,
-    _AttributeValues,
     _AllowStringCreationFunction,
     _AllowTagCreationFunction,
     _PageElementMatchFunction,
+    _RawAttributeValues,
     _TagMatchFunction,
     _StringMatchFunction,
     _StrainableElement,
@@ -98,7 +98,7 @@ class ElementFilter(object):
 
     def allow_tag_creation(
             self, nsprefix:Optional[str], name:str,
-            attrs:Optional[_AttributeValues]
+            attrs:Optional[_RawAttributeValues]
     ) -> bool:
         """Based on the name and attributes of a tag, see whether this
         ElementFilter will allow a Tag object to even be created.
@@ -497,7 +497,7 @@ class SoupStrainer(ElementFilter):
             )
         return this_attr_match
 
-    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[_AttributeValues]) -> bool:
+    def allow_tag_creation(self, nsprefix:Optional[str], name:str, attrs:Optional[_RawAttributeValues]) -> bool:
         """Based on the name and attributes of a tag, see whether this
         SoupStrainer will allow a Tag object to even be created.
 
@@ -586,7 +586,7 @@ class SoupStrainer(ElementFilter):
         return False
 
     @_deprecated("allow_tag_creation", "4.13.0")
-    def search_tag(self, name:str, attrs:Optional[_AttributeValues]) -> bool:
+    def search_tag(self, name:str, attrs:Optional[_RawAttributeValues]) -> bool:
         """A less elegant version of allow_tag_creation()."""
         ":meta private:"
         return self.allow_tag_creation(None, name, attrs)

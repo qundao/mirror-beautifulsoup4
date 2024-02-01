@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from bs4._typing import (
         _AttributeValue,
         _AttributeValues,
+        _RawAttributeValues,
         _StrainableElement,
         _StrainableAttribute,
         _StrainableAttributes,
@@ -1389,7 +1390,7 @@ class Tag(PageElement):
                  name:Optional[str]=None,
                  namespace:Optional[str]=None,
                  prefix:Optional[str]=None,
-                 attrs:Optional[_AttributeValues]=None,
+                 attrs:Optional[_RawAttributeValues]=None,
                  parent:Optional[Union[BeautifulSoup, Tag]]=None,
                  previous:Optional[PageElement]=None,
                  is_xml:Optional[bool]=None,
