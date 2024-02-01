@@ -276,7 +276,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
             yield (detector.markup, encoding, document_declared_encoding, False)
 
     def feed(self, markup:_RawMarkup) -> None:
-        io: IO
+        io: Union[BytesIO, StringIO]
         if isinstance(markup, bytes):
             io = BytesIO(markup)
         elif isinstance(markup, str):
@@ -445,6 +445,7 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
 
     features: Iterable[str] = list(ALTERNATE_NAMES) + [NAME, HTML, FAST, PERMISSIVE]
     is_xml: bool = False
+    _default_parser: Optional[etree.HTMLParser]
 
     def default_parser(self, encoding:Optional[_Encoding]) -> _HTMLParserOrParserClass:
         return etree.HTMLParser
