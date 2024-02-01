@@ -65,9 +65,8 @@ def _invert(d:dict[Any, Any]) -> dict[Any, Any]:
     "Invert a dictionary."
     return dict((v,k) for k, v in list(d.items()))
 
-_XMLParserOrParserClass:TypeAlias = Union[Type[etree.XMLParser], etree.XMLParser]
-_HTMLParserOrParserClass:TypeAlias = Union[Type[etree.HTMLParser], etree.HTMLParser]
-
+_LXMLParser:TypeAlias = Union[etree.XMLParser, etree.HTMLParser]
+_ParserOrParserClass:TypeAlias = Union[_LXMLParser, Type[etree.XMLParser], Type[etree.HTMLParser]]
 
 class LXMLTreeBuilderForXML(TreeBuilder):
 
@@ -143,7 +142,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
                 # prefix, the first one in the document takes precedence.
                 self.soup._namespaces[key] = value
                 
-    def default_parser(self, encoding:Optional[_Encoding]) -> _XMLParserOrParserClass:
+    def default_parser(self, encoding:Optional[_Encoding]) -> _ParserOrParserClass:
         """Find the default parser for the given encoding.
 
         :return: Either a parser object or a class, which
@@ -154,7 +153,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         return self.DEFAULT_PARSER_CLASS(
             target=self, strip_cdata=False, recover=True, encoding=encoding)
 
-    def parser_for(self, encoding: Optional[_Encoding]) -> Any:
+    def parser_for(self, encoding: Optional[_Encoding]) -> _LXMLParser:
         """Instantiate an appropriate parser for the given encoding.
 
         :param encoding: A string.
@@ -453,9 +452,8 @@ class LXMLTreeBuilder(HTMLTreeBuilder, LXMLTreeBuilderForXML):
 
     features: Iterable[str] = list(ALTERNATE_NAMES) + [NAME, HTML, FAST, PERMISSIVE]
     is_xml: bool = False
-    _default_parser: Optional[etree.HTMLParser]
 
-    def default_parser(self, encoding:Optional[_Encoding]) -> _HTMLParserOrParserClass:
+    def default_parser(self, encoding:Optional[_Encoding]) -> _ParserOrParserClass:
         return etree.HTMLParser
 
     def feed(self, markup:_RawMarkup) -> None: 
