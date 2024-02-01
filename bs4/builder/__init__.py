@@ -37,9 +37,10 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import (
         NavigableString, Tag,
-        _AttributeValues, _AttributeValue,
     )
     from bs4._typing import (
+        _AttributeValues,
+        _AttributeValue,
         _Encoding,
         _Encodings,
         _RawMarkup,
@@ -75,7 +76,7 @@ class TreeBuilderRegistry(object):
     builders_for_feature: Dict[str, List[Type[TreeBuilder]]]
     builders: List[Type[TreeBuilder]]
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.builders_for_feature = defaultdict(list)
         self.builders = []
 
@@ -233,7 +234,7 @@ class TreeBuilder(object):
     #: no contents--that is, using XML rules. HTMLTreeBuilder
     #: defines a different set of DEFAULT_EMPTY_ELEMENT_TAGS based on the
     #: HTML 4 and HTML5 standards.
-    DEFAULT_EMPTY_ELEMENT_TAGS: Optional[Set] = None
+    DEFAULT_EMPTY_ELEMENT_TAGS: Optional[Set[str]] = None
     
     #: Most parsers don't keep track of line numbers.
     TRACKS_LINE_NUMBERS: bool = False
@@ -347,7 +348,7 @@ class TreeBuilder(object):
         """
         return False
 
-    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_AttributeValues):
+    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_AttributeValues) -> _AttributeValues:
         """When an attribute value is associated with a tag that can
         have multiple values for that attribute, convert the string
         value to a list of strings.
@@ -359,6 +360,7 @@ class TreeBuilder(object):
         :param tag_name: The name of a tag.
         :param attrs: A dictionary containing the tag's attributes.
            Any appropriate attribute values will be modified in place.
+        :return: The modified dictionary that was originally passed in.
         """
         if not attrs:
             return attrs
@@ -389,58 +391,63 @@ class TreeBuilder(object):
 class SAXTreeBuilder(TreeBuilder):
     """A Beautiful Soup treebuilder that listens for SAX events.
 
-    This is not currently used for anything, but it demonstrates
-    how a simple TreeBuilder would work.
+    This is not currently used for anything, and it will be removed
+    soon. It was a good idea, but it wasn't properly integrated into the
+    rest of Beautiful Soup, so there have been long stretches where it
+    hasn't worked properly.
     """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args:Any, **kwargs:Any) -> None:
         warnings.warn(
-            f"The SAXTreeBuilder class was deprecated in 4.13.0. It is completely untested and probably doesn't work; use at your own risk.",
+            f"The SAXTreeBuilder class was deprecated in 4.13.0 and will be removed soon thereafter. It is completely untested and probably doesn't work; do not use it.",
                 DeprecationWarning,
                 stacklevel=2
             )
         super(SAXTreeBuilder, self).__init__(*args, **kwargs)
     
-    def feed(self, markup:_RawMarkup):
+    def feed(self, markup:_RawMarkup) -> None:
         raise NotImplementedError()
 
-    def close(self):
+    def close(self) -> None:
         pass
 
-    def startElement(self, name, attrs):
+    def startElement(self, name:str, attrs:Dict[str,str]) -> None:
         attrs = dict((key[1], value) for key, value in list(attrs.items()))
         #print("Start %s, %r" % (name, attrs))
-        self.soup.handle_starttag(name, attrs)
+        assert self.soup is not None
+        self.soup.handle_starttag(name, None, None, attrs)
 
-    def endElement(self, name):
+    def endElement(self, name:str) -> None:
         #print("End %s" % name)
+        assert self.soup is not None
         self.soup.handle_endtag(name)
 
-    def startElementNS(self, nsTuple, nodeName, attrs):
+    def startElementNS(self, nsTuple:Tuple[str,str],
+                       nodeName:str, attrs:Dict[str,str]) -> None:
         # Throw away (ns, nodeName) for now.
         self.startElement(nodeName, attrs)
 
-    def endElementNS(self, nsTuple, nodeName):
+    def endElementNS(self, nsTuple:Tuple[str,str], nodeName:str) -> None:
         # Throw away (ns, nodeName) for now.
         self.endElement(nodeName)
         #handler.endElementNS((ns, node.nodeName), node.nodeName)
 
-    def startPrefixMapping(self, prefix, nodeValue):
+    def startPrefixMapping(self, prefix:str, nodeValue:str) -> None:
         # Ignore the prefix for now.
         pass
 
-    def endPrefixMapping(self, prefix):
+    def endPrefixMapping(self, prefix:str) -> None:
         # Ignore the prefix for now.
         # handler.endPrefixMapping(prefix)
         pass
 
-    def characters(self, content):
+    def characters(self, content:str) -> None:
+        assert self.soup is not None
         self.soup.handle_data(content)
 
-    def startDocument(self):
+    def startDocument(self) -> None:
         pass
 
-    def endDocument(self):
+    def endDocument(self) -> None:
         pass
 
 
@@ -620,13 +627,13 @@ class DetectsXMLParsedAsHTML(object):
             return False
         markup = markup[:500]
         if isinstance(markup, bytes):
-            markup_b = cast(bytes, markup)
+            markup_b:bytes = markup
             looks_like_xml = (
                 markup_b.startswith(cls.XML_PREFIX_B)
                 and not cls.LOOKS_LIKE_HTML_B.search(markup)
             )
         else:
-            markup_s = cast(str, markup)
+            markup_s:str = markup
             looks_like_xml = (
                 markup_s.startswith(cls.XML_PREFIX)
                 and not cls.LOOKS_LIKE_HTML.search(markup)
@@ -650,9 +657,13 @@ class DetectsXMLParsedAsHTML(object):
         self._first_processing_instruction = None
         self._root_tag_name = None
        
-    def _document_might_be_xml(self, processing_instruction:str):
+    def _document_might_be_xml(self, processing_instruction:str) -> None:
         """Call this method when encountering an XML declaration, or a
         "processing instruction" that might be an XML declaration.
+
+        This helps Beautiful Soup detect potential issues later, if
+        the XML document turns out to be a non-XHTML document that's
+        being parsed as XML.
         """
         if (self._first_processing_instruction is not None
             or self._root_tag_name is not None):
