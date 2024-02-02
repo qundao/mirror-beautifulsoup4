@@ -1,7 +1,5 @@
 = 4.13.0 (Unreleased)
 
-TODO: we could stand to put limit inside ResultSet
-
 * This version drops support for Python 3.6. The minimum supported
   major Python version for Beautiful Soup is now Python 3.7.
 
