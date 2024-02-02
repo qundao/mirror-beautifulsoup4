@@ -38,7 +38,7 @@ class TestFuzz(object):
     # multiple copies of the code must be kept around to run against
     # older tests. I'm not sure what to do about this, but I may
     # retire old tests after a time.
-    def fuzz_test_with_css(self, filename):
+    def fuzz_test_with_css(self, filename:str) -> None:
         data = self.__markup(filename)
         parsers = ['lxml-xml', 'html5lib', 'html.parser', 'lxml']
         try:
@@ -168,7 +168,7 @@ class TestFuzz(object):
     def test_html5lib_parse_errors(self, filename):
         self.fuzz_test_with_css(filename)
         
-    def __markup(self, filename):
+    def __markup(self, filename:str) -> bytes:
         if not filename.endswith(self.TESTCASE_SUFFIX):
             filename += self.TESTCASE_SUFFIX
         this_dir = os.path.split(__file__)[0]

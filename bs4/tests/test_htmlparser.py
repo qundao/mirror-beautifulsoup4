@@ -10,12 +10,14 @@ from bs4.builder import (
     XMLParsedAsHTMLWarning,
 )
 from bs4.builder._htmlparser import (
+    _DuplicateAttributeHandler,
     BeautifulSoupHTMLParser,
     HTMLParserTreeBuilder,
 )
+from typing import Any
 from . import SoupTest, HTMLTreeBuilderSmokeTest
 
-class TestHTMLParserTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
+class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
 
     default_builder = HTMLParserTreeBuilder
 
@@ -95,7 +97,7 @@ class TestHTMLParserTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
         assert "id" == soup.a['id']
         
         # You can also get this behavior explicitly.
-        def assert_attribute(on_duplicate_attribute, expected):
+        def assert_attribute(on_duplicate_attribute:_DuplicateAttributeHandler, expected:Any) -> None:
             soup = self.soup(
                 markup, on_duplicate_attribute=on_duplicate_attribute
             )

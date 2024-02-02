@@ -8,6 +8,7 @@ import pickle
 import pytest
 import sys
 import tempfile
+from typing import Iterable
 
 from bs4 import (
     BeautifulSoup,
@@ -260,14 +261,15 @@ class TestWarnings(SoupTest):
     # that the code that triggered the warning is in the same
     # file as the test.
 
-    def _assert_warning(self, warnings, cls):
+    def _assert_warning(
+            self, warnings:Iterable[Warning], cls:type[Warning]) -> Warning:
         for w in warnings:
             if isinstance(w.message, cls):
                 assert w.filename == __file__
                 return w
         raise Exception("%s warning not found in %r" % (cls, warnings))
     
-    def _assert_no_parser_specified(self, w):
+    def _assert_no_parser_specified(self, w:Warning) -> None:
         warning = self._assert_warning(w, GuessedAtParserWarning)
         message = str(warning.message)
         assert message.startswith(BeautifulSoup.NO_PARSER_SPECIFIED_WARNING[:60])

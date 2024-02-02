@@ -5,6 +5,12 @@ import warnings
 from . import (
     SoupTest,
 )
+from typing import (
+    Callable,
+    Optional,
+    Pattern,
+    Tuple,
+)
 from bs4.element import Tag
 from bs4.filter import (
     AttributeValueMatchRule,
@@ -14,6 +20,8 @@ from bs4.filter import (
     StringMatchRule,
     TagNameMatchRule,
 )
+from bs4._typing import _RawOrProcessedAttributeValues
+
 
 class TestElementFilter(SoupTest):
 
@@ -107,7 +115,10 @@ class TestElementFilter(SoupTest):
 
 class TestMatchRule(SoupTest):
 
-    def _tuple(self, rule):
+    def _tuple(self, rule:MatchRule) -> Tuple[Optional[str],
+                                              Optional[Pattern[str]],
+                                              Optional[Callable],
+                                              Optional[bool]]:
         return (
             rule.string,
             rule.pattern.pattern if rule.pattern else None,
@@ -395,9 +406,10 @@ class TestSoupStrainer(SoupTest):
             assert msg == "Ignoring nested list [[...]] to avoid the possibility of infinite recursion."
 
     def tag_matches(
-            self, strainer, name, attrs=None, string=None, prefix=None,
-            match_valence=True
-    ):
+            self, strainer:SoupStrainer, name:str,
+            attrs:Optional[_RawOrProcessedAttributeValues]=None,
+            string:Optional[str]=None, prefix:Optional[str]=None,
+    ) -> bool:
         # Create a Tag with the given prefix, name and attributes,
         # then make sure that strainer.matches_tag and allow_tag_creation
         # both approve it.

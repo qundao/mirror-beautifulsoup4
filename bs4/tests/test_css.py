@@ -8,6 +8,12 @@ from bs4 import (
     ResultSet,
 )
 
+from typing import (
+    Any,
+    Iterable,
+    Tuple,
+)
+
 from . import (
     SoupTest,
     SOUP_SIEVE_PRESENT,
@@ -78,7 +84,7 @@ class TestCSSSelectors(SoupTest):
     def setup_method(self):
         self.soup = BeautifulSoup(self.HTML, 'html.parser')
 
-    def assert_selects(self, selector, expected_ids, **kwargs):
+    def assert_selects(self, selector:str, expected_ids:Iterable[str], **kwargs:Any) -> None:
         results = self.soup.select(selector, **kwargs)
         assert isinstance(results, ResultSet)
         el_ids = [el['id'] for el in results]
@@ -90,7 +96,7 @@ class TestCSSSelectors(SoupTest):
 
     assertSelect = assert_selects
 
-    def assert_select_multiple(self, *tests):
+    def assert_select_multiple(self, *tests:Tuple[str, Iterable[str]]):
         for selector, expected_ids in tests:
             self.assert_selects(selector, expected_ids)
 

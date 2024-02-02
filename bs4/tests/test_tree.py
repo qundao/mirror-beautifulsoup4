@@ -135,7 +135,7 @@ class TestFindAllBasicNamespaces(SoupTest):
 class TestFindAllByName(SoupTest):
     """Test ways of finding tags by tag name."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.tree =  self.soup("""<a>First tag.</a>
                                   <b>Second tag.</b>
                                   <c>Third <a>Nested tag.</a> tag.</c>""")
@@ -459,7 +459,7 @@ class TestIndex(SoupTest):
 class TestParentOperations(SoupTest):
     """Test navigation and searching through an element's parents."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.tree = self.soup('''<ul id="empty"></ul>
                                  <ul id="top">
                                   <ul id="middle">
@@ -508,14 +508,14 @@ class TestParentOperations(SoupTest):
 
 class ProximityTest(SoupTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.tree = self.soup(
             '<html id="start"><head></head><body><b id="1">One</b><b id="2">Two</b><b id="3">Three</b></body></html>')
 
 
 class TestNextOperations(ProximityTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         super(TestNextOperations, self).setup_method()
         self.start = self.tree.b
 
@@ -555,7 +555,7 @@ class TestNextOperations(ProximityTest):
 
 class TestPreviousOperations(ProximityTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         super(TestPreviousOperations, self).setup_method()
         self.end = self.tree.find(string="Three")
 
@@ -604,7 +604,7 @@ class TestPreviousOperations(ProximityTest):
 
 class SiblingTest(SoupTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         markup = '''<html>
                     <span id="1">
                      <span id="1.1"></span>
@@ -625,7 +625,7 @@ class SiblingTest(SoupTest):
 
 class TestNextSibling(SiblingTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         super(TestNextSibling, self).setup_method()
         self.start = self.tree.find(id="1")
 
@@ -670,7 +670,7 @@ class TestNextSibling(SiblingTest):
 
 class TestPreviousSibling(SiblingTest):
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         super(TestPreviousSibling, self).setup_method()
         self.end = self.tree.find(id="4")
 

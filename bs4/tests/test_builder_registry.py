@@ -2,10 +2,12 @@
 
 import pytest
 import warnings
+from typing import Type
 
 from bs4 import BeautifulSoup
 from bs4.builder import (
     builder_registry as registry,
+    TreeBuilder,
     TreeBuilderRegistry,
 )
 from bs4.builder._htmlparser import HTMLParserTreeBuilder
@@ -81,7 +83,7 @@ class TestRegistry(object):
     def setup_method(self):
         self.registry = TreeBuilderRegistry()
 
-    def builder_for_features(self, *feature_list):
+    def builder_for_features(self, *feature_list:str) -> Type[TreeBuilder]:
         cls = type('Builder_' + '_'.join(feature_list),
                    (object,), {'features' : feature_list})
 

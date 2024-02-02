@@ -26,7 +26,7 @@ from . import (
     not LXML_PRESENT,
     reason="lxml seems not to be present, not testing its tree builder."
 )
-class TestLXMLTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
+class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
     """See ``HTMLTreeBuilderSmokeTest``."""
 
     @property
@@ -88,7 +88,7 @@ class TestLXMLTreeBuilder(SoupTest, HTMLTreeBuilderSmokeTest):
     not LXML_PRESENT,
     reason="lxml seems not to be present, not testing its XML tree builder."
 )
-class TestLXMLXMLTreeBuilder(SoupTest, XMLTreeBuilderSmokeTest):
+class TestLXMLXMLTreeBuilder(XMLTreeBuilderSmokeTest):
     """See ``HTMLTreeBuilderSmokeTest``."""
 
     @property

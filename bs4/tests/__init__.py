@@ -15,6 +15,7 @@ from bs4.element import (
     Comment,
     ContentMetaAttributeValue,
     Doctype,
+    PageElement,
     PYTHON_SPECIFIC_ENCODINGS,
     Script,
     Stylesheet,
@@ -25,8 +26,21 @@ from bs4.builder import (
     DetectsXMLParsedAsHTML,
     XMLParsedAsHTMLWarning,
 )
+from bs4._typing import (
+    _IncomingMarkup
+)
+
+from bs4.builder import TreeBuilder
 from bs4.builder._htmlparser import HTMLParserTreeBuilder
-default_builder = HTMLParserTreeBuilder
+
+from typing import (
+    Any,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+)
 
 # Some tests depend on specific third-party libraries. We use
 # @pytest.mark.skipIf on the following conditionals to skip them
@@ -51,7 +65,9 @@ except ImportError:
     LXML_PRESENT = False
     LXML_VERSION = (0,)
 
-BAD_DOCUMENT = """A bare string
+default_builder:Type[TreeBuilder] = HTMLParserTreeBuilder
+
+BAD_DOCUMENT:str = """A bare string
 <!DOCTYPE xsl:stylesheet SYSTEM "htmlent.dtd">
 <!DOCTYPE xsl:stylesheet PUBLIC "htmlent.dtd">
 <div><![CDATA[A CDATA section where it doesn't belong]]></div>
@@ -91,28 +107,30 @@ BAD_DOCUMENT = """A bare string
 class SoupTest(object):
 
     @property
-    def default_builder(self):
+    def default_builder(self) -> Type[TreeBuilder]:
         return default_builder
 
-    def soup(self, markup, **kwargs):
+    def soup(self, markup:_IncomingMarkup, **kwargs:Any) -> BeautifulSoup:
         """Build a Beautiful Soup object from markup."""
         builder = kwargs.pop('builder', self.default_builder)
         return BeautifulSoup(markup, builder=builder, **kwargs)
 
-    def document_for(self, markup, **kwargs):
+    def document_for(self, markup:str, **kwargs:Any) -> str:
         """Turn an HTML fragment into a document.
 
         The details depend on the builder.
         """
         return self.default_builder(**kwargs).test_fragment_to_document(markup)
    
-    def assert_soup(self, to_parse, compare_parsed_to=None):
+    def assert_soup(self, to_parse:_IncomingMarkup,
+                    compare_parsed_to:Optional[str]=None) -> None:
         """Parse some markup using Beautiful Soup and verify that
         the output markup is as expected.
         """
         builder = self.default_builder
         obj = BeautifulSoup(to_parse, builder=builder)
         if compare_parsed_to is None:
+            assert isinstance(to_parse, str)
             compare_parsed_to = to_parse
 
         # Verify that the documents come out the same.
@@ -131,7 +149,7 @@ class SoupTest(object):
 
     assertSoupEquals = assert_soup
         
-    def assertConnectedness(self, element):
+    def assertConnectedness(self, element:Tag) -> None:
         """Ensure that next_element and previous_element are properly
         set for all descendants of the given element.
         """
@@ -142,7 +160,7 @@ class SoupTest(object):
                 assert earlier == e.previous_element
             earlier = e
 
-    def linkage_validator(self, el, _recursive_call=False):
+    def linkage_validator(self, el:Tag, _recursive_call:bool=False) -> Optional[PageElement]:
         """Ensure proper linkage throughout the document."""
         descendant = None
         # Document element should have no previous element or previous sibling.
@@ -209,6 +227,7 @@ class SoupTest(object):
 
             if isinstance(child, Tag) and child.contents:
                 descendant = self.linkage_validator(child, True)
+                assert descendant is not None
                 # A bubbled up descendant should have no next siblings
                 assert descendant.next_sibling is None,\
                     "Bad next_sibling\nNODE: {}\nNEXT {}\nEXPECTED {}".format(
@@ -234,7 +253,7 @@ class SoupTest(object):
             child = el
 
         if not _recursive_call and child is not None:
-            target = el
+            target:Optional[Tag] = el
             while True:
                 if target is None:
                     assert child.next_element is None, \
@@ -256,7 +275,7 @@ class SoupTest(object):
             # Return the child to the recursive caller
             return child
 
-    def assert_selects(self, tags, should_match):
+    def assert_selects(self, tags:Iterable[Tag], should_match:Iterable[str]) -> None:
         """Make sure that the given tags have the correct text.
 
         This is used in tests that define a bunch of tags, each
@@ -265,7 +284,7 @@ class SoupTest(object):
         """
         assert [tag.string for tag in tags] == should_match
 
-    def assert_selects_ids(self, tags, should_match):
+    def assert_selects_ids(self, tags:Iterable[Tag], should_match:Iterable[str]) -> None:
         """Make sure that the given tags have the correct IDs.
 
         This is used in tests that define a bunch of tags, each
@@ -275,7 +294,7 @@ class SoupTest(object):
         assert [tag['id'] for tag in tags] == should_match
 
 
-class TreeBuilderSmokeTest(object):
+class TreeBuilderSmokeTest(SoupTest):
     # Tests that are common to HTML and XML tree builders.
 
     @pytest.mark.parametrize(
@@ -352,7 +371,7 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         assert loaded.__class__ == BeautifulSoup
         assert loaded.decode() == tree.decode()
 
-    def assertDoctypeHandled(self, doctype_fragment):
+    def assertDoctypeHandled(self, doctype_fragment:str) -> None:
         """Assert that a given doctype string is handled correctly."""
         doctype_str, soup = self._document_with_doctype(doctype_fragment)
 
@@ -366,7 +385,7 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         # parse tree and that the rest of the document parsed.
         assert soup.p.contents[0] == 'foo'
 
-    def _document_with_doctype(self, doctype_fragment, doctype_string="DOCTYPE"):
+    def _document_with_doctype(self, doctype_fragment:str, doctype_string:str="DOCTYPE") -> Tuple[bytes, BeautifulSoup]:
         """Generate and parse a document with the given doctype."""
         doctype = '<!%s %s>' % (doctype_string, doctype_fragment)
         markup = doctype + '\n<p>foo</p>'

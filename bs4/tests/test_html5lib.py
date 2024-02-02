@@ -8,14 +8,13 @@ from bs4.filter import SoupStrainer
 from . import (
     HTML5LIB_PRESENT,
     HTML5TreeBuilderSmokeTest,
-    SoupTest,
 )
 
 @pytest.mark.skipif(
     not HTML5LIB_PRESENT,
     reason="html5lib seems not to be present, not testing its tree builder."
 )
-class TestHTML5LibBuilder(SoupTest, HTML5TreeBuilderSmokeTest):
+class TestHTML5LibBuilder(HTML5TreeBuilderSmokeTest):
     """See ``HTML5TreeBuilderSmokeTest``."""
 
     @property
