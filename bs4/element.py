@@ -35,12 +35,14 @@ from typing import (
     TYPE_CHECKING,
     Tuple,
     Type,
-    TypeAlias,
     TypeVar,
     Union,
     cast,
 )
-from typing_extensions import Self
+from typing_extensions import (
+    Self,
+    TypeAlias,
+)
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder

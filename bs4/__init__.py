@@ -452,7 +452,7 @@ class BeautifulSoup(Tag):
         clone.original_encoding = self.original_encoding
         return clone
         
-    def __getstate__(self) -> dict[str, Any]:
+    def __getstate__(self) -> Dict[str, Any]:
         # Frequently a tree builder can't be pickled.
         d = dict(self.__dict__)
         if 'builder' in d and d['builder'] is not None and not self.builder.picklable:
@@ -468,7 +468,7 @@ class BeautifulSoup(Tag):
             del d['_most_recent_element']
         return d
 
-    def __setstate__(self, state: dict[str, Any]) -> None:
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         # If necessary, restore the TreeBuilder by looking it up.
         self.__dict__ = state
         if isinstance(self.builder, type):
@@ -665,7 +665,7 @@ class BeautifulSoup(Tag):
         # The user may want us to use some other class (hopefully a
         # custom subclass) instead of the one we'd use normally.
         container = cast(
-            type[NavigableString],
+            Type[NavigableString],
             self.element_classes.get(container, container)
         )
 

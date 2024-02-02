@@ -260,14 +260,14 @@ class EntitySubstitution(object):
     AMPERSAND_OR_BRACKET: Pattern[str] = re.compile("([<>&])")
 
     @classmethod
-    def _substitute_html_entity(cls, matchobj:re.Match[str]) -> str:
+    def _substitute_html_entity(cls, matchobj:re.Match) -> str:
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
         return "&%s;" % entity
 
     @classmethod
-    def _substitute_xml_entity(cls, matchobj:re.Match[str]) -> str:
+    def _substitute_xml_entity(cls, matchobj:re.Match) -> str:
         """Used with a regular expression to substitute the
         appropriate XML entity for a special character string."""
         entity = cls.CHARACTER_TO_XML_ENTITY[matchobj.group(0)]
@@ -752,7 +752,7 @@ class UnicodeDammit:
 
     log: Logger #: :meta private:
             
-    def _sub_ms_char(self, match:re.Match[bytes]) -> bytes:
+    def _sub_ms_char(self, match:re.Match) -> bytes:
         """Changes a MS smart quote character to an XML or HTML
         entity, or an ASCII character.
 

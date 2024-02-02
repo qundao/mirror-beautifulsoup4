@@ -9,6 +9,11 @@
 #   improve the tree matching types (I don't remember what, exactly).
 # * 3.8 defines the Protocol type, which can be used to do duck typing
 #   in a statically checkable way.
+# * In 3.9 it's possible to specialize the re.Pattern and re.Match types.
+#   e.g. re.Pattern[str].
+#   In 3.8 there's a typing.re namespace for this, but it's removed in
+#   3.12, so to support the widest possible set of versions I'm not
+#   using it.
 
 import re
 from typing_extensions import TypeAlias
@@ -51,13 +56,18 @@ _InvertedNamespaceMapping:TypeAlias = Dict[_NamespaceURL, _NamespacePrefix]
 # These are the relatively unprocessed values Beautiful Soup expects
 # to come from a `TreeBuilder`.
 _RawAttributeValue: TypeAlias = str
-_RawAttributeValues: TypeAlias = dict[str, _RawAttributeValue]
+_RawAttributeValues: TypeAlias = Dict[str, _RawAttributeValue]
 
 # These are attribute values in their final form, as stored in the
-# `Tag` class.
+# `Tag` class, after they have been processed and (in some cases)
+# split into lists of strings.
 _AttributeValue: TypeAlias = Union[str, Iterable[str]]
 _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
+# The methods that deal with turning _RawAttributeValues into
+# _AttributeValues may be called several times, even after the values
+# are already processed (e.g. when cloning a tag), so they need to
+# be able to acommodate both possibilities.
 _RawOrProcessedAttributeValues:TypeAlias = Union[_RawAttributeValues, _AttributeValues]
 
 # Aliases to represent the many possibilities for matching bits of a
