@@ -8,12 +8,12 @@
 # * In 3.10, TypeAlias gains capabilities that can be used to
 #   improve the tree matching types (I don't remember what, exactly).
 # * 3.8 defines the Protocol type, which can be used to do duck typing
-#   in a statically checkable way.
-# * In 3.9 it's possible to specialize the re.Pattern and re.Match types.
-#   e.g. re.Pattern[str].
-#   In 3.8 there's a typing.re namespace for this, but it's removed in
-#   3.12, so to support the widest possible set of versions I'm not
-#   using it.
+#   in a statically checkable way. (Protocols are also in typing_extensions,
+#   so I could add this now in the couple places it's needed.)
+# * In 3.9 it's possible to specialize the re.Pattern and re.Match
+#   types. e.g. re.Pattern[str]. In 3.8 there's a typing.re namespace
+#   for this, but it's removed in 3.12, so to support the widest
+#   possible set of versions I'm not using it.
 
 import re
 from typing_extensions import TypeAlias
