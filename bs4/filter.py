@@ -372,9 +372,8 @@ class SoupStrainer(ElementFilter):
             # third-party regex library, whose pattern objects doesn't
             # derive from re.Pattern.
             #
-            # TODO-TYPING: Once we drop support for Python 3.7, we
-            # might be able to address this by defining an appropriate
-            # Protocol.
+            # TODO-TYPING: We should be able to bring in a Protocol
+            # from typing_extensions to handle this.
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
