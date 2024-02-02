@@ -380,13 +380,13 @@ class TreeBuilder(object):
         universal: Set[str] = self.cdata_list_attributes.get('*', set())
         tag_specific = self.cdata_list_attributes.get(
             tag_name.lower(), None)
-        for attr in list(attrs.keys()):
+        for attr in list(modified_attrs.keys()):
             modified_value:_AttributeValue
             if attr in universal or (tag_specific and attr in tag_specific):
                 # We have a "class"-type attribute whose string
                 # value is a whitespace-separated list of
                 # values. Split it into a list.
-                original_value:_AttributeValue = attrs[attr]
+                original_value:_AttributeValue = modified_attrs[attr]
                 if isinstance(original_value, _RawAttributeValue):
                     # This is a _RawAttributeValue (a string) that
                     # needs to be split into a list so it can be an
