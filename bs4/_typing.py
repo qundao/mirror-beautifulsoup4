@@ -48,17 +48,17 @@ _InvertedNamespaceMapping:TypeAlias = Dict[_NamespaceURL, _NamespacePrefix]
 
 # Aliases for the attribute values associated with HTML/XML tags.
 #
-# Note that these are attribute values in their final form, as stored
-# in the `Tag` class.  Different parsers present attributes to the
-# `TreeBuilder` subclasses in different formats, which are not defined
-# here.
+# These are the relatively unprocessed values Beautiful Soup expects
+# to come from a `TreeBuilder`.
+_RawAttributeValue: TypeAlias = str
+_RawAttributeValues: TypeAlias = dict[str, _RawAttributeValue]
+
+# These are attribute values in their final form, as stored in the
+# `Tag` class.
 _AttributeValue: TypeAlias = Union[str, Iterable[str]]
 _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
-# The most common form in which attribute values are passed in from a
-# parser.
-_RawAttributeValue: TypeAlias = str
-_RawAttributeValues: TypeAlias = dict[str, _RawAttributeValue]
+_RawOrProcessedAttributeValues:TypeAlias = Union[_RawAttributeValues, _AttributeValues]
 
 # Aliases to represent the many possibilities for matching bits of a
 # parse tree.

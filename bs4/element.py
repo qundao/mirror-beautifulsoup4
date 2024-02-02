@@ -53,7 +53,7 @@ if TYPE_CHECKING:
         _AttributeValue,
         _AttributeValues,
         _Encoding,
-        _RawAttributeValues,
+        _RawOrProcessedAttributeValues,
         _StrainableElement,
         _StrainableAttribute,
         _StrainableAttributes,
@@ -1395,7 +1395,7 @@ class Tag(PageElement):
                  name:Optional[str]=None,
                  namespace:Optional[str]=None,
                  prefix:Optional[str]=None,
-                 attrs:Optional[_RawAttributeValues]=None,
+                 attrs:Optional[_RawOrProcessedAttributeValues]=None,
                  parent:Optional[Union[BeautifulSoup, Tag]]=None,
                  previous:Optional[PageElement]=None,
                  is_xml:Optional[bool]=None,
@@ -2025,7 +2025,7 @@ class Tag(PageElement):
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:_FormatterOrName="minimal",
-               iterator:Optional[Iterable[PageElement]]=None) -> str:
+               iterator:Optional[Iterator[PageElement]]=None) -> str:
         """Render this `Tag` and its contents as a Unicode string.
 
         :param indent_level: Each line of the rendering will be

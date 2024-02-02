@@ -33,17 +33,20 @@ from bs4.element import (
     nonwhitespace_re
 )
 
+from bs4._typing import (
+    _AttributeValues,
+    _RawAttributeValue,
+)
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import (
         NavigableString, Tag,
     )
     from bs4._typing import (
-        _AttributeValues,
         _AttributeValue,
         _Encoding,
         _Encodings,
-        _RawAttributeValues,
+        _RawOrProcessedAttributeValues,
         _RawMarkup,
     )
     
@@ -349,7 +352,7 @@ class TreeBuilder(object):
         """
         return False
 
-    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_RawAttributeValues) -> _AttributeValues:
+    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_RawOrProcessedAttributeValues) -> _AttributeValues:
         """When an attribute value is associated with a tag that can
         have multiple values for that attribute, convert the string
         value to a list of strings.
@@ -363,31 +366,43 @@ class TreeBuilder(object):
            Any appropriate attribute values will be modified in place.
         :return: The modified dictionary that was originally passed in.
         """
-        if not attrs:
-            return attrs
-        if self.cdata_list_attributes:
-            universal: Set[str] = self.cdata_list_attributes.get('*', set())
-            tag_specific = self.cdata_list_attributes.get(
-                tag_name.lower(), None)
-            for attr in list(attrs.keys()):
-                values: _AttributeValue
-                if attr in universal or (tag_specific and attr in tag_specific):
-                    # We have a "class"-type attribute whose string
-                    # value is a whitespace-separated list of
-                    # values. Split it into a list.
-                    value = attrs[attr]
-                    if isinstance(value, str):
-                        values = nonwhitespace_re.findall(value)
-                    else:
-                        # html5lib sometimes calls setAttributes twice
-                        # for the same tag when rearranging the parse
-                        # tree. On the second call the attribute value
-                        # here is already a list.  If this happens,
-                        # leave the value alone rather than trying to
-                        # split it again.
-                        values = value
-                    attrs[attr] = values
-        return attrs
+
+        # First, cast the attrs dict to _AttributeValues. This might
+        # not be accurate yet, but it will be by the time this method
+        # returns.
+        modified_attrs = cast(_AttributeValues, attrs)
+        if not modified_attrs or not self.cdata_list_attributes:
+            # Nothing to do.
+            return modified_attrs
+
+        # There is at least a possibility that we need to modify one of
+        # the attribute values.
+        universal: Set[str] = self.cdata_list_attributes.get('*', set())
+        tag_specific = self.cdata_list_attributes.get(
+            tag_name.lower(), None)
+        for attr in list(attrs.keys()):
+            modified_value:_AttributeValue
+            if attr in universal or (tag_specific and attr in tag_specific):
+                # We have a "class"-type attribute whose string
+                # value is a whitespace-separated list of
+                # values. Split it into a list.
+                original_value:_AttributeValue = attrs[attr]
+                if isinstance(original_value, _RawAttributeValue):
+                    # This is a _RawAttributeValue (a string) that
+                    # needs to be split into a list so it can be an
+                    # _AttributeValue.
+                    modified_value = nonwhitespace_re.findall(original_value)
+                else:
+                    # html5lib calls setAttributes twice for the
+                    # same tag when rearranging the parse tree. On
+                    # the second call the attribute value here is
+                    # already a list. This can also happen when a
+                    # Tag object is cloned. If this happens, leave
+                    # the value alone rather than trying to split
+                    # it again.
+                    modified_value = original_value
+                modified_attrs[attr] = modified_value
+        return modified_attrs
     
 class SAXTreeBuilder(TreeBuilder):
     """A Beautiful Soup treebuilder that listens for SAX events.

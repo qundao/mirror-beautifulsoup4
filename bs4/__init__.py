@@ -72,7 +72,7 @@ from typing import (
     cast,
     Counter as CounterType,
     Dict,
-    Iterable,
+    Iterator,
     List,
     Sequence,
     Optional,
@@ -967,7 +967,7 @@ class BeautifulSoup(Tag):
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:Union[Formatter,str]="minimal",
-               iterator:Optional[Iterable[PageElement]]=None,
+               iterator:Optional[Iterator[PageElement]]=None,
                **kwargs:Any) -> str:
         """Returns a string representation of the parse tree
             as a full HTML or XML document.
