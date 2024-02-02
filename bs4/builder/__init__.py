@@ -43,6 +43,7 @@ if TYPE_CHECKING:
         _AttributeValue,
         _Encoding,
         _Encodings,
+        _RawAttributeValues,
         _RawMarkup,
     )
     
@@ -348,7 +349,7 @@ class TreeBuilder(object):
         """
         return False
 
-    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_AttributeValues) -> _AttributeValues:
+    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_RawAttributeValues) -> _AttributeValues:
         """When an attribute value is associated with a tag that can
         have multiple values for that attribute, convert the string
         value to a list of strings.

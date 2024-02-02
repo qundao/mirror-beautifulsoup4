@@ -35,6 +35,7 @@ from typing import (
     TYPE_CHECKING,
     Tuple,
     Type,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -43,7 +44,6 @@ from typing_extensions import Self
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.builder import TreeBuilder
-    from bs4.dammit import _Encoding
     from bs4.filter import ElementFilter
     from bs4.formatter import (
         _EntitySubstitutionFunction,
@@ -52,12 +52,15 @@ if TYPE_CHECKING:
     from bs4._typing import (
         _AttributeValue,
         _AttributeValues,
+        _Encoding,
         _RawAttributeValues,
         _StrainableElement,
         _StrainableAttribute,
         _StrainableAttributes,
         _StrainableString,
     )
+
+_OneOrMoreStringTypes:TypeAlias = Union[Type['NavigableString'], Iterable[Type['NavigableString']]]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/
@@ -67,7 +70,7 @@ _deprecated_names = dict(
 #: :meta private:
 _deprecated_whitespace_re: Pattern[str] = re.compile(r"\s+")
 
-def __getattr__(name):
+def __getattr__(name:str) -> Any:
     if name in _deprecated_names:
         message = _deprecated_names[name]
         warnings.warn(
@@ -125,7 +128,8 @@ class NamespacedAttribute(str):
     namespace: Optional[str]
     
     def __new__(cls, prefix:Optional[str],
-                name:Optional[str]=None, namespace:Optional[str]=None):
+                name:Optional[str]=None,
+                namespace:Optional[str]=None) -> Self:
         if not name:
             # This is the default namespace. Its name "has no value"
             # per https://www.w3.org/TR/xml-names/#defaulting
@@ -224,7 +228,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
         """
         if eventual_encoding in PYTHON_SPECIFIC_ENCODINGS:
             return self.CHARSET_RE.sub('', self.original_value)
-        def rewrite(match):
+        def rewrite(match:re.Match[str]) -> str:
             return match.group(1) + eventual_encoding
         return self.CHARSET_RE.sub(rewrite, self.original_value)
 
@@ -371,7 +375,7 @@ class PageElement(object):
         "previousSibling", "previous_sibling", "4.0.0"
     )
 
-    def __deepcopy__(self, memo:Dict, recursive:bool=False) -> Self:
+    def __deepcopy__(self, memo:Dict[Any,Any], recursive:bool=False) -> Self:
         raise NotImplementedError()
         
     def __copy__(self) -> Self:
@@ -886,9 +890,10 @@ class PageElement(object):
 
     def _find_one(
             self,
-            # TODO: "There is no syntax to indicate optional or keyword
-            # arguments; such function types are rarely used as
-            # callback types." - So, not sure how to get more specific here.
+            # TODO-TYPING: "There is no syntax to indicate optional or
+            # keyword arguments; such function types are rarely used
+            # as callback types." - So, not sure how to get more
+            # specific here.
             method:Callable,
             name:Optional[_StrainableElement],
             attrs:_StrainableAttributes,
@@ -963,7 +968,7 @@ class PageElement(object):
         You can pass in your own technique for iterating over the tree, and your own
         technique for matching items.
         """
-        results:ResultSet = ResultSet(matcher)
+        results:ResultSet[PageElement] = ResultSet(matcher)
         while True:
             try:
                 i = next(generator)
@@ -1037,27 +1042,27 @@ class PageElement(object):
         return getattr(self, '_decomposed', False) or False
    
     @_deprecated("next_elements", "4.0.0")
-    def nextGenerator(self):
+    def nextGenerator(self) -> Iterator[PageElement]:
         ":meta private:"
         return self.next_elements
 
     @_deprecated("next_siblings", "4.0.0")
-    def nextSiblingGenerator(self):
+    def nextSiblingGenerator(self) -> Iterator[PageElement]:
         ":meta private:"
         return self.next_siblings
 
     @_deprecated("previous_elements", "4.0.0")
-    def previousGenerator(self):
+    def previousGenerator(self) -> Iterator[PageElement]:
         ":meta private:"
         return self.previous_elements
 
     @_deprecated("previous_siblings", "4.0.0")
-    def previousSiblingGenerator(self):
+    def previousSiblingGenerator(self) -> Iterator[PageElement]:
         ":meta private:"
         return self.previous_siblings
 
     @_deprecated("parents", "4.0.0")
-    def parentGenerator(self):
+    def parentGenerator(self) -> Iterator[PageElement]:
         ":meta private:"
         return self.parents
 
@@ -1095,7 +1100,7 @@ class NavigableString(str, PageElement):
         u.setup()
         return u
 
-    def __deepcopy__(self, memo:Dict, recursive:bool=False) -> Self:
+    def __deepcopy__(self, memo:Dict[Any, Any], recursive:bool=False) -> Self:
         """A copy of a NavigableString has the same contents and class
         as the original, but it is not connected to the parse tree.
 
@@ -1105,7 +1110,7 @@ class NavigableString(str, PageElement):
         """
         return type(self)(self)
 
-    def __getnewargs__(self):
+    def __getnewargs__(self) -> Tuple[str]:
         return (str(self),)
 
     @property
@@ -1142,14 +1147,14 @@ class NavigableString(str, PageElement):
         return None
 
     @name.setter
-    def name(self, name:str):
+    def name(self, name:str) -> None:
         """Prevent NavigableString.name from ever being set.
 
         :meta private:
         """
         raise AttributeError("A NavigableString cannot be given a name.")
 
-    def _all_strings(self, strip=False, types:Iterable[Type[NavigableString]]=PageElement.default) -> Iterator[str]:
+    def _all_strings(self, strip:bool=False, types:_OneOrMoreStringTypes=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         This makes it easy for NavigableString to implement methods
@@ -1493,7 +1498,7 @@ class Tag(PageElement):
     #: :meta private:
     parserClass = _deprecated_alias("parserClass", "parser_class", "4.0.0")
 
-    def __deepcopy__(self, memo:dict, recursive:bool=True) -> Self:
+    def __deepcopy__(self, memo:Dict[Any, Any], recursive:bool=True) -> Self:
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
         """
@@ -1560,9 +1565,9 @@ class Tag(PageElement):
         return len(self.contents) == 0 and self.can_be_empty_element is True
 
     @_deprecated("is_empty_element", "4.0.0")
-    def isSelfClosing(self):
+    def isSelfClosing(self) -> bool:
         ": :meta private:"
-        return is_empty_element()
+        return self.is_empty_element
 
     @property
     def string(self) -> Optional[str]:
@@ -1600,7 +1605,7 @@ class Tag(PageElement):
 
     #: :meta private:
     MAIN_CONTENT_STRING_TYPES = {NavigableString, CData}
-    def _all_strings(self, strip:bool=False, types:Iterable[Type[NavigableString]]=PageElement.default) -> Iterator[str]:
+    def _all_strings(self, strip:bool=False, types:_OneOrMoreStringTypes=PageElement.default) -> Iterator[str]:
         """Yield all strings of certain classes, possibly stripping them.
 
         :param strip: If True, all strings will be stripped before being
@@ -1747,7 +1752,7 @@ class Tag(PageElement):
     replace_with_children = unwrap
 
     @_deprecated("unwrap", "4.0.0")
-    def replaceWithChildren(self):
+    def replaceWithChildren(self) -> PageElement:
         ": :meta private:"
         return self.unwrap()
     
@@ -1922,11 +1927,21 @@ class Tag(PageElement):
         "Deleting tag[key] deletes all 'key' attributes for the tag."
         self.attrs.pop(key, None)
 
-    def __call__(self, *args, **kwargs) -> ResultSet[PageElement]:
+    def __call__(self,
+            name:Optional[_StrainableElement]=None,
+            attrs:_StrainableAttributes={},
+            recursive:bool=True,
+            string:Optional[_StrainableString]=None,
+            limit:Optional[int]=None,
+            _stacklevel:int=2,
+            **kwargs:_StrainableAttribute
+        )-> ResultSet[PageElement]:
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
-        return self.find_all(*args, **kwargs)
+        return self.find_all(
+            name, attrs, recursive, string, limit, _stacklevel, **kwargs
+        )
 
     def __getattr__(self, subtag:str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
@@ -2010,7 +2025,7 @@ class Tag(PageElement):
     def decode(self, indent_level:Optional[int]=None,
                eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                formatter:_FormatterOrName="minimal",
-               iterator:Optional[Iterable]=None) -> str:
+               iterator:Optional[Iterable[PageElement]]=None) -> str:
         """Render this `Tag` and its contents as a Unicode string.
 
         :param indent_level: Each line of the rendering will be
@@ -2130,9 +2145,10 @@ class Tag(PageElement):
     EMPTY_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
     STRING_ELEMENT_EVENT = _TreeTraversalEvent() #: :meta private:
 
-    def _event_stream(self, iterator=None) -> Iterator[
-            Tuple[_TreeTraversalEvent, PageElement]
-    ]:
+    def _event_stream(
+            self,
+            iterator:Optional[Iterator[PageElement]]=None
+    ) -> Iterator[Tuple[_TreeTraversalEvent, PageElement]]:
         """Yield a sequence of events that can be used to reconstruct the DOM
         for this element.
 
@@ -2324,8 +2340,8 @@ class Tag(PageElement):
         return contents.encode(encoding)
 
     @_deprecated("encode_contents", "4.0.0")
-    def renderContents(self, encoding=DEFAULT_OUTPUT_ENCODING,
-                       prettyPrint=False, indentLevel=0):
+    def renderContents(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
+                       prettyPrint:bool=False, indentLevel:Optional[int]=0) -> bytes:
         """Deprecated method for BS3 compatibility.
 
         :meta private:
@@ -2444,7 +2460,7 @@ class Tag(PageElement):
     def select_one(self,
                    selector:str,
                    namespaces:Optional[Dict[str, str]]=None,
-                   **kwargs) -> Optional[Tag]:
+                   **kwargs:Any) -> Optional[Tag]:
         """Perform a CSS selection operation on the current element.
 
         :param selector: A CSS selector.
@@ -2460,7 +2476,7 @@ class Tag(PageElement):
         return self.css.select_one(selector, namespaces, **kwargs)
 
     def select(self, selector:str, namespaces:Optional[Dict[str, str]]=None,
-               limit:int=0, **kwargs) -> ResultSet[Tag]:
+               limit:int=0, **kwargs:Any) -> ResultSet[Tag]:
         """Perform a CSS selection operation on the current element.
 
         This uses the SoupSieve library.
@@ -2486,7 +2502,7 @@ class Tag(PageElement):
 
     # Old names for backwards compatibility
     @_deprecated("children", "4.0.0")
-    def childGenerator(self):
+    def childGenerator(self) -> Iterator[PageElement]:
         """Deprecated generator.
 
         :meta private:
@@ -2494,7 +2510,7 @@ class Tag(PageElement):
         return self.children
 
     @_deprecated("descendants", "4.0.0")
-    def recursiveChildGenerator(self):
+    def recursiveChildGenerator(self) -> Iterator[PageElement]:
         """Deprecated generator.
 
         :meta private:
@@ -2502,7 +2518,7 @@ class Tag(PageElement):
         return self.descendants
 
     @_deprecated("has_attr", "4.0.0")
-    def has_key(self, key):
+    def has_key(self, key:str) -> bool:
         """Deprecated method. This was kind of misleading because has_key()
         (attributes) was different from __in__ (contents).
 
@@ -2524,7 +2540,7 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
         super(ResultSet, self).__init__(result)
         self.source = source
 
-    def __getattr__(self, key:str):
+    def __getattr__(self, key:str) -> None:
         """Raise a helpful exception to explain a common code fix."""
         raise AttributeError(
             f"""ResultSet object has no attribute "{key}". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"""
