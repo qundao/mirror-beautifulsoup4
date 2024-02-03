@@ -1136,6 +1136,8 @@ This code finds all the tags whose names contain the letter 't'::
  # html
  # title
 
+.. _the value True:
+
 ``True``
 ^^^^^^^^
 
@@ -1217,8 +1219,6 @@ code finds all the <a> tags `and` all the <b> tags::
  #  <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
-.. _the value True:
-
 Now we're ready to look at the search methods in detail.
 
 ``find_all()``
@@ -1296,7 +1296,7 @@ pattern-match against each tag's 'href' attribute value::
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>]
 
 The value ``True`` matches every tag that defines the attribute. This code
-finds `all` tags with an ``id`` attribute:
+finds `all` tags with an ``id`` attribute::
 
  soup.find_all(id=True)
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
@@ -1320,7 +1320,7 @@ match a regular expression::
 
 If you pass in a list for an argument, Beautiful Soup will look for an
 attribute-value match against `any` string, regular expression, or function in
-that list. This code finds the first and last link:
+that list. This code finds the first and last link::
 
  soup.find_all(id=["link1", re.compile("3$")])
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
