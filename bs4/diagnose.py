@@ -30,7 +30,7 @@ import traceback
 import sys
 import cProfile
 
-def diagnose(data:_IncomingMarkup) -> None:
+def diagnose(data:'_IncomingMarkup') -> None:
     """Diagnostic suite for isolating common problems.
 
     :param data: Some markup that needs to be explained.
