@@ -86,7 +86,7 @@ def diagnose(data:'_IncomingMarkup') -> None:
 
         print(("-" * 80))
 
-def lxml_trace(data:_IncomingMarkup, html:bool=True, **kwargs:Any) -> None:
+def lxml_trace(data:'_IncomingMarkup', html:bool=True, **kwargs:Any) -> None:
     """Print out the lxml events that occur during parsing.
 
     This lets you see how lxml parses a document when no Beautiful
