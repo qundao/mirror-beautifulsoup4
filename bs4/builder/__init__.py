@@ -709,7 +709,7 @@ class DetectsXMLParsedAsHTML(object):
             # We encountered an XML declaration and then a tag other
             # than 'html'. This is a reliable indicator that a
             # non-XHTML document is being parsed as XML.
-            self._warn()
+            self._warn(stacklevel=10)
 
     
 def register_treebuilders_from(module:ModuleType) -> None:
