@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 from bs4.builder import builder_registry
 from bs4.builder._htmlparser import HTMLParserTreeBuilder
 from bs4.element import (
+    AttributeResemblesVariableWarning,
     CData,
     Comment,
     Declaration,
@@ -1304,15 +1305,17 @@ class TestTreeModification(SoupTest):
         assert isinstance(soup.a.string, CData)
 
 
-class TestDeprecatedArguments(SoupTest):
-
-    @pytest.mark.parametrize(
-        "method_name", [
+all_find_type_methods = [
             "find", "find_all", "find_parent", "find_parents",
             "find_next", "find_all_next", "find_previous",
             "find_all_previous", "find_next_sibling", "find_next_siblings",
             "find_previous_sibling", "find_previous_siblings",
         ]
+
+class TestDeprecatedArguments(SoupTest):
+
+    @pytest.mark.parametrize(
+        "method_name", all_find_type_methods
     )
     def test_find_type_method_string(self, method_name):
         soup = self.soup("<a>some</a><b>markup</b>")
@@ -1324,3 +1327,19 @@ class TestDeprecatedArguments(SoupTest):
             msg = str(warning.message)
             assert msg == "The 'text' argument to find()-type methods is deprecated. Use 'string' instead."
 
+
+class TestWarnings(SoupTest):
+
+    @pytest.mark.parametrize(
+        "method_name", all_find_type_methods
+    )
+    def test_suspicious_syntax_warning(self, method_name):
+        soup = self.soup("<a>some</a><b>markup</b>")
+        method = getattr(soup.b, method_name)
+        with warnings.catch_warnings(record=True) as w:
+            method(_class="u")
+            [warning] = w
+            assert warning.filename == __file__
+            assert isinstance(warning.message, AttributeResemblesVariableWarning)
+            msg = str(warning.message)
+            assert msg == '"_class" is an unusual attribute name and might be a misspelling. Did you mean "class_?"'

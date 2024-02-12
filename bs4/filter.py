@@ -299,6 +299,7 @@ class SoupStrainer(ElementFilter):
                     # because you really are looking for an attribute
                     # called 'class_'.
                     attr = 'class'
+
                 if value is None:
                     value = False
                 for rule_obj in self._make_match_rules(

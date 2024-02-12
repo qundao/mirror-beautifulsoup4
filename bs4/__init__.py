@@ -104,7 +104,6 @@ class MarkupResemblesLocatorWarning(UserWarning):
     on disk.
     """
 
-   
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
 

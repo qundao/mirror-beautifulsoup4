@@ -72,6 +72,14 @@ _deprecated_names = dict(
 #: :meta private:
 _deprecated_whitespace_re: Pattern[str] = re.compile(r"\s+")
 
+class AttributeResemblesVariableWarning(SyntaxWarning):
+    """The warning issued when Beautiful Soup suspects a provided
+    attribute name is actually the misspelled name of a Beautiful Soup
+    variable. Generally speaking, this is only used in cases like
+    "_class" where it's very unlikely the user would be referencing an
+    XML attribute with that name.
+    """
+
 def __getattr__(name:str) -> Any:
     if name in _deprecated_names:
         message = _deprecated_names[name]
@@ -926,6 +934,12 @@ class PageElement(object):
             warnings.warn(
                 "The 'text' argument to find()-type methods is deprecated. Use 'string' instead.",
                 DeprecationWarning, stacklevel=_stacklevel
+            )
+
+        if '_class' in kwargs:
+            warnings.warn(
+                '"_class" is an unusual attribute name and might be a misspelling. Did you mean "class_?"',
+                AttributeResemblesVariableWarning, stacklevel=_stacklevel
             )
 
         from bs4.filter import ElementFilter
