@@ -125,11 +125,8 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
                 stacklevel=4
             )
 
-        # self.underlying_parser is probably None now, but it'll be set
-        # when self.create_treebuilder is called by html5lib.
-        #
-        # TODO-TYPING: typeshed stubs are incorrect about the return
-        # value of HTMLParser.__init__; it is HTMLParser, not None.
+        # self.underlying_builder is probably None now, but it'll be set
+        # when html5lib calls self.create_treebuilder().
         parser = html5lib.HTMLParser(tree=self.create_treebuilder)
         assert self.underlying_builder is not None
         self.underlying_builder.parser = parser
@@ -156,10 +153,6 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             # charEncoding to UTF-8 if it gets Unicode input.
             doc.original_encoding = None
         else:
-            # TODO-TYPING HTMLParser.tokenizer is set by
-            # HTMLParser._parse(), so it's definitely set by this
-            # point, but it's not defined as an instance variable, so
-            # this line gives a warning.
             original_encoding = parser.tokenizer.stream.charEncoding[0]
             # The encoding is an html5lib Encoding object. We want to
             # use a string for compatibility with other tree builders.
@@ -189,6 +182,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
 
     soup:'BeautifulSoup' #: :meta private:
+    parser: Optional[html5lib.HTMLParser] #: :meta private:
 
     def __init__(self, namespaceHTMLElements:bool,
                  soup:Optional['BeautifulSoup']=None,
@@ -208,8 +202,8 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         # constructor?
         super(TreeBuilderForHtml5lib, self).__init__(namespaceHTMLElements)
 
-        # This will be set later to an html5lib.html5parser.HTMLParser
-        # object, which we can use to track the current line number.
+        # This will be set later to a real html5lib HTMLParser object,
+        # which we can use to track the current line number.
         self.parser = None
         self.store_line_numbers = store_line_numbers
         
@@ -228,11 +222,12 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
     def elementClass(self, name:str, namespace:str) -> 'Element':
         sourceline:Optional[int] = None
         sourcepos:Optional[int] = None
-        if self.parser and self.store_line_numbers:
+        if self.parser is not None and self.store_line_numbers:
             # This represents the point immediately after the end of the
             # tag. We don't know when the tag started, but we do know
             # where it ended -- the character just before this one.
             sourceline, sourcepos = self.parser.tokenizer.stream.position()
+            assert sourcepos is not None
             sourcepos = sourcepos-1
         tag = self.soup.new_tag(
             name, namespace, sourceline=sourceline, sourcepos=sourcepos
@@ -261,13 +256,15 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
     def appendChild(self, node:'Element') -> None:
         # TODO: This code is not covered by the BS4 tests, and
         # apparently not triggered by the html5lib test suite either.
+        # But it doesn't seem test-specific and there are calls to it
+        # (or a method with the same name) all over html5lib, so I'm
+        # leaving the implementation in place rather than replacing it
+        # with NotImplementedError()
         self.soup.append(node.element)
 
     def getDocument(self) -> 'BeautifulSoup':
         return self.soup
 
-    # TODO-TYPING: typeshed stubs are incorrect about this;
-    # testSerializer returns a str, not None.
     def testSerializer(self, element:'Element') -> str:
         """This is only used by the html5lib unit tests. Since we
         don't currently hook into those tests, the implementation is
