@@ -25,6 +25,9 @@
   a URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
   parser (XMLParsedAsHTMLWarning).
 
+  The text of these warnings has been revamped to explain in more detail
+  what is going on and how to make the warning go away.
+
   If these warnings are interfering with your workflow, or simply
   annoying you, you can filter all of them by filtering
   UnusualUsageWarning, without worrying about losing the warnings

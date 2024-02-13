@@ -91,11 +91,8 @@ from bs4._typing import (
     _RawMarkup,
 )
 
-from bs4._warnings import (
-    GuessedAtParserWarning,
-    MarkupResemblesLocatorWarning,
-    XMLParsedAsHTMLWarning,
-)
+# Import all warnings so they're easy to suppress if desired.
+from bs4._warnings import *
 
 
 class BeautifulSoup(Tag):
@@ -142,9 +139,6 @@ class BeautifulSoup(Tag):
     #: `BeautifulSoup.endData` to detect data chunks that seem 'empty'.
     ASCII_SPACES: str = '\x20\x0a\x09\x0c\x0d'
 
-    #: :meta private:
-    NO_PARSER_SPECIFIED_WARNING: str = "No parser was explicitly specified, so I'm using the best available %(markup_type)s parser for this system (\"%(parser)s\"). This usually isn't a problem, but if you run this code on another system, or in a different virtual environment, it may use a different parser and behave differently.\n\nThe code that caused this warning is on line %(line_number)s of the file %(filename)s. To get rid of this warning, pass the additional argument 'features=\"%(parser)s\"' to the BeautifulSoup constructor.\n"
-
     # FUTURE PYTHON:
     element_classes:Dict[Type[PageElement], Type[PageElement]] #: :meta private:
     builder:TreeBuilder #: :meta private:
@@ -176,7 +170,9 @@ class BeautifulSoup(Tag):
     #: in the original markup. These mark character sequences that
     #: could not be represented in Unicode.
     contains_replacement_characters: bool
-    
+
+    NO_PARSER_SPECIFIED_WARNING = GuessedAtParserWarning.MESSAGE
+
     def __init__(
             self,
             markup:_IncomingMarkup="",
@@ -375,7 +371,7 @@ class BeautifulSoup(Tag):
                         markup_type=markup_type
                     )
                     warnings.warn(
-                        self.NO_PARSER_SPECIFIED_WARNING % values,
+                        GuessedAtParserWarning.MESSAGE % values,
                         GuessedAtParserWarning, stacklevel=2
                     )
         else:
@@ -523,9 +519,7 @@ class BeautifulSoup(Tag):
         if not problem:
             return False
         warnings.warn(
-            'The input looks more like a URL than markup. You may want to use'
-            ' an HTTP client like requests to get the document behind'
-            ' the URL, and feed that document to Beautiful Soup.',
+            MarkupResemblesLocatorWarning.URL_MESSAGE % dict(markup=markup),
             MarkupResemblesLocatorWarning,
             stacklevel=3
         )
@@ -592,9 +586,7 @@ class BeautifulSoup(Tag):
         # Step 3: If it survived all of those checks, it's similar
         # enough to a file to justify issuing a warning.
         warnings.warn(
-            'The input looks more like a filename than markup. You may'
-            ' want to open this file and pass the filehandle into'
-            ' Beautiful Soup.',
+            MarkupResemblesLocatorWarning.FILENAME_MESSAGE % dict(markup=markup),
             MarkupResemblesLocatorWarning, stacklevel=3
         )
         return True

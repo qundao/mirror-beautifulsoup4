@@ -934,7 +934,10 @@ class PageElement(object):
 
         if '_class' in kwargs:
             warnings.warn(
-                '"_class" is an unusual attribute name and might be a misspelling. Did you mean "class_?"',
+                AttributeResemblesVariableWarning.MESSAGE % dict(
+                    original="_class",
+                    autocorrect="class_",
+                ),
                 AttributeResemblesVariableWarning, stacklevel=_stacklevel
             )
 
