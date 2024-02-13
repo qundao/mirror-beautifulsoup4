@@ -543,8 +543,8 @@ class BeautifulSoup(Tag):
         markup_b:bytes
 
         # We're only checking ASCII characters, so rather than write
-        # the same tests twice, convert Unicode to bytestrings and
-        # operate on the bytestrings.
+        # the same tests twice, convert Unicode to a bytestring and
+        # operate on the bytestring.
         if isinstance(markup, str):
             markup_b = markup.encode("utf8")
         else:
@@ -572,20 +572,20 @@ class BeautifulSoup(Tag):
         if b'  ' in markup_b:
             return False
 
-        # Characters that have special meaning to Unix shells. (< was
-        # excluded before this method was called.)
-        #
-        # Many of these are also reserved characters that cannot
-        # appear in Windows filenames.
-        if any(x in markup_b for x in b'?*#&;>$|'):
-            return False
-
         # A colon in any position other than position 1 (e.g. after a
         # Windows drive letter).
         if markup_b.startswith(b':'):
             return False
         colon_i = markup_b.rfind(b':')
         if colon_i not in (-1, 1):
+            return False
+
+        # Characters that have special meaning to Unix shells. (< was
+        # excluded before this method was called.)
+        #
+        # Many of these are also reserved characters that cannot
+        # appear in Windows filenames.
+        if any(x in markup_b for x in b'?*#&;>$|'):
             return False
 
         # Step 3: If it survived all of those checks, it's similar
