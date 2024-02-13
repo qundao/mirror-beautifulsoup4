@@ -15,10 +15,10 @@ class Formatter(EntitySubstitution):
     HTML4, HTML5, and XML. Others are configurable by the user.
 
     Formatters are passed in as the `formatter` argument to methods
-    like `PageElement.encode`. Most people won't need to think about
-    formatters, and most people who need to think about them can pass
-    in one of these predefined strings as `formatter` rather than
-    making a new Formatter object:
+    like `bs4.element.Tag.encode`. Most people won't need to
+    think about formatters, and most people who need to think about
+    them can pass in one of these predefined strings as `formatter`
+    rather than making a new Formatter object:
 
     For HTML documents:
      * 'html' - HTML entity substitution for generic HTML documents. (default)
@@ -35,6 +35,7 @@ class Formatter(EntitySubstitution):
                    valid XML. (default)
      * None - Do not perform any substitution. This will be faster
               but may result in invalid markup.
+
     """
 
     #: Constant name denoting HTML markup
@@ -154,14 +155,14 @@ class Formatter(EntitySubstitution):
         """
         return self.substitute(value)
 
-    def attributes(self, tag:Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
+    def attributes(self, tag:bs4.element.Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
         """Reorder a tag's attributes however you want.
         
         By default, attributes are sorted alphabetically. This makes
         behavior consistent between Python 2 and Python 3, and preserves
         backwards compatibility with older versions of Beautiful Soup.
 
-        If `empty_boolean_attributes` is True, then attributes whose
+        If `empty_attributes_are_booleans` is True, then attributes whose
         values are set to the empty string will be treated as boolean
         attributes.
         """

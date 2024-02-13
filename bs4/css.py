@@ -1,14 +1,14 @@
 """Integration code for CSS selectors using `Soup Sieve <https://facelessuser.github.io/soupsieve/>`_ (pypi: ``soupsieve``).
 
-Acquire a `CSS` object through the `bs4.element.Tag.css` attribute of
+Acquire a `CSS` object through the `element.Tag.css` attribute of
 the starting point of your CSS selector, or (if you want to run a
 selector against the entire document) of the `BeautifulSoup` object
 itself.
 
 The main advantage of doing this instead of using ``soupsieve``
-functions is that you don't need to keep passing the `bs4.element.Tag` to be
+functions is that you don't need to keep passing the `element.Tag` to be
 selected against, since the `CSS` object is permanently scoped to that
-`bs4.element.Tag`.
+`element.Tag`.
 
 """
 
@@ -153,7 +153,7 @@ class CSS(object):
 
     def select(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
-               limit:int=0, flags:int=0, **kwargs:Any) -> ResultSet[Tag]:
+               limit:int=0, flags:int=0, **kwargs:Any) -> ResultSet[element.Tag]:
         """Perform a CSS selection operation on the current `element.Tag`.
 
         This uses the Soup Sieve library. For more information, see
@@ -275,7 +275,7 @@ class CSS(object):
 
     def filter(self, select:str,
                namespaces:Optional[_NamespaceMapping]=None,
-               flags:int=0, **kwargs:Any) -> ResultSet[Tag]:
+               flags:int=0, **kwargs:Any) -> ResultSet[element.Tag]:
         """Filter this `element.Tag`'s direct children based on the given CSS selector.
 
         This uses the Soup Sieve library. It works the same way as

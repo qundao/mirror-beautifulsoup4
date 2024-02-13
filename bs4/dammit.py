@@ -729,7 +729,7 @@ class UnicodeDammit:
     markup:bytes
 
     #: The Unicode version of the markup, following conversion. This
-    #: is set to `None` if there was simply no way to convert the
+    #: is set to None if there was simply no way to convert the
     #: bytestring to Unicode (as with binary data).
     unicode_markup:Optional[str]
 

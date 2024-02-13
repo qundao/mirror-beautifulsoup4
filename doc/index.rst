@@ -1420,7 +1420,7 @@ expression, or whatever) you want to search for::
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
 To search for tags that match two or more CSS classes at once, use the
-`select()` CSS selector method :ref:`described here <css-selectors>`::
+`bs4.element.Tag.select()` CSS selector method :ref:`described here <css-selectors>`::
 
  css_soup.select("p.strikeout.body")
  # [<p class="body strikeout"></p>]

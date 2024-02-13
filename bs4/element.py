@@ -333,9 +333,11 @@ class PageElement(object):
 
         :param formatter: Can be a `Formatter` object (used as-is), a
             function (used as the entity substitution hook for an
-            `XMLFormatter` or `HTMLFormatter`), or a string (used to look
-            up an `XMLFormatter` or `HTMLFormatter` in the appropriate
-            registry.
+            `bs4.formatter.XMLFormatter` or
+            `bs4.formatter.HTMLFormatter`), or a string (used to look
+            up an `bs4.formatter.XMLFormatter` or
+            `bs4.formatter.HTMLFormatter` in the appropriate registry.
+
         """
         if isinstance(formatter_name, Formatter):
             return formatter_name
@@ -432,8 +434,8 @@ class PageElement(object):
     text = property(get_text)
 
     def replace_with(self, *args:PageElement) -> PageElement:
-        """Replace this `PageElement` with one or more other `PageElements`,
-        keeping the rest of the tree the same.
+        """Replace this `PageElement` with one or more other `PageElement`,
+        objects, keeping the rest of the tree the same.
 
         :return: This `PageElement`, no longer part of the tree.
         """
@@ -1389,15 +1391,17 @@ class Tag(PageElement):
     :param preserve_whitespace_tags: Names of tags whose contents
         should have their whitespace preserved if they are encountered inside
         this tag.
-    :param interesting_string_types: When iterating over this
-        tag's string contesnts in methods like `Tag.strings` or `Tag.get_text`,
-        these are the types of strings that are interesting enough
-        to be considered. By default, `NavigableString` (normal strings)
-        and `CData` (CDATA sections) are the only interesting string subtypes.
+    :param interesting_string_types: When iterating over this tag's
+        string contents in methods like `Tag.strings` or
+        `PageElement.get_text`, these are the types of strings that are
+        interesting enough to be considered. By default,
+        `NavigableString` (normal strings) and `CData` (CDATA
+        sections) are the only interesting string subtypes.
     :param namespaces: A dictionary mapping currently active
         namespace prefixes to URIs, as of the point in the parsing process when
         this tag was encountered. This can be used later to
         construct CSS selectors.
+
     """
     def __init__(self,
                  parser:Optional[BeautifulSoup]=None,

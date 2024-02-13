@@ -568,7 +568,7 @@ class BeautifulSoup(Tag):
         # Many of these are also reserved characters that cannot
         # appear in Windows filenames.
         for byte in markup_b:
-            if byte in b'?*#;>$|':
+            if byte in b'?*#&;>$|':
                 return False
 
         # Two consecutive forward slashes (as seen in a URL) or two
@@ -703,11 +703,10 @@ class BeautifulSoup(Tag):
         object.
 
         :param s: The string content of the `NavigableString`
-
         :param subclass: The subclass of `NavigableString`, if any, to
-        use. If a document is being processed, an appropriate subclass
-        for the current location in the document will be determined
-        automatically.
+               use. If a document is being processed, an appropriate
+               subclass for the current location in the document will
+               be determined automatically.
         """
         container = self.string_container(subclass)
         return container(s)
