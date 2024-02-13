@@ -562,6 +562,15 @@ class BeautifulSoup(Tag):
         # Step 2: it _might_ be a file, but there are a few things
         # we can look for that aren't very common in filenames.
 
+        # Characters that have special meaning to Unix shells. (< was
+        # excluded before this method was called.)
+        #
+        # Many of these are also reserved characters that cannot
+        # appear in Windows filenames.
+        for byte in markup_b:
+            if byte in b'?*#;>$|':
+                return False
+
         # Two consecutive forward slashes (as seen in a URL) or two
         # consecutive spaces (as seen in fixed-width data).
         #
@@ -578,14 +587,6 @@ class BeautifulSoup(Tag):
             return False
         colon_i = markup_b.rfind(b':')
         if colon_i not in (-1, 1):
-            return False
-
-        # Characters that have special meaning to Unix shells. (< was
-        # excluded before this method was called.)
-        #
-        # Many of these are also reserved characters that cannot
-        # appear in Windows filenames.
-        if any(x in markup_b for x in b'?*#&;>$|'):
             return False
 
         # Step 3: If it survived all of those checks, it's similar
