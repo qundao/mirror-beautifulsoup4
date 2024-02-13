@@ -326,28 +326,61 @@ class TestWarnings(SoupTest):
             self.soup("<a>", no_such_argument=True)
 
     @pytest.mark.parametrize(
-        "extension",
-        ['markup.html', 'markup.htm', 'markup.HTML', 'markup.txt',
-         'markup.xhtml', 'markup.xml', "/home/user/file", "c:\\user\file"]
+        "markup",
+        ['markup.html',
+         'markup.htm',
+         'markup.HTML',
+         'markup.txt',
+         'markup.xhtml',
+         'markup.xml',
+         "/home/user/file",
+         r'c:\user\file'
+         r'\\server\share\path\file',
+         ]
     )
-    def test_resembles_filename_warning(self, extension):
+    def test_resembles_filename_warning(self, markup):
         # A warning is issued if the "markup" looks like the name of
         # an HTML or text file, or a full path to a file on disk.
         with warnings.catch_warnings(record=True) as w:
-            soup = BeautifulSoup("markup" + extension, "html.parser")
+            soup = BeautifulSoup(markup, "html.parser")
             warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
             assert "looks more like a filename" in str(warning.message)
 
     @pytest.mark.parametrize(
-        "extension",
-        ['markuphtml', 'markup.com', '', 'markup.js']
+        "markup",
+        ['filename',
+         'markuphtml',
+         'markup.com',
+         '',
+         'markup.js',
+         "two\nlines.html",
+
+         # Excluded because of two consecutive slashes _and_ the
+         # colon.
+         "log message containing a url http://www.url.com/ right there",
+
+         "two  consecutive  spaces.html",
+         "two//consecutive//slashes.html",
+         "looks/like/a/filename/but/oops/theres/a#comment.html"
+         "contains?.html",
+         "contains*.html",
+         "contains#.html",
+         "contains&.html",
+         "contains;.html",
+         "contains>.html",
+         "contains<.html",
+         "contains$.html",
+         "contains|.html",
+         "contains:.html",
+         ":-at-the-front.html",
+         ]
     )
-    def test_resembles_filename_no_warning(self, extension):
+    def test_resembles_filename_no_warning(self, markup):
         # The 'looks more like a filename' warning is not issued if
         # the markup looks like a bare string, a domain name, or a
         # file that's not an HTML file.
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("markup" + extension)
+            soup = self.soup(markup)
         assert [] == w
 
     def test_url_warning_with_bytes_url(self):

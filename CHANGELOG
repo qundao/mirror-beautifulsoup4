@@ -22,6 +22,10 @@
 * Emit a SyntaxWarning if the user tries to search for an attribute
   called _class; they probably mean "class_". [bug=2025089]
 
+* The MarkupResemblesLocatorWarning issued when the markup resembles a
+  filename is now issued less often, due to improvements in detecting
+  markup that's very unlikely to be a filename. [bug=2052988]
+
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.

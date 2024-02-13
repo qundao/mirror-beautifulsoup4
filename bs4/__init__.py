@@ -397,8 +397,8 @@ class BeautifulSoup(Tag):
         if hasattr(markup, 'read'):        # It's a file-type object.
             markup = markup.read()
         elif len(markup) <= 256 and (
-                (isinstance(markup, bytes) and not b'<' in markup)
-                or (isinstance(markup, str) and not '<' in markup)
+                (isinstance(markup, bytes) and not b'<' in markup and not b'\n' in markup)
+                or (isinstance(markup, str) and not '<' in markup and not '\n' in markup)
         ):
             # Issue warnings for a couple beginner problems
             # involving passing non-markup to Beautiful Soup.
@@ -546,37 +546,68 @@ class BeautifulSoup(Tag):
         :return: Whether or not the markup resembled a filename
             closely enough to justify issuing a warning.
         """
-        path_characters_b = b'/\\'
-        path_characters_s = '/\\'
-        extensions_b = [b'.html', b'.htm', b'.xml', b'.xhtml', b'.txt']
-        extensions_s = ['.html', '.htm', '.xml', '.xhtml', '.txt']
+        markup_b:bytes
 
-        filelike = False
-        if isinstance(markup, bytes):
-            if any(x in markup for x in path_characters_b):
-                filelike = True
-            else:
-                lower_b = markup.lower()
-                if any(lower_b.endswith(ext) for ext in extensions_b):
-                    filelike = True
+        # We're only checking ASCII characters, so rather than write
+        # the same tests twice, convert Unicode to bytestrings and
+        # operate on the bytestrings.
+        if isinstance(markup, str):
+            markup_b = markup.encode("utf8")
         else:
-            if any(x in markup for x in path_characters_s):
-                filelike = True
-            else:
-                lower_s = markup.lower()
-                if any(lower_s.endswith(ext) for ext in extensions_s):
-                    filelike = True
+            markup_b = markup
 
-        if filelike:
-            warnings.warn(
-                'The input looks more like a filename than markup. You may'
-                ' want to open this file and pass the filehandle into'
-                ' Beautiful Soup.',
-                MarkupResemblesLocatorWarning, stacklevel=3
-            )
-            return True
-        return False
-    
+        # Step 1: does it contain Unix or Windows path characters, or
+        # end with a common textual file extension?
+        filelike = False
+        if any(x in markup_b for x in rb'/\\'):
+            filelike = True
+        else:
+            lower = markup_b.lower()
+            extensions = [b'.html', b'.htm', b'.xml', b'.xhtml', b'.txt']
+            if any(lower.endswith(ext) for ext in extensions):
+                filelike = True
+        if not filelike:
+            return False
+
+        # Step 2: it _might_ be a file, but there are a few things
+        # we can look for that aren't very common in filenames.
+
+        # Two consecutive forward slashes (as seen in a URL) or two
+        # consecutive spaces (as seen in fixed-width data).
+        #
+        # (Paths to Windows network shares contain consecutive
+        #  backslashes, so checking that doesn't seem as helpful.)
+        if b'//' in markup_b:
+            return False
+        if b'  ' in markup_b:
+            return False
+
+        # Characters that have special meaning to Unix shells. (< was
+        # excluded before this method was called.)
+        #
+        # Many of these are also reserved characters that cannot
+        # appear in Windows filenames.
+        if any(x in markup_b for x in b'?*#&;>$|'):
+            return False
+
+        # A colon in any position other than position 1 (e.g. after a
+        # Windows drive letter).
+        if markup_b.startswith(b':'):
+            return False
+        colon_i = markup_b.rfind(b':')
+        if colon_i not in (-1, 1):
+            return False
+
+        # Step 3: If it survived all of those checks, it's similar
+        # enough to a file to justify issuing a warning.
+        warnings.warn(
+            'The input looks more like a filename than markup. You may'
+            ' want to open this file and pass the filehandle into'
+            ' Beautiful Soup.',
+            MarkupResemblesLocatorWarning, stacklevel=3
+        )
+        return True
+
     def _feed(self) -> None:
         """Internal method that parses previously set markup, creating a large
         number of Tag and NavigableString objects.
