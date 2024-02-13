@@ -19,7 +19,19 @@
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
 
-* Emit a SyntaxWarning if the user tries to search for an attribute
+* Defined a new warning class, UnusualUsageWarning, which is a superclass
+  for all of the warnings issued when Beautiful Soup notices something
+  unusual but not guaranteed to be wrong, like markup that looks like
+  URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
+  parser (XMLParsedAsHTMLWarning).
+
+  If these warnings are interfering with your workflow, or simply
+  annoying you, you can filter all of them by filtering
+  UnusualUsageWarning, without worrying about losing the warnings
+  Beautiful Soup issues when there *definitely* is a problem you
+  need to correct.
+
+* Emit an UnusualUsageWarning if the user tries to search for an attribute
   called _class; they probably mean "class_". [bug=2025089]
 
 * The MarkupResemblesLocatorWarning issued when the markup resembles a

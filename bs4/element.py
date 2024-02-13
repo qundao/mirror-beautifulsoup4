@@ -17,6 +17,7 @@ from bs4.formatter import (
     HTMLFormatter,
     XMLFormatter,
 )
+from bs4._warnings import AttributeResemblesVariableWarning
 
 from typing import (
     Any,
@@ -72,13 +73,6 @@ _deprecated_names = dict(
 #: :meta private:
 _deprecated_whitespace_re: Pattern[str] = re.compile(r"\s+")
 
-class AttributeResemblesVariableWarning(SyntaxWarning):
-    """The warning issued when Beautiful Soup suspects a provided
-    attribute name is actually the misspelled name of a Beautiful Soup
-    variable. Generally speaking, this is only used in cases like
-    "_class" where it's very unlikely the user would be referencing an
-    XML attribute with that name.
-    """
 
 def __getattr__(name:str) -> Any:
     if name in _deprecated_names:

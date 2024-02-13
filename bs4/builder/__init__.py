@@ -37,6 +37,9 @@ from bs4._typing import (
     _AttributeValues,
     _RawAttributeValue,
 )
+
+from bs4._warnings import XMLParsedAsHTMLWarning
+
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import (
@@ -64,12 +67,6 @@ STRICT = 'strict'
 XML = 'xml'
 HTML = 'html'
 HTML_5 = 'html5'
-
-class XMLParsedAsHTMLWarning(UserWarning):
-    """The warning issued when an HTML parser is used to parse
-    XML that is not XHTML.
-    """
-    MESSAGE:str = """It looks like you're parsing an XML document using an HTML parser. If this really is an HTML document (maybe it's XHTML?), you can ignore or filter this warning. If it's XML, you should know that using an XML parser will be more reliable. To parse this document as XML, make sure you have the lxml package installed, and pass the keyword argument `features="xml"` into the BeautifulSoup constructor.""" #: :meta private:
 
 
 class TreeBuilderRegistry(object):

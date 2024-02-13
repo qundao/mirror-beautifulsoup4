@@ -2,11 +2,12 @@
 
 This interface is itself unstable and may change without warning. Do
 not use these functions yourself, even as a joke. The underscores are
-there for a reson.
+there for a reason. No support will be given.
 
-In particular, most of this will go away once Beautiful Soup drops
-support for Python 3.11, since Python 3.12 defines a
-`@typing.deprecated() decorator. <https://peps.python.org/pep-0702/>`_
+In particular, most of this will go away without warning once
+Beautiful Soup drops support for Python 3.11, since Python 3.12
+defines a `@typing.deprecated()
+decorator. <https://peps.python.org/pep-0702/>`_
 """
 
 import functools

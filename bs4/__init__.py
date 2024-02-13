@@ -38,7 +38,6 @@ from .builder import (
     builder_registry,
     ParserRejectedMarkup,
     TreeBuilder,
-    XMLParsedAsHTMLWarning,
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
 from .dammit import UnicodeDammit
@@ -92,17 +91,12 @@ from bs4._typing import (
     _RawMarkup,
 )
 
-# Define some custom warnings.
-class GuessedAtParserWarning(UserWarning):
-    """The warning issued when BeautifulSoup has to guess what parser to
-    use -- probably because no parser was specified in the constructor.
-    """
+from bs4._warnings import (
+    GuessedAtParserWarning,
+    MarkupResemblesLocatorWarning,
+    XMLParsedAsHTMLWarning,
+)
 
-class MarkupResemblesLocatorWarning(UserWarning):
-    """The warning issued when BeautifulSoup is given 'markup' that
-    actually looks like a resource locator -- a URL or a path to a file
-    on disk.
-    """
 
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
