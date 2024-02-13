@@ -550,16 +550,12 @@ class BeautifulSoup(Tag):
         else:
             markup_b = markup
 
-        # Step 1: does it contain Unix or Windows path characters, or
-        # end with a common textual file extension?
+        # Step 1: does it end with a common textual file extension?
         filelike = False
-        if any(x in markup_b for x in rb'/\\'):
+        lower = markup_b.lower()
+        extensions = [b'.html', b'.htm', b'.xml', b'.xhtml', b'.txt']
+        if any(lower.endswith(ext) for ext in extensions):
             filelike = True
-        else:
-            lower = markup_b.lower()
-            extensions = [b'.html', b'.htm', b'.xml', b'.xhtml', b'.txt']
-            if any(lower.endswith(ext) for ext in extensions):
-                filelike = True
         if not filelike:
             return False
 

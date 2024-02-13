@@ -14,7 +14,6 @@ from bs4 import (
     BeautifulSoup,
     BeautifulStoneSoup,
     GuessedAtParserWarning,
-    MarkupResemblesLocatorWarning,
     dammit,
 )
 from bs4.builder import (
@@ -29,6 +28,10 @@ from bs4.element import (
     NavigableString,
 )
 from bs4.filter import SoupStrainer
+from bs4._warnings import (
+    MarkupResemblesLocatorWarning,
+)
+
 
 from . import (
     default_builder,
@@ -333,9 +336,9 @@ class TestWarnings(SoupTest):
          'markup.txt',
          'markup.xhtml',
          'markup.xml',
-         "/home/user/file",
-         r'c:\user\file'
-         r'\\server\share\path\file',
+         "/home/user/file.txt",
+         r'c:\user\file.html'
+         r'\\server\share\path\file.XhTml',
          ]
     )
     def test_resembles_filename_warning(self, markup):
@@ -352,16 +355,27 @@ class TestWarnings(SoupTest):
          'markuphtml',
          'markup.com',
          '',
+
+         # Excluded due to an irrelevant file extension.
          'markup.js',
-         "two\nlines.html",
+         'markup.jpg',
+         'markup.markup',
+
+         # Excluded due to the lack of any file extension.
+         "/home/user/file",
+         r'c:\user\file.html'
+         r'\\server\share\path\file',
 
          # Excluded because of two consecutive slashes _and_ the
          # colon.
-         "log message containing a url http://www.url.com/ right there",
+         "log message containing a url http://www.url.com/ right there.html",
 
+         # Excluded for containing various characters or combinations
+         # not usually found in filenames.
          "two  consecutive  spaces.html",
          "two//consecutive//slashes.html",
          "looks/like/a/filename/but/oops/theres/a#comment.html"
+         "two\nlines.html",
          "contains?.html",
          "contains*.html",
          "contains#.html",

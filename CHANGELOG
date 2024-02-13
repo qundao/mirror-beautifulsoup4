@@ -22,7 +22,7 @@
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
   unusual but not guaranteed to be wrong, like markup that looks like
-  URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
+  a URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
   parser (XMLParsedAsHTMLWarning).
 
   If these warnings are interfering with your workflow, or simply
