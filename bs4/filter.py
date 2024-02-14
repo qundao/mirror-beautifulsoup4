@@ -45,7 +45,7 @@ class ElementFilter(object):
     user-specified query.
 
     2. whether a given sequence of markup found during initial parsing
-    should be turned into a PageElement, or simply discarded.
+    should be turned into a PageElement at all, or simply discarded.
 
     The base class is the simplest ElementFilter. By default, it
     matches everything and allows all PageElements to be created. You

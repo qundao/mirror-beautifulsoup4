@@ -977,11 +977,20 @@ class PageElement(object):
                 return ResultSet(matcher, result)
         return self.match(generator, matcher, limit)
 
-    def match(self, generator:Iterator[PageElement], matcher:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
+    def filter(self, generator:Iterator[PageElement], filter:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
         """The most generic search method offered by Beautiful Soup.
 
-        You can pass in your own technique for iterating over the tree, and your own
-        technique for matching items.
+        You can pass in your own technique for iterating over the
+        tree, and your own technique for filtering items. Only items
+        that match the filter will be returned.
+
+        :param generator: A way of iterating over `PageElement`
+            objects relative to the current `PageElement`.
+
+        :param filter: A way of determining whether a given `PageElement`
+            matches the criteria you're looking for.
+
+        :param limit: Stop looking after finding this many results.
         """
         results:ResultSet[PageElement] = ResultSet(matcher)
         while True:
