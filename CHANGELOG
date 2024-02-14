@@ -1,5 +1,26 @@
 = 4.13.0 (Unreleased)
 
+# Deprecation notices
+
+* The SAXTreeBuilder class, which was never officially supported or tested.
+
+* The private class method BeautifulSoup._decode_markup(), which has not
+  been used inside Beautiful Soup for many years.
+
+* The first argument to BeautifulSoup.decode has been changed from
+  pretty_print:bool to an indent_level:int, to match the signature of
+  Tag.decode. Using a bool will still work but will give you a
+  DeprecationWarning.
+
+* SoupStrainer.text and SoupStrainer.string are both deprecated,
+  since a single item can't capture all the possibilities of a SoupStrainer
+  designed to match strings.
+
+* SoupStrainer.search_tag(). It was never a documented method, but if you
+  use it, you should start using SoupStrainer.allow_tag_creation() instead.
+
+# Compatibility notices
+
 * This version drops support for Python 3.6. The minimum supported
   major Python version for Beautiful Soup is now Python 3.7.
 
@@ -11,41 +32,10 @@
   feature releases or one major release after the deprecation warning
   is added.
 
-* The new_tag() method now takes a 'string' argument. This allows you to
-  set the string contents of a Tag when creating it. Patch by Chris
-  Papademetrious. [bug=2044599]
-
-* The NavigableString class now has a .string property which returns the
-  string itself. This makes it easier to iterate over a mixed list
-  of Tag and NavigableString objects. [bug=2044794]
-
 * All exceptions were moved to the bs4.exceptions module, and all
   warnings to the bs4._warnings module (named so as not to shadow Python's
   built-in warnings module). All warnings and exceptions are exported from
   the bs4 module, which is probably the safest place to import from.
-
-* Defined a new warning class, UnusualUsageWarning, which is a superclass
-  for all of the warnings issued when Beautiful Soup notices something
-  unusual but not guaranteed to be wrong, like markup that looks like
-  a URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
-  parser (XMLParsedAsHTMLWarning).
-
-  The text of these warnings has been revamped to explain in more
-  detail what is going on, how to check if you've made a mistake,
-  and how to make the warning go away if you haven't.
-
-  If these warnings are interfering with your workflow, or simply
-  annoying you, you can filter all of them by filtering
-  UnusualUsageWarning, without worrying about losing the warnings
-  Beautiful Soup issues when there *definitely* is a problem you
-  need to correct.
-
-* Emit an UnusualUsageWarning if the user tries to search for an attribute
-  called _class; they probably mean "class_". [bug=2025089]
-
-* The MarkupResemblesLocatorWarning issued when the markup resembles a
-  filename is now issued less often, due to improvements in detecting
-  markup that's very unlikely to be a filename. [bug=2052988]
 
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
@@ -95,13 +85,6 @@
   attribute. Previously the value in keyword arguments would override the
   value in ``attrs``.
 
-* When using one of the find() methods or creating a SoupStrainer, you can
-  pass a list of any accepted object (strings, regular expressions, etc.) for
-  any of the objects. Previously you could only pass in a list of strings.
-
-* A SoupStrainer can now filter tag creation based on a tag's
-  namespaced name. Previously only the unqualified name could be used.
-
 * Some of the arguments in the methods of LXMLTreeBuilderForXML
   have been renamed for consistency with the names lxml uses for those
   arguments in the superclass. This won't affect you unless you were
@@ -114,22 +97,8 @@
   HTMLTreeBuilder.DEFAULT_BLOCK_ELEMENTS, to avoid confusing them with
   instance variables.
 
-* Issue a warning if a document is parsed using a SoupStrainer that's just
-  going to filter everything. In these cases, filtering everything is the
-  most consistent thing to do, but there was no indication that was
-  happening.
-
-* UnicodeDammit.markup is now always a bytestring representing the
-  *original* markup (sans BOM), and UnicodeDammit.unicode_markup is
-  always the same markup, converted to Unicode. Previously,
-  UnicodeDammit.markup was treated inconsistently and would often end
-  up containing Unicode. UnicodeDammit.markup was not a documented
-  attribute, but if you were using it, you probably want to switch to using
-  .unicode_markup instead.
-
-* Corrected the markup that's output in the unlikely event that you
-  encode a document to a Python internal encoding (like "palmos")
-  that's not recognized by the HTML or XML standard.
+* The unused constant LXMLTreeBuilderForXML.DEFAULT_PARSER_CLASS
+  has been removed.
 
 * The arguments to LXMLTreeBuilderForXML.prepare_markup have been
   changed to match the arguments to the superclass,
@@ -138,30 +107,72 @@
   this method yourself, I recommend switching to using keyword
   arguments instead.
 
+# New features
+
+* The new_tag() method now takes a 'string' argument. This allows you to
+  set the string contents of a Tag when creating it. Patch by Chris
+  Papademetrious. [bug=2044599]
+
+* The NavigableString class now has a .string property which returns the
+  string itself. This makes it easier to iterate over a mixed list
+  of Tag and NavigableString objects. [bug=2044794]
+
+* Defined a new warning class, UnusualUsageWarning, which is a superclass
+  for all of the warnings issued when Beautiful Soup notices something
+  unusual but not guaranteed to be wrong, like markup that looks like
+  a URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
+  parser (XMLParsedAsHTMLWarning).
+
+  The text of these warnings has been revamped to explain in more
+  detail what is going on, how to check if you've made a mistake,
+  and how to make the warning go away if you haven't.
+
+  If these warnings are interfering with your workflow, or simply
+  annoying you, you can filter all of them by filtering
+  UnusualUsageWarning, without worrying about losing the warnings
+  Beautiful Soup issues when there *definitely* is a problem you
+  need to correct.
+
+# Improvements
+
+* Emit an UnusualUsageWarning if the user tries to search for an attribute
+  called _class; they probably mean "class_". [bug=20250
+
+* The MarkupResemblesLocatorWarning issued when the markup resembles a
+  filename is now issued less often, due to improvements in detecting
+  markup that's very unlikely to be a filename. [bug=2052988]
+
+* Emit a warning if a document is parsed using a SoupStrainer that's set up
+  to filter everything. In these cases, filtering everything is the
+  most consistent thing to do, but there was no indication that was
+  happening, so the behavior may have seemed mysterious.
+
+* When using one of the find() methods or creating a SoupStrainer, you can
+  pass a list of any accepted object (strings, regular expressions, etc.) for
+  any of the objects. Previously you could only pass in a list of strings.
+
+* A SoupStrainer can now filter tag creation based on a tag's
+  namespaced name. Previously only the unqualified name could be used.
+
+* Added the correct stacklevel to another instance of the
+  XMLParsedAsHTMLWarning. [bug=2034451]
+
+# Bug fixes
+
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 
-* The unused constant LXMLTreeBuilderForXML.DEFAULT_PARSER_CLASS
-  has been removed.
+* Corrected the markup that's output in the unlikely event that you
+  encode a document to a Python internal encoding (like "palmos")
+  that's not recognized by the HTML or XML standard.
 
-New deprecations in 4.13.0:
-
-* The SAXTreeBuilder class, which was never officially supported or tested.
-
-* The private class method BeautifulSoup._decode_markup(), which has not
-  been used inside Beautiful Soup for many years.
-
-* The first argument to BeautifulSoup.decode has been changed from a bool
-  `pretty_print` to an int `indent_level`, to match the signature of Tag.decode.
-  Using a bool will still work but will give you a DeprecationWarning.
-
-* SoupStrainer.text and SoupStrainer.string are both deprecated
-  since a single item can't capture all the possibilities of a SoupStrainer
-  designed to match strings.
-
-* SoupStrainer.search_tag() is deprecated. It was never a
-  documented method, but if you use it, you should start using
-  SoupStrainer.allow_tag_creation() instead.
+* UnicodeDammit.markup is now always a bytestring representing the
+  *original* markup (sans BOM), and UnicodeDammit.unicode_markup is
+  always the Unicode equivalent of that string. Previously,
+  UnicodeDammit.markup was treated inconsistently and would often end
+  up containing Unicode. UnicodeDammit.markup was not a documented
+  attribute, but if you were using it, you probably want to switch to using
+  .unicode_markup instead.
 
 = 4.12.3 (20240117)
 
