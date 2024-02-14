@@ -1342,4 +1342,4 @@ class TestWarnings(SoupTest):
             assert warning.filename == __file__
             assert isinstance(warning.message, AttributeResemblesVariableWarning)
             msg = str(warning.message)
-            assert msg == '"_class" is an unusual attribute name and might be a misspelling. Did you mean "class_?"'
+            assert "'_class' is an unusual attribute name and is a common misspelling for 'class_'" in msg

@@ -29,7 +29,7 @@ class MarkupResemblesLocatorWarning(UnusualUsageWarning):
     #: :meta private:
     GENERIC_MESSAGE:str = '''
 
-However, if you want to parse %(markup)r as a short string, or if it's a piece of data you got from somewhere else, then nothing has gone wrong: you are using Beautiful Soup correctly, and this warning is spurious and can be filtered. To make this warning go away, run this code before calling the BeautifulSoup constructor:
+However, if you want to parse some data that happens to look like a %(what)s, then nothing has gone wrong: you are using Beautiful Soup correctly, and this warning is spurious and can be filtered. To make this warning go away, run this code before calling the BeautifulSoup constructor:
 
     from bs4 import MarkupResemblesLocatorWarning
     import warnings
@@ -37,17 +37,17 @@ However, if you want to parse %(markup)r as a short string, or if it's a piece o
     warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
     '''
 
-    URL_MESSAGE:str = '''The input %(markup)r looks more like a URL than HTML or XML.
+    URL_MESSAGE:str = '''The input passed in on this line looks more like a URL than HTML or XML.
 
-If you meant to use Beautiful Soup to parse the web page found at %(markup)s, then something has gone wrong. You should use an Python package like 'requests' to fetch the content behind the URL. Once you have the content as a string, you can feed that string into the BeautifulSoup constructor.''' + GENERIC_MESSAGE
+If you meant to use Beautiful Soup to parse the web page found at a certain URL, then something has gone wrong. You should use an Python package like 'requests' to fetch the content behind the URL. Once you have the content as a string, you can feed that string into Beautiful Soup.''' + GENERIC_MESSAGE
 
-    FILENAME_MESSAGE:str = '''The input %(markup)r looks more like a filename than HTML or XML.
+    FILENAME_MESSAGE:str = '''The input passed in on this line looks more like a filename than HTML or XML.
 
-If you meant to use Beautiful Soup to parse the contents of the file %(markup)s, then something has gone wrong. You should open the file first, using code like this:
+If you meant to use Beautiful Soup to parse the contents of a file on disk, then something has gone wrong. You should open the file first, using code like this:
 
-    filehandle = open(%(markup)r)
+    filehandle = open(your filename)
 
-You can then pass the open filehandle into the BeautifulSoup constructor instead of the string %(markup)r.''' + GENERIC_MESSAGE
+You can then feed the open filehandle into Beautiful Soup instead of using the filename.''' + GENERIC_MESSAGE
 
 
 class AttributeResemblesVariableWarning(UnusualUsageWarning, SyntaxWarning):

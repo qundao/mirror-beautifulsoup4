@@ -19,7 +19,6 @@ from bs4 import (
 from bs4.builder import (
     builder_registry,
     TreeBuilder,
-    ParserRejectedMarkup,
 )
 from bs4.element import (
     Comment,
@@ -28,6 +27,9 @@ from bs4.element import (
     NavigableString,
 )
 from bs4.filter import SoupStrainer
+from bs4.exceptions import (
+    ParserRejectedMarkup,
+)
 from bs4._warnings import (
     MarkupResemblesLocatorWarning,
 )

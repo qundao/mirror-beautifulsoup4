@@ -19,14 +19,20 @@
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
 
+* All exceptions were moved to the bs4.exceptions module, and all
+  warnings to the bs4._warnings module (named so as not to shadow Python's
+  built-in warnings module). All warnings and exceptions are exported from
+  the bs4 module, which is probably the safest place to import from.
+
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
   unusual but not guaranteed to be wrong, like markup that looks like
   a URL (MarkupResemblesLocatorWarning) or XML being run through an HTML
   parser (XMLParsedAsHTMLWarning).
 
-  The text of these warnings has been revamped to explain in more detail
-  what is going on and how to make the warning go away.
+  The text of these warnings has been revamped to explain in more
+  detail what is going on, how to check if you've made a mistake,
+  and how to make the warning go away if you haven't.
 
   If these warnings are interfering with your workflow, or simply
   annoying you, you can filter all of them by filtering

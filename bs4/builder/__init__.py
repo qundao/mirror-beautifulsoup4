@@ -33,6 +33,10 @@ from bs4.element import (
     nonwhitespace_re
 )
 
+# Exceptions were moved to their own module in 4.13. Import here for
+# backwards compatibility.
+from bs4.exceptions import ParserRejectedMarkup
+
 from bs4._typing import (
     _AttributeValues,
     _RawAttributeValue,
@@ -721,19 +725,6 @@ def register_treebuilders_from(module:ModuleType) -> None:
             # Register the builder while we're at it.
             this_module.builder_registry.register(obj)
 
-class ParserRejectedMarkup(Exception):
-    """An Exception to be raised when the underlying parser simply
-    refuses to parse the given markup.
-    """
-    def __init__(self, message_or_exception:Union[str,Exception]):
-        """Explain why the parser rejected the given markup, either
-        with a textual explanation or another exception.
-        """
-        if isinstance(message_or_exception, Exception):
-            e = message_or_exception
-            message_or_exception = "%s: %s" % (e.__class__.__name__, str(e))
-        super(ParserRejectedMarkup, self).__init__(message_or_exception)
-            
 # Builders are registered in reverse order of priority, so that custom
 # builder registrations will take precedence. In general, we want lxml
 # to take precedence over html5lib, because it's faster. And we only

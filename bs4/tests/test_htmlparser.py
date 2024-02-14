@@ -6,7 +6,6 @@ import pickle
 import pytest
 import warnings
 from bs4.builder import (
-    ParserRejectedMarkup,
     XMLParsedAsHTMLWarning,
 )
 from bs4.builder._htmlparser import (
@@ -14,6 +13,7 @@ from bs4.builder._htmlparser import (
     BeautifulSoupHTMLParser,
     HTMLParserTreeBuilder,
 )
+from bs4.exceptions import ParserRejectedMarkup
 from typing import Any
 from . import SoupTest, HTMLTreeBuilderSmokeTest
 

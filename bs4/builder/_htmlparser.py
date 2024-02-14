@@ -38,13 +38,15 @@ from bs4.dammit import EntitySubstitution, UnicodeDammit
 
 from bs4.builder import (
     DetectsXMLParsedAsHTML,
-    ParserRejectedMarkup,
     HTML,
     HTMLTreeBuilder,
     STRICT,
     )
 
 from bs4.element import Tag
+
+from bs4.exceptions import ParserRejectedMarkup
+
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString

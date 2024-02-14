@@ -43,10 +43,10 @@ from bs4.builder import (
     HTML,
     HTMLTreeBuilder,
     PERMISSIVE,
-    ParserRejectedMarkup,
     TreeBuilder,
     XML)
 from bs4.dammit import EncodingDetector
+from bs4.exceptions import ParserRejectedMarkup
 if TYPE_CHECKING:
     from bs4._typing import (
         _Encoding,

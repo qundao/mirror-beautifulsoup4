@@ -36,7 +36,6 @@ if sys.version_info.major < 3:
 
 from .builder import (
     builder_registry,
-    ParserRejectedMarkup,
     TreeBuilder,
 )
 from .builder._htmlparser import HTMLParserTreeBuilder
@@ -91,9 +90,9 @@ from bs4._typing import (
     _RawMarkup,
 )
 
-# Import all warnings so they're easy to suppress if desired.
+# Import all warnings and exceptions into the main package.
+from bs4.exceptions import *
 from bs4._warnings import *
-
 
 class BeautifulSoup(Tag):
     """A data structure representing a parsed HTML or XML document.
@@ -519,7 +518,7 @@ class BeautifulSoup(Tag):
         if not problem:
             return False
         warnings.warn(
-            MarkupResemblesLocatorWarning.URL_MESSAGE % dict(markup=markup),
+            MarkupResemblesLocatorWarning.URL_MESSAGE % dict(what="URL"),
             MarkupResemblesLocatorWarning,
             stacklevel=3
         )
@@ -586,7 +585,7 @@ class BeautifulSoup(Tag):
         # Step 3: If it survived all of those checks, it's similar
         # enough to a file to justify issuing a warning.
         warnings.warn(
-            MarkupResemblesLocatorWarning.FILENAME_MESSAGE % dict(markup=markup),
+            MarkupResemblesLocatorWarning.FILENAME_MESSAGE % dict(what="filename"),
             MarkupResemblesLocatorWarning, stacklevel=3
         )
         return True
@@ -1059,17 +1058,6 @@ class BeautifulStoneSoup(BeautifulSoup):
             DeprecationWarning, stacklevel=2
         )
         super(BeautifulStoneSoup, self).__init__(*args, **kwargs)
-
-
-class StopParsing(Exception):
-    """Exception raised by a TreeBuilder if it's unable to continue parsing."""
-    pass
-
-class FeatureNotFound(ValueError):
-    """Exception raised by the BeautifulSoup constructor if no parser with the
-    requested features is found.
-    """
-    pass
 
 
 #If this file is run as a script, act as an HTML pretty-printer.
