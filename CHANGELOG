@@ -1,5 +1,11 @@
 = 4.13.0 (Unreleased)
 
+This release introduces Python type hints to all public classes and
+methods in Beautiful Soup. The addition of type hints exposed a large
+number of very small inconsistencies, which I've fixed, but the result
+is a larger than usual number of deprecations and changes that break
+backwards compatibility.
+
 # Deprecation notices
 
 * The SAXTreeBuilder class, which was never officially supported or tested.
@@ -8,16 +14,17 @@
   been used inside Beautiful Soup for many years.
 
 * The first argument to BeautifulSoup.decode has been changed from
-  pretty_print:bool to an indent_level:int, to match the signature of
+  pretty_print:bool to indent_level:int, to match the signature of
   Tag.decode. Using a bool will still work but will give you a
   DeprecationWarning.
 
-* SoupStrainer.text and SoupStrainer.string are both deprecated,
-  since a single item can't capture all the possibilities of a SoupStrainer
+* SoupStrainer.text and SoupStrainer.string are both deprecated, since
+  a single item can't capture all the possibilities of a SoupStrainer
   designed to match strings.
 
-* SoupStrainer.search_tag(). It was never a documented method, but if you
-  use it, you should start using SoupStrainer.allow_tag_creation() instead.
+* SoupStrainer.search_tag(). It was never a documented method, but if
+  you use it, you should start using SoupStrainer.allow_tag_creation()
+  instead.
 
 # Compatibility notices
 
@@ -33,16 +40,14 @@
   is added.
 
 * All exceptions were moved to the bs4.exceptions module, and all
-  warnings to the bs4._warnings module (named so as not to shadow Python's
-  built-in warnings module). All warnings and exceptions are exported from
-  the bs4 module, which is probably the safest place to import from.
+  warnings to the bs4._warnings module (named so as not to shadow
+  Python's built-in warnings module). All warnings and exceptions are
+  exported from the bs4 module, which is probably the safest place to
+  import them from in your own code.
 
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.
-
-* decompose() was moved from Tag to PageElement, since there's no reason
-  it won't also work on NavigableString objects.
 
 * The BeautifulSoupHTMLParser constructor now requires a BeautifulSoup
   object as its first argument. This almost certainly does not affect
@@ -85,11 +90,6 @@
   attribute. Previously the value in keyword arguments would override the
   value in ``attrs``.
 
-* Some of the arguments in the methods of LXMLTreeBuilderForXML
-  have been renamed for consistency with the names lxml uses for those
-  arguments in the superclass. This won't affect you unless you were
-  calling methods like LXMLTreeBuilderForXML.start() directly.
-
 * All TreeBuilder constructors now take the empty_element_tags
   argument. The sets of tags found in HTMLTreeBuilder.empty_element_tags and
   HTMLTreeBuilder.block_elements are now in
@@ -100,14 +100,23 @@
 * The unused constant LXMLTreeBuilderForXML.DEFAULT_PARSER_CLASS
   has been removed.
 
-* The arguments to LXMLTreeBuilderForXML.prepare_markup have been
-  changed to match the arguments to the superclass,
+* Some of the arguments in the methods of LXMLTreeBuilderForXML
+  have been renamed for consistency with the names lxml uses for those
+  arguments in the superclass. This won't affect you unless you were
+  calling methods like LXMLTreeBuilderForXML.start() directly.
+
+* In particular, the arguments to LXMLTreeBuilderForXML.prepare_markup
+  have been changed to match the arguments to the superclass,
   TreeBuilder.prepare_markup. Specifically, document_declared_encoding
   now appears before exclude_encodings, not after. If you were calling
   this method yourself, I recommend switching to using keyword
   arguments instead.
 
 # New features
+
+* TODO: mention the new ElementFilter class once its design is
+  finalized. Also mention PageElement.match() once _its_ design is
+  finalized.
 
 * The new_tag() method now takes a 'string' argument. This allows you to
   set the string contents of a Tag when creating it. Patch by Chris
@@ -134,6 +143,9 @@
   need to correct.
 
 # Improvements
+
+* decompose() was moved from Tag to its superclass PageElement, since
+  there's no reason it won't also work on NavigableString objects.
 
 * Emit an UnusualUsageWarning if the user tries to search for an attribute
   called _class; they probably mean "class_". [bug=20250
