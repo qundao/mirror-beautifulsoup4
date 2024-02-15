@@ -70,6 +70,10 @@ _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 # be able to acommodate both possibilities.
 _RawOrProcessedAttributeValues:TypeAlias = Union[_RawAttributeValues, _AttributeValues]
 
+# A number of tree manipulation methods can take either a PageElement or a
+# normal Python string (which will be converted to a NavigableString).
+_InsertableElement:TypeAlias = Union['PageElement',str]
+
 # Aliases to represent the many possibilities for matching bits of a
 # parse tree.
 #

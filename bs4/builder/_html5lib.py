@@ -12,6 +12,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Sequence,
     TypeAlias,
     TYPE_CHECKING,
     Tuple,
@@ -77,13 +78,14 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     NAME:str = "html5lib"
 
-    features:Iterable[str] = [NAME, PERMISSIVE, HTML_5, HTML]
+    features:Sequence[str] = [NAME, PERMISSIVE, HTML_5, HTML]
 
     #: html5lib can tell us which line number and position in the
     #: original file is the source of an element.
     TRACKS_LINE_NUMBERS:bool = True
 
     underlying_builder:'TreeBuilderForHtml5lib' #: :meta private:
+    user_specified_encoding: Optional[_Encoding]
 
     def prepare_markup(self, markup:_RawMarkup,
                        user_specified_encoding:Optional[_Encoding]=None,

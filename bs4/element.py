@@ -56,6 +56,7 @@ if TYPE_CHECKING:
         _AttributeValue,
         _AttributeValues,
         _Encoding,
+        _InsertableElement,
         _RawOrProcessedAttributeValues,
         _StrainableElement,
         _StrainableAttribute,
@@ -64,6 +65,8 @@ if TYPE_CHECKING:
     )
 
 _OneOrMoreStringTypes:TypeAlias = Union[Type['NavigableString'], Iterable[Type['NavigableString']]]
+
+_FindMethodName:TypeAlias = Optional[Union['_StrainableElement', 'ElementFilter']]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/
@@ -433,7 +436,7 @@ class PageElement(object):
     getText = get_text
     text = property(get_text)
 
-    def replace_with(self, *args:PageElement) -> PageElement:
+    def replace_with(self, *args:PageElement) -> Self:
         """Replace this `PageElement` with one or more other `PageElement`,
         objects, keeping the rest of the tree the same.
 
@@ -468,7 +471,7 @@ class PageElement(object):
         wrap_inside.append(me)
         return wrap_inside
 
-    def extract(self, _self_index:Optional[int]=None) -> PageElement:
+    def extract(self, _self_index:Optional[int]=None) -> Self:
         """Destructively rips this element out of the tree.
 
         :param _self_index: The location of this element in its parent's
@@ -564,7 +567,7 @@ class PageElement(object):
 
     _lastRecursiveChild = _deprecated_alias("_lastRecursiveChild", "_last_descendant", "4.0.0")
 
-    def insert_before(self, *args:PageElement) -> None:
+    def insert_before(self, *args:_InsertableElement) -> None:
         """Makes the given element(s) the immediate predecessor of this one.
 
         All the elements will have the same `PageElement.parent` as
@@ -585,7 +588,7 @@ class PageElement(object):
             index = parent.index(self)
             parent.insert(index, predecessor)
 
-    def insert_after(self, *args:PageElement) -> None:
+    def insert_after(self, *args:_InsertableElement) -> None:
         """Makes the given element(s) the immediate successor of this one.
 
         The elements will have the same `PageElement.parent` as this
@@ -612,7 +615,7 @@ class PageElement(object):
 
     def find_next(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             **kwargs:_StrainableAttribute
@@ -633,7 +636,7 @@ class PageElement(object):
 
     def find_all_next(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
@@ -659,7 +662,7 @@ class PageElement(object):
 
     def find_next_sibling(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
@@ -682,7 +685,7 @@ class PageElement(object):
 
     def find_next_siblings(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
@@ -715,7 +718,7 @@ class PageElement(object):
 
     def find_previous(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
@@ -739,7 +742,7 @@ class PageElement(object):
 
     def find_all_previous(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
@@ -772,7 +775,7 @@ class PageElement(object):
 
     def find_previous_sibling(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
@@ -796,7 +799,7 @@ class PageElement(object):
 
     def find_previous_siblings(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
@@ -828,7 +831,7 @@ class PageElement(object):
 
     def find_parent(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
         """Find the closest parent of this PageElement that matches the given
@@ -854,7 +857,7 @@ class PageElement(object):
 
     def find_parents(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             limit:Optional[int]=None,
             _stacklevel:int=2,
@@ -901,7 +904,7 @@ class PageElement(object):
             # as callback types." - So, not sure how to get more
             # specific here.
             method:Callable,
-            name:Optional[_StrainableElement],
+            name:_FindMethodName,
             attrs:_StrainableAttributes,
             string:Optional[_StrainableString],
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
@@ -915,7 +918,7 @@ class PageElement(object):
 
     def _find_all(
             self,
-            name:Optional[_StrainableElement],
+            name:_FindMethodName,
             attrs:_StrainableAttributes,
             string:Optional[_StrainableString],
             limit:Optional[int],
@@ -975,9 +978,9 @@ class PageElement(object):
                         ):
                         result.append(element)
                 return ResultSet(matcher, result)
-        return self.match(generator, matcher, limit)
+        return self.filter(generator, matcher, limit)
 
-    def filter(self, generator:Iterator[PageElement], filter:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
+    def filter(self, generator:Iterator[PageElement], element_filter:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
         """The most generic search method offered by Beautiful Soup.
 
         You can pass in your own technique for iterating over the
@@ -992,14 +995,14 @@ class PageElement(object):
 
         :param limit: Stop looking after finding this many results.
         """
-        results:ResultSet[PageElement] = ResultSet(matcher)
+        results:ResultSet[PageElement] = ResultSet(element_filter)
         while True:
             try:
                 i = next(generator)
             except StopIteration:
                 break
             if i:
-                if matcher.match(i):
+                if element_filter.match(i):
                     results.append(i)
                     if limit is not None and len(results) >= limit:
                         break
@@ -1101,14 +1104,14 @@ class NavigableString(str, PageElement):
     #: A string prepended to the body of the 'real' string
     #: when formatting it as part of a document, such as the '<!--'
     #: in an HTML comment.
-    PREFIX = ''
+    PREFIX:str = ''
 
     #: A string appended to the body of the 'real' string
     #: when formatting it as part of a document, such as the '-->'
     #: in an HTML comment.
-    SUFFIX = ''
+    SUFFIX:str = ''
 
-    def __new__(cls, value:str) -> Self:
+    def __new__(cls, value:Union[str,bytes]) -> Self:
         """Create a new NavigableString.
 
         When unpickling a NavigableString, this method is called with
@@ -1245,8 +1248,8 @@ class PreformattedString(NavigableString):
     as comments (`Comment`) and CDATA blocks (`CData`).
     """
 
-    PREFIX = ''
-    SUFFIX = ''
+    PREFIX:str = ''
+    SUFFIX:str = ''
 
     def output_ready(self, formatter:Optional[_FormatterOrName]=None) -> str:
         """Make this string ready for output by adding any subclass-specific
@@ -1266,30 +1269,30 @@ class PreformattedString(NavigableString):
 
 class CData(PreformattedString):
     """A `CDATA section <https://dev.w3.org/html5/spec-LC/syntax.html#cdata-sections>`_."""
-    PREFIX = '<![CDATA['
-    SUFFIX = ']]>'
+    PREFIX:str = '<![CDATA['
+    SUFFIX:str = ']]>'
 
 class ProcessingInstruction(PreformattedString):
     """A SGML processing instruction."""
 
-    PREFIX = '<?'
-    SUFFIX = '>'
+    PREFIX:str = '<?'
+    SUFFIX:str = '>'
 
 class XMLProcessingInstruction(ProcessingInstruction):
     """An `XML processing instruction <https://www.w3.org/TR/REC-xml/#sec-pi>`_."""
-    PREFIX = '<?'
-    SUFFIX = '?>'
+    PREFIX:str = '<?'
+    SUFFIX:str = '?>'
 
 class Comment(PreformattedString):
     """An `HTML comment <https://dev.w3.org/html5/spec-LC/syntax.html#comments>`_ or `XML comment <https://www.w3.org/TR/REC-xml/#sec-comments>`_."""
-    PREFIX = '<!--'
-    SUFFIX = '-->'
+    PREFIX:str = '<!--'
+    SUFFIX:str = '-->'
 
 
 class Declaration(PreformattedString):
     """An `XML declaration <https://www.w3.org/TR/REC-xml/#sec-prolog-dtd>`_."""
-    PREFIX = '<?'
-    SUFFIX = '?>'
+    PREFIX:str = '<?'
+    SUFFIX:str = '?>'
 
 
 class Doctype(PreformattedString):
@@ -1315,8 +1318,8 @@ class Doctype(PreformattedString):
 
         return Doctype(value)
 
-    PREFIX = '<!DOCTYPE '
-    SUFFIX = '>\n'
+    PREFIX:str = '<!DOCTYPE '
+    SUFFIX:str = '>\n'
 
 
 class Stylesheet(NavigableString):
@@ -1326,7 +1329,6 @@ class Stylesheet(NavigableString):
 
     Used to distinguish embedded stylesheets from textual content.
     """
-    pass
 
 
 class Script(NavigableString):
@@ -1337,7 +1339,6 @@ class Script(NavigableString):
 
     Used to distinguish executable code from textual content.
     """
-    pass
 
 
 class TemplateString(NavigableString):
@@ -1347,7 +1348,6 @@ class TemplateString(NavigableString):
 
     Used to distinguish such strings from the main body of the document.
     """
-    pass
 
 
 class RubyTextString(NavigableString):
@@ -1357,14 +1357,12 @@ class RubyTextString(NavigableString):
     Can be used to distinguish such strings from the strings they're
     annotating.
     """
-    pass
 
 
 class RubyParenthesisString(NavigableString):
     """A NavigableString representing the contents of an `<rp> HTML
     tag <https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rp-element>`_.
     """
-    pass
 
 
 class Tag(PageElement):
@@ -1506,6 +1504,7 @@ class Tag(PageElement):
             else:
                 self.interesting_string_types = self.MAIN_CONTENT_STRING_TYPES
 
+    parser_class: Optional[type[BeautifulSoup]]
     name: str
     namespace: Optional[str]
     prefix: Optional[str]
@@ -1671,7 +1670,7 @@ class Tag(PageElement):
                 yield descendant
     strings = property(_all_strings)
 
-    def insert(self, position:int, new_child:PageElement) -> None:
+    def insert(self, position:int, new_child:_InsertableElement) -> None:
         """Insert a new PageElement as a child of this `Tag`.
 
         This works the same way as :py:meth:`list.insert`.
@@ -1760,7 +1759,7 @@ class Tag(PageElement):
             new_childs_last_element.next_element.previous_element = new_childs_last_element
         self.contents.insert(position, new_child)
 
-    def unwrap(self) -> PageElement:
+    def unwrap(self) -> Self:
         """Replace this `PageElement` with its contents.
 
         :return: This object, no longer part of the tree.
@@ -1782,12 +1781,12 @@ class Tag(PageElement):
         ": :meta private:"
         return self.unwrap()
     
-    def append(self, tag:PageElement) -> None:
+    def append(self, tag:_InsertableElement) -> None:
         """Appends the given `PageElement` to the contents of this `Tag`.
         """
         self.insert(len(self.contents), tag)
 
-    def extend(self, tags:Iterable[PageElement]|Tag) -> None:
+    def extend(self, tags:Union[Iterable[_InsertableElement],Tag]) -> None:
         """Appends one or more objects to the contents of this
         `Tag`.
 
@@ -1796,24 +1795,25 @@ class Tag(PageElement):
             If a single `Tag` is provided, its `Tag.contents` will be
             used to extend this object's `Tag.contents`.
         """
-        tag_list: Iterable[PageElement]
+        tag_list: Iterable[_InsertableElement]
+
         if isinstance(tags, Tag):
-            tag_list = tags.contents
-        elif isinstance(tags, PageElement):
+            tag_list = list(tags.contents)
+        elif isinstance(tags, (PageElement, str)):
             # The caller should really be using append() instead,
             # but we can make it work.
             warnings.warn(
                 "A single item was passed into Tag.extend. Use Tag.append instead.",
-                stacklevel=2
+                UserWarning, stacklevel=2
             )
+            if isinstance(tags, str) and not isinstance(tags, PageElement):
+                tags = NavigableString(tags)
             tag_list = [tags]
         elif isinstance(tags, Iterable):
-            tag_list = tags
-
-        if isinstance(tag_list, Iterable):
             # Moving items around the tree may change their position in
             # the original list. Make a list that won't change.
-            tag_list = list(tag_list)
+            tag_list = list(tags)
+
         for tag in tag_list:
             self.append(tag)
     
@@ -2021,7 +2021,7 @@ class Tag(PageElement):
 
     __str__ = __unicode__ = __repr__
 
-    def encode(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
+    def encode(self, encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                indent_level:Optional[int]=None,
                formatter:_FormatterOrName="minimal",
                errors:str="xmlcharrefreplace") -> bytes:
@@ -2308,7 +2308,7 @@ class Tag(PageElement):
             )
         )
 
-    def prettify(self, encoding:Optional[str]=None,
+    def prettify(self, encoding:Optional[_Encoding]=None,
                  formatter:_FormatterOrName="minimal") -> Union[str, bytes]:
         """Pretty-print this `Tag` as a string or bytestring.
 
@@ -2324,7 +2324,7 @@ class Tag(PageElement):
             return self.encode(encoding=encoding, indent_level=0, formatter=formatter)
 
     def decode_contents(self, indent_level:Optional[int]=None,
-                       eventual_encoding:str=DEFAULT_OUTPUT_ENCODING,
+                       eventual_encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                        formatter:_FormatterOrName="minimal") -> str:
         """Renders the contents of this tag as a Unicode string.
 
@@ -2349,7 +2349,7 @@ class Tag(PageElement):
 
     def encode_contents(
         self, indent_level:Optional[int]=None,
-            encoding:str=DEFAULT_OUTPUT_ENCODING,
+            encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
             formatter:_FormatterOrName="minimal") -> bytes:
         """Renders the contents of this PageElement as a bytestring.
 
@@ -2366,7 +2366,7 @@ class Tag(PageElement):
         return contents.encode(encoding)
 
     @_deprecated("encode_contents", "4.0.0")
-    def renderContents(self, encoding:str=DEFAULT_OUTPUT_ENCODING,
+    def renderContents(self, encoding:_Encoding=DEFAULT_OUTPUT_ENCODING,
                        prettyPrint:bool=False, indentLevel:Optional[int]=0) -> bytes:
         """Deprecated method for BS3 compatibility.
 
@@ -2380,7 +2380,7 @@ class Tag(PageElement):
     #Soup methods
 
     def find(self,
-             name:Optional[_StrainableElement]=None,
+             name:_FindMethodName=None,
              attrs:_StrainableAttributes={},
              recursive:bool=True,
              string:Optional[_StrainableString]=None,
@@ -2413,7 +2413,7 @@ class Tag(PageElement):
 
     def find_all(
             self,
-            name:Optional[_StrainableElement]=None,
+            name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             recursive:bool=True,
             string:Optional[_StrainableString]=None,

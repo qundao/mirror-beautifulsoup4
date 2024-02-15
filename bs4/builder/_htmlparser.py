@@ -328,6 +328,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
     picklable:bool = True
     NAME:str = HTMLPARSER
     features: Iterable[str] = [NAME, HTML, STRICT]
+    parser_args: Tuple[Iterable[Any], Dict[str, Any]]
 
     #: The html.parser knows which line number and position in the
     #: original file is the source of an element.

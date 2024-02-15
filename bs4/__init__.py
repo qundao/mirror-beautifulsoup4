@@ -43,7 +43,10 @@ from .dammit import UnicodeDammit
 from .css import (
     CSS
 )
-from ._deprecation import _deprecated
+from ._deprecation import (
+    _deprecated,
+    _deprecated_alias,
+)
 from .element import (
     CData,
     Comment,
@@ -85,6 +88,7 @@ from bs4._typing import (
     _Encoding,
     _Encodings,
     _IncomingMarkup,
+    _InsertableElement,
     _RawAttributeValue,
     _RawAttributeValues,
     _RawMarkup,
@@ -169,8 +173,6 @@ class BeautifulSoup(Tag):
     #: in the original markup. These mark character sequences that
     #: could not be represented in Unicode.
     contains_replacement_characters: bool
-
-    NO_PARSER_SPECIFIED_WARNING = GuessedAtParserWarning.MESSAGE
 
     def __init__(
             self,
@@ -702,13 +704,13 @@ class BeautifulSoup(Tag):
         container = self.string_container(subclass)
         return container(s)
 
-    def insert_before(self, *args:PageElement) -> None:
+    def insert_before(self, *args:_InsertableElement) -> None:
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """
         raise NotImplementedError("BeautifulSoup objects don't support insert_before().")
 
-    def insert_after(self, *args:PageElement) -> None:
+    def insert_after(self, *args:_InsertableElement) -> None:
         """This method is part of the PageElement API, but `BeautifulSoup` doesn't implement
         it because there is nothing before or after it in the parse tree.
         """

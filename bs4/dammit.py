@@ -33,6 +33,7 @@ from typing import (
     Union,
     cast,
 )
+from typing_extensions import Literal
 from bs4._typing import (
     _Encoding,
     _Encodings,
@@ -656,10 +657,7 @@ class UnicodeDammit:
     def __init__(
             self, markup:bytes,
             known_definite_encodings:Optional[_Encodings]=[],
-            # TODO PYTHON 3.8 Literal is added to the typing module
-            #
-            # smart_quotes_to: Literal["ascii", "xml", "html"] | None = None,
-            smart_quotes_to: Optional[str] = None,
+            smart_quotes_to: Optional[Literal["ascii", "xml", "html"]] = None,
             is_html: bool = False,
             exclude_encodings:Optional[_Encodings] = [],
             user_encodings:Optional[_Encodings] = None,
@@ -848,7 +846,7 @@ class UnicodeDammit:
         return str(data, encoding, errors)
 
     @property
-    def declared_html_encoding(self) -> Optional[str]:
+    def declared_html_encoding(self) -> Optional[_Encoding]:
         """If the markup is an HTML document, returns the encoding, if any,
         declared *inside* the document.
         """

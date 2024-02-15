@@ -45,6 +45,10 @@ backwards compatibility.
   exported from the bs4 module, which is probably the safest place to
   import them from in your own code.
 
+* As a side effect of this, the string constant
+  BeautifulSoup.NO_PARSER_SPECIFIED_WARNING was moved to
+  GuessedAtParserWarning.MESSAGE.
+
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
   only have ever worked on Tag objects.

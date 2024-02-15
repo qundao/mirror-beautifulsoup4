@@ -277,7 +277,7 @@ class TestWarnings(SoupTest):
     def _assert_no_parser_specified(self, w:Warning) -> None:
         warning = self._assert_warning(w, GuessedAtParserWarning)
         message = str(warning.message)
-        assert message.startswith(BeautifulSoup.NO_PARSER_SPECIFIED_WARNING[:60])
+        assert message.startswith(GuessedAtParserWarning.MESSAGE[:60])
 
     def test_warning_if_no_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
