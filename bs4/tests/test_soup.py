@@ -267,14 +267,14 @@ class TestWarnings(SoupTest):
     # file as the test.
 
     def _assert_warning(
-            self, warnings:Iterable[Warning], cls:type[Warning]) -> Warning:
+            self, warnings:Iterable[warnings.WarningMessage], cls:type[Warning]) -> warnings.WarningMessage:
         for w in warnings:
             if isinstance(w.message, cls):
                 assert w.filename == __file__
                 return w
         raise Exception("%s warning not found in %r" % (cls, warnings))
     
-    def _assert_no_parser_specified(self, w:Warning) -> None:
+    def _assert_no_parser_specified(self, w:Iterable[warnings.WarningMessage]) -> None:
         warning = self._assert_warning(w, GuessedAtParserWarning)
         message = str(warning.message)
         assert message.startswith(GuessedAtParserWarning.MESSAGE[:60])

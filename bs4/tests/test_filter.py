@@ -20,7 +20,7 @@ from bs4.filter import (
     StringMatchRule,
     TagNameMatchRule,
 )
-from bs4._typing import _RawOrProcessedAttributeValues
+from bs4._typing import _RawAttributeValues
 
 
 class TestElementFilter(SoupTest):
@@ -116,7 +116,7 @@ class TestElementFilter(SoupTest):
 class TestMatchRule(SoupTest):
 
     def _tuple(self, rule:MatchRule) -> Tuple[Optional[str],
-                                              Optional[Pattern[str]],
+                                              Optional[str],
                                               Optional[Callable],
                                               Optional[bool]]:
         return (
@@ -407,7 +407,7 @@ class TestSoupStrainer(SoupTest):
 
     def tag_matches(
             self, strainer:SoupStrainer, name:str,
-            attrs:Optional[_RawOrProcessedAttributeValues]=None,
+            attrs:Optional[_RawAttributeValues]=None,
             string:Optional[str]=None, prefix:Optional[str]=None,
     ) -> bool:
         # Create a Tag with the given prefix, name and attributes,

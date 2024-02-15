@@ -383,6 +383,7 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 
         # Make sure that the doctype was correctly associated with the
         # parse tree and that the rest of the document parsed.
+        assert soup.p is not None
         assert soup.p.contents[0] == 'foo'
 
     def _document_with_doctype(self, doctype_fragment:str, doctype_string:str="DOCTYPE") -> Tuple[bytes, BeautifulSoup]:

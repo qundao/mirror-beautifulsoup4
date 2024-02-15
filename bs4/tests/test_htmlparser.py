@@ -101,6 +101,7 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
             soup = self.soup(
                 markup, on_duplicate_attribute=on_duplicate_attribute
             )
+            assert soup.a is not None
             assert expected == soup.a['href']
 
             # Verify that non-duplicate attributes are treated normally.
