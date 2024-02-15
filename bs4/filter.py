@@ -11,7 +11,6 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Pattern,
     Sequence,
     Set,
     Tuple,
@@ -29,6 +28,7 @@ from bs4._typing import (
     _AllowTagCreationFunction,
     _PageElementMatchFunction,
     _RawAttributeValues,
+    _RegularExpressionProtocol,
     _TagMatchFunction,
     _StringMatchFunction,
     _StrainableElement,
@@ -122,7 +122,7 @@ class MatchRule(object):
     """
 
     string: Optional[str]
-    pattern: Optional[Pattern[str]]
+    pattern: Optional[_RegularExpressionProtocol]
     present: Optional[bool]
     # TODO-TYPING: All MatchRule objects also have an attribute
     # ``function``, but the type of the function depends on the
@@ -131,7 +131,7 @@ class MatchRule(object):
     def __init__(
             self,
             string:Optional[Union[str, bytes]]=None,
-            pattern:Optional[Pattern[str]]=None,
+            pattern:Optional[_RegularExpressionProtocol]=None,
             function:Optional[Callable]=None,
             present:Optional[bool]=None,
     ):
@@ -366,15 +366,7 @@ class SoupStrainer(ElementFilter):
             yield rule_class(present=obj)
         elif callable(obj):
             yield rule_class(function=obj)
-        elif isinstance(obj, Pattern):
-            yield rule_class(pattern=obj)
-        elif hasattr(obj, 'search'):
-            # We do a little duck typing here to detect usage of the
-            # third-party regex library, whose pattern objects doesn't
-            # derive from re.Pattern.
-            #
-            # TODO-TYPING: We should be able to bring in a Protocol
-            # from typing_extensions to handle this.
+        elif isinstance(obj, _RegularExpressionProtocol):
             yield rule_class(pattern=obj)
         elif hasattr(obj, '__iter__'):
             for o in obj:
