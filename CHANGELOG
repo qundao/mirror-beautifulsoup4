@@ -26,6 +26,11 @@ backwards compatibility.
   you use it, you should start using SoupStrainer.allow_tag_creation()
   instead.
 
+* The `soup:BeautifulSoup` argument to the TreeBuilderForHtml5lib
+  constructor is now required, not optional. It's unclear why it was
+  optional in the first place, so if you discover you need this,
+  contact us for possible un-deprecation.
+
 # Compatibility notices
 
 * This version drops support for Python 3.6. The minimum supported

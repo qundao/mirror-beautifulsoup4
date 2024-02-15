@@ -192,9 +192,11 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         if soup:
             self.soup = soup
         else:
+            warnings.warn("The optionality of the 'soup' argument to the TreeBuilderForHtml5lib constructor is deprecated as of Beautiful Soup 4.13.0. If you can't pass in a BeautifulSoup object here, or you get this warning and it seems mysterious to you, please contact the Beautiful Soup developer team for possible un-deprecation.", DeprecationWarning, stacklevel=2)
             from bs4 import BeautifulSoup
-            # TODO: Why is the parser 'html.parser' here? To avoid an
-            # infinite loop?
+            # TODO: Why is the parser 'html.parser' here? Using
+            # html5lib doesn't cause an infinite loop and is more
+            # accurate. Best to get rid of this entire section, I think.
             self.soup = BeautifulSoup(
                 "", "html.parser", store_line_numbers=store_line_numbers,
                 **kwargs
