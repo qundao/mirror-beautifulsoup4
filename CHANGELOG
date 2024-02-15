@@ -1,12 +1,34 @@
 = 4.13.0 (Unreleased)
 
 This release introduces Python type hints to all public classes and
-methods in Beautiful Soup. The addition of type hints exposed a large
-number of very small inconsistencies, which I've fixed, but the result
-is a larger than usual number of deprecations and changes that break
-backwards compatibility.
+methods in Beautiful Soup. The addition of these type hints exposed a
+large number of very small inconsistencies in the code, which I've
+fixed, but the result is a larger-than-usual number of deprecations
+and changes that may break backwards compatibility.
 
 # Deprecation notices
+
+These things now give DeprecationWarnings when you try to use them,
+and are scheduled to be removed in Beautiful Soup 4.15.0.
+
+* Every deprecated method, attribute and class from the 3.0 and 2.0
+  major versions of Beautiful Soup. These have been deprecated for a
+  very long time, but they didn't issue DeprecationWarning when you
+  tried to use them. Now they do, and they're all going away soon.
+
+  This mainly refers to methods and attributes with camelCase names,
+  for example: renderContents, replaceWith, replaceWithChildren,
+  findAll, findAllNext, findAllPrevious, findNext, findNextSibling,
+  findNextSiblings, findParent, findParents, findPrevious,
+  findPreviousSibling, findPreviousSiblings, getText, nextSibling,
+  previousSibling, isSelfClosing, fetchNextSiblings,
+  fetchPreviousSiblings, fetchPrevious, fetchPreviousSiblings,
+  fetchParents, findChild, findChildren, childGenerator,
+  nextGenerator, nextSiblingGenerator, previousGenerator,
+  previousSiblingGenerator, recursiveChildGenerator, and
+  parentGenerator.
+
+  This also includes the BeautifulStoneSoup class.
 
 * The SAXTreeBuilder class, which was never officially supported or tested.
 
@@ -26,7 +48,7 @@ backwards compatibility.
   you use it, you should start using SoupStrainer.allow_tag_creation()
   instead.
 
-* The `soup:BeautifulSoup` argument to the TreeBuilderForHtml5lib
+* The soup:BeautifulSoup argument to the TreeBuilderForHtml5lib
   constructor is now required, not optional. It's unclear why it was
   optional in the first place, so if you discover you need this,
   contact us for possible un-deprecation.
@@ -37,12 +59,9 @@ backwards compatibility.
   major Python version for Beautiful Soup is now Python 3.7.
 
 * Deprecation warnings have been added for all deprecated methods and
-  attributes. Most of these were deprecated over ten years ago, and
-  some were deprecated over fifteen years ago.
-
-  Going forward, deprecated names will be subject to removal two
-  feature releases or one major release after the deprecation warning
-  is added.
+  attributes (see above). Going forward, deprecated names will be
+  removed two feature releases or one major release after the
+  deprecation warning is added.
 
 * All exceptions were moved to the bs4.exceptions module, and all
   warnings to the bs4._warnings module (named so as not to shadow
@@ -161,12 +180,12 @@ backwards compatibility.
 
 * The MarkupResemblesLocatorWarning issued when the markup resembles a
   filename is now issued less often, due to improvements in detecting
-  markup that's very unlikely to be a filename. [bug=2052988]
+  markup that's unlikely to be a filename. [bug=2052988]
 
-* Emit a warning if a document is parsed using a SoupStrainer that's set up
-  to filter everything. In these cases, filtering everything is the
-  most consistent thing to do, but there was no indication that was
-  happening, so the behavior may have seemed mysterious.
+* Emit a warning if a document is parsed using a SoupStrainer that's
+  set up to filter everything. In these cases, filtering everything is
+  the most consistent thing to do, but there was no indication that
+  this was happening, so the behavior may have seemed mysterious.
 
 * When using one of the find() methods or creating a SoupStrainer, you can
   pass a list of any accepted object (strings, regular expressions, etc.) for
