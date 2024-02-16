@@ -19,6 +19,7 @@ from typing_extensions import (
     TypeAlias,
 )
 from typing import (
+    Any,
     Callable,
     Dict,
     IO,
@@ -37,17 +38,17 @@ if TYPE_CHECKING:
 # package.
 @runtime_checkable
 class _RegularExpressionProtocol(Protocol):
-    def search(self, string:str, pos:int=..., endpos:int=...):
+    def search(self, string:str, pos:int=..., endpos:int=...) -> Optional[Any]:
         ...
 
     @property
-    def pattern(self):
+    def pattern(self) -> str:
         ...
 
 # Aliases for markup in various stages of processing.
 #
 # The rawest form of markup: either a string or an open filehandle.
-_IncomingMarkup: TypeAlias = Union[str,bytes,IO]
+_IncomingMarkup: TypeAlias = Union[str,bytes,IO[str],IO[bytes]]
 
 # Markup that is in memory but has (potentially) yet to be converted
 # to Unicode.

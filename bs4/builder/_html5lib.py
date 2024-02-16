@@ -139,14 +139,6 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
             # HTMLBinaryInputStream.__init__.
             extra_kwargs['override_encoding'] = self.user_specified_encoding
 
-        # TODO-TYPING: typeshed stub says the second argument to
-        # HTMLParser.parse is scripting:bool, but the implementation
-        # treats scripting as one of the kwargs. scripting:bool isn't
-        # called out separately until we get down into _parse(), and
-        # there it's the fourth argument, not the second.  I'm not
-        # sure what the stub ought to look like, but I'm confident
-        # enough that it's better to leave this alone, rather than
-        # change this call to get rid of the warning.
         doc = parser.parse(markup, **extra_kwargs)
         
         # Set the character encoding detected by the tokenizer.
@@ -192,7 +184,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
         if soup:
             self.soup = soup
         else:
-            warnings.warn("The optionality of the 'soup' argument to the TreeBuilderForHtml5lib constructor is deprecated as of Beautiful Soup 4.13.0. If you can't pass in a BeautifulSoup object here, or you get this warning and it seems mysterious to you, please contact the Beautiful Soup developer team for possible un-deprecation.", DeprecationWarning, stacklevel=2)
+            warnings.warn("The optionality of the 'soup' argument to the TreeBuilderForHtml5lib constructor is deprecated as of Beautiful Soup 4.13.0: 'soup' is now required. If you can't pass in a BeautifulSoup object here, or you get this warning and it seems mysterious to you, please contact the Beautiful Soup developer team for possible un-deprecation.", DeprecationWarning, stacklevel=2)
             from bs4 import BeautifulSoup
             # TODO: Why is the parser 'html.parser' here? Using
             # html5lib doesn't cause an infinite loop and is more

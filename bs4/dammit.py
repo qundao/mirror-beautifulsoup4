@@ -80,7 +80,7 @@ def _chardet_dammit(s:bytes) -> Optional[str]:
 xml_encoding:str = '^\\s*<\\?.*encoding=[\'"](.*?)[\'"].*\\?>' #: :meta private:
 html_meta:str = '<\\s*meta[^>]+charset\\s*=\\s*["\']?([^>]*?)[ /;\'">]' #: :meta private:
 
-# TODO: The Pattern type here could use more refinement, but it's tricky.
+# TODO-TYPING: The Pattern type here could use more refinement, but it's tricky.
 encoding_res: Dict[Type, Dict[str, Pattern]] = dict()
 encoding_res[bytes] = {
     'html' : re.compile(html_meta.encode("ascii"), re.I),
@@ -602,7 +602,7 @@ class EncodingDetector:
 
         xml_re = res['xml']
         html_re = res['html']
-        declared_encoding = None
+        declared_encoding: Optional[_Encoding] = None
         declared_encoding_match = xml_re.search(markup, endpos=xml_endpos)
         if not declared_encoding_match and is_html:
             declared_encoding_match = html_re.search(markup, endpos=html_endpos)
