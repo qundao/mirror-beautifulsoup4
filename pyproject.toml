@@ -64,6 +64,9 @@ include = [
     "/bs4/**/*.py",
     "/bs4/**/*.testcase",
 
+    # The file that announces support for type hints per PEP-0561.
+    "/bs4/py.typed"
+
     # The tox build configuration
     "tox.ini",
 
