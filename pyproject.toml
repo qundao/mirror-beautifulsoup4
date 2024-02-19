@@ -101,5 +101,6 @@ include = [
 include = [
     # The module itself, and its unit tests.
     "/bs4/**/*.py",
-    "/bs4/**/*.testcase",   
+    "/bs4/**/*.testcase",
+    "/bs4/py.typed",
 ]
