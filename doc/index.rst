@@ -2691,7 +2691,7 @@ Any HTML or XML document is written in a specific encoding like ASCII
 or UTF-8. But when you load that document into Beautiful Soup, you'll
 discover it's been converted to Unicode::
 
- markup = "<h1>Sacr\xc3\xa9 bleu!</h1>"
+ markup = b"<h1>Sacr\xc3\xa9 bleu!</h1>"
  soup = BeautifulSoup(markup, 'html.parser')
  soup.h1
  # <h1>Sacré bleu!</h1>
