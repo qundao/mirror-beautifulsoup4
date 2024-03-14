@@ -41,7 +41,8 @@ from . import (
     SoupTest,
 )
 import warnings
-    
+from typing import Type
+
 class TestConstructor(SoupTest):
 
     def test_short_unicode_input(self):
@@ -267,7 +268,7 @@ class TestWarnings(SoupTest):
     # file as the test.
 
     def _assert_warning(
-            self, warnings:Iterable[warnings.WarningMessage], cls:type[Warning]) -> warnings.WarningMessage:
+            self, warnings:Iterable[warnings.WarningMessage], cls:Type[Warning]) -> warnings.WarningMessage:
         for w in warnings:
             if isinstance(w.message, cls):
                 assert w.filename == __file__

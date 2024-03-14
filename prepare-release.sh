@@ -16,6 +16,7 @@
 #  bs4/__init__.py
 #  doc/source/index.rst
 
+pyenv activate bs4-test
 hatch clean
 tox run-parallel
 

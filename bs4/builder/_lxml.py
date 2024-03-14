@@ -22,10 +22,10 @@ from typing import (
     Set,
     Tuple,
     Type,
-    TypeAlias,
     TYPE_CHECKING,
     Union,
 )
+from typing_extensions import TypeAlias
 
 from io import BytesIO
 from io import StringIO

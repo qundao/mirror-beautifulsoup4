@@ -13,11 +13,11 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TypeAlias,
     TYPE_CHECKING,
     Tuple,
     Union,
 )
+from typing_extensions import TypeAlias
 from bs4._typing import (
     _AttributeValue,
     _AttributeValues,
