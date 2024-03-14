@@ -64,43 +64,65 @@ class TestElementFilter(SoupTest):
         assert "text" == soup.a.string
 
     def test_allow_tag_creation(self):
-        def m(nsprefix, name, attrs):
-            return nsprefix=="allow" or name=="allow" or "allow" in attrs
-        selector = ElementFilter(allow_tag_creation_function=m)
-        f = selector.allow_tag_creation
+        # By default, ElementFilter.allow_tag_creation allows everything.
+        filter = ElementFilter()
+        f = filter.allow_tag_creation
+        assert True == f("allow", "ignore", {})
+        assert True == f("ignore", "allow", {})
+        assert True == f(None, "ignore", {"allow": "1"})
+        assert True == f("no", "no", {"no" : "nope"})
+
+        # You can customize this behavior by overriding
+        # allow_tag_creation in a subclass.
+        class MyFilter(ElementFilter):
+            def allow_tag_creation(self, nsprefix:Optional[str], name:str,
+                                   attrs:Optional[_RawAttributeValues]):
+                return nsprefix=="allow" or name=="allow" or "allow" in attrs
+        filter = MyFilter()
+        f = filter.allow_tag_creation
         assert True == f("allow", "ignore", {})
         assert True == f("ignore", "allow", {})
         assert True == f(None, "ignore", {"allow": "1"})
         assert False == f("no", "no", {"no" : "nope"})
 
-        # Test the ElementFilter as a value for parse_only.
+        # Test the customized ElementFilter as a value for parse_only.
         soup = self.soup(
             "<deny>deny</deny> <allow>deny</allow> allow",
-            parse_only=selector
+            parse_only=filter
         )
 
         # The <deny> tag was filtered out, but there was no effect on
         # the strings, since only allow_tag_creation_function was
-        # defined.
+        # overridden.
         assert 'deny <allow>deny</allow> allow' == soup.decode()
 
         # Similarly, since match_function was not defined, this
         # ElementFilter matches everything.
-        assert soup.find(selector) == "deny"
+        assert soup.find(filter) == "deny"
 
     def test_allow_string_creation(self):
-        def m(s):
-            return s=="allow"
-        selector = ElementFilter(allow_string_creation_function=m)
-        f = selector.allow_string_creation
+        # By default, ElementFilter.allow_string_creation allows everything.
+        filter = ElementFilter()
+        f = filter.allow_string_creation
+        assert True == f("allow")
+        assert True == f("deny")
+        assert True == f("please allow")
+
+        # You can customize this behavior by overriding allow_string_creation
+        # in a subclass.
+        class MyFilter(ElementFilter):
+            def allow_string_creation(self, s:str):
+                return s=="allow"
+        filter = MyFilter()
+        f = filter.allow_string_creation
         assert True == f("allow")
         assert False == f("deny")
         assert False == f("please allow")
 
-        # Test the ElementFilter as a value for parse_only.
+        # Test the customized ElementFilter as a value for parse_only.
         soup = self.soup(
             "<deny>deny</deny> <allow>deny</allow> allow",
-            parse_only=selector
+            parse_only=filter
         )
 
         # All incoming strings other than "allow" (even whitespace)
@@ -110,7 +132,7 @@ class TestElementFilter(SoupTest):
 
         # Similarly, since match_function was not defined, this
         # ElementFilter matches everything.
-        assert soup.find(selector).name == "deny"
+        assert soup.find(filter).name == "deny"
 
 
 class TestMatchRule(SoupTest):

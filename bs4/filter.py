@@ -49,7 +49,8 @@ class ElementFilter(object):
 
     The base class is the simplest ElementFilter. By default, it
     matches everything and allows all PageElements to be created. You
-    can make it more selective by passing in user-defined functions.
+    can make it more selective by passing in a user-defined match
+    function, or defining a subclass.
 
     Most users of Beautiful Soup will never need to use
     ElementFilter, or its more capable subclass
@@ -57,17 +58,18 @@ class ElementFilter(object):
     will convert their arguments into SoupStrainer objects and run them
     against the tree.
     """
-    match_hook: Optional[_PageElementMatchFunction]
-    allow_tag_creation_function: Optional[_AllowTagCreationFunction]
-    allow_string_creation_function: Optional[_AllowStringCreationFunction]
+    match_function: Optional[_PageElementMatchFunction]
 
     def __init__(
-            self, match_function:Optional[_PageElementMatchFunction]=None,
-            allow_tag_creation_function:Optional[_AllowTagCreationFunction]=None,
-            allow_string_creation_function:Optional[_AllowStringCreationFunction]=None):
+            self, match_function:Optional[_PageElementMatchFunction]=None
+    ):
+        """Pass in a match function to easily customize the behavior of
+        ElementFilter.match without needing to subclass.
+
+        :param match_function: A function that takes a PageElement
+          and returns True if that PageElement matches some criteria.
+        """
         self.match_function = match_function
-        self.allow_tag_creation_function = allow_tag_creation_function
-        self.allow_string_creation_function = allow_string_creation_function
 
     @property
     def excludes_everything(self) -> bool:
@@ -78,10 +80,9 @@ class ElementFilter(object):
         The ElementFilter might turn out to exclude everything even
         if this returns False, but it won't do so in an obvious way.
 
-        The default ElementFilter excludes *nothing*, and we don't
-        have any way of answering questions about more complex
-        ElementFilters without running their hook functions, so the
-        base implementation always returns False.
+        The base ElementFilter implementation excludes *nothing*, so
+        the base implementation of excludes_everything() always
+        returns False.
         """
         return False
         
@@ -103,17 +104,25 @@ class ElementFilter(object):
         """Based on the name and attributes of a tag, see whether this
         ElementFilter will allow a Tag object to even be created.
 
+        By default, all tags are parsed. To change this, subclass
+        ElementFilter.
+
         :param name: The name of the prospective tag.
         :param attrs: The attributes of the prospective tag.
         """
-        if not self.allow_tag_creation_function:
-            return True
-        return self.allow_tag_creation_function(nsprefix, name, attrs)
+        return True
 
     def allow_string_creation(self, string:str) -> bool:
-        if not self.allow_string_creation_function:
-            return True
-        return self.allow_string_creation_function(string)
+        """Based on the content of a string, see whether this
+        ElementFilter will allow a NavigableString object based on
+        this string to be added to the parse tree.
+
+        By default, all strings are processed into
+        NavigableStrings. To change this, subclass ElementFilter.
+
+        :param str: The string under consideration.
+        """
+        return True
 
 
 class MatchRule(object):

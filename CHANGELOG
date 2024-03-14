@@ -1,4 +1,4 @@
-= 4.13.0 (Unreleased)
+= 4.13.0b1 (Unreleased)
 
 This release introduces Python type hints to all public classes and
 methods in Beautiful Soup. The addition of these type hints exposed a
@@ -63,6 +63,25 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   removed two feature releases or one major release after the
   deprecation warning is added.
 
+* If Tag.get_attribute_list() is used to access an attribute that's not set,
+  the return value is now an empty list rather than [None].
+
+* If you pass an empty list as the attribute value when searching the
+  tree, you will now find all tags which have that attribute set to a value in
+  the empty list--that is, you will find nothing. This is consistent with other
+  situations where a list of acceptable values is provided. Previously, an
+  empty list was treated the same as None and False, and you would have
+  found the tags which did not have that attribute set at all. [bug=2045469]
+
+* For similar reasons, if you pass in limit=0 to a find() method, you
+  will now get zero results. Previously, you would get all matching results.
+
+* When using one of the find() methods or creating a SoupStrainer,
+  if you specify the same attribute value in ``attrs`` and the
+  keyword arguments, you'll end up with two different ways to match that
+  attribute. Previously the value in keyword arguments would override the
+  value in ``attrs``.
+
 * All exceptions were moved to the bs4.exceptions module, and all
   warnings to the bs4._warnings module (named so as not to shadow
   Python's built-in warnings module). All warnings and exceptions are
@@ -92,31 +111,11 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   html5lib. They may one day have real implementations, as part of a future
   effort to integrate Beautiful Soup into html5lib's test suite.
 
-* If Tag.get_attribute_list() is used to access an attribute that's not set,
-  the return value is now an empty list rather than [None].
-
 * AttributeValueWithCharsetSubstitution.encode() is renamed to
   substitute_encoding, to avoid confusion with the much different str.encode()
 
 * Using PageElement.replace_with() to replace an element with itself
   returns the element instead of None.
-
-* If you pass an empty list as the attribute value when searching the
-  tree, you will now find all tags which have that attribute set to a value in
-  the empty list--that is, you will find nothing. This is consistent with other
-  situations where a list of acceptable values is provided. Previously, an
-  empty list was treated the same as None and False, and you would have
-  found the tags which did not have that attribute set at all. [bug=2045469]
-
-* For similar reasons, if you pass in limit=0 to a find() method for some
-  reason, you will now get zero results. Previously, you would get all
-  matching results.
-
-* When using one of the find() methods or creating a SoupStrainer,
-  if you specify the same attribute value in ``attrs`` and the
-  keyword arguments, you'll end up with two different ways to match that
-  attribute. Previously the value in keyword arguments would override the
-  value in ``attrs``.
 
 * All TreeBuilder constructors now take the empty_element_tags
   argument. The sets of tags found in HTMLTreeBuilder.empty_element_tags and
@@ -142,9 +141,17 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
 # New features
 
-* TODO: mention the new ElementFilter class once its design is
-  finalized. Also mention PageElement.match() once _its_ design is
-  finalized.
+* The new ElementFilter class encapsulates Beautiful Soup's rules
+  about matching elements and decising which parts of a document to
+  parse. It's easy to override those rules with subclassing or
+  function composition. The SoupStrainer class, which contains all the
+  matching logic you're familiar with from the find_* methods, is now
+  a subclass of ElementFilter.
+
+* The new PageElement.filter() method provides a fully general way of
+  finding elements in a Beautiful Soup parse tree. You can specify a
+  function to iterate over the tree and an ElementFilter to determine
+  what matches.
 
 * The new_tag() method now takes a 'string' argument. This allows you to
   set the string contents of a Tag when creating it. Patch by Chris
@@ -162,7 +169,7 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
   The text of these warnings has been revamped to explain in more
   detail what is going on, how to check if you've made a mistake,
-  and how to make the warning go away if you haven't.
+  and how to make the warning go away if you are acting deliberately.
 
   If these warnings are interfering with your workflow, or simply
   annoying you, you can filter all of them by filtering
@@ -176,7 +183,7 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   there's no reason it won't also work on NavigableString objects.
 
 * Emit an UnusualUsageWarning if the user tries to search for an attribute
-  called _class; they probably mean "class_". [bug=20250
+  called _class; they probably mean "class_". [bug=2025089]
 
 * The MarkupResemblesLocatorWarning issued when the markup resembles a
   filename is now issued less often, due to improvements in detecting
@@ -208,11 +215,11 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
 * UnicodeDammit.markup is now always a bytestring representing the
   *original* markup (sans BOM), and UnicodeDammit.unicode_markup is
-  always the Unicode equivalent of that string. Previously,
-  UnicodeDammit.markup was treated inconsistently and would often end
-  up containing Unicode. UnicodeDammit.markup was not a documented
-  attribute, but if you were using it, you probably want to switch to using
-  .unicode_markup instead.
+  always the converted Unicode equivalent of the original
+  markup. Previously, UnicodeDammit.markup was treated inconsistently
+  and would often end up containing Unicode. UnicodeDammit.markup was
+  not a documented attribute, but if you were using it, you probably
+  want to switch to using .unicode_markup instead.
 
 = 4.12.3 (20240117)
 

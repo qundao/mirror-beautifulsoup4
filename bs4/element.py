@@ -983,9 +983,9 @@ class PageElement(object):
     def filter(self, generator:Iterator[PageElement], element_filter:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
         """The most generic search method offered by Beautiful Soup.
 
-        You can pass in your own technique for iterating over the
-        tree, and your own technique for filtering items. Only items
-        that match the filter will be returned.
+        You can pass in your own generator for iterating over the
+        tree, and your own element_filter for filtering items. Only items
+        that match the element_filter will be returned.
 
         :param generator: A way of iterating over `PageElement`
             objects relative to the current `PageElement`.
