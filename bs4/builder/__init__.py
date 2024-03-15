@@ -88,7 +88,7 @@ class TreeBuilderRegistry(object):
     def register(self, treebuilder_class:type[TreeBuilder]) -> None:
         """Register a treebuilder based on its advertised features.
 
-        :param treebuilder_class: A subclass of `Treebuilder`. its
+        :param treebuilder_class: A subclass of `TreeBuilder`. its
            `TreeBuilder.features` attribute should list its features.
         """
         for feature in treebuilder_class.features:
@@ -154,12 +154,12 @@ class TreeBuilder(object):
     :param multi_valued_attributes: If this is set to None, the
      TreeBuilder will not turn any values for attributes like
      'class' into lists. Setting this to a dictionary will
-     customize this behavior; look at DEFAULT_CDATA_LIST_ATTRIBUTES
+     customize this behavior; look at :py:attr:`bs4.builder.HTMLTreeBuilder.DEFAULT_CDATA_LIST_ATTRIBUTES`
      for an example.
 
      Internally, these are called "CDATA list attributes", but that
      probably doesn't make sense to an end-user, so the argument name
-     is `multi_valued_attributes`.
+     is ``multi_valued_attributes``.
 
     :param preserve_whitespace_tags: A set of tags to treat
      the way <pre> tags are treated in HTML. Tags in this set
@@ -167,18 +167,19 @@ class TreeBuilder(object):
      output as-is.
 
     :param string_containers: A dictionary mapping tag names to
-    the classes that should be instantiated to contain the textual
-    contents of those tags. The default is to use NavigableString
-    for every tag, no matter what the name. You can override the
-    default by changing DEFAULT_STRING_CONTAINERS.
+     the classes that should be instantiated to contain the textual
+     contents of those tags. The default is to use NavigableString
+     for every tag, no matter what the name. You can override the
+     default by changing :py:attr:`DEFAULT_STRING_CONTAINERS`.
 
     :param store_line_numbers: If the parser keeps track of the
      line numbers and positions of the original markup, that
      information will, by default, be stored in each corresponding
-     `Tag` object. You can turn this off by passing
+     :py:class:`bs4.element.Tag` object. You can turn this off by passing
      store_line_numbers=False. If the parser you're using doesn't 
      keep track of this information, then setting store_line_numbers=True
      will do nothing.
+
     """
 
     USE_DEFAULT: Any = object() #: :meta private:
@@ -232,8 +233,8 @@ class TreeBuilder(object):
     DEFAULT_PRESERVE_WHITESPACE_TAGS : Set[str] = set()
 
     #: The textual contents of tags with these names should be
-    #: instantiated with some class other than NavigableString.
-    DEFAULT_STRING_CONTAINERS: Dict[str, Type[NavigableString]] = {}
+    #: instantiated with some class other than `bs4.element.NavigableString`.
+    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {}
 
     #: By default, tags are treated as empty-element tags if they have
     #: no contents--that is, using XML rules. HTMLTreeBuilder
@@ -284,8 +285,7 @@ class TreeBuilder(object):
         return tag_name in self.empty_element_tags
     
     def feed(self, markup:_RawMarkup) -> None:
-        """Run some incoming markup through some parsing process,
-        populating the `BeautifulSoup` object in `TreeBuilder.soup`
+        """Run incoming markup through some parsing process.
         """
         raise NotImplementedError()
 
@@ -490,7 +490,7 @@ class HTMLTreeBuilder(TreeBuilder):
     DEFAULT_BLOCK_ELEMENTS: Set[str] = set(["address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video"])
 
     #: These HTML tags need special treatment so they can be
-    #: represented by a string class other than NavigableString.
+    #: represented by a string class other than `bs4.element.NavigableString`.
     #:
     #: For some of these tags, it's because the HTML standard defines
     #: an unusual content model for them. I made this list by going
@@ -505,7 +505,7 @@ class HTMLTreeBuilder(TreeBuilder):
     #:
     #: TODO: Arguably <noscript> could go here but it seems
     #: qualitatively different from the other tags.
-    DEFAULT_STRING_CONTAINERS: Dict[str, Type[NavigableString]] = {
+    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {
         'rt' : RubyTextString,
         'rp' : RubyParenthesisString,
         'style': Stylesheet,

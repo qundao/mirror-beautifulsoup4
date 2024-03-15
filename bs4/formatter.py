@@ -44,8 +44,8 @@ class Formatter(EntitySubstitution):
     #: Constant name denoting XML markup
     XML:str = 'xml'
 
-    # Default values for the various constructor options when the
-    # markup language is HTML.
+    #: Default values for the various constructor options when the
+    #: markup language is HTML.
     HTML_DEFAULTS: Dict[str, Set[str]] = dict(
         cdata_containing_tags=set(["script", "style"]),
     )
@@ -55,7 +55,12 @@ class Formatter(EntitySubstitution):
     void_element_close_prefix: str #: :meta private:
     cdata_containing_tags: Set[str] #: :meta private:    
     indent:str #: :meta private:
-    empty_attributes_are_booleans: bool #: :meta private:
+
+    #: If this is set to true by the constructor, then attributes whose
+    #: values are sent to the empty string will be treated as HTML
+    #: boolean attributes. (Attributes whose value is None are always
+    #: rendered this way.)
+    empty_attributes_are_booleans: bool
     
     def _default(self, language:str, value:Optional[Set[str]], kwarg:str) -> Set[str]:
         if value is not None:
@@ -91,7 +96,7 @@ class Formatter(EntitySubstitution):
            as containing CDATA in this dialect. For example, in HTML,
            <script> and <style> tags are defined as containing CDATA,
            and their contents should not be formatted.
-        :param blank_attributes_are_booleans: If this is set to true,
+        :param empty_attributes_are_booleans: If this is set to true,
           then attributes whose values are sent to the empty string
           will be treated as `HTML boolean
           attributes<https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#boolean-attributes>`_. (Attributes
@@ -132,7 +137,7 @@ class Formatter(EntitySubstitution):
         text.
 
         :param ns: A string.
-        :return: A string with certain characters replaced by named
+        :return: The same string but with certain characters replaced by named
            or numeric entities.
         """
         if not self.entity_substitution:
@@ -155,16 +160,16 @@ class Formatter(EntitySubstitution):
         """
         return self.substitute(value)
 
-    def attributes(self, tag:Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
+    def attributes(self, tag:bs4.element.Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
         """Reorder a tag's attributes however you want.
         
         By default, attributes are sorted alphabetically. This makes
         behavior consistent between Python 2 and Python 3, and preserves
         backwards compatibility with older versions of Beautiful Soup.
 
-        If `empty_attributes_are_booleans` is True, then attributes whose
-        values are set to the empty string will be treated as boolean
-        attributes.
+        If `empty_attributes_are_booleans` is True, then
+        attributes whose values are set to the empty string will be
+        treated as boolean attributes.
         """
         if tag.attrs is None:
             return []

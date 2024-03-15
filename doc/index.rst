@@ -474,7 +474,7 @@ Unicode string. If you don't, your string will carry around a
 reference to the entire Beautiful Soup parse tree, even when you're
 done using Beautiful Soup. This is a big waste of memory.
 
-.. py:class:: BeautifulSoup
+.. BeautifulSoup
 
 ---------------------------
 

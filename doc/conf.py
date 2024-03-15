@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Beautiful Soup'
-copyright = '2004-2023, Leonard Richardson'
+copyright = '2004-2024 Leonard Richardson'
 author = 'Leonard Richardson'
-release = '4.12.1'
+release = '4.13.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -28,6 +28,6 @@ language = 'en,ja,ko,ru,pt,zh'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'alabaster'
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 default_role = 'any'

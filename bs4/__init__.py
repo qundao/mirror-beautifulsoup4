@@ -139,7 +139,7 @@ class BeautifulSoup(Tag):
     DEFAULT_BUILDER_FEATURES: Sequence[str] = ['html', 'fast']
 
     #: A string containing all ASCII whitespace characters, used in
-    #: `BeautifulSoup.endData` to detect data chunks that seem 'empty'.
+    #: during parsing to detect data chunks that seem 'empty'.
     ASCII_SPACES: str = '\x20\x0a\x09\x0c\x0d'
 
     # FUTURE PYTHON:
@@ -640,7 +640,7 @@ class BeautifulSoup(Tag):
         :param namespace: The URI of the new Tag's XML namespace, if any.
         :param prefix: The prefix for the new Tag's XML namespace, if any.
         :param attrs: A dictionary of this Tag's attribute values; can
-            be used instead of `kwattrs` for attributes like 'class'
+            be used instead of ``kwattrs`` for attributes like 'class'
             that are reserved words in Python.
         :param sourceline: The line number where this tag was
             (purportedly) found in its source document.

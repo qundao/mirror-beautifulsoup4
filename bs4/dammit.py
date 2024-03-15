@@ -3,9 +3,9 @@
 
 This library converts a bytestream to Unicode through any means
 necessary. It is heavily based on code from Mark Pilgrim's `Universal
-Feed Parser <https://pypi.org/project/feedparser/>`_. It works best on
-XML and HTML, but it does not rewrite the XML or HTML to reflect a new
-encoding; that's the job of `TreeBuilder`.
+Feed Parser <https://pypi.org/project/feedparser/>`_, now maintained
+by Kurt McKee. It does not rewrite the body of an XML or HTML document
+to reflect a new encoding; that's the job of `TreeBuilder`.
 
 """
 # Use of this source code is governed by the MIT license.

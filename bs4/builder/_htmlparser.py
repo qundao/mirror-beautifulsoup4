@@ -321,8 +321,10 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
 
 
 class HTMLParserTreeBuilder(HTMLTreeBuilder):
-    """A Beautiful soup `TreeBuilder` that uses the `HTMLParser` parser,
-    found in the Python standard library.
+    """A Beautiful soup `bs4.builder.TreeBuilder` that uses the
+    :py:class:`html.parser.HTMLParser` parser, found in the Python
+    standard library.
+
     """
     is_xml:bool = False
     picklable:bool = True
@@ -381,7 +383,8 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
 
             Each 4-tuple represents a strategy for parsing the document.
             This TreeBuilder uses Unicode, Dammit to convert the markup
-            into Unicode, so the `markup` element will always be a string.
+            into Unicode, so the ``markup`` element of the tuple will
+            always be a string.
         """
         if isinstance(markup, str):
             # Parse Unicode as-is.

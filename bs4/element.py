@@ -2557,7 +2557,7 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
-    of matching an `ElementFilter` against a parse tree. Basically, a list of
+    of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
     """
     source: Optional[ElementFilter]
