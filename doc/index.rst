@@ -1,9 +1,5 @@
-.. _manual:
-
 Beautiful Soup Documentation
 ============================
-
-.. py:module:: bs4
 
 .. image:: 6.1.jpg
    :align: right
