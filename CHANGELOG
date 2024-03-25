@@ -157,6 +157,15 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   set the string contents of a Tag when creating it. Patch by Chris
   Papademetrious. [bug=2044599]
 
+* Defined a new iterator, PageElement.self_and_parents, which is the same
+  as PageElement.parents except it yields the element itself before
+  yielding its parents. [bug=2052936] TODO NEEDS DOC
+
+* Similarly, the PageElement.find_parent() and
+  PageElement.find_parents methods take an argument include_self,
+  which lets you treat the element itself as one of its
+  'parents'. [bug=2052936] TODO NEEDS DOC
+
 * The NavigableString class now has a .string property which returns the
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]

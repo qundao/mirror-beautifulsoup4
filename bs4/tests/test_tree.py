@@ -465,7 +465,7 @@ class TestParentOperations(SoupTest):
                                  <ul id="top">
                                   <ul id="middle">
                                    <ul id="bottom">
-                                    <b>Start here</b>
+                                    <b id="start">Start here</b>
                                    </ul>
                                   </ul>''')
         self.start = self.tree.b
@@ -488,10 +488,17 @@ class TestParentOperations(SoupTest):
             self.start.find_parents('ul'), ['bottom', 'middle', 'top'])
         self.assert_selects_ids(
             self.start.find_parents('ul', id="middle"), ['middle'])
+        assert self.start.find_parents(id='start') == []
+        self.assert_selects_ids(
+            self.start.find_parents(id='start', include_self=True), ['start']
+        )
 
     def test_find_parent(self):
         #assert self.start.find_parent('ul')['id'] == 'bottom'
         assert self.start.find_parent('ul', id='top')['id'] == 'top'
+
+        assert self.start.find_parent(id='start') == None
+        assert self.start.find_parent(id='start', include_self=True)['id'] == 'start'
 
     def test_parent_of_text_element(self):
         text = self.tree.find(string="Start here")
@@ -504,7 +511,12 @@ class TestParentOperations(SoupTest):
     def test_parent_generator(self):
         parents = [parent['id'] for parent in self.start.parents
                    if parent is not None and 'id' in parent.attrs]
-        assert parents, ['bottom', 'middle' == 'top']
+        assert parents == ['bottom', 'middle', 'top']
+
+    def test_self_and_parent_generator(self):
+        results = [parent['id'] for parent in self.start.self_and_parents
+                   if parent is not None and 'id' in parent.attrs]
+        assert results == ['start', 'bottom', 'middle', 'top']
 
 
 class ProximityTest(SoupTest):

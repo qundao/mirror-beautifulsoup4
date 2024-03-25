@@ -833,6 +833,7 @@ class PageElement(object):
             self,
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
+            include_self:bool=False,
             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
         """Find the closest parent of this PageElement that matches the given
         criteria.
@@ -842,12 +843,15 @@ class PageElement(object):
 
         :param name: A filter on tag name.
         :param attrs: Additional filters on attribute values.
+        :param self: Whether the PageElement itself should be considered
+           as one of its 'parents'.
         :kwargs: Additional filters on attribute values.
         """
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
         r = None
-        l = self.find_parents(name, attrs, 1, _stacklevel=3, **kwargs)
+        l = self.find_parents(name, attrs, 1, include_self=include_self,
+                              _stacklevel=3, **kwargs)
         if l:
             r = l[0]
         return r
@@ -860,6 +864,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             limit:Optional[int]=None,
+            include_self:bool=False,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
         """Find all parents of this `PageElement` that match the given criteria.
@@ -870,10 +875,16 @@ class PageElement(object):
         :param name: A filter on tag name.
         :param attrs: Additional filters on attribute values.
         :param limit: Stop looking after finding this many results.
+        :param self: Whether the PageElement itself should be considered
+           as one of its 'parents'.
         :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
-        return self._find_all(name, attrs, None, limit, self.parents,
+        if include_self:
+            iterator = self.self_and_parents
+        else:
+            iterator = self.parents
+        return self._find_all(name, attrs, None, limit, iterator,
                               _stacklevel=_stacklevel+1, **kwargs)
 
     findParents = _deprecated_function_alias(
@@ -1053,15 +1064,25 @@ class PageElement(object):
             i = i.previous_sibling
 
     @property
-    def parents(self) -> Iterator[PageElement]:
-        """All PageElements that are parents of this PageElement.
+    def parents(self) -> Iterator[Tag]:
+        """All elements that are parents of this PageElement.
 
-        :yield: A sequence of PageElements.
+        :yield: A sequence of Tags, ending with a BeautifulSoup object.
         """
         i = self.parent
         while i is not None:
             yield i
             i = i.parent
+
+    @property
+    def self_and_parents(self) -> Iterator[PageElement]:
+        """This element, then all of its parents.
+
+        :yield: A sequence of PageElements, ending with a BeautifulSoup object.
+        """
+        yield self
+        for i in self.parents:
+            yield i
 
     @property
     def decomposed(self) -> bool:
