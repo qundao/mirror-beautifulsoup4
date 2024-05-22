@@ -142,7 +142,7 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 # New features
 
 * The new ElementFilter class encapsulates Beautiful Soup's rules
-  about matching elements and decising which parts of a document to
+  about matching elements and deciding which parts of a document to
   parse. It's easy to override those rules with subclassing or
   function composition. The SoupStrainer class, which contains all the
   matching logic you're familiar with from the find_* methods, is now

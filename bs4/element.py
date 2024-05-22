@@ -53,10 +53,13 @@ if TYPE_CHECKING:
         _FormatterOrName,
     )
     from bs4._typing import (
+        _AtMostOneElement,
         _AttributeValue,
         _AttributeValues,
         _Encoding,
         _InsertableElement,
+        _OneElement,
+        _QueryResults,
         _RawOrProcessedAttributeValues,
         _StrainableElement,
         _StrainableAttribute,
@@ -619,7 +622,7 @@ class PageElement(object):
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
             **kwargs:_StrainableAttribute
-    ) -> Optional[PageElement]:
+    ) -> _AtMostOneElement:
         """Find the first PageElement that matches the given criteria and
         appears later in the document than this PageElement.
 
@@ -642,7 +645,7 @@ class PageElement(object):
             limit:Optional[int]=None,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute
-    ) -> ResultSet[PageElement]: 
+    ) -> _QueryResults:
         """Find all `PageElement` objects that match the given criteria and
         appear later in the document than this `PageElement`.
 
@@ -665,7 +668,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
-            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+            **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Find the closest sibling to this PageElement that matches the
         given criteria and appears later in the document.
 
@@ -691,7 +694,7 @@ class PageElement(object):
             limit:Optional[int]=None,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute
-    ) -> ResultSet[PageElement]: 
+    ) -> _QueryResults:
         """Find all siblings of this `PageElement` that match the given criteria
         and appear later in the document.
 
@@ -721,7 +724,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
-            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+            **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Look backwards in the document from this `PageElement` and find the
         first `PageElement` that matches the given criteria.
 
@@ -748,7 +751,7 @@ class PageElement(object):
             limit:Optional[int]=None,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute
-    ) -> ResultSet[PageElement]: 
+    ) -> _QueryResults:
         """Look backwards in the document from this `PageElement` and find all
         `PageElement` that match the given criteria.
 
@@ -778,7 +781,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             string:Optional[_StrainableString]=None,
-            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+            **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Returns the closest sibling to this `PageElement` that matches the
         given criteria and appears earlier in the document.
 
@@ -804,7 +807,7 @@ class PageElement(object):
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
             _stacklevel:int=2,
-            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+            **kwargs:_StrainableAttribute) -> _QueryResults:
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
 
@@ -834,7 +837,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             include_self:bool=False,
-            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+            **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Find the closest parent of this PageElement that matches the given
         criteria.
 
@@ -866,7 +869,7 @@ class PageElement(object):
             limit:Optional[int]=None,
             include_self:bool=False,
             _stacklevel:int=2,
-            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+            **kwargs:_StrainableAttribute) -> _QueryResults:
         """Find all parents of this `PageElement` that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
@@ -918,9 +921,9 @@ class PageElement(object):
             name:_FindMethodName,
             attrs:_StrainableAttributes,
             string:Optional[_StrainableString],
-            **kwargs:_StrainableAttribute) -> Optional[PageElement]:
-        r: Optional[PageElement] = None
-        l: ResultSet[PageElement] = method(
+            **kwargs:_StrainableAttribute) -> _AtMostOneElement:
+        r: _AtMostOneElement = None
+        l: _QueryResults = method(
             name, attrs, string, 1, _stacklevel=4, **kwargs
         )
         if l:
@@ -935,9 +938,9 @@ class PageElement(object):
             limit:Optional[int],
             generator:Iterator[PageElement],
             _stacklevel:int=3,
-            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+            **kwargs:_StrainableAttribute) -> _QueryResults:
         """Iterates over a generator looking for things that match."""
-        results: ResultSet[PageElement]
+        results: _QueryResults
         
         if string is None and 'text' in kwargs:
             string = kwargs.pop('text')
@@ -961,7 +964,7 @@ class PageElement(object):
         else:
             matcher = SoupStrainer(name, attrs, string, **kwargs)
 
-        result: Iterable[PageElement]
+        result: Iterable[_OneElement]
         if string is None and not limit and not attrs and not kwargs:
             if name is True or name is None:
                 # Optimization to find all tags.
@@ -991,7 +994,7 @@ class PageElement(object):
                 return ResultSet(matcher, result)
         return self.filter(generator, matcher, limit)
 
-    def filter(self, generator:Iterator[PageElement], element_filter:ElementFilter, limit:Optional[int]=None) -> ResultSet[PageElement]:
+    def filter(self, generator:Iterator[PageElement], element_filter:ElementFilter, limit:Optional[int]=None) -> _QueryResults:
         """The most generic search method offered by Beautiful Soup.
 
         You can pass in your own generator for iterating over the
@@ -1006,7 +1009,7 @@ class PageElement(object):
 
         :param limit: Stop looking after finding this many results.
         """
-        results:ResultSet[PageElement] = ResultSet(element_filter)
+        results:_QueryResults = ResultSet(element_filter)
         while True:
             try:
                 i = next(generator)
@@ -1014,7 +1017,7 @@ class PageElement(object):
                 break
             if i:
                 if element_filter.match(i):
-                    results.append(i)
+                    results.append(cast(_OneElement, i))
                     if limit is not None and len(results) >= limit:
                         break
         return results
@@ -1982,7 +1985,7 @@ class Tag(PageElement):
             limit:Optional[int]=None,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute
-        )-> ResultSet[PageElement]:
+        )-> _QueryResults:
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
@@ -2405,7 +2408,7 @@ class Tag(PageElement):
              attrs:_StrainableAttributes={},
              recursive:bool=True,
              string:Optional[_StrainableString]=None,
-             **kwargs:_StrainableAttribute) -> Optional[PageElement]:
+             **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Look in the children of this PageElement and find the first
         PageElement that matches the given criteria.
 
@@ -2440,7 +2443,7 @@ class Tag(PageElement):
             string:Optional[_StrainableString]=None,
             limit:Optional[int]=None,
             _stacklevel:int=2,
-            **kwargs:_StrainableAttribute) -> ResultSet[PageElement]:
+            **kwargs:_StrainableAttribute) -> _QueryResults:
         """Look in the children of this `PageElement` and find all
         `PageElement` objects that match the given criteria.
 

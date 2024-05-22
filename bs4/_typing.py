@@ -31,7 +31,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from bs4.element import PageElement, Tag
+    from bs4.element import NavigableString, PageElement, ResultSet, Tag
 
 @runtime_checkable
 class _RegularExpressionProtocol(Protocol):
@@ -174,3 +174,9 @@ _StrainableString:TypeAlias = _StrainableAttribute
 
 #: A dictionary may be used to match against multiple attribute vlaues at once.
 _StrainableAttributes:TypeAlias = Dict[str, _StrainableAttribute]
+
+#: Many Beautiful soup methods return a PageElement or an ResultSet of
+#: PageElements. A PageElement is either a Tag or a NavigableString.
+_OneElement:TypeAlias = Union['Tag', 'NavigableString']
+_AtMostOneElement:TypeAlias = Optional[_OneElement]
+_QueryResults:TypeAlias = 'ResultSet[_OneElement]'

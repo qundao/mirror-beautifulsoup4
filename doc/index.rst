@@ -2700,7 +2700,15 @@ and convert it to Unicode. The autodetected encoding is available as
 the ``.original_encoding`` attribute of the :py:class:`BeautifulSoup` object::
 
  soup.original_encoding
- 'utf-8'
+ # 'utf-8'
+
+If ``.original_encoding`` is ``None``, that means the document was
+already Unicode when it was passed into Beautiful Soup::
+
+  markup = "<h1>Sacré bleu!</h1>"
+  soup = BeautifulSoup(markup, 'html.parser')
+  print(soup.original_encoding)
+  # None
 
 Unicode, Dammit guesses correctly most of the time, but sometimes it
 makes mistakes. Sometimes it guesses correctly, but only after a
