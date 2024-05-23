@@ -264,10 +264,10 @@ class PageElement(object):
     _decomposed: bool
 
     parent: Optional[Tag]
-    next_element: Optional[PageElement]
-    previous_element: Optional[PageElement]
-    next_sibling: Optional[PageElement]
-    previous_sibling: Optional[PageElement]
+    next_element: _AtMostOneElement
+    previous_element: _AtMostOneElement
+    next_sibling: _AtMostOneElement
+    previous_sibling: _AtMostOneElement
 
     #: Whether or not this element is hidden from generated output.
     #: Only the `BeautifulSoup` object itself is hidden.
@@ -530,8 +530,8 @@ class PageElement(object):
         `PageElement.decomposed` property.
         """
         self.extract()
-        e: Optional[PageElement] = self
-        next_up: Optional[PageElement] = None
+        e: _AtMostOneElement = self
+        next_up: _AtMostOneElement = None
         while e is not None:
             next_up = e.next_element
             e.__dict__.clear()
@@ -542,12 +542,12 @@ class PageElement(object):
 
     def _last_descendant(
         self, is_initialized:bool=True, accept_self:bool=True
-    ) -> Optional[PageElement]:
+    ) -> _AtMostOneElement:
         """Finds the last element beneath this object to be parsed.
 
         Special note to help you figure things out if your type
         checking is tripped up by the fact that this method returns
-        Optional[PageElement] instead of PageElement: the only time
+        _AtMostOneElement instead of PageElement: the only time
         this method returns None is if `accept_self` is False and the
         `PageElement` has no children--either it's a NavigableString
         or an empty Tag.
@@ -898,13 +898,13 @@ class PageElement(object):
     )
 
     @property
-    def next(self) -> Optional[PageElement]:
+    def next(self) -> _AtMostOneElement:
         """The `PageElement`, if any, that was parsed just after this one.
         """
         return self.next_element
 
     @property
-    def previous(self) -> Optional[PageElement]:
+    def previous(self) -> _AtMostOneElement:
         """The `PageElement`, if any, that was parsed just before this one.
         """
         return self.previous_element
@@ -1801,7 +1801,7 @@ class Tag(PageElement):
     replace_with_children = unwrap
 
     @_deprecated("unwrap", "4.0.0")
-    def replaceWithChildren(self) -> PageElement:
+    def replaceWithChildren(self) -> _OneElement:
         ": :meta private:"
         return self.unwrap()
     
@@ -1996,7 +1996,7 @@ class Tag(PageElement):
     def __getattr__(self, subtag:str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
         #print("Getattr %s.%s" % (self.__class__, tag))
-        result: Optional[PageElement]
+        result: _AtMostOneElement
         if len(subtag) > 3 and subtag.endswith('Tag'):
             # BS3: soup.aTag -> "soup.find("a")
             tag_name = subtag[:-3]
@@ -2501,7 +2501,7 @@ class Tag(PageElement):
             PageElement, self._last_descendant(accept_self=True)
         )
         stopNode = last_descendant.next_element
-        current: Optional[PageElement] = self.contents[0]
+        current: _AtMostOneElement = self.contents[0]
         while current is not stopNode and current is not None:
             yield current
             current = current.next_element
