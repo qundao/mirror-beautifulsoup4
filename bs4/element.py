@@ -274,10 +274,10 @@ class PageElement(object):
     hidden: bool=False
     
     def setup(self, parent:Optional[Tag]=None,
-              previous_element:Optional[PageElement]=None,
-              next_element:Optional[PageElement]=None,
-              previous_sibling:Optional[PageElement]=None,
-              next_sibling:Optional[PageElement]=None) -> None:
+              previous_element:_AtMostOneElement=None,
+              next_element:_AtMostOneElement=None,
+              previous_sibling:_AtMostOneElement=None,
+              next_sibling:_AtMostOneElement=None) -> None:
         """Sets up the initial relations between this element and
         other elements.
 
@@ -1445,7 +1445,7 @@ class Tag(PageElement):
                  prefix:Optional[str]=None,
                  attrs:Optional[_RawOrProcessedAttributeValues]=None,
                  parent:Optional[Union[BeautifulSoup, Tag]]=None,
-                 previous:Optional[PageElement]=None,
+                 previous:_AtMostOneElement=None,
                  is_xml:Optional[bool]=None,
                  sourceline:Optional[int]=None,
                  sourcepos:Optional[int]=None,

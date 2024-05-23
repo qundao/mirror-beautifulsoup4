@@ -178,6 +178,8 @@ _StrainableAttributes:TypeAlias = Dict[str, _StrainableAttribute]
 
 #: Many Beautiful soup methods return a PageElement or an ResultSet of
 #: PageElements. A PageElement is either a Tag or a NavigableString.
+#: These convenience aliases make it easier for IDE users to see which methods
+#: are available on the objects they're dealing with.
 _OneElement:TypeAlias = Union['PageElement', 'Tag', 'NavigableString']
 _AtMostOneElement:TypeAlias = Optional[_OneElement]
 _QueryResults:TypeAlias = 'ResultSet[_OneElement]'
