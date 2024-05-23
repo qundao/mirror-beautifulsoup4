@@ -77,7 +77,7 @@ class TestElementFilter(SoupTest):
         class MyFilter(ElementFilter):
             def allow_tag_creation(self, nsprefix:Optional[str], name:str,
                                    attrs:Optional[_RawAttributeValues]):
-                return nsprefix=="allow" or name=="allow" or "allow" in attrs
+                return nsprefix=="allow" or name=="allow" or (attrs is not None and "allow" in attrs)
         filter = MyFilter()
         f = filter.allow_tag_creation
         assert True == f("allow", "ignore", {})

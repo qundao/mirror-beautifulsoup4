@@ -4,6 +4,7 @@
 # that can be used once Beautiful Soup drops support for older
 # versions:
 #
+# * ClassVar can be put on class variables now.
 # * In 3.10, x|y is an accepted shorthand for Union[x,y].
 # * In 3.10, TypeAlias gains capabilities that can be used to
 #   improve the tree matching types (I don't remember what, exactly).
@@ -177,6 +178,6 @@ _StrainableAttributes:TypeAlias = Dict[str, _StrainableAttribute]
 
 #: Many Beautiful soup methods return a PageElement or an ResultSet of
 #: PageElements. A PageElement is either a Tag or a NavigableString.
-_OneElement:TypeAlias = Union['Tag', 'NavigableString']
+_OneElement:TypeAlias = Union['PageElement', 'Tag', 'NavigableString']
 _AtMostOneElement:TypeAlias = Optional[_OneElement]
 _QueryResults:TypeAlias = 'ResultSet[_OneElement]'
