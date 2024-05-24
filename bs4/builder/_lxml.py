@@ -429,9 +429,9 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def doctype(self, name:str, pubid:str, system:str) -> None:
         assert self.soup is not None
         self.soup.endData()
-        # TODO: This bypasses the ElementFilter check.
-        doctype = Doctype.for_name_and_ids(name, pubid, system)
-        self.soup.object_was_parsed(doctype)
+        doctype_string = Doctype._string_for_name_and_ids(name, pubid, system)
+        self.soup.handle_data(doctype_string)
+        self.soup.endData(containerClass=Doctype)
 
     def comment(self, text:str|bytes) -> None:
         "Handle comments as Comment objects."

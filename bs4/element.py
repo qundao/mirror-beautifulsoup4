@@ -1017,7 +1017,7 @@ class PageElement(object):
                 break
             if i:
                 if element_filter.match(i):
-                    results.append(cast(_OneElement, i))
+                    results.append(cast('_OneElement', i))
                     if limit is not None and len(results) >= limit:
                         break
         return results
@@ -1332,6 +1332,15 @@ class Doctype(PreformattedString):
         :param system_id: The system identifier for this document type,
             e.g. 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
         """
+        return Doctype(cls._string_for_name_and_ids(name, pub_id, system_id))
+
+    @classmethod
+    def _string_for_name_and_ids(self, name:str, pub_id:Optional[str], system_id:Optional[str]) -> str:
+        """Generate a string to be used as the basis of a Doctype object.
+
+        This is a separate method from for_name_and_ids() because the lxml
+        TreeBuilder needs to call it.
+        """
         value = name or ''
         if pub_id is not None:
             value += ' PUBLIC "%s"' % pub_id
@@ -1339,8 +1348,7 @@ class Doctype(PreformattedString):
                 value += ' "%s"' % system_id
         elif system_id is not None:
             value += ' SYSTEM "%s"' % system_id
-
-        return Doctype(value)
+        return value
 
     PREFIX:str = '<!DOCTYPE '
     SUFFIX:str = '>\n'

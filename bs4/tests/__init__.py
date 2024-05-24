@@ -321,6 +321,11 @@ class TreeBuilderSmokeTest(SoupTest):
         markup = '<!DOCTYPE html]ff>'
         soup = self.soup(markup)
 
+    def test_doctype_filtered(self):
+        markup = '<!DOCTYPE html>\n<html>\n</html>'
+        soup = self.soup(markup, parse_only=SoupStrainer(name="html"))
+        assert not any(isinstance(x, Doctype) for x in soup.find_all())
+
 class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 
     """A basic test of a treebuilder's competence.
