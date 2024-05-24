@@ -21,7 +21,7 @@ from typing import (
 import warnings
 
 from bs4._deprecation import _deprecated
-from bs4.element import NavigableString, PageElement, Tag
+from bs4.element import AttributeDict, NavigableString, PageElement, Tag
 from bs4._typing import (
     _AttributeValue,
     _PageElementMatchFunction,
@@ -530,7 +530,7 @@ class SoupStrainer(ElementFilter):
         # For each attribute that has rules, at least one rule must
         # match.
         if attrs is None:
-            attrs = {}
+            attrs = AttributeDict()
         for attr, rules in self.attribute_rules.items():
             attr_value = attrs.get(attr)
             if not self._attribute_match(attr_value, rules):

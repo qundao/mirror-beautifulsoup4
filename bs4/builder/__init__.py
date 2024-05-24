@@ -23,6 +23,7 @@ from typing import (
 import warnings
 import sys
 from bs4.element import (
+    AttributeDict,
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
     RubyParenthesisString,
@@ -428,7 +429,7 @@ class SAXTreeBuilder(TreeBuilder):
         pass
 
     def startElement(self, name:str, attrs:Dict[str,str]) -> None:
-        attrs = dict((key[1], value) for key, value in list(attrs.items()))
+        attrs = AttributeDict((key[1], value) for key, value in list(attrs.items()))
         #print("Start %s, %r" % (name, attrs))
         assert self.soup is not None
         self.soup.handle_starttag(name, None, None, attrs)

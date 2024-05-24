@@ -32,7 +32,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from bs4.element import NavigableString, PageElement, ResultSet, Tag
+    from bs4.element import AttributeDict, NavigableString, PageElement, ResultSet, Tag
 
 @runtime_checkable
 class _RegularExpressionProtocol(Protocol):
@@ -92,7 +92,7 @@ _RawAttributeValue: TypeAlias = str
 #: A dictionary of names to `_RawAttributeValue` objects. This is how
 #: Beautiful Soup expects a `TreeBuilder` to represent a tag's
 #: attribute values.
-_RawAttributeValues: TypeAlias = Dict[str, _RawAttributeValue]
+_RawAttributeValues: TypeAlias = 'AttributeDict[Union[str, NamespacedAttribute], _RawAttributeValue]'
 
 #: An attribute value in its final form, as stored in the
 # `Tag` class, after it has been processed and (in some cases)

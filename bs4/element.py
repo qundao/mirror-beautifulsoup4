@@ -205,6 +205,22 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
             return ''
         return eventual_encoding
 
+class AttributeDict(dict):
+    """A dictionary that processes incoming values for consistency
+    with the HTML spec regarding the values of tag attributes.
+    """
+
+    def __setitem__(self, key:str, value:Any):
+        if value in (False, None):
+            del self[key]
+            return
+        if isinstance(value, (int, float)):
+            value = str(value)
+        elif isinstance(value, bool):
+            value = key
+        super(AttributeDict, self).__setitem__(key, value)
+
+
 
 class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     """A generic stand-in for the value of a ``<meta>`` tag's ``content``
@@ -1395,7 +1411,6 @@ class RubyParenthesisString(NavigableString):
     """A NavigableString representing the contents of an `<rp> HTML
     tag <https://dev.w3.org/html5/spec-LC/text-level-semantics.html#the-rp-element>`_.
     """
-
 
 class Tag(PageElement):
     """An HTML or XML tag that is part of a parse tree, along with its

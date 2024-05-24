@@ -48,6 +48,7 @@ from ._deprecation import (
     _deprecated_alias,
 )
 from .element import (
+    AttributeDict,
     CData,
     Comment,
     DEFAULT_OUTPUT_ENCODING,
@@ -650,14 +651,15 @@ class BeautifulSoup(Tag):
         :param kwattrs: Keyword arguments for the new Tag's attribute values.
 
         """
-        kwattrs.update(attrs)
+        attr_container = AttributeDict(**kwattrs)
+        attr_container.update(attrs)
         tag_class = self.element_classes.get(Tag, Tag)
 
         # Assume that this is either Tag or a subclass of Tag. If not,
         # the user brought type-unsafety upon themselves.
         tag_class = cast(Type[Tag], tag_class)
         tag = tag_class(
-            None, self.builder, name, namespace, nsprefix, kwattrs,
+            None, self.builder, name, namespace, nsprefix, attr_container,
             sourceline=sourceline, sourcepos=sourcepos
         )
 
