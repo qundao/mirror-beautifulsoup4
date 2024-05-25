@@ -6,6 +6,9 @@ are tested in separate files.
 
 import pytest
 from bs4.element import (
+    AttributeDict,
+    HTMLAttributeDict,
+    XMLAttributeDict,
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
     NamespacedAttribute,
@@ -14,7 +17,7 @@ from bs4.element import (
 from . import SoupTest
 
 
-class TestNamedspacedAttribute(object):
+class TestNamedspacedAttribute:
 
     def test_name_may_be_none_or_missing(self):
         a = NamespacedAttribute("xmlns", None)
@@ -54,7 +57,7 @@ class TestNamedspacedAttribute(object):
         assert a != e
 
 
-class TestAttributeValueWithCharsetSubstitution(object):
+class TestAttributeValueWithCharsetSubstitution:
     """Certain attributes are designed to have the charset of the
     final document substituted into their value.
     """
@@ -83,7 +86,51 @@ class TestAttributeValueWithCharsetSubstitution(object):
         # charset argument will be omitted altogether.
         assert "text/html" == value.substitute_encoding("palmos")
 
-class TestResultSet(object):
+class TestAttributeDicts:
+
+    def test_xml_attribute_value_handling(self):
+        # Verify that attribute values are processed according to the
+        # XML spec's rules.
+        d = XMLAttributeDict()
+        d['v'] = 100
+        assert d['v'] == '100'
+        d['v'] = 100.123
+        assert d['v'] == '100.123'
+
+        # This preserves Beautiful Soup's old behavior in the absence of
+        # guidance from the spec.
+        d['v'] = False
+        assert d['v'] == False
+
+        d['v'] = True
+        assert d['v'] == True
+
+        d['v'] = None
+        assert d['v'] == ''
+
+    def test_html_attribute_value_handling(self):
+        # Verify that attribute values are processed according to the
+        # HTML spec's rules.
+        d = HTMLAttributeDict()
+        d['v'] = 100
+        assert d['v'] == '100'
+        d['v'] = 100.123
+        assert d['v'] == '100.123'
+
+        d['v'] = False
+        assert 'v' not in d
+
+        d['v'] = None
+        assert 'v' not in d
+
+        d['v'] = True
+        assert d['v'] == 'v'
+
+        attribute = NamespacedAttribute("prefix", "name", "namespace")
+        d[attribute] = True
+        assert d[attribute] == 'name'
+
+class TestResultSet:
 
     def test_getattr_exception(self):
 

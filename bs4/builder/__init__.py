@@ -181,6 +181,10 @@ class TreeBuilder(object):
      keep track of this information, then setting store_line_numbers=True
      will do nothing.
 
+    :param attribute_dict_class: A Tag's attribute values (available
+      as tag.attrs) willl be stored in an instance of this class.
+      The default is Beautiful Soup's built-in `AttributeDict` class and
+      you will probably never need to change it.
     """
 
     USE_DEFAULT: Any = object() #: :meta private:
@@ -189,7 +193,8 @@ class TreeBuilder(object):
                  preserve_whitespace_tags:Set[str]=USE_DEFAULT,
                  store_line_numbers:bool=USE_DEFAULT,
                  string_containers:Dict[str, Type[NavigableString]]=USE_DEFAULT,
-                 empty_element_tags:Set[str]=USE_DEFAULT
+                 empty_element_tags:Set[str]=USE_DEFAULT,
+                 attribute_dict_class:Type[Mapping]=AttributeDict,
     ):
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
@@ -208,6 +213,7 @@ class TreeBuilder(object):
         if string_containers == self.USE_DEFAULT:
             string_containers = self.DEFAULT_STRING_CONTAINERS
         self.string_containers = string_containers
+        self.attribute_dict_class = attribute_dict_class
 
     NAME:str = "[Unknown tree builder]"
     ALTERNATE_NAMES: Iterable[str] = []

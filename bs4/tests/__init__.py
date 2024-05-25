@@ -326,6 +326,25 @@ class TreeBuilderSmokeTest(SoupTest):
         soup = self.soup(markup, parse_only=SoupStrainer(name="html"))
         assert not any(isinstance(x, Doctype) for x in soup.find_all())
 
+    def test_custom_attribute_dict_class(self):
+        class MyAttributeDict(dict):
+            def __setitem__(self, key:str, value:Any):
+                # Ignore the provided value and substitute a
+                # hard-coded one.
+                super().__setitem__(key, "OVERRIDDEN")
+
+        markup = '<a attr1="val1" attr2="val2"></a>'
+        builder = self.default_builder(attribute_dict_class=MyAttributeDict)
+        soup = self.soup(markup, builder=builder)
+        tag = soup.a
+        assert 'OVERRIDDEN' == tag['attr1']
+        tag['attr3'] = True
+        assert 'OVERRIDDEN' == tag['attr3']
+
+        expect = '<a attr1="OVERRIDDEN" attr2="OVERRIDDEN" attr3="OVERRIDDEN"></a>'
+        print(tag.encode())
+        assert expect == tag.decode()
+
 class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 
     """A basic test of a treebuilder's competence.

@@ -48,7 +48,6 @@ from ._deprecation import (
     _deprecated_alias,
 )
 from .element import (
-    AttributeDict,
     CData,
     Comment,
     DEFAULT_OUTPUT_ENCODING,
@@ -651,7 +650,7 @@ class BeautifulSoup(Tag):
         :param kwattrs: Keyword arguments for the new Tag's attribute values.
 
         """
-        attr_container = AttributeDict(**kwattrs)
+        attr_container = self.builder.attribute_dict_class(**kwattrs)
         attr_container.update(attrs)
         tag_class = self.element_classes.get(Tag, Tag)
 

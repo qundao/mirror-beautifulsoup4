@@ -37,6 +37,7 @@ from bs4.builder import (
     HTMLTreeBuilder,
     )
 from bs4.element import (
+    HTMLAttributeDict,
     NamespacedAttribute,
     PageElement,
     nonwhitespace_re,

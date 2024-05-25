@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from bs4.builder import DetectsXMLParsedAsHTML
 
-class TestDetectsXMLParsedAsHTML(object):
+class TestDetectsXMLParsedAsHTML:
 
     @pytest.mark.parametrize(
         "markup,looks_like_xml",
