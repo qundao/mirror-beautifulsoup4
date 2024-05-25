@@ -19,6 +19,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Mapping,
     Optional,
     TYPE_CHECKING,
     Tuple,
@@ -89,6 +90,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
     ):
         self.soup = soup
         self.on_duplicate_attribute = on_duplicate_attribute
+        self.attribute_dict_class = soup.builder.attribute_dict_class
         HTMLParser.__init__(self, *args, **kwargs)
 
         # Keep a list of empty-element tags that were encountered
@@ -148,7 +150,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             closing tag).
         """
         # TODO: handle namespaces here?
-        attr_dict:Dict[str, str] = {}
+        attr_dict:Mapping[str, str] = self.attribute_dict_class()
         for key, value in attrs:
             # Change None attribute values to the empty string
             # for consistency with the other tree builders.

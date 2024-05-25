@@ -319,7 +319,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # need a mutable dict--lxml might send us an immutable
         # dictproxy. Third, so we can handle namespaced attribute
         # names by converting the keys to NamespacedAttributes.
-        new_attrs:Dict[Union[str,NamespacedAttribute], str] = {}
+        new_attrs:Dict[Union[str,NamespacedAttribute], str] = self.attribute_dict_class()
         for k, v in attrs.items():
             assert isinstance(k, str)
             assert isinstance(v, str)

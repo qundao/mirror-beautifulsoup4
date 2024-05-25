@@ -1559,14 +1559,22 @@ class Tag(PageElement):
             self.sourceline = sourceline
             self.sourcepos = sourcepos
 
+        if builder is None:
+            if is_xml:
+                attr_dict_class = XMLAttributeDict
+            else:
+                attr_dict_class = HTMLAttributeDict
+        else:
+            attr_dict_class = builder.attribute_dict_class
+
         if attrs is None:
-            self.attrs = dict()
+            self.attrs = attr_dict_class()
         else:
             if builder is not None and builder.cdata_list_attributes:
                 self.attrs = builder._replace_cdata_list_attribute_values(
                     self.name, attrs)
             else:
-                self.attrs = dict(attrs)
+                self.attrs = attr_dict_class(attrs)
 
         # If possible, determine ahead of time whether this tag is an
         # XML tag.

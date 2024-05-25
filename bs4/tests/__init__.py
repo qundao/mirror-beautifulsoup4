@@ -337,6 +337,7 @@ class TreeBuilderSmokeTest(SoupTest):
         builder = self.default_builder(attribute_dict_class=MyAttributeDict)
         soup = self.soup(markup, builder=builder)
         tag = soup.a
+        assert isinstance(tag.attrs, MyAttributeDict)
         assert 'OVERRIDDEN' == tag['attr1']
         tag['attr3'] = True
         assert 'OVERRIDDEN' == tag['attr3']
