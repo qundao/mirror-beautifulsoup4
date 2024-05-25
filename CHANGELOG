@@ -63,6 +63,45 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   removed two feature releases or one major release after the
   deprecation warning is added.
 
+* The storage for a tag's attribute values now modifies incoming values
+  to be consistent with the HTML or XML spec. This means that if you set an
+  attribute value to a number, it will be converted to a string
+  immediately rather than being converted when you output the document.
+  [bug=2065525]
+
+  More importantly for backwards compatibility, setting an HTML
+  attribute value to True will set the attribute's value to the
+  appropriate string per the HTML spec. Setting an attribute value to
+  False or None will remove the attribute value from the tag
+  altogether, rather than (effectively, as before) setting the value
+  to the literal string "False" or "None".
+
+  This means that some programs that modify documents will generate
+  different output than they would in earlier versions of Beautiful Soup,
+  but the new documents are more likely to represent the intent behind the
+  modifications.
+
+  To give a specific example, if you have code that looks something like this:
+
+	checkbox1['checked'] = True
+	checkbox2['checked'] = False
+
+  Then a document that used to look like this (with most browsers
+  treating both boxes as checked):
+
+	<input type="checkbox" checked="True"/>
+        <input type="checkbox" checked="False"/>
+
+  Will now look like this (with browsers treating only the first box
+  as checked):
+
+	<input type="checkbox" checked="checked"/>
+	<input type="checkbox"/>
+
+  You can get the old behavior back by instantiating a TreeBuilder
+  with `attribute_dict_class=dict`, or you can customize how Beautiful Soup
+  treates attribute values by passing in a custom subclass of dict.
+
 * If Tag.get_attribute_list() is used to access an attribute that's not set,
   the return value is now an empty list rather than [None].
 

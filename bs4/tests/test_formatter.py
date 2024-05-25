@@ -14,13 +14,13 @@ class TestFormatter(SoupTest):
         # Test the default behavior of Formatter.attributes().
         formatter = Formatter()
         tag = Tag(name="tag")
-        tag['b'] = 1
-        tag['a'] = 2
+        tag['b'] = "1"
+        tag['a'] = "2"
 
         # Attributes come out sorted by name. In Python 3, attributes
         # normally come out of a dictionary in the order they were
         # added.
-        assert [('a', 2), ('b', 1)] == formatter.attributes(tag)
+        assert [('a', "2"), ('b', "1")] == formatter.attributes(tag)
 
         # This works even if Tag.attrs is None, though this shouldn't
         # normally happen.

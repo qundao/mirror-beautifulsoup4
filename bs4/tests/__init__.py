@@ -333,7 +333,7 @@ class TreeBuilderSmokeTest(SoupTest):
                 # hard-coded one.
                 super().__setitem__(key, "OVERRIDDEN")
 
-        markup = '<a attr1="val1" attr2="val2"></a>'
+        markup = '<a attr1="val1" attr2="val2">f</a>'
         builder = self.default_builder(attribute_dict_class=MyAttributeDict)
         soup = self.soup(markup, builder=builder)
         tag = soup.a
@@ -342,8 +342,7 @@ class TreeBuilderSmokeTest(SoupTest):
         tag['attr3'] = True
         assert 'OVERRIDDEN' == tag['attr3']
 
-        expect = '<a attr1="OVERRIDDEN" attr2="OVERRIDDEN" attr3="OVERRIDDEN"></a>'
-        print(tag.encode())
+        expect = '<a attr1="OVERRIDDEN" attr2="OVERRIDDEN" attr3="OVERRIDDEN">f</a>'
         assert expect == tag.decode()
 
 class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
