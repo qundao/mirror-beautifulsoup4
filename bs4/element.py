@@ -1559,6 +1559,7 @@ class Tag(PageElement):
             self.sourceline = sourceline
             self.sourcepos = sourcepos
 
+        attr_dict_class:type[AttributeDict]
         if builder is None:
             if is_xml:
                 attr_dict_class = XMLAttributeDict

@@ -628,7 +628,7 @@ class BeautifulSoup(Tag):
             name:str,
             namespace:Optional[str]=None,
             nsprefix:Optional[str]=None,
-            attrs:_RawAttributeValues={},
+            attrs:Optional[_RawAttributeValues]=None,
             sourceline:Optional[int]=None,
             sourcepos:Optional[int]=None,
             string:Optional[str]=None,
@@ -651,7 +651,8 @@ class BeautifulSoup(Tag):
 
         """
         attr_container = self.builder.attribute_dict_class(**kwattrs)
-        attr_container.update(attrs)
+        if attrs is not None:
+            attr_container.update(attrs)
         tag_class = self.element_classes.get(Tag, Tag)
 
         # Assume that this is either Tag or a subclass of Tag. If not,

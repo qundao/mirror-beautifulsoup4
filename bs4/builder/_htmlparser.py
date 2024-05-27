@@ -29,6 +29,7 @@ from typing import (
 import warnings
 
 from bs4.element import (
+    AttributeDict,
     CData,
     Comment,
     Declaration,
@@ -150,7 +151,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             closing tag).
         """
         # TODO: handle namespaces here?
-        attr_dict:Mapping[str, str] = self.attribute_dict_class()
+        attr_dict:AttributeDict = self.attribute_dict_class()
         for key, value in attrs:
             # Change None attribute values to the empty string
             # for consistency with the other tree builders.

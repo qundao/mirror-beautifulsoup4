@@ -31,6 +31,7 @@ from io import BytesIO
 from io import StringIO
 from lxml import etree
 from bs4.element import (
+    AttributeDict,
     XMLAttributeDict,
     Comment,
     Doctype,
@@ -367,7 +368,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         # Namespaces are in play. Find any attributes that came in
         # from lxml with namespaces attached to their names, and
         # turn then into NamespacedAttribute objects.
-        final_attrs:Mapping[Union[str,NamespacedAttribute], str] = self.attribute_dict_class()
+        final_attrs:AttributeDict = self.attribute_dict_class()
         for attr, value in list(new_attrs.items()):
             namespace, attr = self._getNsTag(attr)
             if namespace is None:

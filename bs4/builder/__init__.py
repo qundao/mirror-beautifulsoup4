@@ -194,7 +194,7 @@ class TreeBuilder(object):
                  store_line_numbers:bool=USE_DEFAULT,
                  string_containers:Dict[str, Type[NavigableString]]=USE_DEFAULT,
                  empty_element_tags:Set[str]=USE_DEFAULT,
-                 attribute_dict_class:Type[Mapping]=AttributeDict,
+                 attribute_dict_class:Type[AttributeDict]=AttributeDict,
     ):
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
