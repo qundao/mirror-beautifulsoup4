@@ -293,7 +293,7 @@ class AttrList(object):
             # this procedure. Check for this and skip it.
             if not isinstance(value, list):
                 assert isinstance(value, str)
-                value = nonwhitespace_re.findall(value)
+                value = self.element.attribute_value_list_class(nonwhitespace_re.findall(value))
         self.element[name] = value
 
     def items(self) -> Iterable[Tuple[str, _AttributeValue]]:

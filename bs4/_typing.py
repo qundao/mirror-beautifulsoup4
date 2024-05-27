@@ -33,7 +33,15 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from bs4.element import AttributeDict, NamespacedAttribute, NavigableString, PageElement, ResultSet, Tag
+    from bs4.element import (
+        AttributeDict,
+        AttributeValueList,
+        NamespacedAttribute,
+        NavigableString,
+        PageElement,
+        ResultSet,
+        Tag,
+    )
 
 @runtime_checkable
 class _RegularExpressionProtocol(Protocol):
@@ -98,7 +106,7 @@ _RawAttributeValues: TypeAlias = 'Mapping[Union[str, NamespacedAttribute], _RawA
 #: An attribute value in its final form, as stored in the
 # `Tag` class, after it has been processed and (in some cases)
 # split into a list of strings.
-_AttributeValue: TypeAlias = Union[str, Iterable[str]]
+_AttributeValue: TypeAlias = Union[str, 'AttributeValueList']
 
 #: A dictionary of names to `_AttributeValue` objects. This is what
 #: a tag's attributes look like after processing.

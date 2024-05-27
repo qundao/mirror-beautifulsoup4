@@ -205,7 +205,16 @@ class CharsetMetaAttributeValue(AttributeValueWithCharsetSubstitution):
             return ''
         return eventual_encoding
 
+class AttributeValueList(List[str]):
+    """Class for the list used to hold the values of attributes which
+    have multiple values (such as HTML's 'class'). It's just a regular
+    list, but you can subclass it and pass it in to the TreeBuilder
+    constructor as attribute_value_list_class, to have your subclass
+    instantiated instead.
+    """
+
 class AttributeDict(dict):
+
     """Superclass for the dictionary used to hold a tag's
     attributes. You can use this, but it's just a regular dict with no
     special logic.
@@ -1540,7 +1549,7 @@ class Tag(PageElement):
                  cdata_list_attributes:Optional[Dict[str, Set[str]]]=None,
                  preserve_whitespace_tags:Optional[Set[str]]=None,
                  interesting_string_types:Optional[Set[Type[NavigableString]]]=None,
-                 namespaces:Optional[Dict[str, str]]=None
+                 namespaces:Optional[Dict[str, str]]=None,
     ):
         if parser is None:
             self.parser_class = None
@@ -1560,13 +1569,17 @@ class Tag(PageElement):
             self.sourcepos = sourcepos
 
         attr_dict_class:type[AttributeDict]
+        attribute_value_list_class:type[AttributeValueList]
         if builder is None:
             if is_xml:
                 attr_dict_class = XMLAttributeDict
             else:
                 attr_dict_class = HTMLAttributeDict
+            attribute_value_list_class = AttributeValueList
         else:
             attr_dict_class = builder.attribute_dict_class
+            attribute_value_list_class = builder.attribute_value_list_class
+        self.attribute_value_list_class = attribute_value_list_class
 
         if attrs is None:
             self.attrs = attr_dict_class()
@@ -1597,6 +1610,7 @@ class Tag(PageElement):
             self.interesting_string_types = interesting_string_types
         else:
             # Set up any substitutions for this tag, such as the charset in a META tag.
+            self.attribute_value_list_class = builder.attribute_value_list_class
             builder.set_up_substitutions(self)
 
             # Ask the TreeBuilder whether this tag might be an empty-element tag.
@@ -2017,7 +2031,7 @@ class Tag(PageElement):
         return self.attrs.get(key, default)
 
     def get_attribute_list(self, key:str,
-                           default:Optional[Iterable[str]]=None) -> List[str]:
+                           default:Optional[AttributeValueList]=None) -> AttributeValueList:
         """The same as get(), but always returns a (possibly empty) list.
 
         :param key: The attribute to look for.
@@ -2026,15 +2040,15 @@ class Tag(PageElement):
         :return: A list of strings, usually empty or containing only a single
             value.
         """
-        list_value: List[str]
+        list_value: AttributeValueList
         value = self.get(key, default)
         if value is None:
-            list_value = []
+            list_value = self.attribute_value_list_class()
         elif isinstance(value, list):
             list_value = value
         else:
             value = cast(str, value)
-            list_value = [value]
+            list_value = self.attribute_value_list_class([value])
         return list_value
 
     def has_attr(self, key:str) -> bool:

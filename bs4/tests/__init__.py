@@ -11,6 +11,7 @@ import warnings
 import pytest
 from bs4 import BeautifulSoup
 from bs4.element import (
+    AttributeValueList,
     CharsetMetaAttributeValue,
     Comment,
     ContentMetaAttributeValue,
@@ -344,6 +345,22 @@ class TreeBuilderSmokeTest(SoupTest):
 
         expect = '<a attr1="OVERRIDDEN" attr2="OVERRIDDEN" attr3="OVERRIDDEN">f</a>'
         assert expect == tag.decode()
+
+    def test_custom_attribute_value_list_class(self):
+        class MyCustomAttributeValueList(AttributeValueList):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.append("extra")
+        builder = self.default_builder(
+            multi_valued_attributes={"*": set(["attr2"])},
+            attribute_value_list_class=MyCustomAttributeValueList
+        )
+        markup = '<a attr1="val1" attr2="val2">f</a>'
+        soup = self.soup(markup, builder=builder)
+        tag = soup.a
+        assert tag['attr1'] == "val1"
+        assert tag['attr2'] == ["val2", "extra"]
+        assert isinstance(tag['attr2'], MyCustomAttributeValueList)
 
 class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 

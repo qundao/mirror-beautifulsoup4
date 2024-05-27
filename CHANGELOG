@@ -225,6 +225,12 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   Beautiful Soup issues when there *definitely* is a problem you
   need to correct.
 
+* It's now possible to modify the behavior of the list used to store the
+  values of multi-valued attributes such as HTML 'class', by passing in
+  whatever class you want instantiated (instead of a normal Python list)
+  to the TreeBuilder constructor as attribute_value_list_class.
+  [bug=2052943]
+
 # Improvements
 
 * decompose() was moved from Tag to its superclass PageElement, since

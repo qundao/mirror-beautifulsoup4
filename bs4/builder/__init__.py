@@ -24,6 +24,7 @@ import warnings
 import sys
 from bs4.element import (
     AttributeDict,
+    AttributeValueList,
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
     RubyParenthesisString,
@@ -185,6 +186,12 @@ class TreeBuilder(object):
       as tag.attrs) willl be stored in an instance of this class.
       The default is Beautiful Soup's built-in `AttributeDict` class and
       you will probably never need to change it.
+
+    :param attribute_dict_class: The value of a multi-valued attribute
+      (such as HTML's 'class') willl be stored in an instance of this
+      class.  The default is Beautiful Soup's built-in
+      `AttributeValueList`, which is a normal Python list, and you
+      will probably never need to change it.
     """
 
     USE_DEFAULT: Any = object() #: :meta private:
@@ -195,6 +202,7 @@ class TreeBuilder(object):
                  string_containers:Dict[str, Type[NavigableString]]=USE_DEFAULT,
                  empty_element_tags:Set[str]=USE_DEFAULT,
                  attribute_dict_class:Type[AttributeDict]=AttributeDict,
+                 attribute_value_list_class:Type[AttributeValueList]=AttributeValueList,
     ):
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
@@ -214,6 +222,7 @@ class TreeBuilder(object):
             string_containers = self.DEFAULT_STRING_CONTAINERS
         self.string_containers = string_containers
         self.attribute_dict_class = attribute_dict_class
+        self.attribute_value_list_class = attribute_value_list_class
 
     NAME:str = "[Unknown tree builder]"
     ALTERNATE_NAMES: Iterable[str] = []
@@ -397,9 +406,10 @@ class TreeBuilder(object):
                 original_value:_AttributeValue = modified_attrs[attr]
                 if isinstance(original_value, _RawAttributeValue):
                     # This is a _RawAttributeValue (a string) that
-                    # needs to be split into a list so it can be an
+                    # needs to be split and converted to a
+                    # AttributeValueList so it can be an
                     # _AttributeValue.
-                    modified_value = nonwhitespace_re.findall(original_value)
+                    modified_value = self.attribute_value_list_class(nonwhitespace_re.findall(original_value))
                 else:
                     # html5lib calls setAttributes twice for the
                     # same tag when rearranging the parse tree. On

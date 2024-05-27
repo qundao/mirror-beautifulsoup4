@@ -21,6 +21,7 @@ from bs4.builder import (
     TreeBuilder,
 )
 from bs4.element import (
+    AttributeValueList,
     XMLAttributeDict,
     Comment,
     PYTHON_SPECIFIC_ENCODINGS,
@@ -73,6 +74,7 @@ class TestConstructor(SoupTest):
                 self.preserve_whitespace_tags = []
                 self.string_containers = {}
                 self.attribute_dict_class = XMLAttributeDict
+                self.attribute_value_list_class = AttributeValueList
 
             def initialize_soup(self, soup):
                 pass

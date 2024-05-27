@@ -660,7 +660,7 @@ class BeautifulSoup(Tag):
         tag_class = cast(Type[Tag], tag_class)
         tag = tag_class(
             None, self.builder, name, namespace, nsprefix, attr_container,
-            sourceline=sourceline, sourcepos=sourcepos
+            sourceline=sourceline, sourcepos=sourcepos,
         )
 
         if string is not None:
