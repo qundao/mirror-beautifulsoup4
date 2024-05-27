@@ -233,6 +233,11 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
 # Improvements
 
+* Tag.sourceline and Tag.sourcepos are always set, even if the value is
+  None because the parser didn't provide that information. This has the
+  side effect of fixing a major performance problem when a Tag is copied.
+  [bug=2065904]
+
 * decompose() was moved from Tag to its superclass PageElement, since
   there's no reason it won't also work on NavigableString objects.
 

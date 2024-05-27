@@ -1567,6 +1567,9 @@ class Tag(PageElement):
             and (sourceline is not None or sourcepos is not None)):
             self.sourceline = sourceline
             self.sourcepos = sourcepos
+        else:
+            self.sourceline = sourceline
+            self.sourcepos = sourcepos
 
         attr_dict_class:type[AttributeDict]
         attribute_value_list_class:type[AttributeValueList]
