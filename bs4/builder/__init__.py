@@ -174,13 +174,14 @@ class TreeBuilder(object):
      for every tag, no matter what the name. You can override the
      default by changing :py:attr:`DEFAULT_STRING_CONTAINERS`.
 
-    :param store_line_numbers: If the parser keeps track of the
-     line numbers and positions of the original markup, that
-     information will, by default, be stored in each corresponding
-     :py:class:`bs4.element.Tag` object. You can turn this off by passing
-     store_line_numbers=False. If the parser you're using doesn't 
-     keep track of this information, then setting store_line_numbers=True
-     will do nothing.
+    :param store_line_numbers: If the parser keeps track of the line
+     numbers and positions of the original markup, that information
+     will, by default, be stored in each corresponding
+     :py:class:`bs4.element.Tag` object. You can turn this off by
+     passing store_line_numbers=False; then Tag.sourcepos and
+     Tag.sourceline will always be None. If the parser you're using
+     doesn't keep track of this information, then store_line_numbers
+     is irrelevant.
 
     :param attribute_dict_class: A Tag's attribute values (available
       as tag.attrs) willl be stored in an instance of this class.
@@ -192,6 +193,7 @@ class TreeBuilder(object):
       class.  The default is Beautiful Soup's built-in
       `AttributeValueList`, which is a normal Python list, and you
       will probably never need to change it.
+
     """
 
     USE_DEFAULT: Any = object() #: :meta private:
@@ -215,9 +217,12 @@ class TreeBuilder(object):
             self.empty_element_tags = self.DEFAULT_EMPTY_ELEMENT_TAGS
         else:
             self.empty_element_tags = empty_element_tags
+        # TODO: store_line_numbers is probably irrelevant now that
+        # the behavior of sourceline and sourcepos has been made consistent
+        # everywhere.
         if store_line_numbers == self.USE_DEFAULT:
             store_line_numbers = self.TRACKS_LINE_NUMBERS
-        self.store_line_numbers = store_line_numbers 
+        self.store_line_numbers = store_line_numbers
         if string_containers == self.USE_DEFAULT:
             string_containers = self.DEFAULT_STRING_CONTAINERS
         self.string_containers = string_containers

@@ -74,15 +74,15 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
         # the original markup. Even if you ask for line numbers, we
         # don't have 'em.
         #
-        # This means that if you have a tag like <sourceline> or
-        # <sourcepos>, attribute access will find it rather than
-        # giving you a numeric answer.
+        # However, for consistency with other parsers, Tag.sourceline
+        # and Tag.sourcepos are always set to None, rather than being
+        # available as an alias for find().
         soup = self.soup(
             "\n   <p>\n\n<sourceline>\n<b>text</b></sourceline><sourcepos></p>",
             store_line_numbers=True
         )
-        assert "sourceline" == soup.p.sourceline.name
-        assert "sourcepos" == soup.p.sourcepos.name
+        assert None == soup.p.sourceline
+        assert None == soup.p.sourcepos
         
 @pytest.mark.skipif(
     not LXML_PRESENT,

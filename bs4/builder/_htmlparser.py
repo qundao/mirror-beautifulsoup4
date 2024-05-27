@@ -173,7 +173,10 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
                 attr_dict[key] = value
             attrvalue = '""'
         #print("START", name)
-        sourceline, sourcepos = self.getpos()
+        if self.soup.builder.store_line_numbers:
+            sourceline, sourcepos = self.getpos()
+        else:
+            sourceline = sourcepos = None
         tag = self.soup.handle_starttag(
             name, None, None, attr_dict, sourceline=sourceline,
             sourcepos=sourcepos

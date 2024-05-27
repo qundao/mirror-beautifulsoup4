@@ -177,8 +177,8 @@ class TestHTML5LibBuilder(HTML5TreeBuilderSmokeTest):
 
         # You can deactivate this behavior.
         soup = self.soup(markup, store_line_numbers=False)
-        assert "sourceline" == soup.p.sourceline.name
-        assert "sourcepos" == soup.p.sourcepos.name
+        assert None == soup.p.sourceline
+        assert None == soup.p.sourcepos
 
     def test_special_string_containers(self):
         # The html5lib tree builder doesn't support this standard feature,

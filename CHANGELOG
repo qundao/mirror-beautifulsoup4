@@ -51,7 +51,7 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 * The soup:BeautifulSoup argument to the TreeBuilderForHtml5lib
   constructor is now required, not optional. It's unclear why it was
   optional in the first place, so if you discover you need this,
-  contact us for possible un-deprecation.
+  contact me for possible un-deprecation.
 
 # Compatibility notices
 
@@ -130,6 +130,33 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 * As a side effect of this, the string constant
   BeautifulSoup.NO_PARSER_SPECIFIED_WARNING was moved to
   GuessedAtParserWarning.MESSAGE.
+
+* Tag.sourceline and Tag.sourcepos now always have a consistent data
+  type: Optional[int]. Previously these values were sometimes an
+  Optional[int], and sometimes they were Optional[Tag], the result of
+  searching for a child tag called <sourceline> or
+  <sourcepos>. [bug=2065904]
+
+  If your code does search for a tag called <sourceline> or
+  <sourcepos>, it may stop finding that tag when you upgrade to
+  Beautiful Soup 4.13. If this happens, you'll need to replace code
+  that treats "sourceline" or "sourcepos" as tag names:
+
+     tag.sourceline
+
+  with code that explicitly calls the find() method:
+
+     tag.find("sourceline").name
+
+  Making the behavior of sourceline and sourcepos consistent has the
+  side effect of fixing a major performance problem when a Tag is
+  copied.
+
+  With this change, the store_line_numbers argument to the
+  BeautifulSoup constructor becomes much less useful, and its use is
+  now discouraged, thought I'm not deprecating it yet. Please contact
+  me if you have a performance or security rationale for setting
+  store_line_numbers=False.
 
 * append(), extend(), insert(), and unwrap() were moved from PageElement to
   Tag. Those methods manipulate the 'contents' collection, so they would
@@ -232,11 +259,6 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   [bug=2052943]
 
 # Improvements
-
-* Tag.sourceline and Tag.sourcepos are always set, even if the value is
-  None because the parser didn't provide that information. This has the
-  side effect of fixing a major performance problem when a Tag is copied.
-  [bug=2065904]
 
 * decompose() was moved from Tag to its superclass PageElement, since
   there's no reason it won't also work on NavigableString objects.

@@ -1550,6 +1550,9 @@ class Tag(PageElement):
                  preserve_whitespace_tags:Optional[Set[str]]=None,
                  interesting_string_types:Optional[Set[Type[NavigableString]]]=None,
                  namespaces:Optional[Dict[str, str]]=None,
+                 # NOTE: Any new arguments here need to be mirrored in
+                 # Tag._clone, and potentially BeautifulSoup.new_tag
+                 # as well.
     ):
         if parser is None:
             self.parser_class = None
@@ -1652,7 +1655,7 @@ class Tag(PageElement):
     contents: List[PageElement]
     hidden: bool
     interesting_string_types: Optional[Set[Type[NavigableString]]]
-    
+
     can_be_empty_element: Optional[bool]
     cdata_list_attributes: Optional[Dict[str, Set[str]]]
     preserve_whitespace_tags: Optional[Set[str]]
@@ -1701,7 +1704,8 @@ class Tag(PageElement):
             can_be_empty_element=self.can_be_empty_element,
             cdata_list_attributes=self.cdata_list_attributes,
             preserve_whitespace_tags=self.preserve_whitespace_tags,
-            interesting_string_types=self.interesting_string_types
+            interesting_string_types=self.interesting_string_types,
+            namespaces=self.namespaces,
         )
         for attr in ('can_be_empty_element', 'hidden'):
             setattr(clone, attr, getattr(self, attr))
