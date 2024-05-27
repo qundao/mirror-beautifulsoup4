@@ -1705,7 +1705,7 @@ class Tag(PageElement):
             cdata_list_attributes=self.cdata_list_attributes,
             preserve_whitespace_tags=self.preserve_whitespace_tags,
             interesting_string_types=self.interesting_string_types,
-            namespaces=self.namespaces,
+            namespaces=self._namespaces,
         )
         for attr in ('can_be_empty_element', 'hidden'):
             setattr(clone, attr, getattr(self, attr))
