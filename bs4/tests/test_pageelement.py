@@ -7,6 +7,7 @@ import warnings
 
 from bs4 import BeautifulSoup
 from bs4.element import (
+    AttributeValueList,
     Comment,
     ResultSet,
 )
@@ -361,7 +362,7 @@ class TestPersistence(SoupTest):
         assert soup == soup_copy
 
     def test_copy_tag_copies_contents(self):
-        html = "<div><b>Foo<a></a></b><b>Bar</b></div>end"
+        html = "<div class='a b c'><b>Foo<a></a></b><b>Bar</b></div>end"
         soup = self.soup(html)
         div = soup.div
         div_copy = copy.copy(div)
@@ -380,3 +381,10 @@ class TestPersistence(SoupTest):
         assert None == div_copy.find(string='Bar').next_element
         assert None != div.find(string='Bar').next_element
 
+        # Modifying one of the tag's multi-valued attributes
+        # doesn't modify the other.
+        assert div['class'] is not div_copy['class']
+        div['class'].append("d")
+        assert 'a b c d'.split() == div['class']
+        assert 'a b c'.split() == div_copy['class']
+        assert isinstance(div_copy['class'], AttributeValueList)

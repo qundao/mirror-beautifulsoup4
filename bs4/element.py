@@ -1594,7 +1594,14 @@ class Tag(PageElement):
                 self.attrs = builder._replace_cdata_list_attribute_values(
                     self.name, attrs)
             else:
-                self.attrs = attr_dict_class(attrs)
+                self.attrs = attr_dict_class()
+                # Make sure that the values of any multi-valued
+                # attributes (e.g. when a Tag is copied) are stored in
+                # new lists.
+                for k, v in attrs.items():
+                    if isinstance(v, list):
+                        v = v.__class__(v)
+                    self.attrs[k] = v
 
         # If possible, determine ahead of time whether this tag is an
         # XML tag.
