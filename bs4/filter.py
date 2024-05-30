@@ -21,7 +21,13 @@ from typing import (
 import warnings
 
 from bs4._deprecation import _deprecated
-from bs4.element import AttributeDict, NavigableString, PageElement, Tag
+from bs4.element import (
+    AttributeDict,
+    NavigableString,
+    PageElement,
+    ResultSet,
+    Tag,
+)
 from bs4._typing import (
     _AttributeValue,
     _PageElementMatchFunction,
@@ -96,6 +102,31 @@ class ElementFilter(object):
         if not self.match_function:
             return True
         return self.match_function(element)
+
+    def filter(self, generator:Iterator[PageElement], limit:Optional[int]=None) -> _QueryResults:
+        """The most generic search method offered by Beautiful Soup.
+
+        You can pass in your own generator for iterating over the
+        tree, and your own element_filter for filtering items. Only items
+        that match the element_filter will be returned.
+
+        :param generator: A way of iterating over `PageElement`
+            objects.
+
+        :param limit: Stop looking after finding this many results.
+        """
+        results:_QueryResults = ResultSet(self)
+        while True:
+            try:
+                i = next(generator)
+            except StopIteration:
+                break
+            if i:
+                if self.match(i):
+                    results.append(cast('_OneElement', i))
+                    if limit is not None and len(results) >= limit:
+                        break
+        return results
 
     def allow_tag_creation(
             self, nsprefix:Optional[str], name:str,

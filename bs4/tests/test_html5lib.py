@@ -237,3 +237,8 @@ class TestHTML5LibBuilder(HTML5TreeBuilderSmokeTest):
         [warning] = w
         msg = str(warning.message)
         assert msg == f"You provided a value for {name}, but the html5lib tree builder doesn't support {name}."
+
+    def test_doctype_filtered(self):
+        # Since the html5lib parser doesn't support parse_only, this standard
+        # smoke-test test can't be run.
+        pass

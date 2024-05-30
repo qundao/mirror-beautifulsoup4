@@ -1081,35 +1081,7 @@ class PageElement(object):
                         ):
                         result.append(element)
                 return ResultSet(matcher, result)
-        return self.filter(generator, matcher, limit)
-
-    def filter(self, generator:Iterator[PageElement], element_filter:ElementFilter, limit:Optional[int]=None) -> _QueryResults:
-        """The most generic search method offered by Beautiful Soup.
-
-        You can pass in your own generator for iterating over the
-        tree, and your own element_filter for filtering items. Only items
-        that match the element_filter will be returned.
-
-        :param generator: A way of iterating over `PageElement`
-            objects relative to the current `PageElement`.
-
-        :param filter: A way of determining whether a given `PageElement`
-            matches the criteria you're looking for.
-
-        :param limit: Stop looking after finding this many results.
-        """
-        results:_QueryResults = ResultSet(element_filter)
-        while True:
-            try:
-                i = next(generator)
-            except StopIteration:
-                break
-            if i:
-                if element_filter.match(i):
-                    results.append(cast('_OneElement', i))
-                    if limit is not None and len(results) >= limit:
-                        break
-        return results
+        return matcher.filter(generator, limit)
 
     #These generators can be used to navigate starting from both
     #NavigableStrings and Tags.

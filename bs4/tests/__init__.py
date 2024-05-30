@@ -325,7 +325,7 @@ class TreeBuilderSmokeTest(SoupTest):
     def test_doctype_filtered(self):
         markup = '<!DOCTYPE html>\n<html>\n</html>'
         soup = self.soup(markup, parse_only=SoupStrainer(name="html"))
-        assert not any(isinstance(x, Doctype) for x in soup.find_all())
+        assert not any(isinstance(x, Doctype) for x in soup.descendants)
 
     def test_custom_attribute_dict_class(self):
         class MyAttributeDict(dict):
