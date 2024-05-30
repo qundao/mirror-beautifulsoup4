@@ -62,6 +62,11 @@ class ElementFilter(object):
     `Tag.find`, which will convert their arguments into
     `SoupStrainer` objects and run them against the tree.
 
+    However, if you find yourself wanting to treat the arguments to
+    Beautiful Soup's find_*() methods as first-class objects, those
+    objects will be `SoupStrainer` objects. You can create them
+    yourself and then make use of functions like
+    `ElementFilter.filter()`.
     """
     match_function: Optional[_PageElementMatchFunction]
 
@@ -103,19 +108,12 @@ class ElementFilter(object):
             return True
         return self.match_function(element)
 
-    def filter(self, generator:Iterator[PageElement], limit:Optional[int]=None) -> _QueryResults:
+    def filter(self, generator:Iterator[PageElement]) -> Iterator[_OneElement]:
         """The most generic search method offered by Beautiful Soup.
 
-        You can pass in your own generator for iterating over the
-        tree, and your own element_filter for filtering items. Only items
-        that match the element_filter will be returned.
-
-        :param generator: A way of iterating over `PageElement`
-            objects.
-
-        :param limit: Stop looking after finding this many results.
+        Acts like Python's built-in `filter`, using
+        `ElementFilter.match` as the filtering function.
         """
-        results:_QueryResults = ResultSet(self)
         while True:
             try:
                 i = next(generator)
@@ -123,9 +121,39 @@ class ElementFilter(object):
                 break
             if i:
                 if self.match(i):
-                    results.append(cast('_OneElement', i))
-                    if limit is not None and len(results) >= limit:
-                        break
+                    yield cast('_OneElement', i)
+
+    def find(self, generator:Iterator[PageElement]) -> _AtMostOneElement:
+        """A lower-level equivalent of `PageElement.find`.
+
+        You can pass in your own generator for iterating over
+        `PageElement` objects. The first one that matches this
+        `ElementFilter` will be returned.
+
+        :param generator: A way of iterating over `PageElement`
+            objects.
+        """
+        for match in self.filter(generator):
+            return match
+        return None
+
+    def find_all(self, generator:Iterator[PageElement], limit:Optional[int]=None) -> _QueryResults:
+        """A lower-level equivalent of `Tag.find_all`.
+
+        You can pass in your own generator for iterating over
+        `PageElement` objects. Only elements that match this
+        `ElementFilter` will be returned in the `ResultSet`.
+
+        :param generator: A way of iterating over `PageElement`
+            objects.
+
+        :param limit: Stop looking after finding this many results.
+        """
+        results:_QueryResults = ResultSet(self)
+        for match in self.filter(generator):
+            results.append(match)
+            if limit is not None and len(results) >= limit:
+                break
         return results
 
     def allow_tag_creation(

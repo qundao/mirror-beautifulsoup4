@@ -1081,7 +1081,7 @@ class PageElement(object):
                         ):
                         result.append(element)
                 return ResultSet(matcher, result)
-        return matcher.filter(generator, limit)
+        return matcher.find_all(generator, limit)
 
     #These generators can be used to navigate starting from both
     #NavigableStrings and Tags.
