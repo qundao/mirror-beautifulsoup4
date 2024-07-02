@@ -222,6 +222,13 @@ class TestConstructor(SoupTest):
         # (where this information was kept) has been cleared out.
         assert [] == soup.string_container_stack
 
+    @pytest.mark.parametrize(
+    "bad_markup", [1, False, lambda x: False]
+    )
+    def test_invalid_markup_type(self, bad_markup):
+        with pytest.raises(TypeError) as exc_info:
+            BeautifulSoup(bad_markup, 'html.parser')
+        assert f"Incoming markup is of an invalid type: {bad_markup!r}. Markup must be a string, a bytestring, or an open filehandle." in str(exc_info.value)
 
 class TestOutput(SoupTest):
 

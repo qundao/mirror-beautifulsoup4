@@ -387,6 +387,8 @@ class BeautifulSoup(Tag):
 
         if hasattr(markup, 'read'):        # It's a file-type object.
             markup = markup.read()
+        elif not isinstance(markup, (bytes, str)) and not hasattr(markup, '__len__'):
+            raise TypeError(f"Incoming markup is of an invalid type: {markup!r}. Markup must be a string, a bytestring, or an open filehandle.")
         elif len(markup) <= 256 and (
                 (isinstance(markup, bytes) and not b'<' in markup and not b'\n' in markup)
                 or (isinstance(markup, str) and not '<' in markup and not '\n' in markup)
