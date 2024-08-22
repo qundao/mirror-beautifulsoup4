@@ -1,3 +1,12 @@
+= Unreleased
+
+* Changes to make tests work whether tests are run under soupsieve 2.6
+  or an earlier version. Based on a patch by Stefano Rivera.
+
+* Removed the strip_cdata argument to lxml's HTMLParser
+  constructor, which never did anything and is deprecated as of lxml
+  5.3.0. Patch by Stefano Rivera. [bug=2076897]
+
 = 4.12.3 (20240117)
 
 * The Beautiful Soup documentation now has a Spanish translation, thanks
