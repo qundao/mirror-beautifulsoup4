@@ -153,7 +153,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         if self._default_parser is not None:
             return self._default_parser
         return self.DEFAULT_PARSER_CLASS(
-            target=self, strip_cdata=False, recover=True, encoding=encoding)
+            target=self, recover=True, encoding=encoding)
 
     def parser_for(self, encoding: Optional[_Encoding]) -> _LXMLParser:
         """Instantiate an appropriate parser for the given encoding.
@@ -167,7 +167,7 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         if callable(parser):
             # Instantiate the parser with default arguments
             parser = parser(
-                target=self, strip_cdata=False, recover=True, encoding=encoding
+                target=self, recover=True, encoding=encoding
             )
         return parser
 

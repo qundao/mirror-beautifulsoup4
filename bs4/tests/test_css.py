@@ -14,14 +14,23 @@ from typing import (
     Tuple,
 )
 
+from packaging.version import Version
+
 from . import (
     SoupTest,
     SOUP_SIEVE_PRESENT,
 )
 
 if SOUP_SIEVE_PRESENT:
-    from soupsieve import SelectorSyntaxError
+    from soupsieve import __version__, SelectorSyntaxError
 
+    # Some behavior changes in soupsieve 2.6 that affects one of our
+    # tests.  For the test to run under all versions of Python
+    # supported by Beautiful Soup (which includes versions of Python
+    # not supported by soupsieve 2.6) we need to check both behaviors.
+    SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS = SelectorSyntaxError
+    if Version(__version__) < Version("2.6"):
+        SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS = NotImplementedError
 
 @pytest.mark.skipif(not SOUP_SIEVE_PRESENT, reason="Soup Sieve not installed")
 class TestCSSSelectors(SoupTest):
@@ -338,7 +347,7 @@ class TestCSSSelectors(SoupTest):
         assert "yes" == chosen.string
 
     def test_unsupported_pseudoclass(self):
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS):
             self._soup.select("a:no-such-pseudoclass")
 
         with pytest.raises(SelectorSyntaxError):
