@@ -98,7 +98,7 @@ class EntitySubstitution(object):
     #:
     #: :meta hide-value:
     HTML_ENTITY_TO_CHARACTER: Dict[str, str]
-    
+
     #: A map of Unicode strings to the corresponding named HTML entities;
     #: the inverse of HTML_ENTITY_TO_CHARACTER.
     #:
@@ -170,10 +170,10 @@ class EntitySubstitution(object):
             # This is tricky, for two reasons.
 
             if (len(character) == 1 and ord(character) < 128
-                and character not in '<>&'):
+                and character not in '<>'):
                 # First, it would be annoying to turn single ASCII
                 # characters like | into named entities like
-                # &verbar;. The exceptions are <>&, which we _must_
+                # &verbar;. The exceptions are <>, which we _must_
                 # turn into named entities to produce valid HTML.
                 continue
 
@@ -196,7 +196,7 @@ class EntitySubstitution(object):
             # we won't know exactly what the regular expression needs
             # to look like until we've gone through the entire list of
             # named entities.
-            if len(character) == 1:
+            if len(character) == 1 and character != '&':
                 short_entities.add(character)
             else:
                 long_entities_by_first_character[character[0]].add(character)
@@ -245,6 +245,16 @@ class EntitySubstitution(object):
         ">": "gt",
         }
 
+    # "An ambiguous ampersand is a U+0026 AMPERSAND character (&) that
+    # is followed by one or more ASCII alphanumerics, followed by a
+    # U+003B SEMICOLON character (;), where these characters do not
+    # match any of the names given in the named character references
+    # section."
+    #   - https://html.spec.whatwg.org/multipage/syntax.html#syntax-ambiguous-ampersand
+    # "An ASCII alphanumeric is an ASCII digit or ASCII alpha."
+    #   - https://infra.spec.whatwg.org/#ascii-alphanumeric
+    POTENTIALLY_AMBIGUOUS_AMPERSAND_RE = re.compile("&([0-9a-z]);", re.I)
+
     #: A regular expression matching an angle bracket or an ampersand that
     #: is not part of an XML or HTML entity.
     #:
@@ -265,6 +275,8 @@ class EntitySubstitution(object):
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
+        if entity == None:
+            return "&amp;%s;" % original_entity
         return "&%s;" % entity
 
     @classmethod
@@ -273,6 +285,13 @@ class EntitySubstitution(object):
         appropriate XML entity for a special character string."""
         entity = cls.CHARACTER_TO_XML_ENTITY[matchobj.group(0)]
         return "&%s;" % entity
+
+    @classmethod
+    def _escape_ambiguous_ampersand(cls, matchobj:re.Match) -> str:
+        possible_entity = matchobj.group(0)
+        if matchobj.group(0) in cls.HTML_ENTITY_TO_CHARACTER:
+            return "&%s;" % possible_entity
+        return "&amp;%s;" % possible_entity
 
     @classmethod
     def quoted_attribute_value(cls, value: str) -> str:
@@ -378,8 +397,17 @@ class EntitySubstitution(object):
         :return: The string with some Unicode characters replaced with
            HTML entities.
         """
+
+        # First, substitute any ambiguous ampersands. These look like
+        # HTML entities but they don't correspond to anything in the
+        # official list.
+        s = cls.POTENTIALLY_AMBIGUOUS_AMPERSAND_RE.sub(
+            cls._escape_ambiguous_ampersand, s)
+
+        # Next, convert any appropriate characters to HTML entities.
         return cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
             cls._substitute_html_entity, s)
+
 EntitySubstitution._populate_class_variables()
 
 class EncodingDetector:

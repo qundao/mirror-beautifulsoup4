@@ -320,7 +320,6 @@ class TestEntitySubstitution(object):
             # because that's required to generate valid HTML.
             ('&gt;', '>'),
             ('&lt;', '<'),
-            ('&amp;', '&'),
         ):
             template = '3 %s 4'
             raw = template % u
@@ -375,3 +374,22 @@ class TestEntitySubstitution(object):
         """There's no need to do this except inside attribute values."""
         text = 'Bob\'s "bar"'
         assert self.sub.substitute_html(text) == text
+
+    @pytest.mark.parametrize(
+        "markup", ["foo & bar",
+                   "foo&",
+                   "foo&&& bar",
+                   'x=1&y=2',
+                   '&123',
+                   '&abc',
+                   'foo &0 bar',
+                   'foo &lolwat bar']
+        )
+    def test_unambiguous_ampersands_not_escaped(self, markup):
+        assert self.sub.substitute_html(markup) == markup
+
+    @pytest.mark.parametrize(
+        "markup,expect", [("&nosuchentity;", "&amp;nosuchentity;")]
+        )
+    def test_ambiguous_ampersands_escaped(self, markup, expect):
+        assert self.sub.substitute_html(markup) == expect
