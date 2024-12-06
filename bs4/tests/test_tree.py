@@ -914,6 +914,12 @@ class TestTreeModification(SoupTest):
         assert the.next_element == c_tag
         assert c_tag.previous_element == the
 
+    def test_insert_into_the_current_location(self):
+        data = "<a>b<c></c>d</a>"
+        soup = self.soup(data)
+        soup.a.insert(1, soup.c)
+        assert data == soup.decode()
+
     def test_append_child_thats_already_at_the_end(self):
         data = "<a><b></b></a>"
         soup = self.soup(data)

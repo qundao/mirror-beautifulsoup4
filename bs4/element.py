@@ -1826,6 +1826,10 @@ class Tag(PageElement):
                     # we extract this element, our target index will
                     # jump down one.
                     position -= 1
+                elif current_index == position:
+                    # We're 'inserting' an element into its current location.
+                    # This is a no-op.
+                    return
             new_child.extract()
 
         new_child.parent = self

@@ -288,6 +288,9 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 * Improved the wording of the TypeError raised when you pass something
   other than markup into the BeautifulSoup constructor. [bug=2071530]
 
+* Optimized the case where you use Tag.insert() to "insert" a PageElement
+  into its current location. [bug=2077020]
+
 # Bug fixes
 
 * Copying a tag with a multi-valued attribute now makes a copy of the
