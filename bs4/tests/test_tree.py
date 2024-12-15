@@ -1285,7 +1285,28 @@ class TestTreeModification(SoupTest):
         a.clear(decompose=True)
         assert 0 == len(em.contents)
 
-       
+    @pytest.mark.parametrize(
+        "method_name,expected_result", [
+            ("descendants", '<div><em>child1</em><p id="start"></p><p>child3</p></div>'),
+            ("next_siblings", '<div><em>child1</em><p id="start"><a>Second <em>child</em></a></p></div>'),
+            # Confused about why child3 is still here in this test? It's because removing the <p id="start"> tag from the tree removes all of its children from the tree as well. 'child'.next_element becomes None, because 'child' is no longer in the tree, and iteration stops there. Don't do this kind of thing, is what I'm saying.
+            ("next_elements", '<div><em>child1</em><p id="start"></p><p>child3</p></div>'),
+            ("children", '<div><em>child1</em><p id="start"></p><p>child3</p></div>'),
+            ("previous_elements", ''),
+            ("previous_siblings", '<div><p id="start"><a>Second <em>child</em></a></p><p>child3</p></div>'),
+            ("parents", '')
+        ]
+    )
+    def test_extract_during_iteration(self, method_name, expected_result):
+        # The iterators should be able to proceed even if the most
+        # current yield got removed from the tree. This kind of code
+        # is a bad idea, but we should be able to run it without an exception.
+        soup = self.soup("<div><em>child1</em><p id='start'><a>Second <em>child</em></a></p><p>child3</p></div>")
+        iterator = getattr(soup.p, method_name)
+        for i in iterator:
+            i.extract()
+        assert expected_result == soup.decode()
+
     def test_decompose(self):
         # Test PageElement.decompose() and PageElement.decomposed
         soup = self.soup("<p><a>String <em>Italicized</em></a></p><p>Another para</p>")

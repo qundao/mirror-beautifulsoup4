@@ -301,6 +301,26 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   document's initial DOCTYPE if you've set up a SoupStrainer that
   eliminates it. [bug=2062000]
 
+* A lot of things can go wrong if you modify the parse tree while
+  iterating over it, especially if you are removing or replacing
+  elements. Most of those things fall under the category of unexpected
+  behavior (which is why I don't recommend doing this), but there
+  are a few ways that caused unhandled exceptions. The list
+  comprehensions used by Beautiful Soup (e.g. .descendants, which
+  powers the find* methods) should now work correctly in those cases,
+  or at least not raise exceptions.
+
+  As part of this work, I changed when the list comprehension
+  determines the next element. Previously it was done after the yield
+  statement; now it's done before the yield statement. This lets you
+  remove the yielded element in calling code, or modify it in a way that
+  would break this calculation, without causing an exception.
+
+  So if your code relies on modifying the tree in a way that 'steers' a
+  list comprehension, rather than using the list comprension to decide
+  which bits of the tree to modify, it will probably stop working at
+  this point. [bug=2091118]
+
 * Fixed an error in the lookup table used when converting
   ISO-Latin-1 to ASCII, which no one should do anyway.
 
