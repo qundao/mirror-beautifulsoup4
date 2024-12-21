@@ -117,26 +117,31 @@ class EntitySubstitution(object):
         """Initialize variables used by this class to manage the plethora of
         HTML5 named entities.
 
-        This function returns a 3-tuple containing two dictionaries
-        and a regular expression:
+        This function sets the following class variables:
 
-        unicode_to_name - A mapping of Unicode strings like "⦨" to
+        CHARACTER_TO_HTML_ENTITY - A mapping of Unicode strings like "⦨" to
         entity names like "angmsdaa". When a single Unicode string has
         multiple entity names, we try to choose the most commonly-used
         name.
 
-        name_to_unicode: A mapping of entity names like "angmsdaa" to 
+        HTML_ENTITY_TO_CHARACTER: A mapping of entity names like "angmsdaa" to
         Unicode strings like "⦨".
 
-        named_entity_re: A regular expression matching (almost) any
+        CHARACTER_TO_HTML_ENTITY_RE: A regular expression matching (almost) any
         Unicode string that corresponds to an HTML5 named entity.
+
+        CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND: A very similar
+        regular expression to named_entity_re, but which also matches
+        unescaped ampersands. This is used for purposes of
+        backwards-compatibility, even though it's not technically necessary to
+        escape most ampersands.
         """
         unicode_to_name = {}
         name_to_unicode = {}
 
         short_entities = set()
         long_entities_by_first_character = defaultdict(set)
-        
+
         for name_with_semicolon, character in sorted(html5.items()):
             # "It is intentional, for legacy compatibility, that many
             # code points have multiple character reference names. For
@@ -219,7 +224,10 @@ class EntitySubstitution(object):
                 particles.add(long_entity)
 
         re_definition = "(%s)" % "|".join(particles)
-                
+
+        particles.add("&")
+        re_definition_with_ampersand = "(%s)" % "|".join(particles)
+
         # If an entity shows up in both html5 and codepoint2name, it's
         # likely that HTML5 gives it several different names, such as
         # 'rsquo' and 'rsquor'. When converting Unicode characters to
@@ -233,6 +241,7 @@ class EntitySubstitution(object):
         cls.CHARACTER_TO_HTML_ENTITY = unicode_to_name
         cls.HTML_ENTITY_TO_CHARACTER = name_to_unicode
         cls.CHARACTER_TO_HTML_ENTITY_RE = re.compile(re_definition)
+        cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND = re.compile(re_definition_with_ampersand)
 
     #: A map of Unicode strings to the corresponding named XML entities.
     #:
