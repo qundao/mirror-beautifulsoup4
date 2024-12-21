@@ -1091,8 +1091,9 @@ class PageElement(object):
         """
         i = self.next_element
         while i is not None:
+            successor = i.next_element
             yield i
-            i = i.next_element
+            i = successor
 
     @property
     def next_siblings(self) -> Iterator[PageElement]:
@@ -1101,8 +1102,9 @@ class PageElement(object):
         """
         i = self.next_sibling
         while i is not None:
+            successor = i.next_sibling
             yield i
-            i = i.next_sibling
+            i = successor
 
     @property
     def previous_elements(self) -> Iterator[PageElement]:
@@ -1112,8 +1114,9 @@ class PageElement(object):
         """
         i = self.previous_element
         while i is not None:
+            successor = i.previous_element
             yield i
-            i = i.previous_element
+            i = successor
 
     @property
     def previous_siblings(self) -> Iterator[PageElement]:
@@ -1124,8 +1127,9 @@ class PageElement(object):
         """
         i = self.previous_sibling
         while i is not None:
+            successor = i.previous_sibling
             yield i
-            i = i.previous_sibling
+            i = successor
 
     @property
     def parents(self) -> Iterator[Tag]:
@@ -1135,8 +1139,9 @@ class PageElement(object):
         """
         i = self.parent
         while i is not None:
+            successor = i.parent
             yield i
-            i = i.parent
+            i = successor
 
     @property
     def self_and_parents(self) -> Iterator[PageElement]:
@@ -2603,8 +2608,9 @@ class Tag(PageElement):
         stopNode = last_descendant.next_element
         current: _AtMostOneElement = self.contents[0]
         while current is not stopNode and current is not None:
+            successor = current.next_element
             yield current
-            current = current.next_element
+            current = successor
 
     # CSS selector code
     def select_one(self,
