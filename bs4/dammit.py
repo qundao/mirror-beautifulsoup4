@@ -241,7 +241,7 @@ class EntitySubstitution(object):
         cls.CHARACTER_TO_HTML_ENTITY = unicode_to_name
         cls.HTML_ENTITY_TO_CHARACTER = name_to_unicode
         cls.CHARACTER_TO_HTML_ENTITY_RE = re.compile(re_definition)
-        cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND = re.compile(re_definition_with_ampersand)
+        cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE = re.compile(re_definition_with_ampersand)
 
     #: A map of Unicode strings to the corresponding named XML entities.
     #:
@@ -401,6 +401,31 @@ class EntitySubstitution(object):
         containg a LATIN SMALL LETTER E WITH ACUTE, but replacing that
         character with "&eacute;" will make it more readable to some
         people.
+
+        :param s: The string to be modified.
+        :return: The string with some Unicode characters replaced with
+           HTML entities.
+        """
+        # Convert any appropriate characters to HTML entities.
+        return cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE.sub(
+            cls._substitute_html_entity, s)
+
+    @classmethod
+    def substitute_html5(cls, s: str) -> str:
+        """Replace certain Unicode characters with named HTML entities
+        using HTML5 rules.
+
+        The only difference between this and substitute_html is that
+        substitute_html5 is much less aggressive about escaping
+        ampersands. Only ambiguous ampersands are escaped, according
+        to the HTML5 definition:
+
+        "An ambiguous ampersand is a U+0026 AMPERSAND character (&)
+        that is followed by one or more ASCII alphanumerics, followed
+        by a U+003B SEMICOLON character (;), where these characters do
+        not match any of the names given in the named character
+        references section."
+
 
         :param s: The string to be modified.
         :return: The string with some Unicode characters replaced with

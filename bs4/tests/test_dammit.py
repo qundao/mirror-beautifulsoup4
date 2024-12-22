@@ -280,7 +280,6 @@ class TestEntitySubstitution(object):
     def setup_method(self):
         self.sub = EntitySubstitution
 
-
     @pytest.mark.parametrize(
         "original,substituted",
         [
@@ -376,17 +375,20 @@ class TestEntitySubstitution(object):
         assert self.sub.substitute_html(text) == text
 
     @pytest.mark.parametrize(
-        "markup", ["foo & bar",
-                   "foo&",
-                   "foo&&& bar",
-                   'x=1&y=2',
-                   '&123',
-                   '&abc',
-                   'foo &0 bar',
-                   'foo &lolwat bar']
+        "markup, old", [
+            ("foo & bar", "foo &amp; bar"),
+            ("foo&", "foo&amp;"),
+            ("foo&&& bar", "foo&amp;&amp;&amp; bar"),
+            ('x=1&y=2', 'x=1&amp;y=2'),
+            ('&123', '&amp;123'),
+            ('&abc', '&amp;abc'),
+            ('foo &0 bar', 'foo &amp;0 bar'),
+            ('foo &lolwat bar', 'foo &amp;lolwat bar')
+        ]
         )
-    def test_unambiguous_ampersands_not_escaped(self, markup):
-        assert self.sub.substitute_html(markup) == markup
+    def test_unambiguous_ampersands_not_escaped(self, markup, old):
+        assert self.sub.substitute_html5(markup) == markup
+        assert self.sub.substitute_html(markup) == old
 
     @pytest.mark.parametrize(
         "markup,expect", [("&nosuchentity;", "&amp;nosuchentity;")]
