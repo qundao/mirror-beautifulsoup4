@@ -426,12 +426,10 @@ class EntitySubstitution(object):
         not match any of the names given in the named character
         references section."
 
-
         :param s: The string to be modified.
         :return: The string with some Unicode characters replaced with
            HTML entities.
         """
-
         # First, substitute any ambiguous ampersands. These look like
         # HTML entities but they don't correspond to anything in the
         # official list.

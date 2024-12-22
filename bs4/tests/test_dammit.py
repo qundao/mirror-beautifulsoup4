@@ -395,3 +395,4 @@ class TestEntitySubstitution(object):
         )
     def test_ambiguous_ampersands_escaped(self, markup, expect):
         assert self.sub.substitute_html(markup) == expect
+        assert self.sub.substitute_html5(markup) == expect
