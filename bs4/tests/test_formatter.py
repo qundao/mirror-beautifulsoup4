@@ -111,3 +111,23 @@ class TestFormatter(SoupTest):
         formatter = Formatter()
         assert formatter.indent == ' '
 
+    @pytest.mark.parametrize(
+        "s,expect_html,expect_html5", [
+            # The html5 formatter is much less aggressive about escaping ampersands
+            # than the html formatter.
+            ("foo & bar", "foo &amp; bar", "foo & bar"),
+            ("foo&", "foo&amp;", "foo&"),
+            ("foo&&& bar", "foo&amp;&amp;&amp; bar", "foo&&& bar"),
+            ('x=1&y=2', 'x=1&amp;y=2', 'x=1&y=2'),
+            ('&123', '&amp;123', '&123'),
+            ('&abc', '&amp;abc', '&abc'),
+            ('foo &0 bar', 'foo &amp;0 bar', 'foo &0 bar'),
+            ('foo &lolwat bar', 'foo &amp;lolwat bar', 'foo &lolwat bar'),
+
+            # But both formatters escape what the HTML5 spec considers ambiguous ampersands.
+            ("&nosuchentity;", "&amp;nosuchentity;", "&amp;nosuchentity;"),
+        ]
+        )
+    def test_entity_substitution(self, s, expect_html, expect_html5):
+        assert HTMLFormatter.REGISTRY['html'].substitute(s) == expect_html
+        assert HTMLFormatter.REGISTRY['html5'].substitute(s) == expect_html5

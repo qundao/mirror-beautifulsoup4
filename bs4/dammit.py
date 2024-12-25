@@ -262,7 +262,7 @@ class EntitySubstitution(object):
     #   - https://html.spec.whatwg.org/multipage/syntax.html#syntax-ambiguous-ampersand
     # "An ASCII alphanumeric is an ASCII digit or ASCII alpha."
     #   - https://infra.spec.whatwg.org/#ascii-alphanumeric
-    POTENTIALLY_AMBIGUOUS_AMPERSAND_RE = re.compile("&([0-9a-z]);", re.I)
+    POTENTIALLY_AMBIGUOUS_AMPERSAND_RE = re.compile("&([0-9a-z]+);", re.I)
 
     #: A regular expression matching an angle bracket or an ampersand that
     #: is not part of an XML or HTML entity.
@@ -297,8 +297,8 @@ class EntitySubstitution(object):
 
     @classmethod
     def _escape_ambiguous_ampersand(cls, matchobj:re.Match) -> str:
-        possible_entity = matchobj.group(0)
-        if matchobj.group(0) in cls.HTML_ENTITY_TO_CHARACTER:
+        possible_entity = matchobj.group(1)
+        if possible_entity in cls.HTML_ENTITY_TO_CHARACTER:
             return "&%s;" % possible_entity
         return "&amp;%s;" % possible_entity
 

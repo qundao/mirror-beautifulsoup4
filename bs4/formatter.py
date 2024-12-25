@@ -216,6 +216,7 @@ class XMLFormatter(Formatter):
 HTMLFormatter.REGISTRY['html'] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html
 )
+
 HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html5,
     void_element_close_prefix='',

@@ -383,7 +383,7 @@ class TestEntitySubstitution(object):
             ('&123', '&amp;123'),
             ('&abc', '&amp;abc'),
             ('foo &0 bar', 'foo &amp;0 bar'),
-            ('foo &lolwat bar', 'foo &amp;lolwat bar')
+            ('foo &lolwat bar', 'foo &amp;lolwat bar'),
         ]
         )
     def test_unambiguous_ampersands_not_escaped(self, markup, old):
@@ -391,8 +391,15 @@ class TestEntitySubstitution(object):
         assert self.sub.substitute_html(markup) == old
 
     @pytest.mark.parametrize(
+        "entity", ['a &#247; b',  'a &divide; b', 'a &#xa1; b']
+    )
+    def test_entities_not_escaped(self, entity):
+        assert self.sub.substitute_html(entity) == entity
+        assert self.sub.substitute_html5(entity) == entity
+
+    @pytest.mark.parametrize(
         "markup,expect", [("&nosuchentity;", "&amp;nosuchentity;")]
-        )
+    )
     def test_ambiguous_ampersands_escaped(self, markup, expect):
         assert self.sub.substitute_html(markup) == expect
         assert self.sub.substitute_html5(markup) == expect
