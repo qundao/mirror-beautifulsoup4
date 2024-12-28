@@ -280,7 +280,6 @@ class TestEntitySubstitution(object):
     def setup_method(self):
         self.sub = EntitySubstitution
 
-
     @pytest.mark.parametrize(
         "original,substituted",
         [
@@ -375,3 +374,39 @@ class TestEntitySubstitution(object):
         """There's no need to do this except inside attribute values."""
         text = 'Bob\'s "bar"'
         assert self.sub.substitute_html(text) == text
+
+    @pytest.mark.parametrize(
+        "markup, old", [
+            ("foo & bar", "foo &amp; bar"),
+            ("foo&", "foo&amp;"),
+            ("foo&&& bar", "foo&amp;&amp;&amp; bar"),
+            ('x=1&y=2', 'x=1&amp;y=2'),
+            ('&123', '&amp;123'),
+            ('&abc', '&amp;abc'),
+            ('foo &0 bar', 'foo &amp;0 bar'),
+            ('foo &lolwat bar', 'foo &amp;lolwat bar'),
+        ]
+        )
+    def test_unambiguous_ampersands_not_escaped(self, markup, old):
+        assert self.sub.substitute_html(markup) == old
+
+    @pytest.mark.parametrize(
+        "markup,html", [
+            ('&divide;', '&amp;divide;'),
+            ('&nonesuch;', '&amp;nonesuch;'),
+            ('&#247;', '&amp;#247;'),
+            ('&#xa1;', '&amp;#xa1;'),
+        ]
+    )
+    def test_when_entity_ampersands_are_escaped(self, markup, html):
+        # The html formatter always escapes the ampersand
+        # that begins an entity reference, because it assumes
+        # Beautiful Soup has already converted any unescaped entity references
+        # to Unicode characters.
+        assert self.sub.substitute_html(markup) == html
+
+    @pytest.mark.parametrize(
+        "markup,expect", [("&nosuchentity;", "&amp;nosuchentity;")]
+    )
+    def test_ambiguous_ampersands_escaped(self, markup, expect):
+        assert self.sub.substitute_html(markup) == expect

@@ -111,3 +111,42 @@ class TestFormatter(SoupTest):
         formatter = Formatter()
         assert formatter.indent == ' '
 
+    @pytest.mark.parametrize(
+        "s,expect_html", [
+            ("foo & bar", "foo &amp; bar"),
+            ("foo&", "foo&amp;"),
+            ("foo&&& bar", "foo&amp;&amp;&amp; bar"),
+            ('x=1&y=2', 'x=1&amp;y=2'),
+            ('&123', '&amp;123'),
+            ('&abc', '&amp;abc'),
+            ('foo &0 bar', 'foo &amp;0 bar'),
+            ('foo &lolwat bar', 'foo &amp;lolwat bar'),
+
+            ("&nosuchentity;", "&amp;nosuchentity;"),
+        ]
+        )
+    def test_entity_substitution(self, s, expect_html):
+        assert HTMLFormatter.REGISTRY['html'].substitute(s) == expect_html
+        assert HTMLFormatter.REGISTRY['html5'].substitute(s) == expect_html
+
+    def test_entity_round_trip(self):
+        # This is more an explanatory test and a way to avoid regressions than a test of functionality.
+
+        markup = "<p>Some division signs: ÷ &divide; &#247; &#xf7;. These are made with: ÷ &amp;divide; &amp;#247;</p>"
+        soup = self.soup(markup)
+        assert "Some division signs: ÷ ÷ ÷ ÷. These are made with: ÷ &divide; &#247;" == soup.p.string
+
+        # Oops, I forgot to mention the entity.
+        soup.p.string = soup.p.string + " &#xf7;"
+
+        assert "Some division signs: ÷ ÷ ÷ ÷. These are made with: ÷ &divide; &#247; &#xf7;" == soup.p.string
+
+        expect = "<p>Some division signs: &divide; &divide; &divide; &divide;. These are made with: &divide; &amp;divide; &amp;#247; &amp;#xf7;</p>"
+        assert expect == soup.p.decode(formatter='html')
+        assert expect == soup.p.decode(formatter='html5')
+
+        markup = "<p>a & b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp; b</p>" == soup.p.decode(formatter='html')
+        # NOTE: This will change when the 4.13-ambiguous-ampersands branch is merged.
+        assert "<p>a &amp; b</p>" == soup.p.decode(formatter='html5')

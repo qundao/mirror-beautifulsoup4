@@ -151,3 +151,15 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
             with_element = div.encode(formatter="html")
             expect = b"<div>%s</div>" % output_element
             assert with_element == expect
+
+    def test_invalid_html_entity(self):
+        # The html.parser treebuilder can't distinguish between an invalid
+        # HTML entity with a semicolon and an invalid HTML entity with no
+        # semicolon.
+        markup = "<p>a &nosuchentity b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp;nosuchentity b</p>" == soup.p.decode()
+
+        markup = "<p>a &nosuchentity; b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp;nosuchentity b</p>" == soup.p.decode()
