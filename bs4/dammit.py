@@ -130,11 +130,11 @@ class EntitySubstitution(object):
         CHARACTER_TO_HTML_ENTITY_RE: A regular expression matching (almost) any
         Unicode string that corresponds to an HTML5 named entity.
 
-        CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND: A very similar
-        regular expression to named_entity_re, but which also matches
-        unescaped ampersands. This is used for purposes of
-        backwards-compatibility, even though it's not technically necessary to
-        escape most ampersands.
+        CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE: A very similar
+        regular expression to CHARACTER_TO_HTML_ENTITY_RE, but which
+        also matches unescaped ampersands. This is used by the 'html'
+        formatted to provide backwards-compatibility, even though the HTML5
+        spec allows most ampersands to go unescaped.
         """
         unicode_to_name = {}
         name_to_unicode = {}
