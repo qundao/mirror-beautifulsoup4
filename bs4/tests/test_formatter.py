@@ -133,15 +133,22 @@ class TestFormatter(SoupTest):
         assert HTMLFormatter.REGISTRY['html5'].substitute(s) == expect_html5
 
     def test_entity_round_trip(self):
-        # This is more an explanatory test than a test of functionality.
+        # This is more an explanatory test and a way to avoid regressions than a test of functionality.
 
-        markup = "<p>Some division signs: ÷ &divide; &#247; &#xf7;. These are made with: ÷ &amp;divide; &amp;247;</p>"
+        markup = "<p>Some division signs: ÷ &divide; &#247; &#xf7;. These are made with: ÷ &amp;divide; &amp;#247;</p>"
         soup = self.soup(markup)
-        assert "Some division signs: ÷ ÷ ÷ ÷. These are made with: ÷ &divide; &247;" == soup.p.string
+        assert "Some division signs: ÷ ÷ ÷ ÷. These are made with: ÷ &divide; &#247;" == soup.p.string
 
         # Oops, I forgot to mention the entity.
         soup.p.string = soup.p.string + " &#xf7;"
 
-        expect = b"<p>Some division signs: &divide; &divide; &divide; &divide;. These are made with: &divide; &amp;divide; &amp;247; &amp;#xf7;</p>"
-        assert expect == soup.p.encode(formatter='html')
-        assert expect == soup.p.encode(formatter='html5')
+        assert "Some division signs: ÷ ÷ ÷ ÷. These are made with: ÷ &divide; &#247; &#xf7;" == soup.p.string
+
+        expect = "<p>Some division signs: &divide; &divide; &divide; &divide;. These are made with: &divide; &amp;divide; &amp;#247; &amp;#xf7;</p>"
+        assert expect == soup.p.decode(formatter='html')
+        assert expect == soup.p.decode(formatter='html5')
+
+        markup = "<p>a & b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp; b</p>" == soup.p.decode(formatter='html')
+        assert "<p>a & b</p>" == soup.p.decode(formatter='html5')

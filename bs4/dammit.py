@@ -254,15 +254,8 @@ class EntitySubstitution(object):
         ">": "gt",
         }
 
-    # "An ambiguous ampersand is a U+0026 AMPERSAND character (&) that
-    # is followed by one or more ASCII alphanumerics, followed by a
-    # U+003B SEMICOLON character (;), where these characters do not
-    # match any of the names given in the named character references
-    # section."
-    #   - https://html.spec.whatwg.org/multipage/syntax.html#syntax-ambiguous-ampersand
-    # "An ASCII alphanumeric is an ASCII digit or ASCII alpha."
-    #   - https://infra.spec.whatwg.org/#ascii-alphanumeric
-    POTENTIALLY_AMBIGUOUS_AMPERSAND_RE = re.compile("&([0-9a-z]+);", re.I)
+    # Matches any named or numeric HTML entity.
+    ANY_ENTITY_RE = re.compile("&(#\\d+|#x[0-9a-fA-F]+|\\w+);", re.I)
 
     #: A regular expression matching an angle bracket or an ampersand that
     #: is not part of an XML or HTML entity.
@@ -296,7 +289,11 @@ class EntitySubstitution(object):
         return "&%s;" % entity
 
     @classmethod
-    def _escape_ambiguous_ampersand(cls, matchobj:re.Match) -> str:
+    def _escape_entity_name(cls, matchobj:re.Match) -> str:
+        return "&amp;%s;" % matchobj.group(1)
+    
+    @classmethod
+    def _escape_unrecognized_entity_name(cls, matchobj:re.Match) -> str:
         possible_entity = matchobj.group(1)
         if possible_entity in cls.HTML_ENTITY_TO_CHARACTER:
             return "&%s;" % possible_entity
@@ -415,10 +412,9 @@ class EntitySubstitution(object):
         """Replace certain Unicode characters with named HTML entities
         using HTML5 rules.
 
-        The only difference between this and substitute_html is that
-        substitute_html5 is much less aggressive about escaping
-        ampersands. Only ambiguous ampersands are escaped, according
-        to the HTML5 definition:
+        Specifically, this method is much less aggressive about
+        escaping ampersands than substitute_html. Only ambiguous
+        ampersands are escaped, per the HTML5 standard:
 
         "An ambiguous ampersand is a U+0026 AMPERSAND character (&)
         that is followed by one or more ASCII alphanumerics, followed
@@ -426,19 +422,47 @@ class EntitySubstitution(object):
         not match any of the names given in the named character
         references section."
 
+        Unlike substitute_html5_raw, this method assumes HTML entities
+        were converted to Unicode characters on the way in, as
+        Beautiful Soup does. By the time Beautiful Soup does its work,
+        the only ambiguous ampersands that need to be escaped are the
+        ones that were escaped in the original markup when mentioning
+        HTML entities.
+
         :param s: The string to be modified.
         :return: The string with some Unicode characters replaced with
            HTML entities.
         """
-        # First, substitute any ambiguous ampersands. These look like
-        # HTML entities but they don't correspond to anything in the
-        # official list.
-        s = cls.POTENTIALLY_AMBIGUOUS_AMPERSAND_RE.sub(
-            cls._escape_ambiguous_ampersand, s)
+        # First, escape any HTML entities found in the markup.
+        s = cls.ANY_ENTITY_RE.sub(cls._escape_entity_name, s)
 
-        # Next, convert any appropriate characters to HTML entities.
-        return cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
+        # Next, convert any appropriate characters to unescaped HTML entities.
+        s = cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
             cls._substitute_html_entity, s)
+
+        return s
+
+    @classmethod
+    def substitute_html5_raw(cls, s: str) -> str:
+        """Replace certain Unicode characters with named HTML entities
+        using HTML5 rules.
+
+        substitute_html5_raw is similar to substitute_html5 but it is
+        designed for standalone use (whereas substitute_html5 is
+        designed for use with Beautiful Soup).
+
+        :param s: The string to be modified.
+        :return: The string with some Unicode characters replaced with
+           HTML entities.
+        """
+        # First, substitute anything that looks like an entity. This is
+        # because
+        s = cls.ANY_ENTITY_RE.sub(cls._escape_unrecognized_entity_name, s)
+
+        # First, convert any appropriate characters to HTML entities.
+        s = cls.CHARACTER_TO_HTML_ENTITY_RE.sub(cls._substitute_html_entity, s)
+
+        return s
 
 EntitySubstitution._populate_class_variables()
 

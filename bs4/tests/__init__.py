@@ -753,7 +753,20 @@ Hello, world!
         assert "p" == soup.h2.string.next_element.name
         assert "p" == soup.p.name
         self.assertConnectedness(soup)
-        
+
+    def test_invalid_html_entity(self):
+        # The html.parser treebuilder can't distinguish between an
+        # invalid HTML entity with a semicolon and an invalid HTML
+        # entity with no semicolon (see its subclass for the tested
+        # behavior). But the other treebuilders can.
+        markup = "<p>a &nosuchentity b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp;nosuchentity b</p>" == soup.p.decode()
+
+        markup = "<p>a &nosuchentity; b</p>"
+        soup = self.soup(markup)
+        assert "<p>a &amp;nosuchentity; b</p>" == soup.p.decode()
+
     def test_head_tag_between_head_and_body(self):
         "Prevent recurrence of a bug in the html5lib treebuilder."
         content = """<html><head></head>
