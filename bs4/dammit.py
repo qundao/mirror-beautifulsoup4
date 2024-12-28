@@ -98,7 +98,7 @@ class EntitySubstitution(object):
     #:
     #: :meta hide-value:
     HTML_ENTITY_TO_CHARACTER: Dict[str, str]
-    
+
     #: A map of Unicode strings to the corresponding named HTML entities;
     #: the inverse of HTML_ENTITY_TO_CHARACTER.
     #:
@@ -117,26 +117,31 @@ class EntitySubstitution(object):
         """Initialize variables used by this class to manage the plethora of
         HTML5 named entities.
 
-        This function returns a 3-tuple containing two dictionaries
-        and a regular expression:
+        This function sets the following class variables:
 
-        unicode_to_name - A mapping of Unicode strings like "⦨" to
+        CHARACTER_TO_HTML_ENTITY - A mapping of Unicode strings like "⦨" to
         entity names like "angmsdaa". When a single Unicode string has
         multiple entity names, we try to choose the most commonly-used
         name.
 
-        name_to_unicode: A mapping of entity names like "angmsdaa" to 
+        HTML_ENTITY_TO_CHARACTER: A mapping of entity names like "angmsdaa" to
         Unicode strings like "⦨".
 
-        named_entity_re: A regular expression matching (almost) any
+        CHARACTER_TO_HTML_ENTITY_RE: A regular expression matching (almost) any
         Unicode string that corresponds to an HTML5 named entity.
+
+        CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE: A very similar
+        regular expression to CHARACTER_TO_HTML_ENTITY_RE, but which
+        also matches unescaped ampersands. This is used by the 'html'
+        formatted to provide backwards-compatibility, even though the HTML5
+        spec allows most ampersands to go unescaped.
         """
         unicode_to_name = {}
         name_to_unicode = {}
 
         short_entities = set()
         long_entities_by_first_character = defaultdict(set)
-        
+
         for name_with_semicolon, character in sorted(html5.items()):
             # "It is intentional, for legacy compatibility, that many
             # code points have multiple character reference names. For
@@ -170,10 +175,10 @@ class EntitySubstitution(object):
             # This is tricky, for two reasons.
 
             if (len(character) == 1 and ord(character) < 128
-                and character not in '<>&'):
+                and character not in '<>'):
                 # First, it would be annoying to turn single ASCII
                 # characters like | into named entities like
-                # &verbar;. The exceptions are <>&, which we _must_
+                # &verbar;. The exceptions are <>, which we _must_
                 # turn into named entities to produce valid HTML.
                 continue
 
@@ -196,7 +201,7 @@ class EntitySubstitution(object):
             # we won't know exactly what the regular expression needs
             # to look like until we've gone through the entire list of
             # named entities.
-            if len(character) == 1:
+            if len(character) == 1 and character != '&':
                 short_entities.add(character)
             else:
                 long_entities_by_first_character[character[0]].add(character)
@@ -219,7 +224,10 @@ class EntitySubstitution(object):
                 particles.add(long_entity)
 
         re_definition = "(%s)" % "|".join(particles)
-                
+
+        particles.add("&")
+        re_definition_with_ampersand = "(%s)" % "|".join(particles)
+
         # If an entity shows up in both html5 and codepoint2name, it's
         # likely that HTML5 gives it several different names, such as
         # 'rsquo' and 'rsquor'. When converting Unicode characters to
@@ -233,6 +241,7 @@ class EntitySubstitution(object):
         cls.CHARACTER_TO_HTML_ENTITY = unicode_to_name
         cls.HTML_ENTITY_TO_CHARACTER = name_to_unicode
         cls.CHARACTER_TO_HTML_ENTITY_RE = re.compile(re_definition)
+        cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE = re.compile(re_definition_with_ampersand)
 
     #: A map of Unicode strings to the corresponding named XML entities.
     #:
@@ -244,6 +253,9 @@ class EntitySubstitution(object):
         "<": "lt",
         ">": "gt",
         }
+
+    # Matches any named or numeric HTML entity.
+    ANY_ENTITY_RE = re.compile("&(#\\d+|#x[0-9a-fA-F]+|\\w+);", re.I)
 
     #: A regular expression matching an angle bracket or an ampersand that
     #: is not part of an XML or HTML entity.
@@ -265,6 +277,8 @@ class EntitySubstitution(object):
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
+        if entity == None:
+            return "&amp;%s;" % original_entity
         return "&%s;" % entity
 
     @classmethod
@@ -273,6 +287,17 @@ class EntitySubstitution(object):
         appropriate XML entity for a special character string."""
         entity = cls.CHARACTER_TO_XML_ENTITY[matchobj.group(0)]
         return "&%s;" % entity
+
+    @classmethod
+    def _escape_entity_name(cls, matchobj:re.Match) -> str:
+        return "&amp;%s;" % matchobj.group(1)
+    
+    @classmethod
+    def _escape_unrecognized_entity_name(cls, matchobj:re.Match) -> str:
+        possible_entity = matchobj.group(1)
+        if possible_entity in cls.HTML_ENTITY_TO_CHARACTER:
+            return "&%s;" % possible_entity
+        return "&amp;%s;" % possible_entity
 
     @classmethod
     def quoted_attribute_value(cls, value: str) -> str:
@@ -378,8 +403,67 @@ class EntitySubstitution(object):
         :return: The string with some Unicode characters replaced with
            HTML entities.
         """
-        return cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
+        # Convert any appropriate characters to HTML entities.
+        return cls.CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE.sub(
             cls._substitute_html_entity, s)
+
+    @classmethod
+    def substitute_html5(cls, s: str) -> str:
+        """Replace certain Unicode characters with named HTML entities
+        using HTML5 rules.
+
+        Specifically, this method is much less aggressive about
+        escaping ampersands than substitute_html. Only ambiguous
+        ampersands are escaped, per the HTML5 standard:
+
+        "An ambiguous ampersand is a U+0026 AMPERSAND character (&)
+        that is followed by one or more ASCII alphanumerics, followed
+        by a U+003B SEMICOLON character (;), where these characters do
+        not match any of the names given in the named character
+        references section."
+
+        Unlike substitute_html5_raw, this method assumes HTML entities
+        were converted to Unicode characters on the way in, as
+        Beautiful Soup does. By the time Beautiful Soup does its work,
+        the only ambiguous ampersands that need to be escaped are the
+        ones that were escaped in the original markup when mentioning
+        HTML entities.
+
+        :param s: The string to be modified.
+        :return: The string with some Unicode characters replaced with
+           HTML entities.
+        """
+        # First, escape any HTML entities found in the markup.
+        s = cls.ANY_ENTITY_RE.sub(cls._escape_entity_name, s)
+
+        # Next, convert any appropriate characters to unescaped HTML entities.
+        s = cls.CHARACTER_TO_HTML_ENTITY_RE.sub(
+            cls._substitute_html_entity, s)
+
+        return s
+
+    @classmethod
+    def substitute_html5_raw(cls, s: str) -> str:
+        """Replace certain Unicode characters with named HTML entities
+        using HTML5 rules.
+
+        substitute_html5_raw is similar to substitute_html5 but it is
+        designed for standalone use (whereas substitute_html5 is
+        designed for use with Beautiful Soup).
+
+        :param s: The string to be modified.
+        :return: The string with some Unicode characters replaced with
+           HTML entities.
+        """
+        # First, substitute anything that looks like an entity. This is
+        # because
+        s = cls.ANY_ENTITY_RE.sub(cls._escape_unrecognized_entity_name, s)
+
+        # First, convert any appropriate characters to HTML entities.
+        s = cls.CHARACTER_TO_HTML_ENTITY_RE.sub(cls._substitute_html_entity, s)
+
+        return s
+
 EntitySubstitution._populate_class_variables()
 
 class EncodingDetector:

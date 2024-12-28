@@ -319,7 +319,6 @@ class TestEntitySubstitution(object):
             # because that's required to generate valid HTML.
             ('&gt;', '>'),
             ('&lt;', '<'),
-            ('&amp;', '&'),
         ):
             template = '3 %s 4'
             raw = template % u
@@ -389,24 +388,36 @@ class TestEntitySubstitution(object):
         )
     def test_unambiguous_ampersands_not_escaped(self, markup, old):
         assert self.sub.substitute_html(markup) == old
+        assert self.sub.substitute_html5_raw(markup) == markup
 
     @pytest.mark.parametrize(
-        "markup,html", [
-            ('&divide;', '&amp;divide;'),
-            ('&nonesuch;', '&amp;nonesuch;'),
-            ('&#247;', '&amp;#247;'),
-            ('&#xa1;', '&amp;#xa1;'),
+        "markup,html,html5,html5raw", [
+            ('&divide;',   '&amp;divide;',   '&amp;divide;',   '&divide;'),
+            ('&nonesuch;', '&amp;nonesuch;', '&amp;nonesuch;', '&amp;nonesuch;'),
+            ('&#247;',     '&amp;#247;',     '&amp;#247;',     '&amp;#247;'),
+            ('&#xa1;',     '&amp;#xa1;',     '&amp;#xa1;',     '&amp;#xa1;'),
         ]
     )
-    def test_when_entity_ampersands_are_escaped(self, markup, html):
-        # The html formatter always escapes the ampersand
-        # that begins an entity reference, because it assumes
+    def test_when_entity_ampersands_are_escaped(self, markup, html, html5, html5raw):
+        # The html and html5 formatters always escape the ampersand
+        # that begins an entity reference, because they assume
         # Beautiful Soup has already converted any unescaped entity references
         # to Unicode characters.
+        #
+        # The html5_raw formatter does not escape the ampersand that
+        # begins a recognized HTML entity, because it does not
+        # fit the HTML5 definition of an ambiguous ampersand.
+        #
+        # The html5_raw formatter does escape the ampersands in front
+        # of unrecognized named entities, as well as numeric and
+        # hexadecimal entities, because they do fit the definition.
         assert self.sub.substitute_html(markup) == html
+        assert self.sub.substitute_html5(markup) == html5
+        assert self.sub.substitute_html5_raw(markup) == html5raw
 
     @pytest.mark.parametrize(
         "markup,expect", [("&nosuchentity;", "&amp;nosuchentity;")]
     )
     def test_ambiguous_ampersands_escaped(self, markup, expect):
         assert self.sub.substitute_html(markup) == expect
+        assert self.sub.substitute_html5_raw(markup) == expect

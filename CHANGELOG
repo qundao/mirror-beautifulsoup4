@@ -236,6 +236,16 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
 
+* The 'html5' formatter is now much less aggressive about escaping
+  ampersands, escape only the ampersands considered "ambiguous" by the HTML5
+  spec (which is almost none of them). This is the sort of change that
+  might break your unit test suite, but the resulting markup will be much more
+  human-readable.
+
+  In the future, the behavior of the 'html' formatter may change to
+  match, with the current behavior of the 'html' formatter renamed to
+  something else. [bug=1902431]
+
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
   unusual but not guaranteed to be wrong, like markup that looks like
