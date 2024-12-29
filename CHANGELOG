@@ -131,6 +131,25 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   BeautifulSoup.NO_PARSER_SPECIFIED_WARNING was moved to
   GuessedAtParserWarning.MESSAGE.
 
+* The 'html5' formatter is now much less aggressive about escaping
+  ampersands, escaping only the ampersands considered "ambiguous" by the HTML5
+  spec (which is almost none of them). This is the sort of change that
+  might break your unit test suite, but the resulting markup will be much more
+  readable and more HTML5-ish.
+
+  To quickly get the old behavior back, change code like this:
+
+    tag.encode(formatter='html5')
+
+  to this:
+
+    tag.encode(formatter='html5-4.12')
+
+  In the future, the 'html5' formatter may be become the default HTML
+  formatter, which will change Beautiful Soup's default output. This
+  will break a lot of test suites so it's not going to happen for a
+  while. [bug=1902431]
+
 * Tag.sourceline and Tag.sourcepos now always have a consistent data
   type: Optional[int]. Previously these values were sometimes an
   Optional[int], and sometimes they were Optional[Tag], the result of
@@ -235,24 +254,6 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 * The NavigableString class now has a .string property which returns the
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
-
-* The 'html5' formatter is now much less aggressive about escaping
-  ampersands, escaping only the ampersands considered "ambiguous" by the HTML5
-  spec (which is almost none of them). This is the sort of change that
-  might break your unit test suite, but the resulting markup will be much more
-  readable and more HTML5-ish.
-
-  To quickly get the old behavior back, change code like this:
-
-    tag.encode(formatter='html5')
-
-  to this:
-
-    tag.encode(formatter='html5-4.12')
-
-  In the future, the 'html5' formatter may be become the default
-  HTML formatter. This will break a lot of test suites so it's not going
-  to happen for a while. [bug=1902431]
 
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
