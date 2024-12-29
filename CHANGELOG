@@ -240,11 +240,19 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   ampersands, escape only the ampersands considered "ambiguous" by the HTML5
   spec (which is almost none of them). This is the sort of change that
   might break your unit test suite, but the resulting markup will be much more
-  human-readable.
+  readable and more HTML5-ish.
 
-  In the future, the behavior of the 'html' formatter may change to
-  match, with the current behavior of the 'html' formatter renamed to
-  something else. [bug=1902431]
+  To quickly get the old behavior back, change code like this:
+
+    tag.encode(formatter='html5')
+
+  to this:
+
+    tag.encode(formatter='html5-legacy')
+
+  In the future, the 'html5' formatter may be become the default
+  HTML formatter. This will break a lot of test suites so it's not going
+  to happen for a while. [bug=1902431]
 
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
