@@ -490,7 +490,7 @@ class TestParentOperations(SoupTest):
             self.start.find_parents('ul', id="middle"), ['middle'])
         assert self.start.find_parents(id='start') == []
         self.assert_selects_ids(
-            self.start.find_parents(id='start', include_self=True), ['start']
+            self.start.find_parents(id='start', consider_self=True), ['start']
         )
 
     def test_find_parent(self):
@@ -498,7 +498,7 @@ class TestParentOperations(SoupTest):
         assert self.start.find_parent('ul', id='top')['id'] == 'top'
 
         assert self.start.find_parent(id='start') == None
-        assert self.start.find_parent(id='start', include_self=True)['id'] == 'start'
+        assert self.start.find_parent(id='start', consider_self=True)['id'] == 'start'
 
     def test_parent_of_text_element(self):
         text = self.tree.find(string="Start here")

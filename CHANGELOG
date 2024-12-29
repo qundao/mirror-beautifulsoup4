@@ -228,16 +228,16 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   yielding its parents. [bug=2052936] TODO NEEDS DOC
 
 * Similarly, the PageElement.find_parent() and
-  PageElement.find_parents methods take an argument include_self,
-  which lets you treat the element itself as one of its
-  'parents'. [bug=2052936] TODO NEEDS DOC
+  PageElement.find_parents methods take an argument consider_self,
+  which lets you treat the element itself as a potential matching
+  'parent'. [bug=2052936] TODO NEEDS DOC
 
 * The NavigableString class now has a .string property which returns the
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
 
 * The 'html5' formatter is now much less aggressive about escaping
-  ampersands, escape only the ampersands considered "ambiguous" by the HTML5
+  ampersands, escaping only the ampersands considered "ambiguous" by the HTML5
   spec (which is almost none of them). This is the sort of change that
   might break your unit test suite, but the resulting markup will be much more
   readable and more HTML5-ish.
@@ -248,7 +248,7 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
   to this:
 
-    tag.encode(formatter='html5-legacy')
+    tag.encode(formatter='html5-4.12')
 
   In the future, the 'html5' formatter may be become the default
   HTML formatter. This will break a lot of test suites so it's not going

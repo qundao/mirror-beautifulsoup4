@@ -131,6 +131,7 @@ class TestFormatter(SoupTest):
     def test_entity_substitution(self, s, expect_html, expect_html5):
         assert HTMLFormatter.REGISTRY['html'].substitute(s) == expect_html
         assert HTMLFormatter.REGISTRY['html5'].substitute(s) == expect_html5
+        assert HTMLFormatter.REGISTRY['html5-4.12'].substitute(s) == expect_html
 
     def test_entity_round_trip(self):
         # This is more an explanatory test and a way to avoid regressions than a test of functionality.

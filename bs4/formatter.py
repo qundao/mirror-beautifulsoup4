@@ -24,6 +24,8 @@ class Formatter(EntitySubstitution):
      * 'html' - HTML entity substitution for generic HTML documents. (default)
      * 'html5' - HTML entity substitution for HTML5 documents, as
                  well as some optimizations in the way tags are rendered.
+     * 'html5-legacy' - The version of the 'html5' formatter used prior to
+                        Beautiful Soup 4.13.0.
      * 'minimal' - Only make the substitutions necessary to guarantee
                    valid HTML.
      * None - Do not perform any substitution. This will be faster
@@ -219,6 +221,11 @@ HTMLFormatter.REGISTRY['html'] = HTMLFormatter(
 
 HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html5,
+    void_element_close_prefix='',
+    empty_attributes_are_booleans=True,
+)
+HTMLFormatter.REGISTRY["html5-4.12"] = HTMLFormatter(
+    entity_substitution=EntitySubstitution.substitute_html,
     void_element_close_prefix='',
     empty_attributes_are_booleans=True,
 )

@@ -925,7 +925,7 @@ class PageElement(object):
             self,
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
-            include_self:bool=False,
+            consider_self:bool=False,
             **kwargs:_StrainableAttribute) -> _AtMostOneElement:
         """Find the closest parent of this PageElement that matches the given
         criteria.
@@ -942,7 +942,7 @@ class PageElement(object):
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
         r = None
-        l = self.find_parents(name, attrs, 1, include_self=include_self,
+        l = self.find_parents(name, attrs, 1, consider_self=consider_self,
                               _stacklevel=3, **kwargs)
         if l:
             r = l[0]
@@ -956,7 +956,7 @@ class PageElement(object):
             name:_FindMethodName=None,
             attrs:_StrainableAttributes={},
             limit:Optional[int]=None,
-            include_self:bool=False,
+            consider_self:bool=False,
             _stacklevel:int=2,
             **kwargs:_StrainableAttribute) -> _QueryResults:
         """Find all parents of this `PageElement` that match the given criteria.
@@ -972,7 +972,7 @@ class PageElement(object):
         :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
-        if include_self:
+        if consider_self:
             iterator = self.self_and_parents
         else:
             iterator = self.parents
