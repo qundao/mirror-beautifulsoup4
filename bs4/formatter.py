@@ -226,7 +226,7 @@ HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
 )
 HTMLFormatter.REGISTRY["html5-4.12"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html,
-    void_element_close_prefix='',
+    void_element_close_prefix=None,
     empty_attributes_are_booleans=True,
 )
 HTMLFormatter.REGISTRY["minimal"] = HTMLFormatter(

@@ -875,6 +875,22 @@ buried deep within the document, to the very top of the document::
  # html
  # [document]
 
+``.self_and_parents``
+^^^^^^^^^^^^^^^^^^^^^
+
+The ``.self_and_parents`` generator is a variant of ``.parents`` which
+gives you the entire ancestry of an element, including the element
+itself::
+
+ for parent in link.parents:
+     print(parent.name)
+ # link
+ # p
+ # body
+ # html
+ # [document]
+
+ 
 Going sideways
 --------------
 
@@ -1572,9 +1588,9 @@ names`_? That trick works by repeatedly calling ``find()``::
 ``find_parents()`` and ``find_parent()``
 ----------------------------------------
 
-Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, `consider_self`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, `consider_self`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 I spent a lot of time above covering ``find_all()`` and
 ``find()``. The Beautiful Soup API defines ten other methods for
@@ -1619,6 +1635,11 @@ You may have noticed a similarity between ``find_parent()`` and
 mentioned earlier. These search methods actually use the ``.parents``
 attribute to iterate through all parents (unfiltered), checking each one
 against the provided filter to see if it matches.
+
+One argument unique to ``find_parent()`` and ``find_parents()`` is
+``consider_self`` (new in version 4.13.0). If you set this to
+``True``, the element itself will be considered for a possible match
+before any of its parents are considered.
 
 ``find_next_siblings()`` and ``find_next_sibling()``
 ----------------------------------------------------
@@ -3028,33 +3049,62 @@ been called on it::
 This is because two different :py:class:`Tag` objects can't occupy the same
 space at the same time.
 
-Advanced search techniques
+Low-level search interface
 ==========================
 
 Almost everyone who uses Beautiful Soup to extract information from a
 document can get what they need using the methods described in
-`Searching the tree`_. However, there's a lower-level interface--the
-:py:class:`ElementSelector` class-- which lets you define any matching
-behavior whatsoever.
+`Searching the tree`_. However, there's a lower-level interface which
+lets you define any matching behavior you want. Behind the scenes, the
+parts of the Beautiful Soup API that most people use--``find_all()``
+and the like--are actually using this low-level interface, and you
+can use it directly.
 
-To use :py:class:`ElementSelector`, define a function that takes a
+*(Access to the low-level search interface is a new feature in
+ Beautiful Soup 4.13.0.)*
+
+``ElementFilter``
+^^^^^^^^^^^^^^^^^^^
+
+The :py:class:`ElementFilter` class is your entry point to the
+low-level interface. To use it, define a function that takes a
 :py:class:`PageElement` object (that is, it might be either a
-:py:class:`Tag` or a :py:class`NavigableString`) and returns ``True``
-(if the element matches your custom criteria) or ``False`` (if it
-doesn't)::
+:py:class:`Tag` or a :py:class`NavigableString`). The function must
+return ``True`` if the element matches your custom criteria, and
+``False`` if it doesn't.
 
-  [example goes here]
+This example function looks for short things: strings that are less
+than five characters long, and tags whose combined text size is less
+than five characters long::
 
-Then, pass the function into an :py:class:`ElementSelector`::
+  from bs4 import Tag
+  from bs4.filter import ElementFilter
 
- from bs4.select import ElementSelector
- selector = ElementSelector(f)
+  def something_short(tag_or_string):
+      if isinstance(tag_or_string, Tag):
+          return len(tag_or_string.text) < 5
+      else:
+          return len(tag_or_string) < 5
 
-You can then pass the :py:class:`ElementSelector` object as the first
-argument to any of the `Searching the tree`_ methods::
+Once you have a function, pass it into the :py:class:`ElementFilter` constructor::
 
- [examples go here]
+  from bs4.filter import ElementFilter
+  element_filter = ElementFilter(something_short)
 
+You can then use the :py:class:`ElementFilter` object as the first
+argument to any of the `Searching the tree`_ methods. Whatever
+criteria you defined in your function will be used instead of the
+default Beautiful Soup match logic::
+
+  soup.find(element_filter)
+  # '\n'
+  
+  soup.find_all(element_filter)
+  # ['\n', '\n', '\n', ',\n ', '\n', <p class="story">...</p>, '...', '\n']
+
+  >>> soup.a.find_next(element_filter)
+  # <p class="story">...</p>
+  
 Every potential match will be run through your function, and the only
 :py:class:`PageElement` objects returned will be the one where your
 function returned ``True``.
@@ -3062,9 +3112,58 @@ function returned ``True``.
 Note that this is different from simply passing `a function`_ as the
 first argument to one of the search methods. That's an easy way to
 find a tag, but _only_ tags will be considered. With an
-:py:class:`ElementSelector` you can write a single function that makes
+:py:class:`ElementFilter` you can write a single function that makes
 decisions about both tags and strings.
- 
+
+The ``ElementFilter.filter()`` method
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By passing an :py:class:`ElementFilter` instance into Beautiful Soup's
+tree-searching methods, you can completely customize what it means for
+Beautiful Soup to match an element as it iterates over the parse
+tree. By using the :py:method:`ElementFilter.filter` method, you can
+also completely customize what it means for Beautiful Soup to iterate
+over the parse tree in the first place.
+
+:py:method:`ElementFilter.filter` method takes a generator that yields
+a stream of :py:class:`PageElement` objects. There is no restriction
+on which :py:class:`PageElement` objects show up, how many times they
+show up, or in which order. Theoretically, they don't even need to be
+from the same :py:class:`BeautifulSoup` document. You can do whatever
+makes sense for you.
+
+Here's a silly example: a generator that walks randomly back and forth
+through the parse tree.
+
+  import random
+  def random_walk(starting_location):
+      location = starting_location
+      while location is not None:
+          yield location
+          if random.random() < 0.5:
+              location = location.next_element
+          else:
+              location = location.previous_element
+          if location is None:
+              return
+
+Pass this generator into the example :py:method:`ElementFilter.filter`
+and Beautiful Soup will wander randomly around the parse tree,
+applying the ``something_short`` function to every element it finds,
+and yielding all of the matches--potentially yielding a given object
+more than once.
+
+  [x for x in element_filter.filter(random_walk(soup.body))]
+  # ['\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n']
+  [x for x in element_filter.filter(random_walk(soup.body))]
+  # ['\n']
+  [x for x in element_filter.filter(random_walk(soup.body))]
+  # ['\n', '\n', '\n']
+
+(Note that unlike the other code examples in this documentation, this
+example will give you different results every time you run it, thanks
+to the random element. It's very unlikely, but this function could
+wander around the parse tree forever and _never_ complete.)
 
 Advanced parser customization
 =============================

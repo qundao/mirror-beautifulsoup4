@@ -244,12 +244,12 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 
 * Defined a new iterator, PageElement.self_and_parents, which is the same
   as PageElement.parents except it yields the element itself before
-  yielding its parents. [bug=2052936] TODO NEEDS DOC
+  yielding its parents. [bug=2052936]
 
 * Similarly, the PageElement.find_parent() and
   PageElement.find_parents methods take an argument consider_self,
   which lets you treat the element itself as a potential matching
-  'parent'. [bug=2052936] TODO NEEDS DOC
+  'parent'. [bug=2052936]
 
 * The NavigableString class now has a .string property which returns the
   string itself. This makes it easier to iterate over a mixed list
