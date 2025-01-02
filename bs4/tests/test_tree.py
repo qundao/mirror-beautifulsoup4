@@ -406,7 +406,7 @@ class TestSmooth(SoupTest):
         # output.
 
         # Since the <span> tag has two children, its .string is None.
-        assert None == div.span.string
+        assert None is div.span.string
 
         assert 7 == len(div.contents)
         div.smooth()
@@ -470,7 +470,7 @@ class TestParentOperations(SoupTest):
         assert top_tag.parent == self.tree
 
     def test_soup_object_has_no_parent(self):
-        assert None == self.tree.parent
+        assert None is self.tree.parent
 
     def test_find_parents(self):
         self.assert_selects_ids(
@@ -486,7 +486,7 @@ class TestParentOperations(SoupTest):
         # assert self.start.find_parent('ul')['id'] == 'bottom'
         assert self.start.find_parent("ul", id="top")["id"] == "top"
 
-        assert self.start.find_parent(id="start") == None
+        assert self.start.find_parent(id="start") is None
         assert self.start.find_parent(id="start", consider_self=True)["id"] == "start"
 
     def test_parent_of_text_element(self):
@@ -532,11 +532,11 @@ class TestNextOperations(ProximityTest):
 
     def test_next_of_last_item_is_none(self):
         last = self.tree.find(string="Three")
-        assert last.next_element == None
+        assert last.next_element is None
 
     def test_next_of_root_is_none(self):
         # The document root is outside the next/previous chain.
-        assert self.tree.next_element == None
+        assert self.tree.next_element is None
 
     def test_find_all_next(self):
         self.assert_selects(self.start.find_all_next("b"), ["Two", "Three"])
@@ -572,11 +572,11 @@ class TestPreviousOperations(ProximityTest):
 
     def test_previous_of_first_item_is_none(self):
         first = self.tree.find("html")
-        assert first.previous_element == None
+        assert first.previous_element is None
 
     def test_previous_of_root_is_none(self):
         # The document root is outside the next/previous chain.
-        assert self.tree.previous_element == None
+        assert self.tree.previous_element is None
 
     def test_find_all_previous(self):
         # The <b> tag containing the "Three" node is the predecessor
@@ -633,7 +633,7 @@ class TestNextSibling(SiblingTest):
         self.start = self.tree.find(id="1")
 
     def test_next_sibling_of_root_is_none(self):
-        assert self.tree.next_sibling == None
+        assert self.tree.next_sibling is None
 
     def test_next_sibling(self):
         assert self.start.next_sibling["id"] == "2"
@@ -643,13 +643,13 @@ class TestNextSibling(SiblingTest):
         assert self.start.next_element["id"] == "1.1"
 
     def test_next_sibling_may_not_exist(self):
-        assert self.tree.html.next_sibling == None
+        assert self.tree.html.next_sibling is None
 
         nested_span = self.tree.find(id="1.1")
-        assert nested_span.next_sibling == None
+        assert nested_span.next_sibling is None
 
         last_span = self.tree.find(id="4")
-        assert last_span.next_sibling == None
+        assert last_span.next_sibling is None
 
     def test_find_next_sibling(self):
         assert self.start.find_next_sibling("span")["id"] == "2"
@@ -667,7 +667,7 @@ class TestNextSibling(SiblingTest):
 
         self.assert_selects(start.find_next_siblings("b"), ["bar"])
         assert start.find_next_sibling(string="baz") == "baz"
-        assert start.find_next_sibling(string="nonesuch") == None
+        assert start.find_next_sibling(string="nonesuch") is None
 
 
 class TestPreviousSibling(SiblingTest):
@@ -676,7 +676,7 @@ class TestPreviousSibling(SiblingTest):
         self.end = self.tree.find(id="4")
 
     def test_previous_sibling_of_root_is_none(self):
-        assert self.tree.previous_sibling == None
+        assert self.tree.previous_sibling is None
 
     def test_previous_sibling(self):
         assert self.end.previous_sibling["id"] == "3"
@@ -686,13 +686,13 @@ class TestPreviousSibling(SiblingTest):
         assert self.end.previous_element["id"] == "3.1"
 
     def test_previous_sibling_may_not_exist(self):
-        assert self.tree.html.previous_sibling == None
+        assert self.tree.html.previous_sibling is None
 
         nested_span = self.tree.find(id="1.1")
-        assert nested_span.previous_sibling == None
+        assert nested_span.previous_sibling is None
 
         first_span = self.tree.find(id="1")
-        assert first_span.previous_sibling == None
+        assert first_span.previous_sibling is None
 
     def test_find_previous_sibling(self):
         assert self.end.find_previous_sibling("span")["id"] == "3"
@@ -712,7 +712,7 @@ class TestPreviousSibling(SiblingTest):
 
         self.assert_selects(start.find_previous_siblings("b"), ["bar"])
         assert start.find_previous_sibling(string="Foo") == "Foo"
-        assert start.find_previous_sibling(string="nonesuch") == None
+        assert start.find_previous_sibling(string="nonesuch") is None
 
 
 class TestTreeModification(SoupTest):
@@ -773,7 +773,7 @@ class TestTreeModification(SoupTest):
         soup = self.soup("<a><b>Foo</b></a><c>Bar</c>")
         a = soup.a
         a.extract()
-        assert None == a.parent
+        assert None is a.parent
         with pytest.raises(ValueError):
             a.unwrap()
         with pytest.raises(ValueError):
@@ -821,7 +821,6 @@ class TestTreeModification(SoupTest):
     def test_replace_with_maintains_next_element_throughout(self):
         soup = self.soup("<p><a>one</a><b>three</b></p>")
         a = soup.a
-        b = a.contents[0]
         # Make it so the <a> tag has two text children.
         a.insert(1, "two")
 
@@ -841,7 +840,7 @@ class TestTreeModification(SoupTest):
         assert new_text.previous_element == b
         assert new_text.parent == b
         assert new_text.previous_element.next_element == new_text
-        assert new_text.next_element == None
+        assert new_text.next_element is None
 
     def test_consecutive_text_nodes(self):
         # A builder should never create two consecutive text nodes,
@@ -859,7 +858,7 @@ class TestTreeModification(SoupTest):
         assert new_text.previous_sibling == "Argh!"
         assert new_text.previous_sibling.next_sibling == new_text
 
-        assert new_text.next_sibling == None
+        assert new_text.next_sibling is None
         assert new_text.next_element == soup.c
 
     def test_insert_string(self):
@@ -1078,7 +1077,7 @@ class TestTreeModification(SoupTest):
             "<p>There's  business like <b>no</b> business</p>"
         )
 
-        assert show.parent == None
+        assert show.parent is None
         assert no.parent == soup.p
         assert no.next_element == "no"
         assert no.next_sibling == " business"
@@ -1144,17 +1143,17 @@ class TestTreeModification(SoupTest):
         )
 
         # The <b> tag is now an orphan.
-        assert remove_tag.parent == None
-        assert remove_tag.find(string="right").next_element == None
-        assert remove_tag.previous_element == None
-        assert remove_tag.next_sibling == None
-        assert remove_tag.previous_sibling == None
+        assert remove_tag.parent is None
+        assert remove_tag.find(string="right").next_element is None
+        assert remove_tag.previous_element is None
+        assert remove_tag.next_sibling is None
+        assert remove_tag.previous_sibling is None
 
         # The <f> tag is now connected to the <a> tag.
         assert move_tag.parent == soup.a
         assert move_tag.previous_element == "We"
         assert move_tag.next_element.next_element == soup.e
-        assert move_tag.next_sibling == None
+        assert move_tag.next_sibling is None
 
         # The gap where the <f> tag used to be has been mended, and
         # the word "to" is now connected to the <g> tag.
@@ -1170,7 +1169,7 @@ class TestTreeModification(SoupTest):
             <p>Unneeded <em>formatting</em> is unneeded</p>
             """)
         tree.em.unwrap()
-        assert tree.em == None
+        assert tree.em is None
         assert tree.p.text == "Unneeded formatting is unneeded"
 
     def test_wrap(self):
@@ -1205,9 +1204,9 @@ class TestTreeModification(SoupTest):
 
         # The extracted tag is now an orphan.
         assert len(soup.body.contents) == 2
-        assert extracted.parent == None
-        assert extracted.previous_element == None
-        assert extracted.next_element.next_element == None
+        assert extracted.parent is None
+        assert extracted.previous_element is None
+        assert extracted.next_element.next_element is None
 
         # The gap where the extracted tag used to be has been mended.
         content_1 = soup.find(string="Some content. ")
@@ -1220,7 +1219,6 @@ class TestTreeModification(SoupTest):
     def test_extract_distinguishes_between_identical_strings(self):
         soup = self.soup("<a>foo</a><b>bar</b>")
         foo_1 = soup.a.string
-        bar_1 = soup.b.string
         foo_2 = soup.new_string("foo")
         bar_2 = soup.new_string("bar")
         soup.a.append(foo_2)
@@ -1252,7 +1250,7 @@ class TestTreeModification(SoupTest):
     def test_extract_works_when_element_is_surrounded_by_identical_strings(self):
         soup = self.soup("<html>\n" "<body>hi</body>\n" "</html>")
         soup.find("body").extract()
-        assert None == soup.find("body")
+        assert None is soup.find("body")
 
     def test_clear(self):
         """Tag.clear()"""
@@ -1312,22 +1310,22 @@ class TestTreeModification(SoupTest):
         a = p1.a
         text = p1.em.string
         for i in [p1, p2, a, text]:
-            assert False == i.decomposed
+            assert False is i.decomposed
 
         # This sets p1 and everything beneath it to decomposed.
         p1.decompose()
         for i in [p1, a, text]:
-            assert True == i.decomposed
+            assert True is i.decomposed
         # p2 is unaffected.
-        assert False == p2.decomposed
+        assert False is p2.decomposed
 
     def test_decompose_string(self):
         soup = self.soup("<div><p>String 1</p><p>String 2</p></p>")
         div = soup.div
         text = div.p.string
-        assert False == text.decomposed
+        assert False is text.decomposed
         text.decompose()
-        assert True == text.decomposed
+        assert True is text.decomposed
         assert "<div><p></p><p>String 2</p></div>" == div.decode()
 
     def test_string_set(self):

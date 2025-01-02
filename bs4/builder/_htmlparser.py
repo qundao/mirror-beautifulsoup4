@@ -174,7 +174,6 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
                     on_dupe(attr_dict, key, value)
             else:
                 attr_dict[key] = value
-            attrvalue = '""'
         # print("START", name)
         if self.soup.builder.store_line_numbers:
             sourceline, sourcepos = self.getpos()
@@ -421,7 +420,6 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
             # lower-priority user encoding.
             user_encodings.append(document_declared_encoding)
 
-        try_encodings = [user_specified_encoding, document_declared_encoding]
         dammit = UnicodeDammit(
             markup,
             known_definite_encodings=known_definite_encodings,

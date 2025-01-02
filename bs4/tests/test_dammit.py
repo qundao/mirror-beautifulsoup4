@@ -79,7 +79,7 @@ class TestUnicodeDammit(object):
 
         # And if we exclude that, there is no valid guess at all.
         dammit = UnicodeDammit(utf8_data, exclude_encodings=["utf-8", "windows-1252"])
-        assert dammit.original_encoding == None
+        assert dammit.original_encoding is None
 
 
 class TestEncodingDetector(object):
@@ -128,7 +128,7 @@ class TestEncodingDetector(object):
 
             bs4.dammit._chardet_dammit = noop
             dammit = UnicodeDammit(doc)
-            assert True == dammit.contains_replacement_characters
+            assert True is dammit.contains_replacement_characters
             assert "\ufffd" in dammit.unicode_markup
 
             soup = BeautifulSoup(doc, "html.parser")
@@ -191,7 +191,6 @@ class TestEncodingDetector(object):
         message = warning.message
         assert isinstance(message, DeprecationWarning)
         assert warning.filename == __file__
-        msg = str(message)
         assert "iso-8859-8" == dammit.original_encoding
 
         # known_definite_encodings and override_encodings were tried

@@ -313,8 +313,8 @@ class TestPersistence(SoupTest):
 
         soup = self.soup(markup)
 
-        copied = copy.copy(soup)
-        copied = copy.deepcopy(soup)
+        copy.copy(soup)
+        copy.deepcopy(soup)
 
     def test_copy_preserves_encoding(self):
         soup = BeautifulSoup(b"<p>&nbsp;</p>", "html.parser")
@@ -355,11 +355,11 @@ class TestPersistence(SoupTest):
         s1 = soup.find(string="Foo")
         s2 = copy.copy(s1)
         assert s1 == s2
-        assert None == s2.parent
-        assert None == s2.next_element
-        assert None != s1.next_sibling
-        assert None == s2.next_sibling
-        assert None == s2.previous_element
+        assert None is s2.parent
+        assert None is s2.next_element
+        assert None is not s1.next_sibling
+        assert None is s2.next_sibling
+        assert None is s2.previous_element
 
     def test_copy_navigablestring_subclass_has_same_type(self):
         html = "<b><!--Foo--></b>"
@@ -390,10 +390,10 @@ class TestPersistence(SoupTest):
 
         # And they don't have the same relation to the parse tree. The
         # copy is not associated with a parse tree at all.
-        assert None == div_copy.parent
-        assert None == div_copy.previous_element
-        assert None == div_copy.find(string="Bar").next_element
-        assert None != div.find(string="Bar").next_element
+        assert None is div_copy.parent
+        assert None is div_copy.previous_element
+        assert None is div_copy.find(string="Bar").next_element
+        assert None is not div.find(string="Bar").next_element
 
         # Modifying one of the tag's multi-valued attributes
         # doesn't modify the other.

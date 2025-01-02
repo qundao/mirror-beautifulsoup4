@@ -324,7 +324,7 @@ class ContentMetaAttributeValue(AttributeValueWithCharsetSubstitution):
     CHARSET_RE: Pattern[str] = re.compile(r"((^|;)\s*charset=)([^;]*)", re.M)
 
     def __new__(cls, original_value: str) -> Self:
-        match = cls.CHARSET_RE.search(original_value)
+        cls.CHARSET_RE.search(original_value)
         obj = str.__new__(cls, original_value)
         obj.original_value = original_value
         return obj
@@ -1409,7 +1409,7 @@ class PreformattedString(NavigableString):
            suffix added on.
         """
         if formatter is not None:
-            ignore = self.format_string(self, formatter)
+            self.format_string(self, formatter)
         return self.PREFIX + self + self.SUFFIX
 
 

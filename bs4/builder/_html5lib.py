@@ -577,7 +577,7 @@ class Element(BeautifulSoupNode):
         return node
 
     def getNameTuple(self) -> Tuple[Optional[_NamespaceURL], str]:
-        if self.namespace == None:
+        if self.namespace is None:
             return namespaces["html"], self.name
         else:
             return self.namespace, self.name

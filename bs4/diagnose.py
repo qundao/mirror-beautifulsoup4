@@ -223,7 +223,7 @@ def benchmark_parsers(num_elements: int = 100000) -> None:
         success = False
         try:
             a = time.time()
-            soup = BeautifulSoup(data, parser_name)
+            BeautifulSoup(data, parser_name)
             b = time.time()
             success = True
         except Exception:

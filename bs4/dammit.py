@@ -280,7 +280,7 @@ class EntitySubstitution(object):
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
         entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
-        if entity == None:
+        if entity is None:
             return "&amp;%s;" % original_entity
         return "&%s;" % entity
 

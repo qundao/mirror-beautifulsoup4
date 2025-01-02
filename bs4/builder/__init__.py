@@ -620,7 +620,6 @@ class HTMLTreeBuilder(TreeBuilder):
         "link": {"rel", "rev"},
         "td": {"headers"},
         "th": {"headers"},
-        "td": {"headers"},
         "form": {"accept-charset"},
         "object": {"archive"},
         # These are HTML5 specific, as are *.accesskey and *.dropzone above.
@@ -675,7 +674,6 @@ class HTMLTreeBuilder(TreeBuilder):
         if charset is not None:
             # HTML 5 style:
             # <meta charset="utf8">
-            meta_encoding = charset
             tag["charset"] = CharsetMetaAttributeValue(charset)
             substituted = True
 

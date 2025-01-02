@@ -163,7 +163,7 @@ class TestConstructor(SoupTest):
         # Here are two ways of saying that `id` is a multi-valued
         # attribute in this context, but 'class' is not.
         for switcheroo in ({"*": "id"}, {"a": "id"}):
-            with warnings.catch_warnings(record=True) as w:
+            with warnings.catch_warnings(record=True):
                 # This will create a warning about not explicitly
                 # specifying a parser, but we'll ignore it.
                 soup = self.soup(
@@ -313,23 +313,23 @@ class TestWarnings(SoupTest):
 
     def test_warning_if_no_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
-            soup = BeautifulSoup("<a><b></b></a>")
+            BeautifulSoup("<a><b></b></a>")
         self._assert_no_parser_specified(w)
 
     def test_warning_if_parser_specified_too_vague(self):
         with warnings.catch_warnings(record=True) as w:
-            soup = BeautifulSoup("<a><b></b></a>", "html")
+            BeautifulSoup("<a><b></b></a>", "html")
         self._assert_no_parser_specified(w)
 
     def test_no_warning_if_explicit_parser_specified(self):
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("<a><b></b></a>")
+            self.soup("<a><b></b></a>")
         assert [] == w
 
     def test_warning_if_strainer_filters_everything(self):
         strainer = SoupStrainer(name="a", string="b")
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup("<a><b></b></a>", parse_only=strainer)
+            self.soup("<a><b></b></a>", parse_only=strainer)
         warning = self._assert_warning(w, UserWarning)
         msg = str(warning.message)
         assert msg.startswith("The given value for parse_only will exclude everything:")
@@ -378,7 +378,7 @@ class TestWarnings(SoupTest):
         # A warning is issued if the "markup" looks like the name of
         # an HTML or text file, or a full path to a file on disk.
         with warnings.catch_warnings(record=True) as w:
-            soup = BeautifulSoup(markup, "html.parser")
+            BeautifulSoup(markup, "html.parser")
             warning = self._assert_warning(w, MarkupResemblesLocatorWarning)
             assert "looks more like a filename" in str(warning.message)
 
@@ -423,13 +423,13 @@ class TestWarnings(SoupTest):
         # the markup looks like a bare string, a domain name, or a
         # file that's not an HTML file.
         with warnings.catch_warnings(record=True) as w:
-            soup = self.soup(markup)
+            self.soup(markup)
         assert [] == w
 
     def test_url_warning_with_bytes_url(self):
         url = b"http://www.crummybytes.com/"
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = BeautifulSoup(url, "html.parser")
+            BeautifulSoup(url, "html.parser")
         warning = self._assert_warning(warning_list, MarkupResemblesLocatorWarning)
         assert "looks more like a URL" in str(warning.message)
         assert url not in str(warning.message).encode("utf8")
@@ -439,7 +439,7 @@ class TestWarnings(SoupTest):
         with warnings.catch_warnings(record=True) as warning_list:
             # note - this url must differ from the bytes one otherwise
             # python's warnings system swallows the second warning
-            soup = BeautifulSoup(url, "html.parser")
+            BeautifulSoup(url, "html.parser")
         warning = self._assert_warning(warning_list, MarkupResemblesLocatorWarning)
         assert "looks more like a URL" in str(warning.message)
         assert url not in str(warning.message)
@@ -448,12 +448,12 @@ class TestWarnings(SoupTest):
         # Here the markup contains something besides a URL, so no warning
         # is issued.
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = self.soup(b"http://www.crummybytes.com/ is great")
+            self.soup(b"http://www.crummybytes.com/ is great")
         assert not any("looks more like a URL" in str(w.message) for w in warning_list)
 
     def test_url_warning_with_unicode_and_space(self):
         with warnings.catch_warnings(record=True) as warning_list:
-            soup = self.soup("http://www.crummyunicode.com/ is great")
+            self.soup("http://www.crummyunicode.com/ is great")
         assert not any("looks more like a URL" in str(w.message) for w in warning_list)
 
 
@@ -475,13 +475,13 @@ class TestNewTag(SoupTest):
         assert "foo" == new_tag.name
         assert new_tag.string == "txt"
         assert dict(bar="baz", name="a name") == new_tag.attrs
-        assert None == new_tag.parent
+        assert None is new_tag.parent
 
         # string can be null
         new_tag = soup.new_tag("foo")
-        assert None == new_tag.string
+        assert None is new_tag.string
         new_tag = soup.new_tag("foo", string=None)
-        assert None == new_tag.string
+        assert None is new_tag.string
 
         # Or the empty string
         new_tag = soup.new_tag("foo", string="")
@@ -587,7 +587,7 @@ class TestEncodingConversion(SoupTest):
         soup_from_unicode = self.soup(self.unicode_data)
         assert soup_from_unicode.decode() == self.unicode_data
         assert soup_from_unicode.foo.string == "Sacr\xe9 bleu!"
-        assert soup_from_unicode.original_encoding == None
+        assert soup_from_unicode.original_encoding is None
 
     def test_utf8_in_unicode_out(self):
         # UTF-8 input is converted to Unicode. The original_encoding

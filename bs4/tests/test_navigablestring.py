@@ -53,7 +53,7 @@ class TestNavigableString(SoupTest):
     def test_string_has_immutable_name_property(self):
         # string.name is defined as None and can't be modified
         string = self.soup("s").string
-        assert None == string.name
+        assert None is string.name
         with pytest.raises(AttributeError):
             string.name = "foo"
 

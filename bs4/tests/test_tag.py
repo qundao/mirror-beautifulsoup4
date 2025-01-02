@@ -17,18 +17,18 @@ class TestTag(SoupTest):
 
         # No list of whitespace-preserving tags -> pretty-print
         tag._preserve_whitespace_tags = None
-        assert True == tag._should_pretty_print(0)
+        assert True is tag._should_pretty_print(0)
 
         # List exists but tag is not on the list -> pretty-print
         tag.preserve_whitespace_tags = ["some_other_tag"]
-        assert True == tag._should_pretty_print(1)
+        assert True is tag._should_pretty_print(1)
 
         # Indent level is None -> don't pretty-print
-        assert False == tag._should_pretty_print(None)
+        assert False is tag._should_pretty_print(None)
 
         # Tag is on the whitespace-preserving list -> don't pretty-print
         tag.preserve_whitespace_tags = ["some_other_tag", "a_tag"]
-        assert False == tag._should_pretty_print(1)
+        assert False is tag._should_pretty_print(1)
 
     def test_len(self):
         """The length of a Tag is its number of children."""
@@ -49,7 +49,7 @@ class TestTag(SoupTest):
         soup = self.soup("<b><i></i></b>")
         assert soup.b == soup.find("b")
         assert soup.b.i == soup.find("b").find("i")
-        assert soup.a == None
+        assert soup.a is None
 
     def test_deprecated_member_access(self):
         soup = self.soup("<b><i></i></b>")
@@ -85,21 +85,21 @@ class TestTag(SoupTest):
     def test_empty_tag_has_no_string(self):
         # A Tag with no children has no .stirng.
         soup = self.soup("<b></b>")
-        assert soup.b.string == None
+        assert soup.b.string is None
 
     def test_tag_with_multiple_children_has_no_string(self):
         # A Tag with no children has no .string.
         soup = self.soup("<a>foo<b></b><b></b></b>")
-        assert soup.b.string == None
+        assert soup.b.string is None
 
         soup = self.soup("<a>foo<b></b>bar</b>")
-        assert soup.b.string == None
+        assert soup.b.string is None
 
         # Even if all the children are strings, due to trickery,
         # it won't work--but this would be a good optimization.
         soup = self.soup("<a>foo</b>")
         soup.a.insert(1, "bar")
-        assert soup.a.string == None
+        assert soup.a.string is None
 
     def test_tag_with_recursive_string_has_string(self):
         # A Tag with a single child which has a .string inherits that

@@ -334,9 +334,12 @@ class TreeBuilderSmokeTest(SoupTest):
         assert soup.a["class"] == ["a", "b", "c"]
 
     def test_invalid_doctype(self):
+        # We don't have an official opinion on how these are parsed,
+        # but they shouldn't crash any of the parsers.
         markup = "<![if word]>content<![endif]>"
+        self.soup(markup)
         markup = "<!DOCTYPE html]ff>"
-        soup = self.soup(markup)
+        self.soup(markup)
 
     def test_doctype_filtered(self):
         markup = "<!DOCTYPE html>\n<html>\n</html>"
@@ -415,7 +418,7 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         ]:
             soup = self.soup("")
             new_tag = soup.new_tag(name)
-            assert new_tag.is_empty_element == True
+            assert new_tag.is_empty_element is True
 
         self.assert_soup("<br/><br/><br/>", "<br/><br/><br/>")
         self.assert_soup("<br /><br /><br />", "<br/><br/><br/>")
@@ -666,7 +669,7 @@ Hello, world!
         self.assert_soup(nested_b_tag)
 
         double_nested_b_tag = "<p>A <a>doubly <i>nested <b>tag</b></i></a></p>"
-        self.assert_soup(nested_b_tag)
+        self.assert_soup(double_nested_b_tag)
 
     def test_nested_block_level_elements(self):
         """Block elements can be nested."""
@@ -837,7 +840,6 @@ Hello, world!
         markup = b'<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mathml="http://www.w3.org/1998/Math/MathML" xmlns:svg="http://www.w3.org/2000/svg"><head></head><body><mathml:msqrt>4</mathml:msqrt><b svg:fill="red"></b></body></html>'
         soup = self.soup(markup)
         assert markup == soup.encode()
-        html = soup.html
         assert "http://www.w3.org/1999/xhtml" == soup.html["xmlns"]
         assert "http://www.w3.org/1998/Math/MathML" == soup.html["xmlns:mathml"]
         assert "http://www.w3.org/2000/svg" == soup.html["xmlns:svg"]

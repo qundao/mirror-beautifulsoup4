@@ -74,8 +74,8 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
             "\n   <p>\n\n<sourceline>\n<b>text</b></sourceline><sourcepos></p>",
             store_line_numbers=True,
         )
-        assert None == soup.p.sourceline
-        assert None == soup.p.sourcepos
+        assert None is soup.p.sourceline
+        assert None is soup.p.sourcepos
 
 
 @pytest.mark.skipif(

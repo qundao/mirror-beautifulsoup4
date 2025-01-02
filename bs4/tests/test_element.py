@@ -97,10 +97,10 @@ class TestAttributeDicts:
         # This preserves Beautiful Soup's old behavior in the absence of
         # guidance from the spec.
         d["v"] = False
-        assert d["v"] == False
+        assert d["v"] is False
 
         d["v"] = True
-        assert d["v"] == True
+        assert d["v"] is True
 
         d["v"] = None
         assert d["v"] == ""

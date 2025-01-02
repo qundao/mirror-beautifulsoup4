@@ -35,7 +35,7 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
         ]
         for markup in bad_markup:
             with pytest.raises(ParserRejectedMarkup):
-                soup = self.soup(markup)
+                self.soup(markup)
 
     def test_namespaced_system_doctype(self):
         # html.parser can't handle namespaced doctypes, so skip this one.
@@ -74,8 +74,8 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
 
         # You can deactivate this behavior.
         soup = self.soup(markup, store_line_numbers=False)
-        assert None == soup.p.sourceline
-        assert None == soup.p.sourcepos
+        assert None is soup.p.sourceline
+        assert None is soup.p.sourcepos
 
     def test_on_duplicate_attribute(self):
         # The html.parser tree builder has a variety of ways of

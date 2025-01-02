@@ -55,17 +55,17 @@ class TestFormatter(SoupTest):
 
         for name in ("html", "minimal", None):
             formatter = HTMLFormatter.REGISTRY[name]
-            assert False == formatter.empty_attributes_are_booleans
+            assert False is formatter.empty_attributes_are_booleans
 
         formatter = XMLFormatter.REGISTRY[None]
-        assert False == formatter.empty_attributes_are_booleans
+        assert False is formatter.empty_attributes_are_booleans
 
         formatter = HTMLFormatter.REGISTRY["html5"]
-        assert True == formatter.empty_attributes_are_booleans
+        assert True is formatter.empty_attributes_are_booleans
 
         # Verify that the constructor sets the value.
         formatter = Formatter(empty_attributes_are_booleans=True)
-        assert True == formatter.empty_attributes_are_booleans
+        assert True is formatter.empty_attributes_are_booleans
 
         # Now demonstrate what it does to markup.
         for markup in ("<option selected></option>", '<option selected=""></option>'):

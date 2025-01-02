@@ -413,7 +413,6 @@ class LXMLTreeBuilderForXML(TreeBuilder):
         assert self.soup is not None
         assert isinstance(name, str)
         self.soup.endData()
-        completed_tag = self.soup.tagStack[-1]
         namespace, name = self._getNsTag(name)
         nsprefix = None
         if namespace is not None:

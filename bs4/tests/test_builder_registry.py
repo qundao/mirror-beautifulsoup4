@@ -45,7 +45,7 @@ class TestBuiltInRegistry(object):
             assert registry.lookup("html") == LXMLTreeBuilder
             assert registry.lookup("xml") == LXMLTreeBuilderForXML
         else:
-            assert registry.lookup("xml") == None
+            assert registry.lookup("xml") is None
             if HTML5LIB_PRESENT:
                 assert registry.lookup("html") == HTML5TreeBuilder
             else:
@@ -61,7 +61,7 @@ class TestBuiltInRegistry(object):
         assert registry.lookup("html.parser") == HTMLParserTreeBuilder
 
     def test_beautifulsoup_constructor_does_lookup(self):
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True):
             # This will create a warning about not explicitly
             # specifying a parser, but we'll ignore it.
 
@@ -108,11 +108,10 @@ class TestRegistry(object):
         assert self.registry.lookup("bar") is builder
 
     def test_lookup_fails_when_no_builder_implements_feature(self):
-        builder = self.builder_for_features("foo", "bar")
         assert self.registry.lookup("baz") is None
 
     def test_lookup_gets_most_recent_registration_when_no_feature_specified(self):
-        builder1 = self.builder_for_features("foo")
+        self.builder_for_features("foo")
         builder2 = self.builder_for_features("bar")
         assert self.registry.lookup() == builder2
 
@@ -120,12 +119,12 @@ class TestRegistry(object):
         assert self.registry.lookup() is None
 
     def test_lookup_gets_most_recent_builder_supporting_all_features(self):
-        has_one = self.builder_for_features("foo")
-        has_the_other = self.builder_for_features("bar")
+        self.builder_for_features("foo")
+        self.builder_for_features("bar")
         has_both_early = self.builder_for_features("foo", "bar", "baz")
         has_both_late = self.builder_for_features("foo", "bar", "quux")
-        lacks_one = self.builder_for_features("bar")
-        has_the_other = self.builder_for_features("foo")
+        self.builder_for_features("bar")
+        self.builder_for_features("foo")
 
         # There are two builders featuring 'foo' and 'bar', but
         # the one that also features 'quux' was registered later.
@@ -135,6 +134,6 @@ class TestRegistry(object):
         assert self.registry.lookup("foo", "bar", "baz") == has_both_early
 
     def test_lookup_fails_when_cannot_reconcile_requested_features(self):
-        builder1 = self.builder_for_features("foo", "bar")
-        builder2 = self.builder_for_features("foo", "baz")
+        self.builder_for_features("foo", "bar")
+        self.builder_for_features("foo", "baz")
         assert self.registry.lookup("bar", "baz") is None

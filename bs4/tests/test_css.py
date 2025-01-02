@@ -140,10 +140,9 @@ class TestCSSSelectors(SoupTest):
 
     def test_select_one_returns_none_if_no_match(self):
         match = self._soup.select_one("nonexistenttag")
-        assert None == match
+        assert None is match
 
     def test_tag_in_tag_one(self):
-        els = self._soup.select("div div")
         self.assert_css_selects("div div", ["inner", "data1"])
 
     def test_tag_in_tag_many(self):
@@ -508,8 +507,8 @@ class TestCSSSelectors(SoupTest):
     def test_match(self):
         inner = self._soup.find("div", id="inner")
         main = self._soup.find("div", id="main")
-        assert inner.css.match("div[id=main]") == False
-        assert main.css.match("div[id=main]") == True
+        assert inner.css.match("div[id=main]") is False
+        assert main.css.match("div[id=main]") is True
 
     def test_iselect(self):
         gen = self._soup.css.iselect("h2")

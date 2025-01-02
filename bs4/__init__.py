@@ -528,7 +528,6 @@ class BeautifulSoup(Tag):
         """
         problem: bool = False
         if isinstance(markup, bytes):
-            cant_start_with_b: Tuple[bytes, bytes] = (b"http:", b"https:")
             problem = (
                 any(markup.startswith(prefix) for prefix in (b"http:", b"https:"))
                 and b" " not in markup
@@ -1073,7 +1072,7 @@ class BeautifulSoup(Tag):
                 # go into an XML document because it means nothing
                 # outside of Python.
                 declared_encoding = None
-            if declared_encoding != None:
+            if declared_encoding is not None:
                 encoding_part = ' encoding="%s"' % declared_encoding
             prefix = '<?xml version="1.0"%s?>\n' % encoding_part
         else:

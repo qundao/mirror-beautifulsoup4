@@ -30,14 +30,14 @@ class TestElementFilter(SoupTest):
         soup = self.soup("<a>text</a>")
         tag = soup.a
         string = tag.string
-        assert True == selector.match(soup)
-        assert True == selector.match(tag)
-        assert True == selector.match(string)
+        assert True is selector.match(soup)
+        assert True is selector.match(tag)
+        assert True is selector.match(string)
         assert soup.find(selector).name == "a"
 
         # And allows any incoming markup to be turned into PageElements.
-        assert True == selector.allow_tag_creation(None, "tag", None)
-        assert True == selector.allow_string_creation("some string")
+        assert True is selector.allow_tag_creation(None, "tag", None)
+        assert True is selector.allow_string_creation("some string")
 
     def test_match(self):
         def m(pe):
@@ -50,10 +50,10 @@ class TestElementFilter(SoupTest):
         deny_string = soup.find(string="deny")
 
         selector = ElementFilter(match_function=m)
-        assert True == selector.match(allow_tag)
-        assert True == selector.match(allow_string)
-        assert False == selector.match(deny_tag)
-        assert False == selector.match(deny_string)
+        assert True is selector.match(allow_tag)
+        assert True is selector.match(allow_string)
+        assert False is selector.match(deny_tag)
+        assert False is selector.match(deny_string)
 
         # Since only the match function was provided, there is
         # no effect on tag or string creation.
@@ -64,10 +64,10 @@ class TestElementFilter(SoupTest):
         # By default, ElementFilter.allow_tag_creation allows everything.
         filter = ElementFilter()
         f = filter.allow_tag_creation
-        assert True == f("allow", "ignore", {})
-        assert True == f("ignore", "allow", {})
-        assert True == f(None, "ignore", {"allow": "1"})
-        assert True == f("no", "no", {"no": "nope"})
+        assert True is f("allow", "ignore", {})
+        assert True is f("ignore", "allow", {})
+        assert True is f(None, "ignore", {"allow": "1"})
+        assert True is f("no", "no", {"no": "nope"})
 
         # You can customize this behavior by overriding
         # allow_tag_creation in a subclass.
@@ -86,10 +86,10 @@ class TestElementFilter(SoupTest):
 
         filter = MyFilter()
         f = filter.allow_tag_creation
-        assert True == f("allow", "ignore", {})
-        assert True == f("ignore", "allow", {})
-        assert True == f(None, "ignore", {"allow": "1"})
-        assert False == f("no", "no", {"no": "nope"})
+        assert True is f("allow", "ignore", {})
+        assert True is f("ignore", "allow", {})
+        assert True is f(None, "ignore", {"allow": "1"})
+        assert False is f("no", "no", {"no": "nope"})
 
         # Test the customized ElementFilter as a value for parse_only.
         soup = self.soup(
@@ -109,9 +109,9 @@ class TestElementFilter(SoupTest):
         # By default, ElementFilter.allow_string_creation allows everything.
         filter = ElementFilter()
         f = filter.allow_string_creation
-        assert True == f("allow")
-        assert True == f("deny")
-        assert True == f("please allow")
+        assert True is f("allow")
+        assert True is f("deny")
+        assert True is f("please allow")
 
         # You can customize this behavior by overriding allow_string_creation
         # in a subclass.
@@ -121,9 +121,9 @@ class TestElementFilter(SoupTest):
 
         filter = MyFilter()
         f = filter.allow_string_creation
-        assert True == f("allow")
-        assert False == f("deny")
-        assert False == f("please allow")
+        assert True is f("allow")
+        assert False is f("deny")
+        assert False is f("please allow")
 
         # Test the customized ElementFilter as a value for parse_only.
         soup = self.soup(
@@ -285,7 +285,7 @@ class TestSoupStrainer(SoupTest):
     def test_search_tag_deprecated(self):
         strainer = SoupStrainer(name="a")
         with warnings.catch_warnings(record=True) as w:
-            assert False == strainer.search_tag("b", {})
+            assert False is strainer.search_tag("b", {})
             [w1] = w
             msg = str(w1.message)
             assert w1.filename == __file__
@@ -299,7 +299,7 @@ class TestSoupStrainer(SoupTest):
         soup = self.soup("<a></a><b></b>")
         with warnings.catch_warnings(record=True) as w:
             assert soup.a == strainer.search(soup.a)
-            assert None == strainer.search(soup.b)
+            assert None is strainer.search(soup.b)
             [w1, w2] = w
             msg = str(w1.message)
             assert msg == str(w2.message)
@@ -609,7 +609,7 @@ class TestSoupStrainer(SoupTest):
             assert True, soupstrainer.excludes_everything
             assert "" == self.soup(markup, parse_only=soupstrainer).decode()
             [warning] = w
-            msg = str(warning.message)
+            str(warning.message)
             assert warning.filename == __file__
             assert str(warning.message).startswith(
                 "The given value for parse_only will exclude everything:"
