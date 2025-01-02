@@ -18,41 +18,63 @@ from typing import (
     Callable,
 )
 
-def _deprecated_alias(old_name:str, new_name:str, version:str):
+
+def _deprecated_alias(old_name: str, new_name: str, version: str):
     """Alias one attribute name to another for backward compatibility
 
     :meta private:
     """
+
     @property
     def alias(self) -> Any:
         ":meta private:"
-        warnings.warn(f"Access to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            f"Access to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return getattr(self, new_name)
 
     @alias.setter
-    def alias(self, value:str) -> None:
+    def alias(self, value: str) -> None:
         ":meta private:"
-        warnings.warn(f"Write to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            f"Write to deprecated property {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return setattr(self, new_name, value)
+
     return alias
 
-def _deprecated_function_alias(old_name:str, new_name:str, version:str) -> Callable[[Any], Any]:
-    def alias(self, *args:Any, **kwargs:Any) -> Any:
+
+def _deprecated_function_alias(
+    old_name: str, new_name: str, version: str
+) -> Callable[[Any], Any]:
+    def alias(self, *args: Any, **kwargs: Any) -> Any:
         ":meta private:"
-        warnings.warn(f"Call to deprecated method {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.", DeprecationWarning, stacklevel=2)
+        warnings.warn(
+            f"Call to deprecated method {old_name}. (Replaced by {new_name}) -- Deprecated since version {version}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return getattr(self, new_name)(*args, **kwargs)
+
     return alias
 
-def _deprecated(replaced_by:str, version:str) -> Callable:
-    def deprecate(func:Callable) -> Callable:
+
+def _deprecated(replaced_by: str, version: str) -> Callable:
+    def deprecate(func: Callable) -> Callable:
         @functools.wraps(func)
-        def with_warning(*args:Any, **kwargs:Any) -> Any:
+        def with_warning(*args: Any, **kwargs: Any) -> Any:
             ":meta private:"
             warnings.warn(
                 f"Call to deprecated method {func.__name__}. (Replaced by {replaced_by}) -- Deprecated since version {version}.",
                 DeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
             return func(*args, **kwargs)
+
         return with_warning
+
     return deprecate

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
@@ -32,7 +33,7 @@ from bs4.element import (
     Stylesheet,
     Script,
     TemplateString,
-    nonwhitespace_re
+    nonwhitespace_re,
 )
 
 # Exceptions were moved to their own module in 4.13. Import here for
@@ -49,7 +50,8 @@ from bs4._warnings import XMLParsedAsHTMLWarning
 if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import (
-        NavigableString, Tag,
+        NavigableString,
+        Tag,
     )
     from bs4._typing import (
         _AttributeValue,
@@ -58,21 +60,21 @@ if TYPE_CHECKING:
         _RawOrProcessedAttributeValues,
         _RawMarkup,
     )
-    
+
 __all__ = [
-    'HTMLTreeBuilder',
-    'SAXTreeBuilder',
-    'TreeBuilder',
-    'TreeBuilderRegistry',
-    ]
+    "HTMLTreeBuilder",
+    "SAXTreeBuilder",
+    "TreeBuilder",
+    "TreeBuilderRegistry",
+]
 
 # Some useful features for a TreeBuilder to have.
-FAST = 'fast'
-PERMISSIVE = 'permissive'
-STRICT = 'strict'
-XML = 'xml'
-HTML = 'html'
-HTML_5 = 'html5'
+FAST = "fast"
+PERMISSIVE = "permissive"
+STRICT = "strict"
+XML = "xml"
+HTML = "html"
+HTML_5 = "html5"
 
 
 class TreeBuilderRegistry(object):
@@ -82,12 +84,12 @@ class TreeBuilderRegistry(object):
 
     builders_for_feature: Dict[str, List[Type[TreeBuilder]]]
     builders: List[Type[TreeBuilder]]
-    
+
     def __init__(self) -> None:
         self.builders_for_feature = defaultdict(list)
         self.builders = []
 
-    def register(self, treebuilder_class:type[TreeBuilder]) -> None:
+    def register(self, treebuilder_class: type[TreeBuilder]) -> None:
         """Register a treebuilder based on its advertised features.
 
         :param treebuilder_class: A subclass of `TreeBuilder`. its
@@ -97,7 +99,7 @@ class TreeBuilderRegistry(object):
             self.builders_for_feature[feature].insert(0, treebuilder_class)
         self.builders.insert(0, treebuilder_class)
 
-    def lookup(self, *features:str) -> Optional[Type[TreeBuilder]]:
+    def lookup(self, *features: str) -> Optional[Type[TreeBuilder]]:
         """Look up a TreeBuilder subclass with the desired features.
 
         :param features: A list of features to look for. If none are
@@ -130,8 +132,7 @@ class TreeBuilderRegistry(object):
                     candidate_set = set(candidates)
                 else:
                     # Eliminate any candidates that don't have this feature.
-                    candidate_set = candidate_set.intersection(
-                        set(we_have_the_feature))
+                    candidate_set = candidate_set.intersection(set(we_have_the_feature))
 
         # The only valid candidates are the ones in candidate_set.
         # Go through the original list of candidates and pick the first one
@@ -143,9 +144,11 @@ class TreeBuilderRegistry(object):
                 return candidate
         return None
 
+
 #: The `BeautifulSoup` constructor will take a list of features
 #: and use it to look up `TreeBuilder` classes in this registry.
-builder_registry:TreeBuilderRegistry = TreeBuilderRegistry()
+builder_registry: TreeBuilderRegistry = TreeBuilderRegistry()
+
 
 class TreeBuilder(object):
     """Turn a textual document into a Beautiful Soup object tree.
@@ -196,15 +199,17 @@ class TreeBuilder(object):
 
     """
 
-    USE_DEFAULT: Any = object() #: :meta private:
-    
-    def __init__(self, multi_valued_attributes:Dict[str, Set[str]]=USE_DEFAULT,
-                 preserve_whitespace_tags:Set[str]=USE_DEFAULT,
-                 store_line_numbers:bool=USE_DEFAULT,
-                 string_containers:Dict[str, Type[NavigableString]]=USE_DEFAULT,
-                 empty_element_tags:Set[str]=USE_DEFAULT,
-                 attribute_dict_class:Type[AttributeDict]=AttributeDict,
-                 attribute_value_list_class:Type[AttributeValueList]=AttributeValueList,
+    USE_DEFAULT: Any = object()  #: :meta private:
+
+    def __init__(
+        self,
+        multi_valued_attributes: Dict[str, Set[str]] = USE_DEFAULT,
+        preserve_whitespace_tags: Set[str] = USE_DEFAULT,
+        store_line_numbers: bool = USE_DEFAULT,
+        string_containers: Dict[str, Type[NavigableString]] = USE_DEFAULT,
+        empty_element_tags: Set[str] = USE_DEFAULT,
+        attribute_dict_class: Type[AttributeDict] = AttributeDict,
+        attribute_value_list_class: Type[AttributeValueList] = AttributeValueList,
     ):
         self.soup = None
         if multi_valued_attributes is self.USE_DEFAULT:
@@ -229,29 +234,29 @@ class TreeBuilder(object):
         self.attribute_dict_class = attribute_dict_class
         self.attribute_value_list_class = attribute_value_list_class
 
-    NAME:str = "[Unknown tree builder]"
+    NAME: str = "[Unknown tree builder]"
     ALTERNATE_NAMES: Iterable[str] = []
     features: Iterable[str] = []
 
     is_xml: bool = False
     picklable: bool = False
 
-    soup: Optional[BeautifulSoup] #: :meta private:
+    soup: Optional[BeautifulSoup]  #: :meta private:
 
     #: A tag will be considered an empty-element
     #: tag when and only when it has no contents.
-    empty_element_tags: Optional[Set[str]] = None #: :meta private:
-    cdata_list_attributes: Dict[str, Set[str]] #: :meta private:
-    preserve_whitespace_tags: Set[str] #: :meta private:
-    string_containers: Dict[str, Type[NavigableString]] #: :meta private:
-    tracks_line_numbers: bool #: :meta private:
-    
+    empty_element_tags: Optional[Set[str]] = None  #: :meta private:
+    cdata_list_attributes: Dict[str, Set[str]]  #: :meta private:
+    preserve_whitespace_tags: Set[str]  #: :meta private:
+    string_containers: Dict[str, Type[NavigableString]]  #: :meta private:
+    tracks_line_numbers: bool  #: :meta private:
+
     #: A value for these tag/attribute combinations is a space- or
     #: comma-separated list of CDATA, rather than a single CDATA.
-    DEFAULT_CDATA_LIST_ATTRIBUTES : Dict[str, Set[str]] = defaultdict(set)
+    DEFAULT_CDATA_LIST_ATTRIBUTES: Dict[str, Set[str]] = defaultdict(set)
 
     #: Whitespace should be preserved inside these tags.
-    DEFAULT_PRESERVE_WHITESPACE_TAGS : Set[str] = set()
+    DEFAULT_PRESERVE_WHITESPACE_TAGS: Set[str] = set()
 
     #: The textual contents of tags with these names should be
     #: instantiated with some class other than `bs4.element.NavigableString`.
@@ -262,18 +267,18 @@ class TreeBuilder(object):
     #: defines a different set of DEFAULT_EMPTY_ELEMENT_TAGS based on the
     #: HTML 4 and HTML5 standards.
     DEFAULT_EMPTY_ELEMENT_TAGS: Optional[Set[str]] = None
-    
+
     #: Most parsers don't keep track of line numbers.
     TRACKS_LINE_NUMBERS: bool = False
-        
-    def initialize_soup(self, soup:BeautifulSoup) -> None:
+
+    def initialize_soup(self, soup: BeautifulSoup) -> None:
         """The BeautifulSoup object has been initialized and is now
         being associated with the TreeBuilder.
 
         :param soup: A BeautifulSoup object.
         """
         self.soup = soup
-        
+
     def reset(self) -> None:
         """Do any work necessary to reset the underlying parser
         for a new document.
@@ -282,7 +287,7 @@ class TreeBuilder(object):
         """
         pass
 
-    def can_be_empty_element(self, tag_name:str) -> bool:
+    def can_be_empty_element(self, tag_name: str) -> bool:
         """Might a tag with this name be an empty-element tag?
 
         The final markup may or may not actually present this tag as
@@ -304,17 +309,17 @@ class TreeBuilder(object):
         if self.empty_element_tags is None:
             return True
         return tag_name in self.empty_element_tags
-    
-    def feed(self, markup:_RawMarkup) -> None:
-        """Run incoming markup through some parsing process.
-        """
+
+    def feed(self, markup: _RawMarkup) -> None:
+        """Run incoming markup through some parsing process."""
         raise NotImplementedError()
 
     def prepare_markup(
-            self, markup:_RawMarkup,
-            user_specified_encoding:Optional[_Encoding]=None,
-            document_declared_encoding:Optional[_Encoding]=None,
-            exclude_encodings:Optional[_Encodings]=None
+        self,
+        markup: _RawMarkup,
+        user_specified_encoding: Optional[_Encoding] = None,
+        document_declared_encoding: Optional[_Encoding] = None,
+        exclude_encodings: Optional[_Encodings] = None,
     ) -> Iterable[Tuple[_RawMarkup, Optional[_Encoding], Optional[_Encoding], bool]]:
         """Run any preliminary steps necessary to make incoming markup
         acceptable to the parser.
@@ -345,7 +350,7 @@ class TreeBuilder(object):
         """
         yield markup, None, None, False
 
-    def test_fragment_to_document(self, fragment:str) -> str:
+    def test_fragment_to_document(self, fragment: str) -> str:
         """Wrap an HTML fragment to make it look like a document.
 
         Different parsers do this differently. For instance, lxml
@@ -362,8 +367,8 @@ class TreeBuilder(object):
         """
         return fragment
 
-    def set_up_substitutions(self, tag:Tag) -> bool:
-        """Set up any substitutions that will need to be performed on 
+    def set_up_substitutions(self, tag: Tag) -> bool:
+        """Set up any substitutions that will need to be performed on
         a `Tag` when it's output as a string.
 
         By default, this does nothing. See `HTMLTreeBuilder` for a
@@ -374,7 +379,9 @@ class TreeBuilder(object):
         """
         return False
 
-    def _replace_cdata_list_attribute_values(self, tag_name:str, attrs:_RawOrProcessedAttributeValues) -> _AttributeValues:
+    def _replace_cdata_list_attribute_values(
+        self, tag_name: str, attrs: _RawOrProcessedAttributeValues
+    ) -> _AttributeValues:
         """When an attribute value is associated with a tag that can
         have multiple values for that attribute, convert the string
         value to a list of strings.
@@ -399,22 +406,23 @@ class TreeBuilder(object):
 
         # There is at least a possibility that we need to modify one of
         # the attribute values.
-        universal: Set[str] = self.cdata_list_attributes.get('*', set())
-        tag_specific = self.cdata_list_attributes.get(
-            tag_name.lower(), None)
+        universal: Set[str] = self.cdata_list_attributes.get("*", set())
+        tag_specific = self.cdata_list_attributes.get(tag_name.lower(), None)
         for attr in list(modified_attrs.keys()):
-            modified_value:_AttributeValue
+            modified_value: _AttributeValue
             if attr in universal or (tag_specific and attr in tag_specific):
                 # We have a "class"-type attribute whose string
                 # value is a whitespace-separated list of
                 # values. Split it into a list.
-                original_value:_AttributeValue = modified_attrs[attr]
+                original_value: _AttributeValue = modified_attrs[attr]
                 if isinstance(original_value, _RawAttributeValue):
                     # This is a _RawAttributeValue (a string) that
                     # needs to be split and converted to a
                     # AttributeValueList so it can be an
                     # _AttributeValue.
-                    modified_value = self.attribute_value_list_class(nonwhitespace_re.findall(original_value))
+                    modified_value = self.attribute_value_list_class(
+                        nonwhitespace_re.findall(original_value)
+                    )
                 else:
                     # html5lib calls setAttributes twice for the
                     # same tag when rearranging the parse tree. On
@@ -426,7 +434,8 @@ class TreeBuilder(object):
                     modified_value = original_value
                 modified_attrs[attr] = modified_value
         return modified_attrs
-    
+
+
 class SAXTreeBuilder(TreeBuilder):
     """A Beautiful Soup treebuilder that listens for SAX events.
 
@@ -435,51 +444,53 @@ class SAXTreeBuilder(TreeBuilder):
     rest of Beautiful Soup, so there have been long stretches where it
     hasn't worked properly.
     """
-    def __init__(self, *args:Any, **kwargs:Any) -> None:
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         warnings.warn(
             f"The SAXTreeBuilder class was deprecated in 4.13.0 and will be removed soon thereafter. It is completely untested and probably doesn't work; do not use it.",
-                DeprecationWarning,
-                stacklevel=2
-            )
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super(SAXTreeBuilder, self).__init__(*args, **kwargs)
-    
-    def feed(self, markup:_RawMarkup) -> None:
+
+    def feed(self, markup: _RawMarkup) -> None:
         raise NotImplementedError()
 
     def close(self) -> None:
         pass
 
-    def startElement(self, name:str, attrs:Dict[str,str]) -> None:
+    def startElement(self, name: str, attrs: Dict[str, str]) -> None:
         attrs = AttributeDict((key[1], value) for key, value in list(attrs.items()))
-        #print("Start %s, %r" % (name, attrs))
+        # print("Start %s, %r" % (name, attrs))
         assert self.soup is not None
         self.soup.handle_starttag(name, None, None, attrs)
 
-    def endElement(self, name:str) -> None:
-        #print("End %s" % name)
+    def endElement(self, name: str) -> None:
+        # print("End %s" % name)
         assert self.soup is not None
         self.soup.handle_endtag(name)
 
-    def startElementNS(self, nsTuple:Tuple[str,str],
-                       nodeName:str, attrs:Dict[str,str]) -> None:
+    def startElementNS(
+        self, nsTuple: Tuple[str, str], nodeName: str, attrs: Dict[str, str]
+    ) -> None:
         # Throw away (ns, nodeName) for now.
         self.startElement(nodeName, attrs)
 
-    def endElementNS(self, nsTuple:Tuple[str,str], nodeName:str) -> None:
+    def endElementNS(self, nsTuple: Tuple[str, str], nodeName: str) -> None:
         # Throw away (ns, nodeName) for now.
         self.endElement(nodeName)
-        #handler.endElementNS((ns, node.nodeName), node.nodeName)
+        # handler.endElementNS((ns, node.nodeName), node.nodeName)
 
-    def startPrefixMapping(self, prefix:str, nodeValue:str) -> None:
+    def startPrefixMapping(self, prefix: str, nodeValue: str) -> None:
         # Ignore the prefix for now.
         pass
 
-    def endPrefixMapping(self, prefix:str) -> None:
+    def endPrefixMapping(self, prefix: str) -> None:
         # Ignore the prefix for now.
         # handler.endPrefixMapping(prefix)
         pass
 
-    def characters(self, content:str) -> None:
+    def characters(self, content: str) -> None:
         assert self.soup is not None
         self.soup.handle_data(content)
 
@@ -497,19 +508,80 @@ class HTMLTreeBuilder(TreeBuilder):
 
     #: Some HTML tags are defined as having no contents. Beautiful Soup
     #: treats these specially.
-    DEFAULT_EMPTY_ELEMENT_TAGS: Set[str] = set([
-        # These are from HTML5.
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr',
-        
-        # These are from earlier versions of HTML and are removed in HTML5.
-        'basefont', 'bgsound', 'command', 'frame', 'image', 'isindex', 'nextid', 'spacer'
-    ])
+    DEFAULT_EMPTY_ELEMENT_TAGS: Set[str] = set(
+        [
+            # These are from HTML5.
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "keygen",
+            "link",
+            "menuitem",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr",
+            # These are from earlier versions of HTML and are removed in HTML5.
+            "basefont",
+            "bgsound",
+            "command",
+            "frame",
+            "image",
+            "isindex",
+            "nextid",
+            "spacer",
+        ]
+    )
 
     #: The HTML standard defines these tags as block-level elements. Beautiful
     #: Soup does not treat these elements differently from other elements,
     #: but it may do so eventually, and this information is available if
     #: you need to use it.
-    DEFAULT_BLOCK_ELEMENTS: Set[str] = set(["address", "article", "aside", "blockquote", "canvas", "dd", "div", "dl", "dt", "fieldset", "figcaption", "figure", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "header", "hr", "li", "main", "nav", "noscript", "ol", "output", "p", "pre", "section", "table", "tfoot", "ul", "video"])
+    DEFAULT_BLOCK_ELEMENTS: Set[str] = set(
+        [
+            "address",
+            "article",
+            "aside",
+            "blockquote",
+            "canvas",
+            "dd",
+            "div",
+            "dl",
+            "dt",
+            "fieldset",
+            "figcaption",
+            "figure",
+            "footer",
+            "form",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "header",
+            "hr",
+            "li",
+            "main",
+            "nav",
+            "noscript",
+            "ol",
+            "output",
+            "p",
+            "pre",
+            "section",
+            "table",
+            "tfoot",
+            "ul",
+            "video",
+        ]
+    )
 
     #: These HTML tags need special treatment so they can be
     #: represented by a string class other than `bs4.element.NavigableString`.
@@ -528,13 +600,13 @@ class HTMLTreeBuilder(TreeBuilder):
     #: TODO: Arguably <noscript> could go here but it seems
     #: qualitatively different from the other tags.
     DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {
-        'rt' : RubyTextString,
-        'rp' : RubyParenthesisString,
-        'style': Stylesheet,
-        'script': Script,
-        'template': TemplateString,
-    }    
-    
+        "rt": RubyTextString,
+        "rp": RubyParenthesisString,
+        "style": Stylesheet,
+        "script": Script,
+        "template": TemplateString,
+    }
+
     #: The HTML standard defines these attributes as containing a
     #: space-separated list of values, not a single value. That is,
     #: class="foo bar" means that the 'class' attribute has two values,
@@ -543,27 +615,26 @@ class HTMLTreeBuilder(TreeBuilder):
     #: a list of values if possible. Upon output, the list will be
     #: converted back into a string.
     DEFAULT_CDATA_LIST_ATTRIBUTES: Dict[str, Set[str]] = {
-        "*" : {'class', 'accesskey', 'dropzone'},
-        "a" : {'rel', 'rev'},
-        "link" :  {'rel', 'rev'},
-        "td" : {"headers"},
-        "th" : {"headers"},
-        "td" : {"headers"},
-        "form" : {"accept-charset"},
-        "object" : {"archive"},
-
+        "*": {"class", "accesskey", "dropzone"},
+        "a": {"rel", "rev"},
+        "link": {"rel", "rev"},
+        "td": {"headers"},
+        "th": {"headers"},
+        "td": {"headers"},
+        "form": {"accept-charset"},
+        "object": {"archive"},
         # These are HTML5 specific, as are *.accesskey and *.dropzone above.
-        "area" : {"rel"},
-        "icon" : {"sizes"},
-        "iframe" : {"sandbox"},
-        "output" : {"for"},
-        }
+        "area": {"rel"},
+        "icon": {"sizes"},
+        "iframe": {"sandbox"},
+        "output": {"for"},
+    }
 
     #: By default, whitespace inside these HTML tags will be
     #: preserved rather than being collapsed.
-    DEFAULT_PRESERVE_WHITESPACE_TAGS: set[str] = set(['pre', 'textarea'])
+    DEFAULT_PRESERVE_WHITESPACE_TAGS: set[str] = set(["pre", "textarea"])
 
-    def set_up_substitutions(self, tag:Tag) -> bool:
+    def set_up_substitutions(self, tag: Tag) -> bool:
         """Replace the declared encoding in a <meta> tag with a placeholder,
         to be substituted when the tag is output to a string.
 
@@ -576,21 +647,21 @@ class HTMLTreeBuilder(TreeBuilder):
         :meta private:
         """
         # We are only interested in <meta> tags
-        if tag.name != 'meta':
+        if tag.name != "meta":
             return False
 
         # TODO: This cast will fail in the (very unlikely) scenario
         # that the programmer who instantiates the TreeBuilder
         # specifies meta['content'] or meta['charset'] as
         # cdata_list_attributes.
-        content:Optional[str] = cast(Optional[str], tag.get('content'))
-        charset:Optional[str] = cast(Optional[str], tag.get('charset'))
+        content: Optional[str] = cast(Optional[str], tag.get("content"))
+        charset: Optional[str] = cast(Optional[str], tag.get("charset"))
 
         # But we can accommodate meta['http-equiv'] being made a
         # cdata_list_attribute (again, very unlikely) without much
         # trouble.
-        http_equiv:List[str] = tag.get_attribute_list('http-equiv')
-        
+        http_equiv: List[str] = tag.get_attribute_list("http-equiv")
+
         # We are interested in <meta> tags that say what encoding the
         # document was originally in. This means HTML 5-style <meta>
         # tags that provide the "charset" attribute. It also means
@@ -605,17 +676,19 @@ class HTMLTreeBuilder(TreeBuilder):
             # HTML 5 style:
             # <meta charset="utf8">
             meta_encoding = charset
-            tag['charset'] = CharsetMetaAttributeValue(charset)
+            tag["charset"] = CharsetMetaAttributeValue(charset)
             substituted = True
 
-        elif (content is not None and
-              any(x.lower() == 'content-type' for x in http_equiv)):
+        elif content is not None and any(
+            x.lower() == "content-type" for x in http_equiv
+        ):
             # HTML 4 style:
             # <meta http-equiv="content-type" content="text/html; charset=utf8">
-            tag['content'] = ContentMetaAttributeValue(content)
+            tag["content"] = ContentMetaAttributeValue(content)
             substituted = True
 
         return substituted
+
 
 class DetectsXMLParsedAsHTML(object):
     """A mixin class for any class (a TreeBuilder, or some class used by a
@@ -631,24 +704,26 @@ class DetectsXMLParsedAsHTML(object):
     """
 
     #: Regular expression for seeing if string markup has an <html> tag.
-    LOOKS_LIKE_HTML:Pattern[str] = re.compile("<[^ +]html", re.I)
+    LOOKS_LIKE_HTML: Pattern[str] = re.compile("<[^ +]html", re.I)
 
     #: Regular expression for seeing if byte markup has an <html> tag.
-    LOOKS_LIKE_HTML_B:Pattern[bytes] = re.compile(b"<[^ +]html", re.I)
+    LOOKS_LIKE_HTML_B: Pattern[bytes] = re.compile(b"<[^ +]html", re.I)
 
     #: The start of an XML document string.
-    XML_PREFIX:str = '<?xml'
+    XML_PREFIX: str = "<?xml"
 
     #: The start of an XML document bytestring.
-    XML_PREFIX_B:bytes = b'<?xml'
+    XML_PREFIX_B: bytes = b"<?xml"
 
     # This is typed as str, not `ProcessingInstruction`, because this
     # check may be run before any Beautiful Soup objects are created.
-    _first_processing_instruction: Optional[str] #: :meta private:
-    _root_tag_name: Optional[str] #: :meta private:
-    
+    _first_processing_instruction: Optional[str]  #: :meta private:
+    _root_tag_name: Optional[str]  #: :meta private:
+
     @classmethod
-    def warn_if_markup_looks_like_xml(cls, markup:Optional[_RawMarkup], stacklevel:int=3) -> bool:
+    def warn_if_markup_looks_like_xml(
+        cls, markup: Optional[_RawMarkup], stacklevel: int = 3
+    ) -> bool:
         """Perform a check on some markup to see if it looks like XML
         that's not XHTML. If so, issue a warning.
 
@@ -666,37 +741,36 @@ class DetectsXMLParsedAsHTML(object):
             return False
         markup = markup[:500]
         if isinstance(markup, bytes):
-            markup_b:bytes = markup
-            looks_like_xml = (
-                markup_b.startswith(cls.XML_PREFIX_B)
-                and not cls.LOOKS_LIKE_HTML_B.search(markup)
-            )
+            markup_b: bytes = markup
+            looks_like_xml = markup_b.startswith(
+                cls.XML_PREFIX_B
+            ) and not cls.LOOKS_LIKE_HTML_B.search(markup)
         else:
-            markup_s:str = markup
-            looks_like_xml = (
-                markup_s.startswith(cls.XML_PREFIX)
-                and not cls.LOOKS_LIKE_HTML.search(markup)
-            )
+            markup_s: str = markup
+            looks_like_xml = markup_s.startswith(
+                cls.XML_PREFIX
+            ) and not cls.LOOKS_LIKE_HTML.search(markup)
 
         if looks_like_xml:
-            cls._warn(stacklevel=stacklevel+2)
+            cls._warn(stacklevel=stacklevel + 2)
             return True
-        return False        
-    
+        return False
+
     @classmethod
-    def _warn(cls, stacklevel:int=5) -> None:
+    def _warn(cls, stacklevel: int = 5) -> None:
         """Issue a warning about XML being parsed as HTML."""
         warnings.warn(
-            XMLParsedAsHTMLWarning.MESSAGE, XMLParsedAsHTMLWarning,
-            stacklevel=stacklevel
+            XMLParsedAsHTMLWarning.MESSAGE,
+            XMLParsedAsHTMLWarning,
+            stacklevel=stacklevel,
         )
-        
+
     def _initialize_xml_detector(self) -> None:
         """Call this method before parsing a document."""
         self._first_processing_instruction = None
         self._root_tag_name = None
-       
-    def _document_might_be_xml(self, processing_instruction:str) -> None:
+
+    def _document_might_be_xml(self, processing_instruction: str) -> None:
         """Call this method when encountering an XML declaration, or a
         "processing instruction" that might be an XML declaration.
 
@@ -704,8 +778,10 @@ class DetectsXMLParsedAsHTML(object):
         the XML document turns out to be a non-XHTML document that's
         being parsed as XML.
         """
-        if (self._first_processing_instruction is not None
-            or self._root_tag_name is not None):
+        if (
+            self._first_processing_instruction is not None
+            or self._root_tag_name is not None
+        ):
             # The document has already started. Don't bother checking
             # anymore.
             return
@@ -714,8 +790,8 @@ class DetectsXMLParsedAsHTML(object):
 
         # We won't know until we encounter the first tag whether or
         # not this is actually a problem.
-        
-    def _root_tag_encountered(self, name:str) -> None:
+
+    def _root_tag_encountered(self, name: str) -> None:
         """Call this when you encounter the document's root tag.
 
         This is where we actually check whether an XML document is
@@ -727,15 +803,18 @@ class DetectsXMLParsedAsHTML(object):
             return
 
         self._root_tag_name = name
-        if (name != 'html' and self._first_processing_instruction is not None
-            and self._first_processing_instruction.lower().startswith('xml ')):
+        if (
+            name != "html"
+            and self._first_processing_instruction is not None
+            and self._first_processing_instruction.lower().startswith("xml ")
+        ):
             # We encountered an XML declaration and then a tag other
             # than 'html'. This is a reliable indicator that a
             # non-XHTML document is being parsed as XML.
             self._warn(stacklevel=10)
 
-    
-def register_treebuilders_from(module:ModuleType) -> None:
+
+def register_treebuilders_from(module: ModuleType) -> None:
     """Copy TreeBuilders from the given module into this module."""
     this_module = sys.modules[__name__]
     for name in module.__all__:
@@ -747,20 +826,24 @@ def register_treebuilders_from(module:ModuleType) -> None:
             # Register the builder while we're at it.
             this_module.builder_registry.register(obj)
 
+
 # Builders are registered in reverse order of priority, so that custom
 # builder registrations will take precedence. In general, we want lxml
 # to take precedence over html5lib, because it's faster. And we only
 # want to use HTMLParser as a last resort.
 from . import _htmlparser
+
 register_treebuilders_from(_htmlparser)
 try:
     from . import _html5lib
+
     register_treebuilders_from(_html5lib)
 except ImportError:
     # They don't have html5lib installed.
     pass
 try:
     from . import _lxml
+
     register_treebuilders_from(_lxml)
 except ImportError:
     # They don't have lxml installed.

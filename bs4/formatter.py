@@ -41,10 +41,10 @@ class Formatter(EntitySubstitution):
     """
 
     #: Constant name denoting HTML markup
-    HTML:str = 'html'
+    HTML: str = "html"
 
     #: Constant name denoting XML markup
-    XML:str = 'xml'
+    XML: str = "xml"
 
     #: Default values for the various constructor options when the
     #: markup language is HTML.
@@ -52,19 +52,21 @@ class Formatter(EntitySubstitution):
         cdata_containing_tags=set(["script", "style"]),
     )
 
-    language:Optional[str] #: :meta private:
-    entity_substitution: Optional[_EntitySubstitutionFunction] #: :meta private:
-    void_element_close_prefix: str #: :meta private:
-    cdata_containing_tags: Set[str] #: :meta private:    
-    indent:str #: :meta private:
+    language: Optional[str]  #: :meta private:
+    entity_substitution: Optional[_EntitySubstitutionFunction]  #: :meta private:
+    void_element_close_prefix: str  #: :meta private:
+    cdata_containing_tags: Set[str]  #: :meta private:
+    indent: str  #: :meta private:
 
     #: If this is set to true by the constructor, then attributes whose
     #: values are sent to the empty string will be treated as HTML
     #: boolean attributes. (Attributes whose value is None are always
     #: rendered this way.)
     empty_attributes_are_booleans: bool
-    
-    def _default(self, language:str, value:Optional[Set[str]], kwarg:str) -> Set[str]:
+
+    def _default(
+        self, language: str, value: Optional[Set[str]], kwarg: str
+    ) -> Set[str]:
         if value is not None:
             return value
         if language == self.XML:
@@ -76,12 +78,13 @@ class Formatter(EntitySubstitution):
         return self.HTML_DEFAULTS[kwarg]
 
     def __init__(
-            self,
-            language:Optional[str]=None,
-            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
-            void_element_close_prefix:str='/',
-            cdata_containing_tags:Optional[Set[str]]=None,
-            empty_attributes_are_booleans:bool=False, indent:int=1,
+        self,
+        language: Optional[str] = None,
+        entity_substitution: Optional[_EntitySubstitutionFunction] = None,
+        void_element_close_prefix: str = "/",
+        cdata_containing_tags: Optional[Set[str]] = None,
+        empty_attributes_are_booleans: bool = False,
+        indent: int = 1,
     ):
         r"""Constructor.
 
@@ -89,7 +92,7 @@ class Formatter(EntitySubstitution):
            XML markup and `Formatter.HTML` if you are formatting HTML markup.
 
         :param entity_substitution: A function to call to replace special
-           characters with XML/HTML entities. For examples, see 
+           characters with XML/HTML entities. For examples, see
            bs4.dammit.EntitySubstitution.substitute_html and substitute_xml.
         :param void_element_close_prefix: By default, void elements
            are represented as <tag/> (XML rules) rather than <tag>
@@ -117,23 +120,23 @@ class Formatter(EntitySubstitution):
         self.entity_substitution = entity_substitution
         self.void_element_close_prefix = void_element_close_prefix
         self.cdata_containing_tags = self._default(
-            self.language, cdata_containing_tags, 'cdata_containing_tags'
+            self.language, cdata_containing_tags, "cdata_containing_tags"
         )
-        self.empty_attributes_are_booleans=empty_attributes_are_booleans
+        self.empty_attributes_are_booleans = empty_attributes_are_booleans
         if indent is None:
             indent = 0
         indent_str: str
         if isinstance(indent, int):
             if indent < 0:
                 indent = 0
-            indent_str = ' ' * indent
+            indent_str = " " * indent
         elif isinstance(indent, str):
             indent_str = indent
         else:
-            indent_str = ' '
+            indent_str = " "
         self.indent = indent_str
 
-    def substitute(self, ns:str) -> str:
+    def substitute(self, ns: str) -> str:
         """Process a string that needs to undergo entity substitution.
         This may be a string encountered in an attribute value or as
         text.
@@ -145,15 +148,18 @@ class Formatter(EntitySubstitution):
         if not self.entity_substitution:
             return ns
         from .element import NavigableString
-        if (isinstance(ns, NavigableString)
+
+        if (
+            isinstance(ns, NavigableString)
             and ns.parent is not None
-            and ns.parent.name in self.cdata_containing_tags):
+            and ns.parent.name in self.cdata_containing_tags
+        ):
             # Do nothing.
             return ns
         # Substitute.
         return self.entity_substitution(ns)
 
-    def attribute_value(self, value:str) -> str:
+    def attribute_value(self, value: str) -> str:
         """Process the value of an attribute.
 
         :param ns: A string.
@@ -162,9 +168,11 @@ class Formatter(EntitySubstitution):
         """
         return self.substitute(value)
 
-    def attributes(self, tag:bs4.element.Tag) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
+    def attributes(
+        self, tag: bs4.element.Tag
+    ) -> Iterable[Tuple[str, Optional[_AttributeValue]]]:
         """Reorder a tag's attributes however you want.
-        
+
         By default, attributes are sorted alphabetically. This makes
         behavior consistent between Python 2 and Python 3, and preserves
         backwards compatibility with older versions of Beautiful Soup.
@@ -178,50 +186,63 @@ class Formatter(EntitySubstitution):
 
         items: Iterable[Tuple[str, _AttributeValue]] = list(tag.attrs.items())
         return sorted(
-            (k, (None if self.empty_attributes_are_booleans and v == '' else v))
+            (k, (None if self.empty_attributes_are_booleans and v == "" else v))
             for k, v in items
         )
-   
+
+
 class HTMLFormatter(Formatter):
     """A generic Formatter for HTML."""
+
     REGISTRY: Dict[Optional[str], HTMLFormatter] = {}
+
     def __init__(
-            self,
-            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
-            void_element_close_prefix:str='/',
-            cdata_containing_tags:Optional[Set[str]]=None,
-            empty_attributes_are_booleans:bool=False, indent:int=1,
+        self,
+        entity_substitution: Optional[_EntitySubstitutionFunction] = None,
+        void_element_close_prefix: str = "/",
+        cdata_containing_tags: Optional[Set[str]] = None,
+        empty_attributes_are_booleans: bool = False,
+        indent: int = 1,
     ):
         super(HTMLFormatter, self).__init__(
-            self.HTML, entity_substitution, void_element_close_prefix,
-            cdata_containing_tags, empty_attributes_are_booleans
+            self.HTML,
+            entity_substitution,
+            void_element_close_prefix,
+            cdata_containing_tags,
+            empty_attributes_are_booleans,
         )
 
-    
+
 class XMLFormatter(Formatter):
     """A generic Formatter for XML."""
+
     REGISTRY: Dict[Optional[str], XMLFormatter] = {}
+
     def __init__(
-            self,
-            entity_substitution:Optional[_EntitySubstitutionFunction]=None,
-            void_element_close_prefix:str='/',
-            cdata_containing_tags:Optional[Set[str]]=None,
-            empty_attributes_are_booleans:bool=False, indent:int=1,
+        self,
+        entity_substitution: Optional[_EntitySubstitutionFunction] = None,
+        void_element_close_prefix: str = "/",
+        cdata_containing_tags: Optional[Set[str]] = None,
+        empty_attributes_are_booleans: bool = False,
+        indent: int = 1,
     ):
         super(XMLFormatter, self).__init__(
-            self.XML, entity_substitution, void_element_close_prefix,
-            cdata_containing_tags, empty_attributes_are_booleans
+            self.XML,
+            entity_substitution,
+            void_element_close_prefix,
+            cdata_containing_tags,
+            empty_attributes_are_booleans,
         )
 
 
 # Set up aliases for the default formatters.
-HTMLFormatter.REGISTRY['html'] = HTMLFormatter(
+HTMLFormatter.REGISTRY["html"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html
 )
 
 HTMLFormatter.REGISTRY["html5"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html5,
-    void_element_close_prefix='',
+    void_element_close_prefix="",
     empty_attributes_are_booleans=True,
 )
 HTMLFormatter.REGISTRY["html5-4.12"] = HTMLFormatter(
@@ -233,7 +254,7 @@ HTMLFormatter.REGISTRY["minimal"] = HTMLFormatter(
     entity_substitution=EntitySubstitution.substitute_xml
 )
 HTMLFormatter.REGISTRY[None] = HTMLFormatter(entity_substitution=None)
-XMLFormatter.REGISTRY["html"] =  XMLFormatter(
+XMLFormatter.REGISTRY["html"] = XMLFormatter(
     entity_substitution=EntitySubstitution.substitute_html
 )
 XMLFormatter.REGISTRY["minimal"] = XMLFormatter(
@@ -251,4 +272,4 @@ _EntitySubstitutionFunction: TypeAlias = Callable[[str], str]
 
 # Many of the output-centered methods take an argument that can either
 # be a Formatter object or the name of a Formatter to be looked up.
-_FormatterOrName = Union[Formatter,str]
+_FormatterOrName = Union[Formatter, str]

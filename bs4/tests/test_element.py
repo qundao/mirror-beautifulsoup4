@@ -18,7 +18,6 @@ from . import SoupTest
 
 
 class TestNamedspacedAttribute:
-
     def test_name_may_be_none_or_missing(self):
         a = NamespacedAttribute("xmlns", None)
         assert a == "xmlns"
@@ -28,14 +27,14 @@ class TestNamedspacedAttribute:
 
         a = NamespacedAttribute("xmlns")
         assert a == "xmlns"
-        
+
     def test_namespace_may_be_none_or_missing(self):
         a = NamespacedAttribute(None, "tag")
         assert a == "tag"
-        
+
         a = NamespacedAttribute("", "tag")
         assert a == "tag"
-        
+
     def test_attribute_is_equivalent_to_colon_separated_string(self):
         a = NamespacedAttribute("a", "b")
         assert "a:b" == a
@@ -61,7 +60,7 @@ class TestAttributeValueWithCharsetSubstitution:
     """Certain attributes are designed to have the charset of the
     final document substituted into their value.
     """
-    
+
     def test_charset_meta_attribute_value(self):
         # The value of a CharsetMetaAttributeValue is whatever
         # encoding the string is in.
@@ -86,56 +85,57 @@ class TestAttributeValueWithCharsetSubstitution:
         # charset argument will be omitted altogether.
         assert "text/html" == value.substitute_encoding("palmos")
 
-class TestAttributeDicts:
 
+class TestAttributeDicts:
     def test_xml_attribute_value_handling(self):
         # Verify that attribute values are processed according to the
         # XML spec's rules.
         d = XMLAttributeDict()
-        d['v'] = 100
-        assert d['v'] == '100'
-        d['v'] = 100.123
-        assert d['v'] == '100.123'
+        d["v"] = 100
+        assert d["v"] == "100"
+        d["v"] = 100.123
+        assert d["v"] == "100.123"
 
         # This preserves Beautiful Soup's old behavior in the absence of
         # guidance from the spec.
-        d['v'] = False
-        assert d['v'] == False
+        d["v"] = False
+        assert d["v"] == False
 
-        d['v'] = True
-        assert d['v'] == True
+        d["v"] = True
+        assert d["v"] == True
 
-        d['v'] = None
-        assert d['v'] == ''
+        d["v"] = None
+        assert d["v"] == ""
 
     def test_html_attribute_value_handling(self):
         # Verify that attribute values are processed according to the
         # HTML spec's rules.
         d = HTMLAttributeDict()
-        d['v'] = 100
-        assert d['v'] == '100'
-        d['v'] = 100.123
-        assert d['v'] == '100.123'
+        d["v"] = 100
+        assert d["v"] == "100"
+        d["v"] = 100.123
+        assert d["v"] == "100.123"
 
-        d['v'] = False
-        assert 'v' not in d
+        d["v"] = False
+        assert "v" not in d
 
-        d['v'] = None
-        assert 'v' not in d
+        d["v"] = None
+        assert "v" not in d
 
-        d['v'] = True
-        assert d['v'] == 'v'
+        d["v"] = True
+        assert d["v"] == "v"
 
         attribute = NamespacedAttribute("prefix", "name", "namespace")
         d[attribute] = True
-        assert d[attribute] == 'name'
+        assert d[attribute] == "name"
+
 
 class TestResultSet:
-
     def test_getattr_exception(self):
-
         rs = ResultSet(None)
         with pytest.raises(AttributeError) as e:
             rs.name
-        assert """ResultSet object has no attribute "name". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?""" == str(e.value)
-
+        assert (
+            """ResultSet object has no attribute "name". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"""
+            == str(e.value)
+        )
