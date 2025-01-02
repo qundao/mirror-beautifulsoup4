@@ -18,16 +18,13 @@ import codecs
 from html.entities import html5
 import re
 from logging import Logger, getLogger
-import string
 from types import ModuleType
 from typing import (
     Dict,
-    Iterable,
     Iterator,
     List,
     Optional,
     Pattern,
-    Sequence,
     Set,
     Tuple,
     Type,
@@ -38,7 +35,6 @@ from typing_extensions import Literal
 from bs4._typing import (
     _Encoding,
     _Encodings,
-    _RawMarkup,
 )
 import warnings
 
@@ -951,7 +947,7 @@ class UnicodeDammit:
             u = self._to_unicode(markup, proposed, errors)
             self.unicode_markup = u
             self.original_encoding = proposed
-        except Exception as e:
+        except Exception:
             # print("That didn't work!")
             # print(e)
             return None

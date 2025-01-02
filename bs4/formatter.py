@@ -5,7 +5,6 @@ from bs4.dammit import EntitySubstitution
 
 if TYPE_CHECKING:
     from bs4._typing import _AttributeValue
-    from bs4.element import Tag
 
 
 class Formatter(EntitySubstitution):

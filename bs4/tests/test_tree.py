@@ -14,19 +14,12 @@ import re
 import warnings
 from bs4 import BeautifulSoup
 from bs4.builder import builder_registry
-from bs4.builder._htmlparser import HTMLParserTreeBuilder
 from bs4.element import (
     AttributeResemblesVariableWarning,
     CData,
     Comment,
-    Declaration,
-    Doctype,
-    Formatter,
     NavigableString,
-    Script,
-    Stylesheet,
     Tag,
-    TemplateString,
 )
 from bs4.filter import SoupStrainer
 from . import (

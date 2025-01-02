@@ -21,14 +21,12 @@ from typing import (
 if TYPE_CHECKING:
     from bs4._typing import _IncomingMarkup
 
-import os
 import pstats
 import random
 import tempfile
 import time
 import traceback
 import sys
-import cProfile
 
 
 def diagnose(data: "_IncomingMarkup") -> None:
@@ -57,7 +55,7 @@ def diagnose(data: "_IncomingMarkup") -> None:
             from lxml import etree
 
             print(("Found lxml version %s" % ".".join(map(str, etree.LXML_VERSION))))
-        except ImportError as e:
+        except ImportError:
             print("lxml is not installed or couldn't be imported.")
 
     if "html5lib" in basic_parsers:
@@ -65,7 +63,7 @@ def diagnose(data: "_IncomingMarkup") -> None:
             import html5lib
 
             print(("Found html5lib version %s" % html5lib.__version__))
-        except ImportError as e:
+        except ImportError:
             print("html5lib is not installed or couldn't be imported.")
 
     if hasattr(data, "read"):
@@ -77,7 +75,7 @@ def diagnose(data: "_IncomingMarkup") -> None:
         try:
             soup = BeautifulSoup(data, features=parser)
             success = True
-        except Exception as e:
+        except Exception:
             print(("%s could not parse the markup." % parser))
             traceback.print_exc()
         if success:
@@ -228,7 +226,7 @@ def benchmark_parsers(num_elements: int = 100000) -> None:
             soup = BeautifulSoup(data, parser_name)
             b = time.time()
             success = True
-        except Exception as e:
+        except Exception:
             print(("%s could not parse the markup." % parser_name))
             traceback.print_exc()
         if success:

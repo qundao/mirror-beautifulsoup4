@@ -6,7 +6,6 @@ are tested in separate files.
 
 import pytest
 from bs4.element import (
-    AttributeDict,
     HTMLAttributeDict,
     XMLAttributeDict,
     CharsetMetaAttributeValue,
@@ -14,7 +13,6 @@ from bs4.element import (
     NamespacedAttribute,
     ResultSet,
 )
-from . import SoupTest
 
 
 class TestNamedspacedAttribute:

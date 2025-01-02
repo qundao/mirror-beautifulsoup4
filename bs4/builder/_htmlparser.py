@@ -12,7 +12,6 @@ __all__ = [
 
 from html.parser import HTMLParser
 
-import sys
 from typing import (
     Any,
     Callable,
@@ -20,14 +19,12 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Mapping,
     Optional,
     TYPE_CHECKING,
     Tuple,
     Type,
     Union,
 )
-import warnings
 
 from bs4.element import (
     AttributeDict,
@@ -46,7 +43,6 @@ from bs4.builder import (
     STRICT,
 )
 
-from bs4.element import Tag
 
 from bs4.exceptions import ParserRejectedMarkup
 
@@ -258,12 +254,12 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
                     continue
                 try:
                     data = bytearray([real_name]).decode(encoding)
-                except UnicodeDecodeError as e:
+                except UnicodeDecodeError:
                     pass
         if not data:
             try:
                 data = chr(real_name)
-            except (ValueError, OverflowError) as e:
+            except (ValueError, OverflowError):
                 pass
         data = data or "\N{REPLACEMENT CHARACTER}"
         self.handle_data(data)

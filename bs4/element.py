@@ -4,7 +4,6 @@ from __future__ import annotations
 __license__ = "MIT"
 
 import re
-import sys
 import warnings
 
 from bs4.css import CSS
@@ -24,7 +23,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Generator,
     Generic,
     Iterable,
     Iterator,
@@ -32,7 +30,6 @@ from typing import (
     Mapping,
     Optional,
     Pattern,
-    Sequence,
     Set,
     TYPE_CHECKING,
     Tuple,

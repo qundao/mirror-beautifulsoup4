@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from bs4.element import (
     AttributeValueList,
     Comment,
-    ResultSet,
 )
 from bs4.filter import SoupStrainer
 from . import (

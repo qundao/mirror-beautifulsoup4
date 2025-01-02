@@ -6,16 +6,12 @@ from typing import (
     Callable,
     cast,
     Dict,
-    Generic,
     Iterator,
     Iterable,
     List,
     Optional,
     Sequence,
-    Set,
-    Tuple,
     Type,
-    TYPE_CHECKING,
     Union,
 )
 import warnings
@@ -37,7 +33,6 @@ from bs4._typing import (
     _StringMatchFunction,
     _StrainableElement,
     _StrainableAttribute,
-    _StrainableAttributes,
     _StrainableString,
 )
 
@@ -413,7 +408,7 @@ class SoupStrainer(ElementFilter):
     def string(self) -> Optional[_StrainableString]:
         ":meta private:"
         warnings.warn(
-            f"Access to deprecated property string. (Look at .string_rules instead) -- Deprecated since version 4.13.0.",
+            "Access to deprecated property string. (Look at .string_rules instead) -- Deprecated since version 4.13.0.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -423,7 +418,7 @@ class SoupStrainer(ElementFilter):
     def text(self) -> Optional[_StrainableString]:
         ":meta private:"
         warnings.warn(
-            f"Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0.",
+            "Access to deprecated property text. (Look at .string_rules instead) -- Deprecated since version 4.13.0.",
             DeprecationWarning,
             stacklevel=2,
         )

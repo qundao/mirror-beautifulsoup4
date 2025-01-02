@@ -13,7 +13,6 @@
 #   but it's removed in 3.12, so to support the widest possible set of
 #   versions I'm not using it.
 
-import re
 from typing_extensions import (
     runtime_checkable,
     Protocol,
@@ -34,7 +33,6 @@ from typing import (
 
 if TYPE_CHECKING:
     from bs4.element import (
-        AttributeDict,
         AttributeValueList,
         NamespacedAttribute,
         NavigableString,

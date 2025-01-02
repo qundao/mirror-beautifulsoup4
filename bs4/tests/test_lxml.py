@@ -2,7 +2,6 @@
 
 import pickle
 import pytest
-import re
 import warnings
 from . import LXML_PRESENT, LXML_VERSION
 
@@ -10,16 +9,12 @@ if LXML_PRESENT:
     from bs4.builder._lxml import LXMLTreeBuilder, LXMLTreeBuilderForXML
 
 from bs4 import (
-    BeautifulSoup,
     BeautifulStoneSoup,
 )
-from bs4.element import Comment, Doctype
-from bs4.filter import SoupStrainer
 from . import (
     HTMLTreeBuilderSmokeTest,
     XMLTreeBuilderSmokeTest,
     SOUP_SIEVE_PRESENT,
-    SoupTest,
 )
 
 

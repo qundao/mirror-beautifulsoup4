@@ -8,7 +8,6 @@ from . import (
 from typing import (
     Callable,
     Optional,
-    Pattern,
     Tuple,
 )
 from bs4.element import Tag

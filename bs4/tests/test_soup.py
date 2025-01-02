@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 """Tests of Beautiful Soup as a whole."""
 
-from pdb import set_trace
 import logging
-import os
 import pickle
 import pytest
-import sys
-import tempfile
 from typing import Iterable
 
 from bs4 import (
     BeautifulSoup,
-    BeautifulStoneSoup,
     GuessedAtParserWarning,
     dammit,
 )
 from bs4.builder import (
-    builder_registry,
     TreeBuilder,
 )
 from bs4.element import (
@@ -140,7 +134,6 @@ class TestConstructor(SoupTest):
             yield markup, None, None, False
             yield markup, None, None, False
 
-        import re
 
         with pytest.raises(ParserRejectedMarkup) as exc_info:
             BeautifulSoup("", builder=Mock)
@@ -281,7 +274,7 @@ class TestOutput(SoupTest):
         # declaration won't mention any particular encoding.
         soup = BeautifulSoup("<tag></tag>", "html.parser")
         soup.is_xml = True
-        assert f'<?xml version="1.0"?>\n<tag></tag>' == soup.decode(
+        assert '<?xml version="1.0"?>\n<tag></tag>' == soup.decode(
             eventual_encoding=eventual_encoding
         )
 

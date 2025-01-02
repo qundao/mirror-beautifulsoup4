@@ -447,7 +447,7 @@ class SAXTreeBuilder(TreeBuilder):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         warnings.warn(
-            f"The SAXTreeBuilder class was deprecated in 4.13.0 and will be removed soon thereafter. It is completely untested and probably doesn't work; do not use it.",
+            "The SAXTreeBuilder class was deprecated in 4.13.0 and will be removed soon thereafter. It is completely untested and probably doesn't work; do not use it.",
             DeprecationWarning,
             stacklevel=2,
         )

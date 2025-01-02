@@ -412,8 +412,8 @@ class BeautifulSoup(Tag):
                 f"Incoming markup is of an invalid type: {markup!r}. Markup must be a string, a bytestring, or an open filehandle."
             )
         elif len(markup) <= 256 and (
-            (isinstance(markup, bytes) and not b"<" in markup and not b"\n" in markup)
-            or (isinstance(markup, str) and not "<" in markup and not "\n" in markup)
+            (isinstance(markup, bytes) and b"<" not in markup and b"\n" not in markup)
+            or (isinstance(markup, str) and "<" not in markup and "\n" not in markup)
         ):
             # Issue warnings for a couple beginner problems
             # involving passing non-markup to Beautiful Soup.
@@ -531,12 +531,12 @@ class BeautifulSoup(Tag):
             cant_start_with_b: Tuple[bytes, bytes] = (b"http:", b"https:")
             problem = (
                 any(markup.startswith(prefix) for prefix in (b"http:", b"https:"))
-                and not b" " in markup
+                and b" " not in markup
             )
         elif isinstance(markup, str):
             problem = (
                 any(markup.startswith(prefix) for prefix in ("http:", "https:"))
-                and not " " in markup
+                and " " not in markup
             )
         else:
             return False

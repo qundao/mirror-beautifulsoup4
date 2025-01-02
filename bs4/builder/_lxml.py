@@ -9,13 +9,10 @@ __all__ = [
     "LXMLTreeBuilder",
 ]
 
-from collections.abc import Callable
 
 from typing import (
     Any,
-    cast,
     Dict,
-    IO,
     Iterable,
     List,
     Optional,

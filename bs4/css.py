@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 soupsieve: Optional[ModuleType]
 try:
     import soupsieve
-except ImportError as e:
+except ImportError:
     soupsieve = None
     warnings.warn(
         "The soupsieve package is not installed. CSS selectors cannot be used."

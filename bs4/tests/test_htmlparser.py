@@ -1,13 +1,8 @@
 """Tests to ensure that the html.parser tree builder generates good
 trees."""
 
-from pdb import set_trace
 import pickle
 import pytest
-import warnings
-from bs4.builder import (
-    XMLParsedAsHTMLWarning,
-)
 from bs4.builder._htmlparser import (
     _DuplicateAttributeHandler,
     BeautifulSoupHTMLParser,
@@ -15,7 +10,7 @@ from bs4.builder._htmlparser import (
 )
 from bs4.exceptions import ParserRejectedMarkup
 from typing import Any
-from . import SoupTest, HTMLTreeBuilderSmokeTest
+from . import HTMLTreeBuilderSmokeTest
 
 
 class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):

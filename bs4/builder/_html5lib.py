@@ -10,7 +10,6 @@ from typing import (
     cast,
     Dict,
     Iterable,
-    List,
     Optional,
     Sequence,
     TYPE_CHECKING,
@@ -28,7 +27,6 @@ from bs4._typing import (
 )
 
 import warnings
-import re
 from bs4.builder import (
     DetectsXMLParsedAsHTML,
     PERMISSIVE,
@@ -37,7 +35,6 @@ from bs4.builder import (
     HTMLTreeBuilder,
 )
 from bs4.element import (
-    HTMLAttributeDict,
     NamespacedAttribute,
     PageElement,
     nonwhitespace_re,
@@ -45,7 +42,6 @@ from bs4.element import (
 import html5lib
 from html5lib.constants import (
     namespaces,
-    prefixes,
 )
 from bs4.element import (
     Comment,
@@ -58,7 +54,6 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
 
 from html5lib.treebuilders import base as treebuilder_base
-from html5lib.treewalkers import base as treewalker_base
 
 
 class HTML5TreeBuilder(HTMLTreeBuilder):
