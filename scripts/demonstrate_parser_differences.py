@@ -50,7 +50,6 @@ DEMO_MARKUP = """A bare string
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">"""
 
 from io import StringIO
-import os
 import sys
 from bs4 import BeautifulSoup
 parsers = ['html.parser']
@@ -58,13 +57,13 @@ parsers = ['html.parser']
 try:
     from bs4.builder import _lxml
     parsers.append('lxml')
-except ImportError as e:
+except ImportError:
     pass
 
 try:
     from bs4.builder import _html5lib
     parsers.append('html5lib')
-except ImportError as e:
+except ImportError:
     pass
 
 class Demonstration(object):

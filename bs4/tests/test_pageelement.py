@@ -218,11 +218,11 @@ class TestFormatters(SoupTest):
 
     def test_prettify_outputs_unicode_by_default(self):
         soup = self.soup("<a></a>")
-        assert str == type(soup.prettify())
+        assert str is type(soup.prettify())
 
     def test_prettify_can_encode_data(self):
         soup = self.soup("<a></a>")
-        assert bytes == type(soup.prettify("utf-8"))
+        assert bytes is type(soup.prettify("utf-8"))
 
     def test_html_entity_substitution_off_by_default(self):
         markup = "<b>Sacr\N{LATIN SMALL LETTER E WITH ACUTE} bleu!</b>"

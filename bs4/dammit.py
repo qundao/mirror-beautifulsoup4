@@ -279,7 +279,8 @@ class EntitySubstitution(object):
     def _substitute_html_entity(cls, matchobj: re.Match) -> str:
         """Used with a regular expression to substitute the
         appropriate HTML entity for a special character string."""
-        entity = cls.CHARACTER_TO_HTML_ENTITY.get(matchobj.group(0))
+        original_entity = matchobj.group(0)
+        entity = cls.CHARACTER_TO_HTML_ENTITY.get(original_entity)
         if entity is None:
             return "&amp;%s;" % original_entity
         return "&%s;" % entity
@@ -881,7 +882,7 @@ class UnicodeDammit:
         else:
             if orig in self.MS_CHARS:
                 substitutions = self.MS_CHARS[orig]
-                if type(substitutions) == tuple:
+                if type(substitutions) is tuple:
                     if self.smart_quotes_to == "xml":
                         sub = b"&#x" + substitutions[1].encode() + b";"
                     else:

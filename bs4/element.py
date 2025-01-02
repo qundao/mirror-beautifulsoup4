@@ -997,11 +997,11 @@ class PageElement(object):
         # NOTE: We can't use _find_one because findParents takes a different
         # set of arguments.
         r = None
-        l = self.find_parents(
+        results = self.find_parents(
             name, attrs, 1, consider_self=consider_self, _stacklevel=3, **kwargs
         )
-        if l:
-            r = l[0]
+        if results:
+            r = results[0]
         return r
 
     findParent = _deprecated_function_alias("findParent", "find_parent", "4.0.0")
@@ -1064,9 +1064,9 @@ class PageElement(object):
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         r: _AtMostOneElement = None
-        l: _QueryResults = method(name, attrs, string, 1, _stacklevel=4, **kwargs)
-        if l:
-            r = l[0]
+        results: _QueryResults = method(name, attrs, string, 1, _stacklevel=4, **kwargs)
+        if results:
+            r = results[0]
         return r
 
     def _find_all(
@@ -1080,7 +1080,6 @@ class PageElement(object):
         **kwargs: _StrainableAttribute,
     ) -> _QueryResults:
         """Iterates over a generator looking for things that match."""
-        results: _QueryResults
 
         if string is None and "text" in kwargs:
             string = kwargs.pop("text")
@@ -2645,9 +2644,9 @@ class Tag(PageElement):
         :kwargs: Additional filters on attribute values.
         """
         r = None
-        l = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3, **kwargs)
-        if l:
-            r = l[0]
+        results = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3, **kwargs)
+        if results:
+            r = results[0]
         return r
 
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")

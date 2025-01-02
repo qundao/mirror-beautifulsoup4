@@ -23,10 +23,7 @@ __license__ = "MIT"
 __all__ = ["BeautifulSoup"]
 
 from collections import Counter
-import os
-import re
 import sys
-import traceback
 import warnings
 
 # The very first thing we do is give a useful error if someone is
@@ -77,9 +74,7 @@ from typing import (
     List,
     Sequence,
     Optional,
-    Tuple,
     Type,
-    TYPE_CHECKING,
     Union,
 )
 

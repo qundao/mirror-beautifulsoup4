@@ -128,7 +128,7 @@ class TestConstructor(SoupTest):
             def feed(self, *args, **kwargs):
                 raise ParserRejectedMarkup("Nope.")
 
-        def prepare_markup(self, *args, **kwargs):
+        def prepare_markup(self, markup, *args, **kwargs):
             # We're going to try two different ways of preparing this markup,
             # but feed() will reject both of them.
             yield markup, None, None, False

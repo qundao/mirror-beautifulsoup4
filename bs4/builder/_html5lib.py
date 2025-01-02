@@ -356,7 +356,7 @@ class Element(BeautifulSoupNode):
     def appendChild(self, node: "BeautifulSoupNode") -> None:
         string_child: Optional[NavigableString] = None
         child: PageElement
-        if type(node.element) == NavigableString:
+        if type(node.element) is NavigableString:
             string_child = child = node.element
         else:
             child = node.element
@@ -372,7 +372,7 @@ class Element(BeautifulSoupNode):
         if (
             string_child is not None
             and self.element.contents
-            and type(self.element.contents[-1]) == NavigableString
+            and type(self.element.contents[-1]) is NavigableString
         ):
             # We are appending a string onto another string.
             # TODO This has O(n^2) performance, for input like
@@ -464,13 +464,13 @@ class Element(BeautifulSoupNode):
     ) -> None:
         index = self.element.index(refNode.element)
         if (
-            type(node.element) == NavigableString
+            type(node.element) is NavigableString
             and self.element.contents
-            and type(self.element.contents[index - 1]) == NavigableString
+            and type(self.element.contents[index - 1]) is NavigableString
         ):
             # (See comments in appendChild)
             old_node = self.element.contents[index - 1]
-            assert type(old_node) == NavigableString
+            assert type(old_node) is NavigableString
             new_str = self.soup.new_string(old_node + node.element)
             old_node.replace_with(new_str)
         else:
