@@ -74,6 +74,14 @@ XML = "xml"
 HTML = "html"
 HTML_5 = "html5"
 
+__all__ = [
+    "TreeBuilderRegistry",
+    "TreeBuilder",
+    "HTMLTreeBuilder",
+    "DetectsXMLParsedAsHTML",
+
+    "ParserRejectedMarkup", # backwards compatibility only as of 4.13.0
+]
 
 class TreeBuilderRegistry(object):
     """A way of looking up TreeBuilder subclasses by their name or by desired
@@ -827,7 +835,7 @@ def register_treebuilders_from(module: ModuleType) -> None:
 # builder registrations will take precedence. In general, we want lxml
 # to take precedence over html5lib, because it's faster. And we only
 # want to use HTMLParser as a last resort.
-from . import _htmlparser
+from . import _htmlparser # noqa: E402
 
 register_treebuilders_from(_htmlparser)
 try:
