@@ -10,6 +10,7 @@ proximity to code that can trigger the problems.
 """
 
 import os
+import importlib
 import pytest
 from bs4 import (
     BeautifulSoup,
@@ -18,10 +19,9 @@ from bs4 import (
 
 try:
     from soupsieve.util import SelectorSyntaxError
-    import lxml
-    import html5lib
-
-    fully_fuzzable = True
+    has_lxml = importlib.util.find_spec("lxml")
+    has_html5lib = importlib.util.find_spec("html5lib")
+    fully_fuzzable = has_lxml and has_html5lib
 except ImportError:
     fully_fuzzable = False
 

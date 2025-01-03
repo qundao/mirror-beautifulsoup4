@@ -25,15 +25,18 @@ from bs4.element import (
     Tag,
 )
 from bs4._typing import (
+    _AtMostOneElement,
     _AttributeValue,
+    _OneElement,
     _PageElementMatchFunction,
+    _QueryResults,
     _RawAttributeValues,
     _RegularExpressionProtocol,
-    _TagMatchFunction,
-    _StringMatchFunction,
-    _StrainableElement,
     _StrainableAttribute,
+    _StrainableElement,
     _StrainableString,
+    _StringMatchFunction,
+    _TagMatchFunction,
 )
 
 

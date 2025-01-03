@@ -429,11 +429,11 @@ class TestSoupStrainer(SoupTest):
         # ignored, to avoid the possibility of an infinite recursion.
 
         # Create a self-referential object.
-        l = []
-        l.append(l)
+        selfref = []
+        selfref.append(selfref)
 
         with warnings.catch_warnings(record=True) as w:
-            rules = SoupStrainer._make_match_rules(["a", l, "b"], MatchRule)
+            rules = SoupStrainer._make_match_rules(["a", selfref, "b"], MatchRule)
             assert list(rules) == [MatchRule(string="a"), MatchRule(string="b")]
 
             [warning] = w

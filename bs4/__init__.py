@@ -20,7 +20,35 @@ __copyright__ = "Copyright (c) 2004-2024 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
-__all__ = ["BeautifulSoup"]
+__all__ = [
+    "AttributeResemblesVariableWarning",
+    "BeautifulSoup",
+    "Comment",
+    "Declaration",
+    "ProcessingInstruction",
+    "ResultSet",
+    "CSS",
+    "Script",
+    "Stylesheet",
+    "Tag",
+    "TemplateString",
+    "ElementFilter",
+    "UnicodeDammit",
+    "CData",
+    "Doctype",
+
+    # Exceptions
+    "FeatureNotFound",
+    "ParserRejectedMarkup",
+    "StopParsing",
+
+    # Warnings
+    "AttributeResemblesVariableWarning",
+    "GuessedAtParserWarning",
+    "MarkupResemblesLocatorWarning",
+    "UnusualUsageWarning",
+    "XMLParsedAsHTMLWarning",
+]
 
 from collections import Counter
 import sys
@@ -42,7 +70,6 @@ from .dammit import UnicodeDammit
 from .css import CSS
 from ._deprecation import (
     _deprecated,
-    _deprecated_alias,
 )
 from .element import (
     CData,
@@ -79,7 +106,6 @@ from typing import (
 )
 
 from bs4._typing import (
-    _AttributeValue,
     _Encoding,
     _Encodings,
     _IncomingMarkup,
@@ -90,8 +116,18 @@ from bs4._typing import (
 )
 
 # Import all warnings and exceptions into the main package.
-from bs4.exceptions import *
-from bs4._warnings import *
+from bs4.exceptions import (
+    FeatureNotFound,
+    ParserRejectedMarkup,
+    StopParsing,
+)
+from bs4._warnings import (
+    AttributeResemblesVariableWarning,
+    GuessedAtParserWarning,
+    MarkupResemblesLocatorWarning,
+    UnusualUsageWarning,
+    XMLParsedAsHTMLWarning,
+)
 
 
 class BeautifulSoup(Tag):

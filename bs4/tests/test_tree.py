@@ -94,13 +94,13 @@ class TestFindAll(SoupTest):
     ):
         soup = self.soup("<a></a>")
         # Create a self-referential list.
-        l = []
-        l.append(l)
+        selfref = []
+        selfref.append(selfref)
 
         # Without special code in SoupStrainer, this would cause infinite
         # recursion.
         with warnings.catch_warnings(record=True) as w:
-            assert [] == soup.find_all(l)
+            assert [] == soup.find_all(selfref)
             [warning] = w
             assert warning.filename == __file__
             msg = str(warning.message)
@@ -914,15 +914,15 @@ class TestTreeModification(SoupTest):
     def test_extend_with_a_list_of_elements(self):
         data = "<a><b><c><d><e><f><g></g></f></e></d></c></b></a>"
         soup = self.soup(data)
-        l = [soup.g, soup.f, soup.e, soup.d, soup.c, soup.b]
-        soup.a.extend(l)
+        elements = [soup.g, soup.f, soup.e, soup.d, soup.c, soup.b]
+        soup.a.extend(elements)
         assert "<a><g></g><f></f><e></e><d></d><c></c><b></b></a>" == soup.decode()
 
     def test_extend_with_a_list_of_strings(self):
         data = "<a></a>"
         soup = self.soup(data)
-        l = ["b", "c", NavigableString("d"), "e"]
-        soup.a.extend(l)
+        elements = ["b", "c", NavigableString("d"), "e"]
+        soup.a.extend(elements)
         assert "<a>bcde</a>" == soup.decode()
 
     @pytest.mark.parametrize("get_tags", [lambda tag: tag, lambda tag: tag.contents])

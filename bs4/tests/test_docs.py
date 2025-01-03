@@ -6,7 +6,7 @@
 
 __metaclass__ = type
 __all__ = [
-    "additional_tests",
+    #"additional_tests",
 ]
 
 import doctest

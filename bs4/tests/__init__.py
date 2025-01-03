@@ -5,8 +5,8 @@
 __license__ = "MIT"
 
 import pickle
+import importlib
 import copy
-import functools
 import warnings
 import pytest
 from bs4 import BeautifulSoup
@@ -24,7 +24,6 @@ from bs4.element import (
 )
 from bs4.filter import SoupStrainer
 from bs4.builder import (
-    DetectsXMLParsedAsHTML,
     XMLParsedAsHTMLWarning,
 )
 from bs4._typing import _IncomingMarkup
@@ -35,7 +34,6 @@ from bs4.builder._htmlparser import HTMLParserTreeBuilder
 from typing import (
     Any,
     Iterable,
-    List,
     Optional,
     Tuple,
     Type,
@@ -51,16 +49,10 @@ try:
 except ImportError:
     SOUP_SIEVE_PRESENT = False
 
-try:
-    import html5lib
-
-    HTML5LIB_PRESENT = True
-except ImportError:
-    HTML5LIB_PRESENT = False
+HTML5LIB_PRESENT = importlib.util.find_spec("html5lib") is not None
 
 try:
     import lxml.etree
-
     LXML_PRESENT = True
     LXML_VERSION = lxml.etree.LXML_VERSION
 except ImportError:

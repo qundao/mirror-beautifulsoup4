@@ -4,7 +4,6 @@ from __future__ import annotations
 __license__ = "MIT"
 
 from collections import defaultdict
-import itertools
 import re
 from types import ModuleType
 from typing import (
@@ -19,7 +18,6 @@ from typing import (
     Tuple,
     Type,
     TYPE_CHECKING,
-    Union,
 )
 import warnings
 import sys
