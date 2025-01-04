@@ -3056,7 +3056,7 @@ Low-level search interface
 
 Almost everyone who uses Beautiful Soup to extract information from a
 document can get what they need using the methods described in
-`Searching the tree`_. However, there's a lower-level interface which
+`Searching the tree`_. However, there's a lower-level interface that
 lets you define any matching behavior you want. Behind the scenes, the
 parts of the Beautiful Soup API that most people use--``find_all()``
 and the like--are actually using this low-level interface, and you
@@ -3072,52 +3072,69 @@ Custom element filtering
 
 The :py:class:`ElementFilter` class is your entry point to the
 low-level interface. To use it, define a function that takes a
-:py:class:`PageElement` object (that is, it might be either a
+:py:class:`PageElement` object (which could be either a
 :py:class:`Tag` or a :py:class:`NavigableString`). The function must
 return ``True`` if the element matches your custom criteria, and
 ``False`` if it doesn't.
 
-This example function looks for short things: strings that are less
-than five characters long, and tags whose combined text size is less
-than five characters long::
+This example function looks for content-containing tags and strings,
+but skips whitespace-only strings::
 
- from bs4 import Tag
- from bs4.filter import ElementFilter
-
- def something_short(tag_or_string):
-     if isinstance(tag_or_string, Tag):
-         return len(tag_or_string.text) < 5
-     else:
-         return len(tag_or_string) < 5
+ def non_whitespace_element_func(tag_or_string):
+     """
+     return True for:
+     * all Tag objects
+     * NavigableString objects that contain non-whitespace text
+     """
+     return (
+         isinstance(tag_or_string, Tag) or
+         (isinstance(tag_or_string, NavigableString) and
+             tag_or_string.strip() != ""))
 
 Once you have a function, pass it into the :py:class:`ElementFilter` constructor::
 
-  from bs4.filter import ElementFilter
-  element_filter = ElementFilter(something_short)
+ from bs4.filter import ElementFilter
+ non_whitespace_filter = ElementFilter(non_whitespace_element_func)
 
-You can then use the :py:class:`ElementFilter` object as the first
+You can then use this :py:class:`ElementFilter` object as the first
 argument to any of the `Searching the tree`_ methods. Whatever
 criteria you defined in your function will be used instead of the
 default Beautiful Soup match logic::
 
- soup.find(element_filter)
- # '\n'
+ from bs4 import BeautifulSoup
+ html_doc = """
+ <p>
+   <b>bold</b>
+   <i>italic</i>
+   and
+   <u>underline</u>
+ </p>
+ """
+ soup = BeautifulSoup(html_doc, 'html.parser')
 
- soup.find_all(element_filter)
- # ['\n', '\n', '\n', ',\n ', '\n', <p class="story">...</p>, '...', '\n']
+ soup.find('p').find_all(non_whitespace_filter, recursive=False)
+ # [<b>bold</b>, <i>italic</i>, '\n  and\n  ', <u>underline</u>]
 
- >>> soup.a.find_next(element_filter)
- # <p class="story">...</p>
+ soup.find("b").find_next(non_whitespace_filter)
+ # 'bold'
+
+ soup.find("i").find_next_siblings(non_whitespace_filter)
+ # ['\n  and\n  ', <u>underline</u>]
 
 Every potential match will be run through your function, and the only
 :py:class:`PageElement` objects returned will be the ones where your
 function returned ``True``.
 
-Note that this is different from simply passing `a function`_ as the
-first argument to one of the search methods. That's an easy way to
-find a tag, but *only* tags will be considered. With an
-:py:class:`ElementFilter` you can write a single function that makes
-decisions about both tags and strings.
+To summarize the function-based matching behaviors,
+
+* A function passed as the first argument to a search method
+  (or equivalently, using the ``name`` argument) considers only
+  :py:class:`Tag` objects.
+* A function passed to a search method using the ``string`` argument
+  considers only :py:class:`NavigableString` objects.
+* A function passed to a search method using an :py:class:`ElementFilter`
+  object considers both :py:class:`Tag` and :py:class:`NavigableString`
+  objects.
 
 Custom element iteration
 ^^^^^^^^^^^^^^^^^^^^^^^^
