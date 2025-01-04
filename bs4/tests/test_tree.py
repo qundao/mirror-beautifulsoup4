@@ -478,16 +478,12 @@ class TestParentOperations(SoupTest):
         )
         self.assert_selects_ids(self.start.find_parents("ul", id="middle"), ["middle"])
         assert self.start.find_parents(id="start") == []
-        self.assert_selects_ids(
-            self.start.find_parents(id="start", consider_self=True), ["start"]
-        )
 
     def test_find_parent(self):
         # assert self.start.find_parent('ul')['id'] == 'bottom'
         assert self.start.find_parent("ul", id="top")["id"] == "top"
 
         assert self.start.find_parent(id="start") is None
-        assert self.start.find_parent(id="start", consider_self=True)["id"] == "start"
 
     def test_parent_of_text_element(self):
         text = self.tree.find(string="Start here")
@@ -517,7 +513,7 @@ class TestParentOperations(SoupTest):
 class ProximityTest(SoupTest):
     def setup_method(self) -> None:
         self.tree = self.soup(
-            '<html id="start"><head></head><body><b id="1">One</b><b id="2">Two</b><b id="3">Three</b></body></html>'
+            '<html id="start"><head id="headtag"></head><body id="bodytag"><b id="1">One</b><b id="2">Two</b><b id="3">Three</b></body></html>'
         )
 
 
@@ -552,13 +548,17 @@ class TestNextOperations(ProximityTest):
         assert text.find_next("b").string == "Two"
         self.assert_selects(text.find_all_next("b"), ["Two", "Three"])
 
-    def test_next_generator(self):
+    def test_next_generators(self):
         start = self.tree.find(string="Two")
         successors = [node for node in start.next_elements]
         # There are two successors: the final <b> tag and its text contents.
         tag, contents = successors
         assert tag["id"] == "3"
         assert contents == "Three"
+
+        successors2 = [node for node in start.self_and_next_elements]
+        assert successors2[1:] == successors
+        assert successors2[0] == start
 
 
 class TestPreviousOperations(ProximityTest):
@@ -594,17 +594,10 @@ class TestPreviousOperations(ProximityTest):
         assert text.find_previous("b").string == "Three"
         self.assert_selects(text.find_all_previous("b"), ["Three", "Two", "One"])
 
-    def test_previous_generator(self):
-        start = self.tree.find(string="One")
-        predecessors = [node for node in start.previous_elements]
-
-        # There are four predecessors: the <b> tag containing "One"
-        # the <body> tag, the <head> tag, and the <html> tag.
-        b, body, head, html = predecessors
-        assert b["id"] == "1"
-        assert body.name == "body"
-        assert head.name == "head"
-        assert html.name == "html"
+    def test_previous_generators(self):
+        start = self.tree.find("b", string="One")
+        self.assert_selects_ids(start.previous_elements, ["bodytag", "headtag", 'start'])
+        self.assert_selects_ids(start.self_and_previous_elements, ["1", "bodytag", "headtag", "start"])
 
 
 class SiblingTest(SoupTest):
@@ -659,6 +652,10 @@ class TestNextSibling(SiblingTest):
 
         self.assert_selects_ids(self.start.find_next_siblings(id="3"), ["3"])
 
+    def test_next_siblings_generators(self):
+        self.assert_selects_ids(self.start.next_siblings, ["2", "3", "4"])
+        self.assert_selects_ids(self.start.self_and_next_siblings, ["1", "2", "3", "4"])
+
     def test_next_sibling_for_text_element(self):
         soup = self.soup("Foo<b>bar</b>baz")
         start = soup.find(string="Foo")
@@ -703,6 +700,10 @@ class TestPreviousSibling(SiblingTest):
         )
 
         self.assert_selects_ids(self.end.find_previous_siblings(id="1"), ["1"])
+
+    def test_previous_siblings_generators(self):
+        self.assert_selects_ids(self.end.previous_siblings, ["3", "2", "1"])
+        self.assert_selects_ids(self.end.self_and_previous_siblings, ["4", "3", "2", "1"])
 
     def test_previous_sibling_for_text_element(self):
         soup = self.soup("Foo<b>bar</b>baz")

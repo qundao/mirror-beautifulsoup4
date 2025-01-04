@@ -242,14 +242,20 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   set the string contents of a Tag when creating it. Patch by Chris
   Papademetrious. [bug=2044599]
 
-* Defined a new iterator, PageElement.self_and_parents, which is the same
-  as PageElement.parents except it yields the element itself before
-  yielding its parents. [bug=2052936]
+* Defined a number of new iterators which are the same as existing iterators,
+  but which yield the element itself before beginning to traverse the
+  tree. [bug=2052936] [bug=2067634]
 
-* Similarly, the PageElement.find_parent() and
-  PageElement.find_parents methods take an argument consider_self,
-  which lets you treat the element itself as a potential matching
-  'parent'. [bug=2052936]
+  - PageElement.self_and_parents
+  - PageElement.self_and_descendants
+  - PageElement.self_and_next_elements
+  - PageElement.self_and_next_siblings
+  - PageElement.self_and_previous_elements
+  - PageElement.self_and_previous_siblings
+
+ self_and_parents yields the element you call it on and then all of its
+ parents. self_and_next_element yields the element you call it on and then
+ every element parsed afterwards; and so on.
 
 * The NavigableString class now has a .string property which returns the
   string itself. This makes it easier to iterate over a mixed list

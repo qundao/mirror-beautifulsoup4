@@ -979,7 +979,6 @@ class PageElement(object):
         self,
         name: _FindMethodName = None,
         attrs: _StrainableAttributes = {},
-        consider_self: bool = False,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         """Find the closest parent of this PageElement that matches the given
@@ -998,7 +997,7 @@ class PageElement(object):
         # set of arguments.
         r = None
         results = self.find_parents(
-            name, attrs, 1, consider_self=consider_self, _stacklevel=3, **kwargs
+            name, attrs, 1, _stacklevel=3, **kwargs
         )
         if results:
             r = results[0]
@@ -1011,7 +1010,6 @@ class PageElement(object):
         name: _FindMethodName = None,
         attrs: _StrainableAttributes = {},
         limit: Optional[int] = None,
-        consider_self: bool = False,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _QueryResults:
@@ -1023,15 +1021,10 @@ class PageElement(object):
         :param name: A filter on tag name.
         :param attrs: Additional filters on attribute values.
         :param limit: Stop looking after finding this many results.
-        :param self: Whether the PageElement itself should be considered
-           as one of its 'parents'.
         :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
-        if consider_self:
-            iterator = self.self_and_parents
-        else:
-            iterator = self.parents
+        iterator = self.parents
         return self._find_all(
             name, attrs, None, limit, iterator, _stacklevel=_stacklevel + 1, **kwargs
         )
@@ -1147,6 +1140,11 @@ class PageElement(object):
             i = successor
 
     @property
+    def self_and_next_elements(self) -> Iterator[PageElement]:
+        """This PageElement, then all PageElements that were parsed after it."""
+        return self._self_and(self.next_elements)
+
+    @property
     def next_siblings(self) -> Iterator[PageElement]:
         """All PageElements that are siblings of this one but were parsed
         later.
@@ -1156,6 +1154,11 @@ class PageElement(object):
             successor = i.next_sibling
             yield i
             i = successor
+
+    @property
+    def self_and_next_siblings(self) -> Iterator[PageElement]:
+        """This PageElement, then all of its siblings."""
+        return self._self_and(self.next_siblings)
 
     @property
     def previous_elements(self) -> Iterator[PageElement]:
@@ -1170,6 +1173,12 @@ class PageElement(object):
             i = successor
 
     @property
+    def self_and_previous_elements(self) -> Iterator[PageElement]:
+        """This PageElement, then all elements that were parsed
+        earlier."""
+        return self._self_and(self.previous_elements)
+
+    @property
     def previous_siblings(self) -> Iterator[PageElement]:
         """All PageElements that are siblings of this one but were parsed
         earlier.
@@ -1181,6 +1190,12 @@ class PageElement(object):
             successor = i.previous_sibling
             yield i
             i = successor
+
+    @property
+    def self_and_previous_siblings(self) -> Iterator[PageElement]:
+        """This PageElement, then all of its siblings that were parsed
+        earlier."""
+        return self._self_and(self.previous_siblings)
 
     @property
     def parents(self) -> Iterator[Tag]:
@@ -1200,8 +1215,15 @@ class PageElement(object):
 
         :yield: A sequence of PageElements, ending with a BeautifulSoup object.
         """
-        yield self
-        for i in self.parents:
+        return self._self_and(self.parents)
+
+    def _self_and(self, other_generator):
+        """Modify a generator by yielding this element, then everything
+        yielded by the other generator.
+        """
+        if not self.hidden:
+            yield self
+        for i in other_generator:
             yield i
 
     @property
@@ -2697,10 +2719,7 @@ class Tag(PageElement):
         """Iterate over this `Tag` and its children in a
         breadth-first sequence.
         """
-        if not self.hidden:
-            yield self
-        for i in self.descendants:
-            yield i
+        return self._self_and(self.descendants)
 
     @property
     def descendants(self) -> Iterator[PageElement]:
