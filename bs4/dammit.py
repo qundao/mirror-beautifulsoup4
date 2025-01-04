@@ -458,11 +458,13 @@ class EntitySubstitution(object):
         :return: The string with some Unicode characters replaced with
            HTML entities.
         """
-        # First, substitute anything that looks like an entity. This is
-        # because
+        # First, escape the ampersand for anything that looks like an
+        # entity but isn't in the list of recognized entities. All other
+        # ampersands can be left alone.
         s = cls.ANY_ENTITY_RE.sub(cls._escape_unrecognized_entity_name, s)
 
-        # First, convert any appropriate characters to HTML entities.
+        # Then, convert a range of Unicode characters to unescaped
+        # HTML entities.
         s = cls.CHARACTER_TO_HTML_ENTITY_RE.sub(cls._substitute_html_entity, s)
 
         return s
