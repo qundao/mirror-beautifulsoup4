@@ -489,7 +489,7 @@ class BeautifulSoup(Tag):
         self.markup = None
         self.builder.soup = None
 
-    def _clone(self) -> "BeautifulSoup":
+    def copy_self(self) -> "BeautifulSoup":
         """Create a new BeautifulSoup object with the same TreeBuilder,
         but not associated with any markup.
 

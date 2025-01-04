@@ -1620,7 +1620,7 @@ class Tag(PageElement):
         interesting_string_types: Optional[Set[Type[NavigableString]]] = None,
         namespaces: Optional[Dict[str, str]] = None,
         # NOTE: Any new arguments here need to be mirrored in
-        # Tag._clone, and potentially BeautifulSoup.new_tag
+        # Tag.copy_self, and potentially BeautifulSoup.new_tag
         # as well.
     ):
         if parser is None:
@@ -1745,7 +1745,7 @@ class Tag(PageElement):
         """A deepcopy of a Tag is a new Tag, unconnected to the parse tree.
         Its contents are a copy of the old Tag's contents.
         """
-        clone = self._clone()
+        clone = self.copy_self()
 
         if recursive:
             # Clone this tag's descendants recursively, but without
@@ -1767,11 +1767,13 @@ class Tag(PageElement):
                         tag_stack.append(cast(Tag, descendant_clone))
         return clone
 
-    def _clone(self) -> Self:
+    def copy_self(self) -> Self:
         """Create a new Tag just like this one, but with no
         contents and unattached to any parse tree.
 
-        This is the first step in the deepcopy process.
+        This is the first step in the deepcopy process, but you can
+        call it on its own to create a copy of a Tag without copying its
+        contents.
         """
         clone = type(self)(
             None,

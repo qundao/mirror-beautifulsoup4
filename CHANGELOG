@@ -261,6 +261,13 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   string itself. This makes it easier to iterate over a mixed list
   of Tag and NavigableString objects. [bug=2044794]
 
+* Defined a new method, Tag.copy_self(), which creates a copy of a Tag but
+  with no contents. [bug=2065120] 
+
+  Note that this method used to be a private method named
+  _clone(). The _clone() method has been removed, so if you were using
+  it, change your code to call copy_self() instead.
+
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something
   unusual but not guaranteed to be wrong, like markup that looks like

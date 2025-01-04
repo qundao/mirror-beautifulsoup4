@@ -1588,9 +1588,9 @@ names`_? That trick works by repeatedly calling ``find()``::
 ``find_parents()`` and ``find_parent()``
 ----------------------------------------
 
-Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`consider_self <consider_self>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`consider_self <consider_self>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 I spent a lot of time above covering ``find_all()`` and
 ``find()``. The Beautiful Soup API defines ten other methods for
@@ -1635,13 +1635,6 @@ You may have noticed a similarity between ``find_parent()`` and
 mentioned earlier. These search methods actually use the ``.parents``
 attribute to iterate through all parents (unfiltered), checking each one
 against the provided filter to see if it matches.
-
-.. _consider_self:
-
-One argument unique to ``find_parent()`` and ``find_parents()`` is
-``consider_self`` (new in version 4.13.0). If you set this to
-``True``, the element itself is considered for a possible match first,
-followed by its parents.
 
 ``find_next_siblings()`` and ``find_next_sibling()``
 ----------------------------------------------------
@@ -2090,7 +2083,7 @@ call the factory method ``BeautifulSoup.new_tag()``::
 
 Only the first argument, the tag name, is required.
 
-The ``string`` argument to ``new_tag`` was added in Beautiful Soup 4.13.0.
+*(The ``string`` argument to ``new_tag`` was introduced in Beautiful Soup 4.13.0.)*
 
 ``insert()``
 ------------
@@ -3043,13 +3036,25 @@ same markup as the original, but it's not the same object::
 
 The only real difference is that the copy is completely detached from
 the original Beautiful Soup object tree, just as if ``extract()`` had
-been called on it::
+been called on it. This is because two different :py:class:`Tag`
+objects can't occupy the same space at the same time.
 
- print(p_copy.parent)
- # None
+ ::
+  print(p_copy.parent)
+  # None
 
-This is because two different :py:class:`Tag` objects can't occupy the same
-space at the same time.
+You can use :py:meth:`Tag.copy_self` to create a copy of a
+:py:class:`Tag` without copying its contents.
+
+ ::
+  original = BeautifulSoup('<a id="a_tag" class="link">the <i>link</i></a>', 'html.parser')
+  print(original.a)
+  # <a class="link" id="a_tag">the <i>link</a>
+  print(original.a.copy_self())
+  # <a class="link" id="a_tag"></a>
+      
+*(Tag.copy_self() is introduced in Beautiful Soup 4.13.0.)*
+
 
 Low-level search interface
 ==========================
