@@ -890,7 +890,7 @@ itself::
  # html
  # [document]
 
- 
+
 Going sideways
 --------------
 
@@ -1588,9 +1588,9 @@ names`_? That trick works by repeatedly calling ``find()``::
 ``find_parents()`` and ``find_parent()``
 ----------------------------------------
 
-Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, `consider_self`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`consider_self <consider_self>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
-Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, `consider_self`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
+Method signature: find_parent(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`consider_self <consider_self>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
 
 I spent a lot of time above covering ``find_all()`` and
 ``find()``. The Beautiful Soup API defines ten other methods for
@@ -1636,10 +1636,12 @@ mentioned earlier. These search methods actually use the ``.parents``
 attribute to iterate through all parents (unfiltered), checking each one
 against the provided filter to see if it matches.
 
+.. _consider_self:
+
 One argument unique to ``find_parent()`` and ``find_parents()`` is
 ``consider_self`` (new in version 4.13.0). If you set this to
-``True``, the element itself will be considered for a possible match
-before any of its parents are considered.
+``True``, the element itself is considered for a possible match first,
+followed by its parents.
 
 ``find_next_siblings()`` and ``find_next_sibling()``
 ----------------------------------------------------
@@ -2045,7 +2047,7 @@ in order::
  # ['Soup', ''s', ' ', 'on']
 
 ``NavigableString()`` and ``.new_tag()``
--------------------------------------------------
+----------------------------------------
 
 If you need to add a string to a document, no problem--you can pass a
 Python string in to ``append()``, or you can call the :py:class:`NavigableString`
@@ -2257,7 +2259,7 @@ returns the new wrapper::
 *This method is new in Beautiful Soup 4.0.5.*
 
 ``unwrap()``
----------------------------
+------------
 
 ``Tag.unwrap()`` is the opposite of ``wrap()``. It replaces a tag with
 whatever's inside that tag. It's good for stripping out markup::
@@ -2274,7 +2276,7 @@ Like ``replace_with()``, ``unwrap()`` returns the tag
 that was replaced.
 
 ``smooth()``
----------------------------
+------------
 
 After calling a bunch of methods that modify the parse tree, you may end up
 with two or more :py:class:`NavigableString` objects next to each other.
@@ -3061,15 +3063,17 @@ and the like--are actually using this low-level interface, and you
 can use it directly.
 
 *(Access to the low-level search interface is a new feature in
- Beautiful Soup 4.13.0.)*
+Beautiful Soup 4.13.0.)*
 
-``ElementFilter``
-^^^^^^^^^^^^^^^^^^^
+Custom element filtering
+------------------------
+
+.. py:class:: ElementFilter
 
 The :py:class:`ElementFilter` class is your entry point to the
 low-level interface. To use it, define a function that takes a
 :py:class:`PageElement` object (that is, it might be either a
-:py:class:`Tag` or a :py:class`NavigableString`). The function must
+:py:class:`Tag` or a :py:class:`NavigableString`). The function must
 return ``True`` if the element matches your custom criteria, and
 ``False`` if it doesn't.
 
@@ -3077,14 +3081,14 @@ This example function looks for short things: strings that are less
 than five characters long, and tags whose combined text size is less
 than five characters long::
 
-  from bs4 import Tag
-  from bs4.filter import ElementFilter
+ from bs4 import Tag
+ from bs4.filter import ElementFilter
 
-  def something_short(tag_or_string):
-      if isinstance(tag_or_string, Tag):
-          return len(tag_or_string.text) < 5
-      else:
-          return len(tag_or_string) < 5
+ def something_short(tag_or_string):
+     if isinstance(tag_or_string, Tag):
+         return len(tag_or_string.text) < 5
+     else:
+         return len(tag_or_string) < 5
 
 Once you have a function, pass it into the :py:class:`ElementFilter` constructor::
 
@@ -3096,36 +3100,38 @@ argument to any of the `Searching the tree`_ methods. Whatever
 criteria you defined in your function will be used instead of the
 default Beautiful Soup match logic::
 
-  soup.find(element_filter)
-  # '\n'
-  
-  soup.find_all(element_filter)
-  # ['\n', '\n', '\n', ',\n ', '\n', <p class="story">...</p>, '...', '\n']
+ soup.find(element_filter)
+ # '\n'
 
-  >>> soup.a.find_next(element_filter)
-  # <p class="story">...</p>
-  
+ soup.find_all(element_filter)
+ # ['\n', '\n', '\n', ',\n ', '\n', <p class="story">...</p>, '...', '\n']
+
+ >>> soup.a.find_next(element_filter)
+ # <p class="story">...</p>
+
 Every potential match will be run through your function, and the only
-:py:class:`PageElement` objects returned will be the one where your
+:py:class:`PageElement` objects returned will be the ones where your
 function returned ``True``.
 
 Note that this is different from simply passing `a function`_ as the
 first argument to one of the search methods. That's an easy way to
-find a tag, but _only_ tags will be considered. With an
+find a tag, but *only* tags will be considered. With an
 :py:class:`ElementFilter` you can write a single function that makes
 decisions about both tags and strings.
 
-The ``ElementFilter.filter()`` method
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Custom element iteration
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. py:method:: ElementFilter.filter()
 
 By passing an :py:class:`ElementFilter` instance into Beautiful Soup's
 tree-searching methods, you can completely customize what it means for
 Beautiful Soup to match an element as it iterates over the parse
-tree. By using the :py:method:`ElementFilter.filter` method, you can
+tree. By using the :py:meth:`ElementFilter.filter()` method, you can
 also completely customize what it means for Beautiful Soup to iterate
 over the parse tree in the first place.
 
-:py:method:`ElementFilter.filter` method takes a generator that yields
+The :py:meth:`ElementFilter.filter()` method takes a generator that yields
 a stream of :py:class:`PageElement` objects. There is no restriction
 on which :py:class:`PageElement` objects show up, how many times they
 show up, or in which order. Theoretically, they don't even need to be
@@ -3133,37 +3139,37 @@ from the same :py:class:`BeautifulSoup` document. You can do whatever
 makes sense for you.
 
 Here's a silly example: a generator that walks randomly back and forth
-through the parse tree.
+through the parse tree::
 
-  import random
-  def random_walk(starting_location):
-      location = starting_location
-      while location is not None:
-          yield location
-          if random.random() < 0.5:
-              location = location.next_element
-          else:
-              location = location.previous_element
-          if location is None:
-              return
+ import random
+ def random_walk(starting_location):
+     location = starting_location
+     while location is not None:
+         yield location
+         if random.random() < 0.5:
+             location = location.next_element
+         else:
+             location = location.previous_element
+         if location is None:
+             return
 
-Pass this generator into the example :py:method:`ElementFilter.filter`
+Pass this generator into the example :py:meth:`ElementFilter.filter()`
 and Beautiful Soup will wander randomly around the parse tree,
 applying the ``something_short`` function to every element it finds,
 and yielding all of the matches--potentially yielding a given object
-more than once.
+more than once::
 
-  [x for x in element_filter.filter(random_walk(soup.body))]
-  # ['\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n']
-  [x for x in element_filter.filter(random_walk(soup.body))]
-  # ['\n']
-  [x for x in element_filter.filter(random_walk(soup.body))]
-  # ['\n', '\n', '\n']
+ [x for x in element_filter.filter(random_walk(soup.body))]
+ # ['\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n']
+ [x for x in element_filter.filter(random_walk(soup.body))]
+ # ['\n']
+ [x for x in element_filter.filter(random_walk(soup.body))]
+ # ['\n', '\n', '\n']
 
 (Note that unlike the other code examples in this documentation, this
-example will give you different results every time you run it, thanks
+example can give different results every time you run it, thanks
 to the random element. It's very unlikely, but this function could
-wander around the parse tree forever and _never_ complete.)
+wander around the parse tree forever and *never* complete.)
 
 Advanced parser customization
 =============================
