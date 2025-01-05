@@ -2043,7 +2043,7 @@ in order::
  soup.a.contents
  # ['Soup', ''s', ' ', 'on']
 
-``Tag.extend()`` returns the last newly appended element in the list.
+``Tag.extend()`` returns the list of appended elements.
 
 ``NavigableString()`` and ``.new_tag()``
 ----------------------------------------
@@ -2119,7 +2119,11 @@ say, similar to ``.insert()`` on a Python list::
  new_string
  # 'but did not endorse '
 
-``Tag.insert()`` returns the newly inserted element.
+You can pass more than one element into ``Tag.insert()``. All the
+elements will be inserted, starting at the numeric position you
+provide.
+ 
+``Tag.insert()`` returns the list of newly inserted elements.
 
 ``insert_before()`` and ``insert_after()``
 ------------------------------------------

@@ -1911,18 +1911,26 @@ class Tag(PageElement):
 
     strings = property(_all_strings)
 
-    def insert(self, position: int, new_child: _InsertableElement) -> PageElement:
-        """Insert a new PageElement as a child of this `Tag`.
+    def insert(self, position: int, *new_children: _InsertableElement) -> Iterable[PageElement]:
+        """Insert one or more new PageElements as a child of this `Tag`.
 
-        This works the same way as :py:meth:`list.insert`.
+        This works similarly to :py:meth:`list.insert`, except you can insert
+        multiple elements at once.
 
         :param position: The numeric position that should be occupied
-           in this Tag's `Tag.children` by the new `PageElement`.
+           in this Tag's `Tag.children` by the first new `PageElement`.
 
-        :param new_child: The PageElement to insert.
+        :param new_children: The PageElements to insert.
 
-        :return The newly inserted PageElement.
+        :return The newly inserted PageElements.
         """
+        inserted: List[PageElement] = []
+        for new_child in new_children:
+            inserted.extend(self._insert(position, new_child))
+            position += 1
+        return inserted
+
+    def _insert(self, position: int, new_child: _InsertableElement) -> Iterable[PageElement]:
         if new_child is None:
             raise ValueError("Cannot insert None into a tag.")
         if new_child is self:
@@ -1931,15 +1939,11 @@ class Tag(PageElement):
             new_child = NavigableString(new_child)
 
         from bs4 import BeautifulSoup
-
         if isinstance(new_child, BeautifulSoup):
             # We don't want to end up with a situation where one BeautifulSoup
-            # object contains another. Insert the children one at a time,
-            # then return the last.
-            for subchild in list(new_child.contents):
-                self.insert(position, subchild)
-                position += 1
-            return subchild
+            # object contains another. Insert the BeautifulSoup's children and
+            # return them.
+            return self.insert(position, *list(new_child.contents))
         position = min(position, len(self.contents))
         if hasattr(new_child, "parent") and new_child.parent is not None:
             # We're 'inserting' an element that's already one
@@ -1955,7 +1959,7 @@ class Tag(PageElement):
                 elif current_index == position:
                     # We're 'inserting' an element into its current location.
                     # This is a no-op.
-                    return new_child
+                    return [new_child]
             new_child.extract()
 
         new_child.parent = self
@@ -2011,7 +2015,7 @@ class Tag(PageElement):
             )
         self.contents.insert(position, new_child)
 
-        return new_child
+        return [new_child]
 
     def unwrap(self) -> Self:
         """Replace this `PageElement` with its contents.

@@ -262,11 +262,25 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   of Tag and NavigableString objects. [bug=2044794]
 
 * Defined a new method, Tag.copy_self(), which creates a copy of a Tag but
-  with no contents. [bug=2065120] 
+  with no contents. [bug=2065120]
 
   Note that this method used to be a private method named
   _clone(). The _clone() method has been removed, so if you were using
   it, change your code to call copy_self() instead.
+
+* The PageElement.append() method now returns the element that was
+  appended; it used to have no return value. [bug=2093025]
+
+* The methods PageElement.insert(), PageElement.extend(),
+  PageElement.insert_before(), and PageElement.insert_after() now return a
+  list of the items inserted. These methods used to have no return
+  value. [bug=2093025]
+
+* The PageElement.insert() method now takes a variable number of
+  arguments, to match insert_before() and insert_after(). (Even if I
+  hadn't made this change, an edge case around inserting one Beautiful
+  Soup object into another means that insert()'s return value needs to
+  be a list.) [bug=2093025]
 
 * Defined a new warning class, UnusualUsageWarning, which is a superclass
   for all of the warnings issued when Beautiful Soup notices something

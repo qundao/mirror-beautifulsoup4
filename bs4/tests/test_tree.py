@@ -756,16 +756,16 @@ class TestTreeModification(SoupTest):
             '<p id="1">Don\'t leave me .</p>\n' '<p id="2">Don\'t leave!<b>here</b></p>'
         )
 
-    def test_insertion_returns_last_inserted_thing(self):
+    def test_insertion_returns_inserted_things(self):
         soup = self.soup("<html></html>")
         html = soup.find('html')
-        head = html.append(soup.new_tag('head'))
+        [head] = html.append(soup.new_tag('head'))
         assert head.name == 'head'
 
-        title = head.insert(0, soup.new_tag('title'))
+        [title] = head.insert(0, soup.new_tag('title'))
         assert title.name == 'title'
 
-        text5 = title.append('5')
+        [text5] = title.append('5')
         assert text5 == '5'
         text34 = text5.insert_before('3', '4')
         assert text34 == ('3', '4')
@@ -819,6 +819,18 @@ class TestTreeModification(SoupTest):
         with pytest.raises(ValueError):
             soup.a.insert(0, soup.a)
 
+    def test_insert_multiple_elements(self):
+        soup = self.soup("<p>And now, a word:</p><p>And we're back.</p>")
+        p2, p3 = soup.insert(1, soup.new_tag("p", string="p2"), soup.new_tag("p", string="p3"))
+        assert "p2" == p2.string
+        assert "p3" == p3.string
+
+        p1, p2, p3, p4 = list(soup.children)
+        assert "And now, a word:" == p1.string
+        assert "p2" == p2.string
+        assert "p3" == p3.string
+        assert "And we're back." == p4.string
+
     def test_insert_beautifulsoup_object_inserts_children(self):
         """Inserting one BeautifulSoup object into another actually inserts all
         of its children -- you'll never combine BeautifulSoup objects.
@@ -827,7 +839,9 @@ class TestTreeModification(SoupTest):
 
         text = "<p>p2</p><p>p3</p>"
         to_insert = self.soup(text)
-        soup.insert(1, to_insert)
+        p2, p3 = soup.insert(1, to_insert)
+        assert "p2" == p2.string
+        assert "p3" == p3.string
 
         for i in soup.descendants:
             assert not isinstance(i, BeautifulSoup)
