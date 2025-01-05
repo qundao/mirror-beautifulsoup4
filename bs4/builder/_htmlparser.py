@@ -173,6 +173,8 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             else:
                 attr_dict[key] = value
         # print("START", name)
+        sourceline: Optional[int]
+        sourcepos: Optional[int]
         if self.soup.builder.store_line_numbers:
             sourceline, sourcepos = self.getpos()
         else:

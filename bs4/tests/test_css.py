@@ -19,6 +19,7 @@ from . import (
     SOUP_SIEVE_PRESENT,
 )
 
+SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS: type[Exception]
 if SOUP_SIEVE_PRESENT:
     from soupsieve import __version__, SelectorSyntaxError
 
