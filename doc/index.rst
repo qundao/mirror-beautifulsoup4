@@ -2017,12 +2017,16 @@ You can add to a tag's contents with ``Tag.append()``. It works just
 like calling ``.append()`` on a Python list::
 
  soup = BeautifulSoup("<a>Foo</a>", 'html.parser')
- soup.a.append("Bar")
+ new_string = soup.a.append("Bar")
 
  soup
  # <a>FooBar</a>
  soup.a.contents
  # ['Foo', 'Bar']
+ new_string
+ # 'Bar'
+
+``Tag.append()`` returns the newly appended element.
 
 ``extend()``
 ------------
@@ -2038,6 +2042,8 @@ in order::
  # <a>Soup's on</a>
  soup.a.contents
  # ['Soup', ''s', ' ', 'on']
+
+``Tag.extend()`` returns the last newly appended element in the list.
 
 ``NavigableString()`` and ``.new_tag()``
 ----------------------------------------
@@ -2085,23 +2091,35 @@ Only the first argument, the tag name, is required.
 
 *(The ``string`` argument to ``new_tag`` was introduced in Beautiful Soup 4.13.0.)*
 
+Because insertion methods return the newly inserted element, you
+can create, insert, and obtain an element in one step::
+
+ soup = BeautifulSoup("<html></html>", 'html.parser')
+ html = soup.html
+
+ title = html.append(soup.new_tag("title"))
+
 ``insert()``
 ------------
 
 ``Tag.insert()`` is just like ``Tag.append()``, except the new element
 doesn't necessarily go at the end of its parent's
-``.contents``. It'll be inserted at whatever numeric position you
-say. It works just like ``.insert()`` on a Python list::
+``.contents``. It will be inserted at whatever numeric position you
+say, similar to ``.insert()`` on a Python list::
 
  markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
  soup = BeautifulSoup(markup, 'html.parser')
  tag = soup.a
 
- tag.insert(1, "but did not endorse ")
+ new_string = tag.insert(1, "but did not endorse ")
  tag
  # <a href="http://example.com/">I linked to but did not endorse <i>example.com</i></a>
  tag.contents
  # ['I linked to ', 'but did not endorse ', <i>example.com</i>]
+ new_string
+ # 'but did not endorse '
+
+``Tag.insert()`` returns the newly inserted element.
 
 ``insert_before()`` and ``insert_after()``
 ------------------------------------------
@@ -2117,7 +2135,7 @@ before something else in the parse tree::
  # <b><i>Don't</i>leave</b>
 
 The ``insert_after()`` method inserts tags or strings immediately
-following something else in the parse tree::
+after something else in the parse tree::
 
  div = soup.new_tag('div')
  div.string = 'ever'
@@ -2126,6 +2144,8 @@ following something else in the parse tree::
  # <b><i>Don't</i> you <div>ever</div> leave</b>
  soup.b.contents
  # [<i>Don't</i>, ' you', <div>ever</div>, 'leave']
+
+Both methods return the list of newly inserted elements.
 
 ``clear()``
 -----------

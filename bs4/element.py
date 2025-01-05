@@ -686,12 +686,16 @@ class PageElement(object):
         "_lastRecursiveChild", "_last_descendant", "4.0.0"
     )
 
-    def insert_before(self, *args: _InsertableElement) -> None:
+    def insert_before(self, *args: _InsertableElement) -> Iterable[PageElement]:
         """Makes the given element(s) the immediate predecessor of this one.
 
         All the elements will have the same `PageElement.parent` as
         this one, and the given elements will occur immediately before
         this one.
+
+        :param args: One or more PageElements.
+
+        :return The list of PageElements that were inserted.
         """
         parent = self.parent
         if parent is None:
@@ -706,12 +710,18 @@ class PageElement(object):
             index = parent.index(self)
             parent.insert(index, predecessor)
 
-    def insert_after(self, *args: _InsertableElement) -> None:
+        return args
+
+    def insert_after(self, *args: _InsertableElement) -> Iterable[PageElement]:
         """Makes the given element(s) the immediate successor of this one.
 
         The elements will have the same `PageElement.parent` as this
         one, and the given elements will occur immediately after this
         one.
+
+        :param args: One or more PageElements.
+
+        :return The list of PageElements that were inserted.
         """
         # Do all error checking before modifying the tree.
         parent = self.parent
@@ -729,6 +739,8 @@ class PageElement(object):
             index = parent.index(self)
             parent.insert(index + 1 + offset, successor)
             offset += 1
+
+        return args
 
     def find_next(
         self,
@@ -1899,13 +1911,17 @@ class Tag(PageElement):
 
     strings = property(_all_strings)
 
-    def insert(self, position: int, new_child: _InsertableElement) -> None:
+    def insert(self, position: int, new_child: _InsertableElement) -> PageElement:
         """Insert a new PageElement as a child of this `Tag`.
 
         This works the same way as :py:meth:`list.insert`.
 
         :param position: The numeric position that should be occupied
            in this Tag's `Tag.children` by the new `PageElement`.
+
+        :param new_child: The PageElement to insert.
+
+        :return The newly inserted PageElement.
         """
         if new_child is None:
             raise ValueError("Cannot insert None into a tag.")
@@ -1918,11 +1934,12 @@ class Tag(PageElement):
 
         if isinstance(new_child, BeautifulSoup):
             # We don't want to end up with a situation where one BeautifulSoup
-            # object contains another. Insert the children one at a time.
+            # object contains another. Insert the children one at a time,
+            # then return the last.
             for subchild in list(new_child.contents):
                 self.insert(position, subchild)
                 position += 1
-            return
+            return subchild
         position = min(position, len(self.contents))
         if hasattr(new_child, "parent") and new_child.parent is not None:
             # We're 'inserting' an element that's already one
@@ -1938,7 +1955,7 @@ class Tag(PageElement):
                 elif current_index == position:
                     # We're 'inserting' an element into its current location.
                     # This is a no-op.
-                    return
+                    return new_child
             new_child.extract()
 
         new_child.parent = self
@@ -1994,6 +2011,8 @@ class Tag(PageElement):
             )
         self.contents.insert(position, new_child)
 
+        return new_child
+
     def unwrap(self) -> Self:
         """Replace this `PageElement` with its contents.
 
@@ -2018,11 +2037,17 @@ class Tag(PageElement):
         ": :meta private:"
         return self.unwrap()
 
-    def append(self, tag: _InsertableElement) -> None:
-        """Appends the given `PageElement` to the contents of this `Tag`."""
-        self.insert(len(self.contents), tag)
+    def append(self, tag: _InsertableElement) -> PageElement:
+        """
+        Appends the given `PageElement` to the contents of this `Tag`.
 
-    def extend(self, tags: Union[Iterable[_InsertableElement], Tag]) -> None:
+        :param tag: A PageElement.
+
+        :return The newly appended PageElement.
+        """
+        return self.insert(len(self.contents), tag)
+
+    def extend(self, tags: Union[Iterable[_InsertableElement], Tag]) -> Iterable[PageElement]:
         """Appends one or more objects to the contents of this
         `Tag`.
 
@@ -2030,6 +2055,8 @@ class Tag(PageElement):
             they will be appended to this tag's contents, one at a time.
             If a single `Tag` is provided, its `Tag.contents` will be
             used to extend this object's `Tag.contents`.
+
+        :return The list of PageElements that were appended.
         """
         tag_list: Iterable[_InsertableElement]
 
@@ -2039,7 +2066,7 @@ class Tag(PageElement):
             # The caller should really be using append() instead,
             # but we can make it work.
             warnings.warn(
-                "A single item was passed into Tag.extend. Use Tag.append instead.",
+                "A single non-Tag item was passed into Tag.extend. Use Tag.append instead.",
                 UserWarning,
                 stacklevel=2,
             )
@@ -2053,6 +2080,8 @@ class Tag(PageElement):
 
         for tag in tag_list:
             self.append(tag)
+
+        return tag_list
 
     def clear(self, decompose: bool = False) -> None:
         """Destroy all children of this `Tag` by calling
