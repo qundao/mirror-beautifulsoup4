@@ -116,6 +116,15 @@ class EntitySubstitution(object):
     #: :meta hide-value:
     CHARACTER_TO_HTML_ENTITY_RE: Pattern[str]
 
+    #: A very similar regular expression to
+    #: CHARACTER_TO_HTML_ENTITY_RE, but which also matches unescaped
+    #: ampersands. This is used by the 'html' formatted to provide
+    #: backwards-compatibility, even though the HTML5 spec allows most
+    #: ampersands to go unescaped.
+    #:
+    #: :meta hide-value:
+    CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE: Pattern[str]
+
     @classmethod
     def _populate_class_variables(cls) -> None:
         """Initialize variables used by this class to manage the plethora of

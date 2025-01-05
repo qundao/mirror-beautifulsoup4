@@ -759,18 +759,18 @@ class TestTreeModification(SoupTest):
     def test_insertion_returns_inserted_things(self):
         soup = self.soup("<html></html>")
         html = soup.find('html')
-        [head] = html.append(soup.new_tag('head'))
+        head = html.append(soup.new_tag('head'))
         assert head.name == 'head'
 
         [title] = head.insert(0, soup.new_tag('title'))
         assert title.name == 'title'
 
-        [text5] = title.append('5')
+        text5 = title.append('5')
         assert text5 == '5'
         text34 = text5.insert_before('3', '4')
-        assert text34 == ('3', '4')
+        assert text34 == ['3', '4']
         text67 = text5.insert_after('6', '7')
-        assert text67 == ('6', '7')
+        assert text67 == ['6', '7']
         text89 = title.extend(['8', '9'])
         assert text89 == ['8', '9']
         assert title.get_text() == '3456789'
@@ -903,6 +903,12 @@ class TestTreeModification(SoupTest):
         assert ["foo", "bar"] == soup.a.contents
         # And they were converted to NavigableStrings.
         assert soup.a.contents[0].next_element == "bar"
+
+    def test_append(self):
+        soup = self.soup("<b>1</b>")
+        result = soup.b.append("2")
+        assert result == "2"
+        assert soup.b.decode() == "<b>12</b>"
 
     def test_insert_tag(self):
         builder = self.default_builder()

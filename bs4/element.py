@@ -686,7 +686,7 @@ class PageElement(object):
         "_lastRecursiveChild", "_last_descendant", "4.0.0"
     )
 
-    def insert_before(self, *args: _InsertableElement) -> Iterable[PageElement]:
+    def insert_before(self, *args: _InsertableElement) -> List[PageElement]:
         """Makes the given element(s) the immediate predecessor of this one.
 
         All the elements will have the same `PageElement.parent` as
@@ -702,17 +702,18 @@ class PageElement(object):
             raise ValueError("Element has no parent, so 'before' has no meaning.")
         if any(x is self for x in args):
             raise ValueError("Can't insert an element before itself.")
+        results: List[PageElement] = []
         for predecessor in args:
             # Extract first so that the index won't be screwed up if they
             # are siblings.
             if isinstance(predecessor, PageElement):
                 predecessor.extract()
             index = parent.index(self)
-            parent.insert(index, predecessor)
+            results.extend(parent.insert(index, predecessor))
 
-        return args
+        return results
 
-    def insert_after(self, *args: _InsertableElement) -> Iterable[PageElement]:
+    def insert_after(self, *args: _InsertableElement) -> List[PageElement]:
         """Makes the given element(s) the immediate successor of this one.
 
         The elements will have the same `PageElement.parent` as this
@@ -731,16 +732,17 @@ class PageElement(object):
             raise ValueError("Can't insert an element after itself.")
 
         offset = 0
+        results: List[PageElement] = []
         for successor in args:
             # Extract first so that the index won't be screwed up if they
             # are siblings.
             if isinstance(successor, PageElement):
                 successor.extract()
             index = parent.index(self)
-            parent.insert(index + 1 + offset, successor)
+            results.extend(parent.insert(index + 1 + offset, successor))
             offset += 1
 
-        return args
+        return results
 
     def find_next(
         self,
@@ -1911,7 +1913,7 @@ class Tag(PageElement):
 
     strings = property(_all_strings)
 
-    def insert(self, position: int, *new_children: _InsertableElement) -> Iterable[PageElement]:
+    def insert(self, position: int, *new_children: _InsertableElement) -> List[PageElement]:
         """Insert one or more new PageElements as a child of this `Tag`.
 
         This works similarly to :py:meth:`list.insert`, except you can insert
@@ -1930,7 +1932,7 @@ class Tag(PageElement):
             position += 1
         return inserted
 
-    def _insert(self, position: int, new_child: _InsertableElement) -> Iterable[PageElement]:
+    def _insert(self, position: int, new_child: _InsertableElement) -> List[PageElement]:
         if new_child is None:
             raise ValueError("Cannot insert None into a tag.")
         if new_child is self:
@@ -2049,9 +2051,9 @@ class Tag(PageElement):
 
         :return The newly appended PageElement.
         """
-        return self.insert(len(self.contents), tag)
+        return self.insert(len(self.contents), tag)[0]
 
-    def extend(self, tags: Union[Iterable[_InsertableElement], Tag]) -> Iterable[PageElement]:
+    def extend(self, tags: Union[Iterable[_InsertableElement], Tag]) -> List[PageElement]:
         """Appends one or more objects to the contents of this
         `Tag`.
 
@@ -2082,10 +2084,11 @@ class Tag(PageElement):
             # the original list. Make a list that won't change.
             tag_list = list(tags)
 
+        results: List[PageElement] = []
         for tag in tag_list:
-            self.append(tag)
+            results.append(self.append(tag))
 
-        return tag_list
+        return results
 
     def clear(self, decompose: bool = False) -> None:
         """Destroy all children of this `Tag` by calling
