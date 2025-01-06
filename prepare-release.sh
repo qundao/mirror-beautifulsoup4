@@ -28,7 +28,7 @@ rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
-python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
+python -m pytest ../py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/tests/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
