@@ -57,7 +57,7 @@ class ElementFilter(object):
     Most users of Beautiful Soup will never need to use
     `ElementFilter`, or its more capable subclass
     `SoupStrainer`. Instead, they will use methods like
-    `Tag.find`, which will convert their arguments into
+    :py:meth:`Tag.find`, which will convert their arguments into
     `SoupStrainer` objects and run them against the tree.
 
     However, if you find yourself wanting to treat the arguments to
@@ -121,7 +121,7 @@ class ElementFilter(object):
                     yield cast("_OneElement", i)
 
     def find(self, generator: Iterator[PageElement]) -> _AtMostOneElement:
-        """A lower-level equivalent of `PageElement.find`.
+        """A lower-level equivalent of :py:meth:`Tag.find`.
 
         You can pass in your own generator for iterating over
         `PageElement` objects. The first one that matches this
@@ -137,11 +137,11 @@ class ElementFilter(object):
     def find_all(
         self, generator: Iterator[PageElement], limit: Optional[int] = None
     ) -> _QueryResults:
-        """A lower-level equivalent of `Tag.find_all`.
+        """A lower-level equivalent of :py:meth:`Tag.find_all`.
 
         You can pass in your own generator for iterating over
         `PageElement` objects. Only elements that match this
-        `ElementFilter` will be returned in the `ResultSet`.
+        `ElementFilter` will be returned in the :py:class:`ResultSet`.
 
         :param generator: A way of iterating over `PageElement`
             objects.
@@ -315,7 +315,7 @@ class SoupStrainer(ElementFilter):
 
     A `SoupStrainer` encapsulates the logic necessary to perform the
     kind of matches supported by methods such as
-    `Tag.find`. `SoupStrainer` objects are primarily created
+    :py:meth:`Tag.find`. `SoupStrainer` objects are primarily created
     internally, but you can create one yourself and pass it in as
     ``parse_only`` to the `BeautifulSoup` constructor, to parse a
     subset of a large document.

@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Beautiful Soup'
-copyright = '2004-2024 Leonard Richardson'
+copyright = '2004-2025 Leonard Richardson'
 author = 'Leonard Richardson'
 release = '4.13.0'
 
@@ -23,6 +23,8 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 language = 'en,ja,ko,ru,pt,zh'
+
+html_sidebars = { '**': ['localtoc.html', 'searchbox.html'] }
 
 # I've got type aliases documented in the apidoc, but
 # references to those aliases don't link to the definitions.

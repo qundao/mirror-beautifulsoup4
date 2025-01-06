@@ -89,15 +89,15 @@ class CSS(object):
         return ns
 
     def _rs(self, results: Iterable[Tag]) -> ResultSet[Tag]:
-        """Normalize a list of results to a Resultset.
+        """Normalize a list of results to a py:class:`ResultSet`.
 
-        A ResultSet is more consistent with the rest of Beautiful
-        Soup's API, and ResultSet.__getattr__ has a helpful error
-        message if you try to treat a list of results as a single
-        result (a common mistake).
+        A py:class:`ResultSet` is more consistent with the rest of
+        Beautiful Soup's API, and :py:meth:`ResultSet.__getattr__` has
+        a helpful error message if you try to treat a list of results
+        as a single result (a common mistake).
         """
         # Import here to avoid circular import
-        from bs4.element import ResultSet
+        from bs4 import ResultSet
 
         return ResultSet(None, results)
 

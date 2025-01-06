@@ -734,12 +734,11 @@ class DetectsXMLParsedAsHTML(object):
         This is much less reliable than doing the check while parsing,
         but some of the tree builders can't do that.
 
-        :param stacklevel: The stacklevel of the code calling this
-        function.
+        :param stacklevel: The stacklevel of the code calling this\
+         function.
 
         :return: True if the markup looks like non-XHTML XML, False
-        otherwise.
-
+         otherwise.
         """
         if markup is None:
             return False
@@ -807,6 +806,7 @@ class DetectsXMLParsedAsHTML(object):
             return
 
         self._root_tag_name = name
+
         if (
             name != "html"
             and self._first_processing_instruction is not None

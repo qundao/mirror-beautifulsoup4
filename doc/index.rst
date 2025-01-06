@@ -4,7 +4,7 @@ Beautiful Soup Documentation
 .. image:: 6.1.jpg
    :align: right
    :alt: "The Fish-Footman began by producing from under his arm a great letter, nearly as large as himself."
-
+        
 `Beautiful Soup <http://www.crummy.com/software/BeautifulSoup/>`_ is a
 Python library for pulling data out of HTML and XML files. It works
 with your favorite parser to provide idiomatic ways of navigating,
@@ -48,6 +48,15 @@ that document.
 
 When reporting an error in this documentation, please mention which
 translation you're reading.
+
+API documentation
+^^^^^^^^^^^^^^^^^
+
+This document is written like an instruction manual, but you can also read
+:doc:`traditional API documentation <api/modules>`
+generated from the Beautiful Soup source code. If you want details
+about Beautiful Soup's internals, or a feature not covered in this
+document, try the API documentation.
 
 Quick Start
 ===========
@@ -1432,7 +1441,7 @@ expression, or whatever) you want to search for::
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
 To search for tags that match two or more CSS classes at once, use the
-`bs4.element.Tag.select()` CSS selector method :ref:`described here <css-selectors>`::
+:py:meth:`Tag.select` CSS selector method :ref:`described here <css-selectors>`::
 
  css_soup.select("p.strikeout.body")
  # [<p class="body strikeout"></p>]
@@ -3064,6 +3073,7 @@ been called on it. This is because two different :py:class:`Tag`
 objects can't occupy the same space at the same time.
 
  ::
+
   print(p_copy.parent)
   # None
 
@@ -3071,6 +3081,7 @@ You can use :py:meth:`Tag.copy_self` to create a copy of a
 :py:class:`Tag` without copying its contents.
 
  ::
+    
   original = BeautifulSoup('<a id="a_tag" class="link">the <i>link</i></a>', 'html.parser')
   print(original.a)
   # <a class="link" id="a_tag">the <i>link</a>

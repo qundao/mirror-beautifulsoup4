@@ -110,12 +110,12 @@ _RawAttributeValues: TypeAlias = (
 # split into a list of strings.
 _AttributeValue: TypeAlias = Union[str, "AttributeValueList"]
 
-#: A dictionary of names to `_AttributeValue` objects. This is what
+#: A dictionary of names to :py:data:`_AttributeValue` objects. This is what
 #: a tag's attributes look like after processing.
 _AttributeValues: TypeAlias = Dict[str, _AttributeValue]
 
-#: The methods that deal with turning `_RawAttributeValue` into
-#: `_AttributeValue` may be called several times, even after the values
+#: The methods that deal with turning :py:data:`_RawAttributeValue` into
+#: :py:data:`_AttributeValue` may be called several times, even after the values
 #: are already processed (e.g. when cloning a tag), so they need to
 #: be able to acommodate both possibilities.
 _RawOrProcessedAttributeValues: TypeAlias = Union[_RawAttributeValues, _AttributeValues]
