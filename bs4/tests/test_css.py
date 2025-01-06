@@ -10,6 +10,7 @@ from typing import (
     Any,
     List,
     Tuple,
+    Type,
 )
 
 from packaging.version import Version
@@ -19,7 +20,7 @@ from . import (
     SOUP_SIEVE_PRESENT,
 )
 
-SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS: type[Exception]
+SOUPSIEVE_EXCEPTION_ON_UNSUPPORTED_PSEUDOCLASS: Type[Exception]
 if SOUP_SIEVE_PRESENT:
     from soupsieve import __version__, SelectorSyntaxError
 
