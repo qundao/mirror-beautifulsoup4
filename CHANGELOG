@@ -1,4 +1,4 @@
-= 4.13.0b2 (20250106)
+= 4.13.0b3 (20250106)
 
 This release introduces Python type hints to all public classes and
 methods in Beautiful Soup. The addition of these type hints exposed a

@@ -25,14 +25,14 @@ hatch build
 
 # Test the sdist locally.
 rm -rf ../py3-install-test-virtualenv
-virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
-source ../py3-install-test-virtualenv/bin/activate
+pyenv virtualenv 3.12.2 py3-install-test-virtualenv
+pyenv activate py3-install-test-virtualenv
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
-python -m pytest ../py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/tests/
+python -m pytest ~/.pyenv/versions/3.12.2/envs/py3-install-test-virtualenv/lib/python3.12/site-packages/bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
-(cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
+(cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
-# /home/.../py3-install-test-virtualenv/bin/python
+# Python 3.12.2
 # [new version number] <a>foo</a>
 
 
@@ -40,12 +40,13 @@ echo "EXPECT HTML ON LINE BELOW"
 pip uninstall beautifulsoup4
 pip install dist/beautifulsoup4-*.whl
 echo "EXPECT HTML ON LINE BELOW"
-(cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
+(cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 
-deactivate
-rm -rf ../py3-install-test-virtualenv
+pyenv deactivate
+pyenv virtualenv-delete py3-install-test-virtualenv
 
 # Upload to test pypi
+pyenv activate bs4-test
 hatch publish -r test
 
 # Test install from test pypi.
