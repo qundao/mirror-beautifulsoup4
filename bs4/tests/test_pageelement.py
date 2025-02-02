@@ -402,3 +402,36 @@ class TestPersistence(SoupTest):
         assert "a b c d".split() == div["class"]
         assert "a b c".split() == div_copy["class"]
         assert isinstance(div_copy["class"], AttributeValueList)
+
+
+class TestEquality(SoupTest):
+
+    def test_comparison(self):
+        soup = self.soup("<a>string</a> <a>string</a>")
+        first_a, second_a = soup.find_all('a')
+        first_string, second_string = soup.find_all(string='string')
+
+        # Tags with the same markup are equal.
+        assert first_a == second_a
+
+        # NavigableStrings with the same content are equal, and also
+        # equal to a Python string with the same content...
+        assert first_string == second_string == "string"
+
+        # ...but not equivalent to a bytestring with the same content.
+        assert first_string != b"string"
+
+    def test_hash(self):
+        soup = self.soup("<a>string</a> <a>string</a>")
+        first_a, second_a = soup.find_all('a')
+        first_string, second_string = soup.find_all(string='string')
+
+        # Tags with the same markup hash to the same value.
+        assert hash(first_a) == hash(second_a)
+
+        # But they're not the same object.
+        assert id(first_a) != id(second_a)
+
+        # NavigableStrings with the same contents hash to the value of
+        # the contents.
+        assert hash(first_string) == hash(second_string) == hash("string")
