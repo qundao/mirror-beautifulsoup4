@@ -50,43 +50,46 @@ pyenv activate bs4-test
 hatch publish -r test
 
 # Test install from test pypi.
-rm -rf ../py3-install-test-virtualenv
-virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
-source ../py3-install-test-virtualenv/bin/activate
-pip install pytest lxml html5lib
+cd ..
+rm -rf py3-install-test-virtualenv
+pyenv virtualenv 3.13.1 py3-install-test-virtualenv
+pyenv activate py3-install-test-virtualenv
+pip install pytest lxml html5lib soupsieve typing-extensions hatchling
 
 # First, install from source and run the tests.
-pip install -i https://testpypi.python.org/pypi beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
-python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
+pip install -i https://test.pypi.org/simple/ beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
+python -m pytest ~/.pyenv/versions/py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
-# /home/.../py3-install-test-virtualenv/bin/python
+# /home/leonardr/.pyenv/shims/python
 # [new version number] <a>foo</a>
 
 # Next, install the wheel and just test functionality.
 pip uninstall beautifulsoup4
-pip install -i https://testpypi.python.org/pypi beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi
+pip install -i https://test.pypi.org/simple/ beautifulsoup4
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
 # /home/.../py3-install-test-virtualenv/bin/python
 # [new version number] <a>foo</a>
 
-deactivate
-rm -rf ../py3-install-test-virtualenv
+pyenv virtualenv-delete py3-install-test-virtualenv
 
 # Upload to production pypi
+pyenv activate bs4-test
 hatch publish
 
 # Test install from production pypi
 
 # First, from the source distibution
+pyenv virtualenv py3-install-test-virtualenv
+
 rm -rf ../py3-install-test-virtualenv
 virtualenv -p /usr/bin/python3 ../py3-install-test-virtualenv
 source ../py3-install-test-virtualenv/bin/activate
 pip install pytest lxml html5lib beautifulsoup4 --no-binary beautifulsoup4
-python -m pytest ../py3-install-test-virtualenv/lib/python3.11/site-packages/bs4/tests/
+python -m pytest ~/.pyenv/versions/py3-install-test-virtualenv/lib/python3.*/site-packages/bs4/
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'html.parser'))")
 # That should print something like:
@@ -103,5 +106,4 @@ echo "EXPECT HTML ON LINE BELOW"
 # [new version number] <a>foo</a>
 
 # Cleanup
-deactivate
-rm -rf ../py3-install-test-virtualenv
+pyenv virtualenv-delete py3-install-test-virtualenv
