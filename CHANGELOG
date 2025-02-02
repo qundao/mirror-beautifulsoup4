@@ -1,4 +1,4 @@
-= 4.13.0b3 (20250106)
+= 4.13.0 (20250202)
 
 This release introduces Python type hints to all public classes and
 methods in Beautiful Soup. The addition of these type hints exposed a
@@ -341,6 +341,13 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
 * Optimized the case where you use Tag.insert() to "insert" a PageElement
   into its current location. [bug=2077020]
 
+* Changes to make tests work whether tests are run under soupsieve 2.6
+  or an earlier version. Based on a patch by Stefano Rivera.
+
+* Removed the strip_cdata argument to lxml's HTMLParser
+  constructor, which never did anything and is deprecated as of lxml
+  5.3.0. Patch by Stefano Rivera. [bug=2076897]
+
 # Bug fixes
 
 * Copying a tag with a multi-valued attribute now makes a copy of the
@@ -385,15 +392,6 @@ and are scheduled to be removed in Beautiful Soup 4.15.0.
   and would often end up containing Unicode. UnicodeDammit.markup was
   not a documented attribute, but if you were using it, you probably
   want to switch to using .unicode_markup instead.
-
-= Unreleased pre-4.13 branch
-
-* Changes to make tests work whether tests are run under soupsieve 2.6
-  or an earlier version. Based on a patch by Stefano Rivera.
-
-* Removed the strip_cdata argument to lxml's HTMLParser
-  constructor, which never did anything and is deprecated as of lxml
-  5.3.0. Patch by Stefano Rivera. [bug=2076897]
 
 = 4.12.3 (20240117)
 
