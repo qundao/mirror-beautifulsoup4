@@ -25,14 +25,14 @@ hatch build
 
 # Test the sdist locally.
 rm -rf ../py3-install-test-virtualenv
-pyenv virtualenv 3.12.2 py3-install-test-virtualenv
+pyenv virtualenv 3.13.1 py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
-python -m pytest ~/.pyenv/versions/3.12.2/envs/py3-install-test-virtualenv/lib/python3.12/site-packages/bs4/tests
+python -m pytest ~/.pyenv/versions/3.13.1/envs/py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
-# Python 3.12.2
+# Python 3.13.1
 # [new version number] <a>foo</a>
 
 
