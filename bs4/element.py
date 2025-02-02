@@ -223,7 +223,7 @@ class AttributeValueList(List[str]):
     """
 
 
-class AttributeDict(dict[Any,Any]):
+class AttributeDict(Dict[Any,Any]):
     """Superclass for the dictionary used to hold a tag's
     attributes. You can use this, but it's just a regular dict with no
     special logic.
