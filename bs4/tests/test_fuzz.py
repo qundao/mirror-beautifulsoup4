@@ -21,7 +21,7 @@ try:
     from soupsieve.util import SelectorSyntaxError
     has_lxml = importlib.util.find_spec("lxml")
     has_html5lib = importlib.util.find_spec("html5lib")
-    fully_fuzzable = has_lxml and has_html5lib
+    fully_fuzzable = has_lxml != None and has_html5lib != None
 except ImportError:
     fully_fuzzable = False
 
