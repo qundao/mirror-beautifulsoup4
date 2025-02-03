@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
 ]
 dependencies = [
-    "typing-extensions",
+    "typing-extensions>=4.0.0",
     "soupsieve >1.2",
 ]
 
