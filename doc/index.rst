@@ -3623,7 +3623,7 @@ and onto the Beautiful Soup website:
    your translation, or attach your translation to the message.
 
 Use the Chinese or Brazilian Portuguese translations as your model. In
-particular, please translate the source file ``doc/source/index.rst``,
+particular, please translate the source file ``doc/index.rst``,
 rather than the HTML version of the documentation. This makes it
 possible to publish the documentation in a variety of formats, not
 just HTML.
@@ -3692,95 +3692,25 @@ for lxml or html5lib, you may find that the parse tree changes yet
 again. If this happens, you'll need to update your scraping code to
 process the new tree.
 
-Method names
-^^^^^^^^^^^^
-
-* ``renderContents`` -> ``encode_contents``
-* ``replaceWith`` -> ``replace_with``
-* ``replaceWithChildren`` -> ``unwrap``
-* ``findAll`` -> ``find_all``
-* ``findAllNext`` -> ``find_all_next``
-* ``findAllPrevious`` -> ``find_all_previous``
-* ``findNext`` -> ``find_next``
-* ``findNextSibling`` -> ``find_next_sibling``
-* ``findNextSiblings`` -> ``find_next_siblings``
-* ``findParent`` -> ``find_parent``
-* ``findParents`` -> ``find_parents``
-* ``findPrevious`` -> ``find_previous``
-* ``findPreviousSibling`` -> ``find_previous_sibling``
-* ``findPreviousSiblings`` -> ``find_previous_siblings``
-* ``getText`` -> ``get_text``
-* ``nextSibling`` -> ``next_sibling``
-* ``previousSibling`` -> ``previous_sibling``
-
-Some arguments to the Beautiful Soup constructor were renamed for the
-same reasons:
-
-* ``BeautifulSoup(parseOnlyThese=...)`` -> ``BeautifulSoup(parse_only=...)``
-* ``BeautifulSoup(fromEncoding=...)`` -> ``BeautifulSoup(from_encoding=...)``
-
-I renamed one method for compatibility with Python 3:
-
-* ``Tag.has_key()`` -> ``Tag.has_attr()``
-
-I renamed one attribute to use more accurate terminology:
-
-* ``Tag.isSelfClosing`` -> ``Tag.is_empty_element``
+Property names
+^^^^^^^^^^^^^^
 
 I renamed three attributes to avoid using words that have special
-meaning to Python. Unlike the others, these changes are *not backwards
-compatible.* If you used these attributes in BS3, your code will break
-in BS4 until you change them.
+meaning to Python. Unlike my changes to method names (which you'll see
+in the form of deprecation warnings), these changes *did not
+preserve backwards compatibility.* If you used these attributes in
+BS3, your code will break in BS4 until you change them.
 
 * ``UnicodeDammit.unicode`` -> ``UnicodeDammit.unicode_markup``
 * ``Tag.next`` -> ``Tag.next_element``
 * ``Tag.previous`` -> ``Tag.previous_element``
 
-These methods are left over from the Beautiful Soup 2 API. They've
-been deprecated since 2006 and should not be used at all:
-
-* ``Tag.fetchNextSiblings``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchPrevious``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchParents``
-* ``Tag.findChild``
-* ``Tag.findChildren``
-
 
 Generators
 ^^^^^^^^^^
 
-I gave the generators PEP 8-compliant names, and transformed them into
-properties:
-
-* ``childGenerator()`` -> ``children``
-* ``nextGenerator()`` -> ``next_elements``
-* ``nextSiblingGenerator()`` -> ``next_siblings``
-* ``previousGenerator()`` -> ``previous_elements``
-* ``previousSiblingGenerator()`` -> ``previous_siblings``
-* ``recursiveChildGenerator()`` -> ``descendants``
-* ``parentGenerator()`` -> ``parents``
-
-So instead of this::
-
- for parent in tag.parentGenerator():
-     ...
-
-You can write this::
-
- for parent in tag.parents:
-     ...
-
-(But the old code will still work.)
-
 Some of the generators used to yield ``None`` after they were done, and
 then stop. That was a bug. Now the generators just stop.
-
-There are two new generators, :ref:`.strings and
-.stripped_strings <string-generators>`. ``.strings`` yields
-NavigableString objects, and ``.stripped_strings`` yields Python
-strings that have had whitespace stripped.
 
 XML
 ^^^
