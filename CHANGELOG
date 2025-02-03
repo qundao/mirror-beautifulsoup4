@@ -19,6 +19,11 @@ and changes that may break backwards compatibility.
 Chris Papademetrious deserves a special thanks for his work on this
 release through its long beta process.
 
+NOTE: This release was yanked from PyPI on 20250203, because bug 2097263
+made it difficult to install older versions of Beautiful Soup on Python
+3.6. You can still install this version by explicitly pinning
+beautifulsoup4==4.13.0, but you really shouldn't need to.
+
 # Deprecation notices
 
 These things now give DeprecationWarnings when you try to use them,
