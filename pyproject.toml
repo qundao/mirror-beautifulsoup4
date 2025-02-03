@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Screen-scraping library"
 readme = "README.md"
 license = { text = "MIT License" }
-requires-python = ">=3.6.0"
+requires-python = ">=3.7.0"
 authors = [
     { name = "Leonard Richardson", email = "leonardr@segfault.org" },
 ]

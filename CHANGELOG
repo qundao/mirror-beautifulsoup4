@@ -1,3 +1,7 @@
+= 4.13.1 (20250203)
+
+* Updated pyproject.toml to require Python 3.7 or above. [bug=2097263]
+
 = 4.13.0 (20250202)
 
 This release introduces Python type hints to all public classes and
