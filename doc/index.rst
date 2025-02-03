@@ -3120,6 +3120,7 @@ return ``True`` if the element matches your custom criteria, and
 This example function looks for content-containing tags and strings,
 but skips whitespace-only strings::
 
+ from bs4 import Tag, NavigableString
  def non_whitespace_element_func(tag_or_string):
      """
      return True for:
@@ -3142,7 +3143,7 @@ criteria you defined in your function will be used instead of the
 default Beautiful Soup match logic::
 
  from bs4 import BeautifulSoup
- html_doc = """
+ small_doc = """
  <p>
    <b>bold</b>
    <i>italic</i>
@@ -3150,7 +3151,7 @@ default Beautiful Soup match logic::
    <u>underline</u>
  </p>
  """
- soup = BeautifulSoup(html_doc, 'html.parser')
+ soup = BeautifulSoup(small_doc, 'html.parser')
 
  soup.find('p').find_all(non_whitespace_filter, recursive=False)
  # [<b>bold</b>, <i>italic</i>, '\n  and\n  ', <u>underline</u>]
@@ -3212,16 +3213,15 @@ through the parse tree::
 
 Pass this generator into the example :py:meth:`ElementFilter.filter()`
 and Beautiful Soup will wander randomly around the parse tree,
-applying the ``something_short`` function to every element it finds,
+applying the ``non_whitespace_filter`` function to every element it finds,
 and yielding all of the matches--potentially yielding a given object
 more than once::
 
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n']
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n']
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n', '\n', '\n']
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, 'bold', <b>bold</b>, <p><b>bold</b>...]
+
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, <b>bold</b>, 'bold', <i>italic</i>, <i>italic</i>, ...]
 
 (Note that unlike the other code examples in this documentation, this
 example can give different results every time you run it, thanks
