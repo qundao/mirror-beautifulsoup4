@@ -725,7 +725,7 @@ spot.
 
 The ``.contents`` and ``.children`` attributes consider only a tag's
 *direct* children. For instance, the <head> tag has a single direct
-child--the <title> tag::
+child—the <title> tag::
 
  head_tag.contents
  # [<title>The Dormouse's story</title>]
@@ -2057,7 +2057,7 @@ in order::
 ``NavigableString()`` and ``.new_tag()``
 ----------------------------------------
 
-If you need to add a string to a document, no problem--you can pass a
+If you need to add a string to a document, no problem—you can pass a
 Python string in to ``append()``, or you can call the :py:class:`NavigableString`
 constructor::
 
@@ -2806,7 +2806,7 @@ to replace some characters with the special Unicode character
 this, it will set the ``.contains_replacement_characters`` attribute
 to ``True`` on the ``UnicodeDammit`` or :py:class:`BeautifulSoup` object. This
 lets you know that the Unicode representation is not an exact
-representation of the original--some data was lost. If a document
+representation of the original—some data was lost. If a document
 contains �, but ``.contains_replacement_characters`` is ``False``,
 you'll know that the � was there originally (as it is in this
 paragraph) and doesn't stand in for missing data.
@@ -3099,7 +3099,7 @@ document can get what they need using the methods described in
 `Searching the tree`_. However, there's a lower-level interface that
 lets you define any matching behavior you want. Behind the scenes, the
 parts of the Beautiful Soup API that most people use--``find_all()``
-and the like--are actually using this low-level interface, and you
+and the like—are actually using this low-level interface, and you
 can use it directly.
 
 *(Access to the low-level search interface is a new feature in
@@ -3214,7 +3214,7 @@ through the parse tree::
 Pass this generator into the example :py:meth:`ElementFilter.filter()`
 and Beautiful Soup will wander randomly around the parse tree,
 applying the ``non_whitespace_filter`` function to every element it finds,
-and yielding all of the matches--potentially yielding a given object
+and yielding all of the matches—potentially yielding a given object
 more than once::
 
  [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
@@ -3566,7 +3566,7 @@ Miscellaneous
 * ``AttributeError: 'ResultSet' object has no attribute 'foo'`` - This
   usually happens because you expected ``find_all()`` to return a
   single tag or string. But ``find_all()`` returns a *list* of tags
-  and strings--a ``ResultSet`` object. You need to iterate over the
+  and strings—a ``ResultSet`` object. You need to iterate over the
   list and look at the ``.foo`` of each one. Or, if you really only
   want one result, you need to use ``find()`` instead of
   ``find_all()``.
