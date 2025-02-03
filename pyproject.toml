@@ -89,6 +89,11 @@ include = [
     "/doc*/*.rst",
     "/doc*/*.jpg",
 
+    # Some translations keep the RST source in a /source/ subdirectory.
+    "/doc*/source/conf.py",
+    "/doc*/source/*.rst",
+    "/doc*/source/*.jpg",
+
     # The Japanese and Korean translations are in HTML format, not RST.
     "/doc.jp/index.html",
     "/doc.ko/*.jpg",
