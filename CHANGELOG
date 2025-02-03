@@ -3,6 +3,8 @@
 * Updated pyproject.toml to require Python 3.7 or above. [bug=2097263]
 * Pinned the typing-extensions dependency to a minimum version of 4.0.0.
   [bug=2097262]
+* Restored the English documentation to the source distribution.
+  [bug=2097237]
 
 = 4.13.0 (20250202)
 

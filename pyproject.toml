@@ -85,9 +85,9 @@ include = [
 
     # Documentation source in various languages.
     "/doc*/Makefile",
-    "/doc*/source/conf.py",
-    "/doc*/source/*.rst",
-    "/doc*/source/*.jpg",
+    "/doc*/conf.py",
+    "/doc*/*.rst",
+    "/doc*/*.jpg",
 
     # The Japanese and Korean translations are in HTML format, not RST.
     "/doc.jp/index.html",
