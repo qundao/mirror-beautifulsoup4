@@ -24,7 +24,7 @@ tox run-parallel
 hatch build
 
 # Test the sdist locally.
-pyenv virtualenv-delete py3-install-test-virtualenv
+pyenv virtualenv-delete -f py3-install-test-virtualenv
 pyenv virtualenv 3.13.1 py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
@@ -43,7 +43,7 @@ echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 
 pyenv deactivate
-pyenv virtualenv-delete py3-install-test-virtualenv
+pyenv virtualenv-delete -f py3-install-test-virtualenv
 
 # Upload to test pypi
 pyenv activate bs4-test
@@ -72,7 +72,7 @@ echo "EXPECT HTML ON LINE BELOW"
 # /home/.../py3-install-test-virtualenv/bin/python
 # [new version number] <a>foo</a>
 
-pyenv virtualenv-delete py3-install-test-virtualenv
+pyenv virtualenv-delete -f py3-install-test-virtualenv
 
 # Upload to production pypi
 pyenv activate bs4-test
@@ -81,7 +81,7 @@ hatch publish
 # Test install from production pypi
 
 # First, from the source distibution
-pyenv virtualenv-delete py3-install-test-virtualenv
+pyenv virtualenv-delete -f py3-install-test-virtualenv
 pyenv virtualenv py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
 
@@ -103,4 +103,4 @@ echo "EXPECT HTML ON LINE BELOW"
 # [new version number] <a>foo</a>
 
 # Cleanup
-pyenv virtualenv-delete py3-install-test-virtualenv
+pyenv virtualenv-delete -f py3-install-test-virtualenv
