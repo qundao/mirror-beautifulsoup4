@@ -1,3 +1,10 @@
+= 4.13.3 (Unreleased)
+
+* Modified the 4.13.2 change slightly to restore backwards
+  compatibility. Specifically, calling a find_* method with no
+  arguments should return the first Tag out of the iterator, not the
+  first PageElement. [bug=2097333]
+
 = 4.13.2 (20250204)
 
 * Gave ElementFilter the ability to explicitly say that it excludes

@@ -270,6 +270,7 @@ class TestTagNameMatchRule(SoupTest):
 
 
 class TestSoupStrainer(SoupTest):
+
     def test_constructor_string_deprecated_text_argument(self):
         with warnings.catch_warnings(record=True) as w:
             strainer = SoupStrainer(text="text")
@@ -319,6 +320,14 @@ class TestSoupStrainer(SoupTest):
     # Dummy function used within tests.
     def _match_function(x):
         pass
+
+    def test_constructor_default(self):
+        # The default SoupStrainer matches all tags, and only tags.
+        strainer = SoupStrainer()
+        [name_rule] = strainer.name_rules
+        assert True == name_rule.present
+        assert 0 == len(strainer.attribute_rules)
+        assert 0 == len(strainer.string_rules)
 
     def test_constructor(self):
         strainer = SoupStrainer(

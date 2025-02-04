@@ -390,9 +390,15 @@ class SoupStrainer(ElementFilter):
                 stacklevel=2,
             )
 
-        self.name_rules = cast(
-            List[TagNameMatchRule], list(self._make_match_rules(name, TagNameMatchRule))
-        )
+        if name is None and not attrs and not string and not kwargs:
+            # Special case for backwards compatibility. Instantiating
+            # a SoupStrainer with no arguments whatsoever gets you one
+            # that matches all Tags, and only Tags.
+            self.name_rules = [TagNameMatchRule(present=True)]
+        else:
+                self.name_rules = cast(
+                    List[TagNameMatchRule], list(self._make_match_rules(name, TagNameMatchRule))
+                )
         self.attribute_rules = defaultdict(list)
 
         if not isinstance(attrs, dict):
