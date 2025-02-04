@@ -1,4 +1,4 @@
-= 4.13.3 (Unreleased)
+= 4.13.3 (20250204)
 
 * Modified the 4.13.2 change slightly to restore backwards
   compatibility. Specifically, calling a find_* method with no
