@@ -27,6 +27,7 @@ class TestElementFilter(SoupTest):
         # An unconfigured ElementFilter matches absolutely everything.
         selector = ElementFilter()
         assert not selector.excludes_everything
+        assert selector.includes_everything
         soup = self.soup("<a>text</a>")
         tag = soup.a
         string = tag.string
@@ -38,6 +39,12 @@ class TestElementFilter(SoupTest):
         # And allows any incoming markup to be turned into PageElements.
         assert True is selector.allow_tag_creation(None, "tag", None)
         assert True is selector.allow_string_creation("some string")
+
+    def test_setup_with_match_function(self):
+        # Configure an ElementFilter with a match function and
+        # we can no longer state with certainty that it includes everything.
+        selector = ElementFilter(lambda x: False)
+        assert not selector.includes_everything
 
     def test_match(self):
         def m(pe):
@@ -192,14 +199,14 @@ class TestMatchRule(SoupTest):
     def test_empty_match_not_allowed(self):
         with pytest.raises(
             ValueError,
-            match="Either string, pattern, function or present must be provided.",
+            match="Either string, pattern, function, present, or exclude_everything must be provided.",
         ):
             MatchRule()
 
     def test_full_match_not_allowed(self):
         with pytest.raises(
             ValueError,
-            match="At most one of string, pattern, function and present must be provided.",
+            match="At most one of string, pattern, function, present, and exclude_everything must be provided.",
         ):
             MatchRule("a", "b", self.tag_function, True)
 
@@ -426,7 +433,8 @@ class TestSoupStrainer(SoupTest):
 
     def test__make_match_rules_nested_list(self):
         # If you pass a nested list into _make_match_rules, it's
-        # ignored, to avoid the possibility of an infinite recursion.
+        # turned into a restriction that excludes everything, to avoid the
+        # possibility of an infinite recursion.
 
         # Create a self-referential object.
         selfref = []
@@ -434,7 +442,7 @@ class TestSoupStrainer(SoupTest):
 
         with warnings.catch_warnings(record=True) as w:
             rules = SoupStrainer._make_match_rules(["a", selfref, "b"], MatchRule)
-            assert list(rules) == [MatchRule(string="a"), MatchRule(string="b")]
+            assert list(rules) == [MatchRule(string="a"), MatchRule(exclude_everything=True), MatchRule(string="b")]
 
             [warning] = w
             # Don't check the filename because the stacklevel is

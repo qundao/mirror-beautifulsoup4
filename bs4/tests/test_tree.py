@@ -57,6 +57,11 @@ class TestFind(SoupTest):
         soup = self.soup("<a>foo</a><b>bar</b><a>baz</a>")
         assert 2 == len(soup.find_all("a"))
 
+    def test_find_with_no_arguments(self):
+        soup = self.soup("<div></div><p></p>")
+        assert "div" == soup.find().name
+        assert "div" == soup.find("p").find_previous_sibling().name
+        assert "p" == soup.find("div").find_next_sibling().name
 
 class TestFindAll(SoupTest):
     """Basic tests of the find_all() method."""

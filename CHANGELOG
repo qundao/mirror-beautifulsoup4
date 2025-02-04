@@ -1,3 +1,24 @@
+= 4.13.2 (20250204)
+
+* Gave ElementFilter the ability to explicitly say that it excludes
+  every item in the parse tree. This is used internally in situations
+  where the provided filters are logically inconsistent or match a
+  value against the null set.
+
+  Without this, it's not always possible to distinguish between
+  a SoupStrainer that excludes everything and one that excludes
+  nothing.
+
+  This fixes a bug where calls to find_* methods with no arguments
+  returned None, instead of the first item out of the iterator. [bug=2097333]
+
+  Things added to the API to support this:
+
+  - The ElementFilter.includes_everything property
+  - The MatchRule.exclude_everything member
+  - The _known_rules argument to ElementFilter.match. This is an optional
+    argument used internally to indicate that an optimization is safe.
+
 = 4.13.1 (20250203)
 
 * Updated pyproject.toml to require Python 3.7 or above. [bug=2097263]
