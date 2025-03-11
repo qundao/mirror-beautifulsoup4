@@ -1317,6 +1317,14 @@ class NavigableString(str, PageElement):
     def __getnewargs__(self) -> Tuple[str]:
         return (str(self),)
 
+    # TODO-TYPING This should be SupportsIndex|slice but SupportsIndex
+    # is introduced in 3.8.
+    def __getitem__(self, key: Union[int|slice]) -> str:
+        """Raise an exception """
+        if isinstance(key, str):
+            raise TypeError("string indices must be integers, not '{0}'. Are you treating a NavigableString like a Tag?".format(key.__class__.__name__))
+        return super(NavigableString, self).__getitem__(key)
+
     @property
     def string(self) -> str:
         """Convenience property defined to match `Tag.string`.

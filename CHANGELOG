@@ -1,3 +1,9 @@
+= 4.13.4 (Unreleased)
+
+* Added a passthrough implementation for NavigableString.__getitem__ which gives a
+  more helpful exception if the user tries to treat it as a Tag and
+  access its HTML attributes.
+
 = 4.13.3 (20250204)
 
 * Modified the 4.13.2 change slightly to restore backwards
