@@ -4,6 +4,9 @@
   more helpful exception if the user tries to treat it as a Tag and
   access its HTML attributes.
 
+* Fixed a bug that caused an exception when unpickling the result of
+  parsing certain invalid markup with lxml as the tree builder. [bug=2103126]
+
 = 4.13.3 (20250204)
 
 * Modified the 4.13.2 change slightly to restore backwards
