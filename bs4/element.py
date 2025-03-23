@@ -389,7 +389,7 @@ class PageElement(object):
         :param previous_element: The element parsed immediately before
             this one.
 
-        :param next_element: The element parsed immediately before
+        :param next_element: The element parsed immediately after
             this one.
 
         :param previous_sibling: The most recently encountered element
