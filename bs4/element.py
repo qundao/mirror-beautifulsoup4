@@ -37,6 +37,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 from typing_extensions import (
     Self,
@@ -2605,6 +2606,22 @@ class Tag(PageElement):
             not self.preserve_whitespace_tags
             or self.name not in self.preserve_whitespace_tags
         )
+
+    @overload
+    def prettify(
+        self,
+        encoding: None = None,
+        formatter: _FormatterOrName = "minimal",
+    ) -> str:
+        ...
+
+    @overload
+    def prettify(
+        self,
+        encoding: _Encoding,
+        formatter: _FormatterOrName = "minimal",
+    ) -> bytes:
+        ...
 
     def prettify(
         self,
