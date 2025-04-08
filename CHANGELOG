@@ -1,5 +1,11 @@
 = 4.13.4 (Unreleased)
 
+* If you pass a function as the first argument to a find* method, the
+  function will only ever be called once per tag, with the Tag object
+  as the argument. Starting in 4.13.0, there were cases where the
+  function would be called with a Tag object and then called again
+  with the name of the tag. [bug=2106435]
+
 * Added a passthrough implementation for NavigableString.__getitem__ which gives a
   more helpful exception if the user tries to treat it as a Tag and
   access its HTML attributes.
