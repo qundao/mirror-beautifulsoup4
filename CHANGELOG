@@ -13,6 +13,8 @@
 * Fixed a bug that caused an exception when unpickling the result of
   parsing certain invalid markup with lxml as the tree builder. [bug=2103126]
 
+* Converted the AUTHORS file to UTF-8 for PEP8 compliance. [bug=2107405]
+
 = 4.13.3 (20250204)
 
 * Modified the 4.13.2 change slightly to restore backwards
