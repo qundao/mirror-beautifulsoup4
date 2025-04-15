@@ -1,4 +1,4 @@
-= 4.13.4 (Unreleased)
+= 4.13.4 (20250415)
 
 * If you pass a function as the first argument to a find* method, the
   function will only ever be called once per tag, with the Tag object
