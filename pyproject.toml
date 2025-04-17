@@ -60,7 +60,7 @@ path = "bs4/__init__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    # The module itself, and its unit tests.
+    # The module itself, and its unit tests and test cases.
     "/bs4/**/*.py",
     "/bs4/**/*.testcase",
 
@@ -104,8 +104,14 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    # The module itself, and its unit tests.
+    # The module itself. Unit tests and test cases are excluded by the exclude clause below.
     "/bs4/**/*.py",
-    "/bs4/**/*.testcase",
+
+    # The file that announces support for type hints per PEP-0561.
     "/bs4/py.typed",
+]
+
+exclude = [
+    # Unit tests and test cases.
+    "bs4/tests/"
 ]

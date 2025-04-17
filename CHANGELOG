@@ -1,3 +1,7 @@
+= 4.13.5 (Unreleased)
+
+* Unit tests and test case data are no longer packaged with the wheel. [bug=2107495]
+
 = 4.13.4 (20250415)
 
 * If you pass a function as the first argument to a find* method, the

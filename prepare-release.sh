@@ -23,7 +23,7 @@ tox run-parallel
 # Build sdist and wheel.
 hatch build
 
-# Test the sdist locally.
+# Install the sdist locally and run unit tests.
 pyenv virtualenv-delete -f py3-install-test-virtualenv
 pyenv virtualenv 3.13.1 py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
@@ -36,7 +36,9 @@ echo "EXPECT HTML ON LINE BELOW"
 # [new version number] <a>foo</a>
 
 
-# Test the wheel locally.
+# Install the wheel locally and test basic functionality. Note that we
+# don't run the unit tests because tests are not included with the
+# wheel.
 pip uninstall beautifulsoup4
 pip install dist/beautifulsoup4-*.whl
 echo "EXPECT HTML ON LINE BELOW"
@@ -63,7 +65,7 @@ echo "EXPECT HTML ON LINE BELOW"
 # /home/leonardr/.pyenv/shims/python
 # [new version number] <a>foo</a>
 
-# Next, install the wheel and just test functionality.
+# Next, install the wheel and test basic functionality.
 pip uninstall beautifulsoup4
 pip install -i https://test.pypi.org/simple/ beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
 echo "EXPECT HTML ON LINE BELOW"
