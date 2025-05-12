@@ -797,9 +797,9 @@ class UnicodeDammit:
         )
 
         # Short-circuit if the data is in Unicode to begin with.
-        if isinstance(markup, str) or markup == b"":
-            self.markup = markup
-            self.unicode_markup = str(markup)
+        if isinstance(markup, str):
+            self.markup = markup.encode("utf8")
+            self.unicode_markup = markup
             self.original_encoding = None
             return
 

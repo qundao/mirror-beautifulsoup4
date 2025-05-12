@@ -19,6 +19,17 @@ class TestUnicodeDammit(object):
         dammit = UnicodeDammit(markup)
         assert dammit.unicode_markup == markup
 
+    def test_empty_input(self):
+        markup = ""
+        dammit = UnicodeDammit(markup)
+        assert dammit.unicode_markup == markup
+        assert dammit.original_encoding == None
+
+        markup = b""
+        dammit = UnicodeDammit(markup)
+        assert dammit.unicode_markup == ""
+        assert dammit.original_encoding == "utf-8"
+
     @pytest.mark.parametrize(
         "smart_quotes_to,expect_converted",
         [
