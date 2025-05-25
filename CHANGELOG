@@ -2,6 +2,8 @@
 
 * Unit tests and test case data are no longer packaged with the wheel. [bug=2107495]
 * Fixed a bug that gave the wrong result when parsing the empty bytestring. [bug=2110492]
+* Brought the Spanish translation of the documentation up to date with
+  4.13.4. Courtesy of Carlos Romero.
 
 = 4.13.4 (20250415)
 
