@@ -76,6 +76,8 @@ class TestFuzz(object):
             "crash-ffbdfa8a2b26f13537b68d3794b0478a4090ee4a",
         ],
     )
+    # Fixed in https://github.com/python/cpython/issues/77057
+    @pytest.mark.skipif("sys.version_info >= (3, 13)")
     def test_rejected_markup(self, filename):
         markup = self.__markup(filename)
         with pytest.raises(ParserRejectedMarkup):
