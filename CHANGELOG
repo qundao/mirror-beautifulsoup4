@@ -8,6 +8,8 @@
   exceptions when given very bad markup. The bug in htmlparser that caused
   this behavior has been fixed. Patch courtesy of Stefano Rivera.
 * Used overloading to improve type hints for prettify().
+* Updated the SoupStrainer documentation to clarify that during initial
+  parsing, attribute values are always passed into the SoupStrainer as raw strings. [bug=2111651]
 
 = 4.13.4 (20250415)
 

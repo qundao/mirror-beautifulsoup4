@@ -3314,13 +3314,21 @@ three :py:class:`SoupStrainer` objects::
  # ...
  #
 
-The :py:class:`SoupStrainer` behavior is as follows:
+When selectively parsing a document, the behavior of :py:class:`SoupStrainer` is as follows:
 
-* When a tag matches, it is kept (including all its contents, whether they also
-  match or not).
-* When a tag does not match, the tag itself is not kept, but parsing continues
-  into its contents to look for other tags that do match.
-
+* When the name and attributes for a potential tag matches the
+  :py:class:`SoupStrainer`, the tag is parsed. All of its
+  children are automatically parsed, without the
+  :py:class:`SoupStrainer` being consulted.
+* When the name and attributes for a potential tag do not match, the tag is
+  not parsed. But its children will be compared against the
+  :py:class:`SoupStrainer` and may end up being parsed.
+* The tag names and attribute values passed in to the
+  :py:class:`SoupStrainer` are the same ones that would be passed into
+  the :py:class:`Tag` constructor. These values will be in a less
+  processed form here than in other parts of Beautiful Soup. In particular,
+  attribute values are always passed in as Unicode strings, even if (as with
+  the `class` attribute in HTML) that value would become a list after parsing.
 
 Customizing multi-valued attributes
 -----------------------------------
