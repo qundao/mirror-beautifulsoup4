@@ -174,12 +174,12 @@ class ElementFilter(object):
 
         :param limit: Stop looking after finding this many results.
         """
-        results: _QueryResults = ResultSet(self)
+        results = []
         for match in self.filter(generator):
             results.append(match)
             if limit is not None and len(results) >= limit:
                 break
-        return results
+        return ResultSet(self, results)
 
     def allow_tag_creation(
         self, nsprefix: Optional[str], name: str, attrs: Optional[_RawAttributeValues]

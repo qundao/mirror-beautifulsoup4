@@ -1072,7 +1072,7 @@ class PageElement(object):
         # specific here.
         method: Callable,
         name: _FindMethodName,
-        attrs: _StrainableAttributes,
+        attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -2246,7 +2246,7 @@ class Tag(PageElement):
     def __call__(
         self,
         name: Optional[_StrainableElement] = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -2725,8 +2725,8 @@ class Tag(PageElement):
     @overload
     def find(
             self,
-            name: None,
-            attrs: None,
+            name: None=None,
+            attrs: None=None,
             recursive: bool = True,
             string: _StrainableString="",
     ) -> _AtMostOneNavigableString:
@@ -2766,10 +2766,10 @@ class Tag(PageElement):
     @overload
     def find_all(
         self,
-        name: None,
-        attrs: None,
+        name: _FindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
-        string: _StrainableString = "",
+        string: None = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
@@ -2935,7 +2935,7 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
 
-class ResultSet(List[_PageElementT], Sequence[_PageElementT], Generic[_PageElementT]):
+class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
@@ -2946,8 +2946,14 @@ class ResultSet(List[_PageElementT], Sequence[_PageElementT], Generic[_PageEleme
     def __init__(
         self, source: Optional[ElementFilter], result: Iterable[_PageElementT] = ()
     ) -> None:
-        super(ResultSet, self).__init__(result)
+        self.result = result
         self.source = source
+
+    def __len__(self):
+        return len(self.result)
+
+    def __getitem__(self, index):
+        return self.result[index]
 
     def __getattr__(self, key: str) -> None:
         """Raise a helpful exception to explain a common code fix."""
