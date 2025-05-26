@@ -750,25 +750,6 @@ class PageElement(object):
 
         return results
 
-    @overload
-    def find_next(
-            self,
-            name: _FindMethodName = None,
-            attrs: Optional[_StrainableAttributes] = None,
-            string: None = None,
-            **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneTag:
-        ...
-
-    @overload
-    def find_next(
-            self,
-            name: None = None,
-            attrs: None = None,
-            string: _StrainableString="",
-    ) -> _AtMostOneNavigableString:
-        ...
-
     def find_next(
         self,
         name: _FindMethodName = None,
@@ -824,25 +805,6 @@ class PageElement(object):
         )
 
     findAllNext = _deprecated_function_alias("findAllNext", "find_all_next", "4.0.0")
-
-    @overload
-    def find_next_sibling(
-            self,
-            name: _FindMethodName = None,
-            attrs: Optional[_StrainableAttributes] = None,
-            string: Optional[_StrainableString] = None,
-            **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneTag:
-        ...
-
-    @overload
-    def find_next_sibling(
-            self,
-            name: None = None,
-            attrs: None = None,
-            string: _StrainableString="",
-    ) -> _AtMostOneNavigableString:
-        ...
 
     def find_next_sibling(
         self,
@@ -2973,7 +2935,7 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
 
-class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
+class ResultSet(List[_PageElementT], Sequence[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
