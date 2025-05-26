@@ -2,7 +2,7 @@
 trees."""
 
 import pickle
-import pytest
+import pytest # type:ignore
 from bs4.builder._htmlparser import (
     _DuplicateAttributeHandler,
     BeautifulSoupHTMLParser,

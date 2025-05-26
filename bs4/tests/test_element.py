@@ -4,7 +4,7 @@ The really big classes -- Tag, PageElement, and NavigableString --
 are tested in separate files.
 """
 
-import pytest
+import pytest # type:ignore
 from bs4.element import (
     HTMLAttributeDict,
     XMLAttributeDict,

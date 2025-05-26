@@ -47,7 +47,7 @@ import warnings
 chardet_module: Optional[ModuleType] = None
 try:
     #  PyPI package: cchardet
-    import cchardet
+    import cchardet # type:ignore
 
     chardet_module = cchardet
 except ImportError:
@@ -60,7 +60,7 @@ except ImportError:
     except ImportError:
         try:
             # PyPI package: charset-normalizer
-            import charset_normalizer
+            import charset_normalizer # type:ignore
 
             chardet_module = charset_normalizer
         except ImportError:

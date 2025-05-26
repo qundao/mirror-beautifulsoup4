@@ -1,5 +1,5 @@
 # encoding: utf-8
-import pytest
+import pytest # type:ignore
 import logging
 import warnings
 import bs4

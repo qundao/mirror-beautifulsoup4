@@ -8,7 +8,7 @@ import pickle
 import importlib
 import copy
 import warnings
-import pytest
+import pytest # type:ignore
 from bs4 import BeautifulSoup
 from bs4.element import (
     AttributeValueList,
@@ -49,10 +49,10 @@ try:
 except ImportError:
     SOUP_SIEVE_PRESENT = False
 
-HTML5LIB_PRESENT = importlib.util.find_spec("html5lib") is not None
+HTML5LIB_PRESENT = importlib.util.find_spec("html5lib") is not None # type:ignore
 
 try:
-    import lxml.etree
+    import lxml.etree # type:ignore
     LXML_PRESENT = True
     LXML_VERSION = lxml.etree.LXML_VERSION
 except ImportError:

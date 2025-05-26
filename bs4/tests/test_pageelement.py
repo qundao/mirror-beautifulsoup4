@@ -2,9 +2,9 @@
 
 import copy
 import pickle
-import pytest
 import sys
 import warnings
+import pytest # type:ignore
 
 from bs4 import BeautifulSoup
 from bs4.element import (

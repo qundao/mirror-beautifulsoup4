@@ -1,5 +1,5 @@
-import pytest
 import types
+import pytest # type:ignore
 
 from bs4 import (
     BeautifulSoup,

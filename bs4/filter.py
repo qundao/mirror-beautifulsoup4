@@ -117,8 +117,8 @@ class ElementFilter(object):
         the constructor.
 
         :param _known_rules: Defined for compatibility with
-        SoupStrainer._match(). Used more for consistency than because
-        we need the performance optimization.
+            SoupStrainer._match(). Used more for consistency than because
+            we need the performance optimization.
         """
         if not _known_rules and self.includes_everything:
             return True
