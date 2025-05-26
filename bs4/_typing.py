@@ -196,5 +196,5 @@ _AtMostOneElement: TypeAlias = Optional[_OneElement]
 _AtMostOneTag: TypeAlias = Optional["Tag"]
 _AtMostOneNavigableString: TypeAlias = Optional["NavigableString"]
 _QueryResults: TypeAlias = "ResultSet[_OneElement]"
-_TagQueryResults: TypeAlias = "ResultSet[Tag]"
-_StringQueryResults: TypeAlias = "ResultSet[NavigableString]"
+_SomeTags: TypeAlias = "ResultSet[Tag]"
+_SomeNavigableStrings: TypeAlias = "ResultSet[NavigableString]"

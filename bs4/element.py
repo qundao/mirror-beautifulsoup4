@@ -30,6 +30,7 @@ from typing import (
     Mapping,
     Optional,
     Pattern,
+    Sequence,
     Set,
     TYPE_CHECKING,
     Tuple,
@@ -67,6 +68,8 @@ if TYPE_CHECKING:
         _StrainableAttribute,
         _StrainableAttributes,
         _StrainableString,
+        _SomeNavigableStrings,
+        _SomeTags,
     )
 
 _OneOrMoreStringTypes: TypeAlias = Union[
@@ -747,10 +750,29 @@ class PageElement(object):
 
         return results
 
+    @overload
+    def find_next(
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None = None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_next(
+            self,
+            name: None = None,
+            attrs: None = None,
+            string: _StrainableString="",
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_next(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -802,6 +824,25 @@ class PageElement(object):
         )
 
     findAllNext = _deprecated_function_alias("findAllNext", "find_all_next", "4.0.0")
+
+    @overload
+    def find_next_sibling(
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: Optional[_StrainableString] = None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_next_sibling(
+            self,
+            name: None = None,
+            attrs: None = None,
+            string: _StrainableString="",
+    ) -> _AtMostOneNavigableString:
+        ...
 
     def find_next_sibling(
         self,
@@ -1082,7 +1123,7 @@ class PageElement(object):
     def _find_all(
         self,
         name: _FindMethodName,
-        attrs: _StrainableAttributes,
+        attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         limit: Optional[int],
         generator: Iterator[PageElement],
@@ -2712,8 +2753,9 @@ class Tag(PageElement):
     def find(
             self,
             name: _FindMethodName = None,
-            attrs: _StrainableAttributes = {},
+            attrs: Optional[_StrainableAttributes] = None,
             recursive: bool = True,
+            string: None=None,
             **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
         ...
@@ -2721,8 +2763,8 @@ class Tag(PageElement):
     @overload
     def find(
             self,
-            name: None = None,
-            attrs: None = None,
+            name: None,
+            attrs: None,
             recursive: bool = True,
             string: _StrainableString="",
     ) -> _AtMostOneNavigableString:
@@ -2731,7 +2773,7 @@ class Tag(PageElement):
     def find(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = {},
+        attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -2759,10 +2801,36 @@ class Tag(PageElement):
 
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")
 
+    @overload
+    def find_all(
+        self,
+        name: None,
+        attrs: None,
+        recursive: bool = True,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def find_all(
+        self,
+        name: None = None,
+        attrs: None = None,
+        recursive: bool = True,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
     def find_all(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -2905,7 +2973,7 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
 
-class ResultSet(List[_PageElementT], Generic[_PageElementT]):
+class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.

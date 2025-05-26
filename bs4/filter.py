@@ -117,8 +117,8 @@ class ElementFilter(object):
         the constructor.
 
         :param _known_rules: Defined for compatibility with
-        SoupStrainer._match(). Used more for consistency than because
-        we need the performance optimization.
+            SoupStrainer._match(). Used more for consistency than because
+            we need the performance optimization.
         """
         if not _known_rules and self.includes_everything:
             return True
@@ -378,7 +378,7 @@ class SoupStrainer(ElementFilter):
     def __init__(
         self,
         name: Optional[_StrainableElement] = None,
-        attrs: Dict[str, _StrainableAttribute] = {},
+        attrs: Optional[Dict[str, _StrainableAttribute]] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ):
@@ -396,11 +396,13 @@ class SoupStrainer(ElementFilter):
             # that matches all Tags, and only Tags.
             self.name_rules = [TagNameMatchRule(present=True)]
         else:
-                self.name_rules = cast(
-                    List[TagNameMatchRule], list(self._make_match_rules(name, TagNameMatchRule))
-                )
+            self.name_rules = cast(
+                List[TagNameMatchRule], list(self._make_match_rules(name, TagNameMatchRule))
+            )
         self.attribute_rules = defaultdict(list)
 
+        if attrs is None:
+            attrs = {}
         if not isinstance(attrs, dict):
             # Passing something other than a dictionary as attrs is
             # sugar for matching that thing against the 'class'
