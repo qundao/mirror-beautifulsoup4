@@ -746,8 +746,9 @@ class SoupStrainer(ElementFilter):
 
     @_deprecated("allow_tag_creation", "4.13.0")
     def search_tag(self, name: str, attrs: Optional[_RawAttributeValues]) -> bool:
-        """A less elegant version of `allow_tag_creation`. Deprecated as of 4.13.0"""
-        ":meta private:"
+        """A less elegant version of `allow_tag_creation`. Deprecated as of 4.13.0
+        :meta private:
+        """
         return self.allow_tag_creation(None, name, attrs)
 
     @_deprecated("match", "4.13.0")

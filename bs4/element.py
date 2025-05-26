@@ -54,6 +54,8 @@ if TYPE_CHECKING:
     )
     from bs4._typing import (
         _AtMostOneElement,
+        _AtMostOneTag,
+        _AtMostOneNavigableString,
         _AttributeValue,
         _AttributeValues,
         _Encoding,
@@ -2706,10 +2708,30 @@ class Tag(PageElement):
 
     # Soup methods
 
+    @overload
+    def find(
+            self,
+            name: _FindMethodName = None,
+            attrs: _StrainableAttributes = {},
+            recursive: bool = True,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find(
+            self,
+            name: None = None,
+            attrs: None = None,
+            recursive: bool = True,
+            string: _StrainableString="",
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
