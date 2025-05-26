@@ -3,7 +3,7 @@
 
 import logging
 import pickle
-import pytest
+import pytest # type:ignore
 from typing import Iterable
 
 from bs4 import (

@@ -1,8 +1,8 @@
 """Tests of the builder registry."""
 
-import pytest
 import warnings
 from typing import Type
+import pytest # type:ignore
 
 from bs4 import BeautifulSoup
 from bs4.builder import (

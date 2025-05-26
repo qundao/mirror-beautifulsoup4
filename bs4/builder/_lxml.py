@@ -22,11 +22,13 @@ from typing import (
     TYPE_CHECKING,
     Union,
 )
-from typing_extensions import TypeAlias
 
 from io import BytesIO
 from io import StringIO
-from lxml import etree
+
+from typing_extensions import TypeAlias
+
+from lxml import etree # type:ignore
 from bs4.element import (
     AttributeDict,
     XMLAttributeDict,

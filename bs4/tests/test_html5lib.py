@@ -1,7 +1,7 @@
 """Tests to ensure that the html5lib tree builder generates good trees."""
 
-import pytest
 import warnings
+import pytest # type:ignore
 
 from bs4 import BeautifulSoup
 from bs4.filter import SoupStrainer

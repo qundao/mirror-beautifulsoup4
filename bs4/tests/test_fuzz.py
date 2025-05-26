@@ -11,7 +11,7 @@ proximity to code that can trigger the problems.
 
 import os
 import importlib
-import pytest
+import pytest # type:ignore
 from bs4 import (
     BeautifulSoup,
     ParserRejectedMarkup,
@@ -19,17 +19,17 @@ from bs4 import (
 
 try:
     from soupsieve.util import SelectorSyntaxError
-    has_lxml = importlib.util.find_spec("lxml")
-    has_html5lib = importlib.util.find_spec("html5lib")
-    fully_fuzzable = has_lxml != None and has_html5lib != None
+    has_lxml = importlib.util.find_spec("lxml") # type:ignore
+    has_html5lib = importlib.util.find_spec("html5lib") # type:ignore
+    FULLY_FUZZABLE = has_lxml is not None and has_html5lib is not None
 except ImportError:
-    fully_fuzzable = False
+    FULLY_FUZZABLE = False
 
 
 @pytest.mark.skipif(
-    not fully_fuzzable, reason="Prerequisites for fuzz tests are not installed."
+    not FULLY_FUZZABLE, reason="Prerequisites for fuzz tests are not installed."
 )
-class TestFuzz(object):
+class TestFuzz:
     # Test case markup files from fuzzers are given this extension so
     # they can be included in builds.
     TESTCASE_SUFFIX = ".testcase"

@@ -1,6 +1,6 @@
-import pytest
 import re
 import warnings
+import pytest # type:ignore
 
 from . import (
     SoupTest,

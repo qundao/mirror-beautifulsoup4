@@ -1362,8 +1362,8 @@ class NavigableString(str, PageElement):
         return (str(self),)
 
     # TODO-TYPING This should be SupportsIndex|slice but SupportsIndex
-    # is introduced in 3.8.
-    def __getitem__(self, key: Union[int|slice]) -> str:
+    # is introduced in 3.8. This can be changed once 3.7 support is dropped.
+    def __getitem__(self, key: Union[int|slice]) -> str: # type:ignore
         """Raise an exception """
         if isinstance(key, str):
             raise TypeError("string indices must be integers, not '{0}'. Are you treating a NavigableString like a Tag?".format(key.__class__.__name__))

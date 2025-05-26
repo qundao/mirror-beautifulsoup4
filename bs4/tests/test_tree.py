@@ -9,9 +9,9 @@ same markup, but all Beautiful Soup trees can be traversed with the
 methods tested here.
 """
 
-import pytest
 import re
 import warnings
+import pytest # type:ignore
 from bs4 import BeautifulSoup
 from bs4.builder import builder_registry
 from bs4.element import (
