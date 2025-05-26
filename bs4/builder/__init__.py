@@ -260,7 +260,7 @@ class TreeBuilder(object):
 
     #: The textual contents of tags with these names should be
     #: instantiated with some class other than `bs4.element.NavigableString`.
-    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {}
+    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {} # type:ignore
 
     #: By default, tags are treated as empty-element tags if they have
     #: no contents--that is, using XML rules. HTMLTreeBuilder
@@ -599,7 +599,7 @@ class HTMLTreeBuilder(TreeBuilder):
     #:
     #: TODO: Arguably <noscript> could go here but it seems
     #: qualitatively different from the other tags.
-    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = {
+    DEFAULT_STRING_CONTAINERS: Dict[str, Type[bs4.element.NavigableString]] = { # type:ignore
         "rt": RubyTextString,
         "rp": RubyParenthesisString,
         "style": Stylesheet,
