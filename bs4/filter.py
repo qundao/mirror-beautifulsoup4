@@ -680,3 +680,29 @@ class SoupStrainer(ElementFilter):
         :meta private:
         """
         return element if self.match(element) else None
+
+
+class TagStrainer(SoupStrainer):
+    """A SoupStrainer which is further constrained to only match Tags."""
+
+    def matches_string(self, string: Optional[str]) -> bool:
+        """Strings are never matched."""
+        return False
+
+    def allow_string_creation(self, string: str) -> bool:
+        """We don't match strings, so we don't allow the creation of strings."""
+        return False
+
+
+class StringStrainer(SoupStrainer):
+    """A SoupStrainer which is further constrained to only match NavigableStrings."""
+
+    def matches_tag(self, tag: Tag) -> bool:
+        """Tags are never matched."""
+        return False
+
+    def allow_tag_creation(
+        self, nsprefix: Optional[str], name: str, attrs: Optional[_RawAttributeValues]
+    ) -> bool:
+        """We don't match tags, so we don't allow the creation of tags."""
+        return False
