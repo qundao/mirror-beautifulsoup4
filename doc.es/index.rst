@@ -1,10 +1,5 @@
-.. _manual:
-
-=================================
- Documentación de Beautiful Soup
-=================================
-
-.. py:module:: bs4
+Documentación de Beautiful Soup
+===============================
 
 .. image:: 6.1.jpg
    :align: right
@@ -13,7 +8,7 @@
 
 `Beautiful Soup <http://www.crummy.com/software/BeautifulSoup/>`_ es una
 librería de Python para extraer datos de archivos en formato HTML y XML.
-Trabaja con tu analizador favorito para ofrecer maneras bien definidas
+Funciona con tu analizador favorito para ofrecer maneras bien definidas
 de navegar, buscar y modificar el árbol analizado. Puede llegar a ahorrar
 horas o días de trabajo a los programadores. 
 
@@ -22,7 +17,7 @@ de Beautiful Soup 4. Te muestro las cosas para las que la librería es buena,
 cómo funciona, cómo usarla, cómo hacer lo que quieres y qué hacer cuando
 no se cumplen tus expectativas.
 
-Este documento cubre Beautiful Soup versión 4.12.1. Los ejemplos en este
+Este documento cubre Beautiful Soup versión 4.13.4. Los ejemplos en este
 documento fueron escritos para Python 3.8.
 
 Podrías estar buscando la documentación de `Beautiful Soup 3
@@ -40,9 +35,11 @@ de Beautiful Soup:
 * `이 문서는 한국어 번역도 가능합니다. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ko/>`_
 * `Este documento também está disponível em Português do Brasil. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ptbr>`_
 * `Эта документация доступна на русском языке. <https://www.crummy.com/software/BeautifulSoup/bs4/doc.ru/>`_
+* `This document is also available in English. <https://www.crummy.com/software/BeautifulSoup/bs4/doc/>`_
  
 Cómo conseguir ayuda
-====================
+--------------------
+
 Si tienes alguna pregunta sobre BeautifulSoup, o si tienes problemas,
 `envía un correo electrónico al grupo de discusión
 <https://groups.google.com/forum/?fromgroups#!forunm/beautifulsoup>`_.
@@ -53,12 +50,20 @@ sobre dicho documento.
 Cuando informes de algún error en esta documentación, por favor,
 indica la traducción que estás leyendo.
 
-===============
- Inicio rápido
-===============
+Documentación de la API
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Este documento está escrito como un manual de instrucciones, pero también
+puedes leer :doc:`la tradicional documentación de la API <api/modules>`
+generada a partir del código fuente de Beautiful Soup. Si quieres conocer 
+detalles acerca de la parte interna de Beautiful Soup, o una funcionalidad
+no incluida en este documento, prueba en la documentación de la API. 
+
+Inicio rápido
+=============
 
 Este es un documento HTML que usaré como ejemplo a lo largo de este
-documento. Es parte de una historia de `Alicia en el país de las maravillas`::
+documento. Es parte de una historia de *Alicia en el país de las maravillas*::
 
  html_doc = """<html><head><title>The Dormouse's story</title></head>
  <body>
@@ -172,9 +177,9 @@ Otra tarea habitual es extraer todo el texto de una página::
 
 ¿Esto se parece a lo que necesitas? Si es así, sigue leyendo.
 
-=========================
- Instalar Beautiful Soup
-=========================
+Instalar Beautiful Soup
+=======================
+
 Si usas una versión reciente de Debian o Ubuntu Linux, puedes instalar
 Beautiful Soup con el gestor de paquetes del sistema:
 
@@ -190,7 +195,7 @@ de Python (podrían llamarse ``pip3`` y ``easy_install3``, respectivamente):
 
 :kbd:`$ pip install beautifulsoup4`
 
-(El paquete :py:class:`BeautifulSoup` ``no`` es el que quieres. Ese es
+(El paquete :py:class:`BeautifulSoup` *no* es el que quieres. Ese es
 el lanzamiento anterior `Beautiful Soup 3`_. Muchos *software* utilizan
 BS3, así que aún está disponible, pero si estás escribiendo nuevo código,
 deberías instalar ``beautifulsoup4``).
@@ -214,7 +219,7 @@ funcionar con otras versiones recientes.
 
 
 Instalar un analizador
-======================
+----------------------
 
 Beautiful Soup soporta el analizador de HTML incluido en la librería
 estándar de Python, aunque también soporta varios analizadores de
@@ -268,12 +273,11 @@ Ten en cuenta que si un documento es inválido, analizadores diferentes
 generarán árboles de Beautiful Soup diferentes para él. Mira
 `Diferencias entre analizadores`_ para más detalle.
 
-==================
- Haciendo la sopa
-==================
+Haciendo la sopa
+================
 
 Para analizar un documento pásalo al constructor de :py:class:`BeautifulSoup`.
-Puedes pasar una cadena de caracteres o abrir un manejador de archivos::
+Puedes pasar una cadena de caracteres o abrir un gestor de archivos::
 
  from bs4 import BeautifulSoup
 
@@ -292,12 +296,11 @@ Entonces Beautiful Soup analiza el documento usando el mejor analizador
 disponible. Usará un analizador HTML a no ser que se especifique que se
 use un analizador XML (ver `Analizar XML`_).
 
-==================
- Tipos de objetos
-==================
+Tipos de objetos
+================
 
 Beautiful Soup transforma un complejo documento HTML en un complejo árbol de objetos
-de Python. Pero tan solo tendrás que lidiar con cuatro `tipos` de objetos: :py:class:`Tag`,
+de Python. Pero tan solo tendrás que lidiar con cuatro *tipos* de objetos: :py:class:`Tag`,
 :py:class:`NavigableString`, :py:class:`BeautifulSoup` y :py:class:`Comment`.
 
 .. py:class:: Tag
@@ -385,7 +388,7 @@ de Python. Pero tan solo tendrás que lidiar con cuatro `tipos` de objetos: :py:
    css_soup.p['class']
    # ['body', 'strikeout']
 
-  Si un atributo `parece` que tiene más de un valor, pero no es un atributo
+  Si un atributo *parece* que tiene más de un valor, pero no es un atributo
   multivaluado definido como tal por ninguna versión del estándar de HTML,
   Beautiful Soup no modificará el atributo::
 
@@ -473,7 +476,7 @@ No puedes editar dicha cadena, pero puedes reemplazar una cadena por otra, usand
 `Navegar por el árbol`_ y `Buscar en el árbol`_, pero no todas.
 En particular, como una cadena no puede contener nada (la manera en la que
 una etiqueta contiene una cadena de caracteres u otra etiqueta), *strings* no
-admiten los atributos `.contents`` o ``.string``, o el método ``find()``.
+admiten los atributos ``.contents`` o ``.string``, o el método ``find()``.
 
 Si quieres usar un :py:class:`NavigableString` fuera de Beautiful Soup,
 deberías llamar ``unicode()`` sobre él para convertirlo en una cadena de caracteres
@@ -481,7 +484,7 @@ de Python Unicode. Si no, tu cadena arrastrará una referencia a todo el árbol 
 de Beautiful Soup, incluso cuando hayas acabado de utilizar Beautiful Soup. Esto es un
 gran malgasto de memoria.
 
-.. py:class:: BeautifulSoup
+.. BeautifulSoup
 
 ---------------------------
 
@@ -511,7 +514,7 @@ comprobar su ``.name``, así que se le ha dado el ``.name`` especial
  # '[document]'
 
 Cadenas especiales
-==================
+------------------
 
 :py:class:`Tag`, :py:class:`NavigableString` y
 :py:class:`BeautifulSoup` cubren la mayoría de todo lo que verás en
@@ -542,14 +545,14 @@ se muestra con un formato especial::
  # </b>
 
 Para documentos HTML
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Beautiful Soup define algunas subclases de :py:class:`NavigableString`
 para contener cadenas de caracteres encontradas dentro de etiquetas
 HTML específicas. Esto hace más fácil tomar el cuerpo principal de la
 página, ignorando cadenas que probablemente representen directivas de
-programación encontradas dentro de la página. `(Estas clases son nuevas
-en Beautiful Soup 4.9.0, y el analizador html5lib no las usa)`.
+programación encontradas dentro de la página. *(Estas clases son nuevas
+en Beautiful Soup 4.9.0, y el analizador html5lib no las usa)*.
 
 .. py:class:: Stylesheet
 
@@ -565,12 +568,12 @@ JavaScript embebido; esto es, cualquier cadena en una etiqueta
 
 .. py:class:: Template
 
-Una subclase de :py:class:NavigableString` que representa plantillas
+Una subclase de :py:class:`NavigableString` que representa plantillas
 HTML embebidas; esto es, cualquier cadena en una etiqueta ``<template>``
 durante el análisis del documento.
 
 Para documentos XML
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Beautiful Soup define algunas clases :py:class:`NavigableString`
 para contener tipos especiales de cadenas de caracteres que pueden
@@ -600,10 +603,8 @@ Una subclase de :py:class:`NavigableString` que representa una
 Una subclase de :py:class:`NavigableString` que representa el contenido de
 una `instrucción de procesamiento XML <https://www.w3.org/TR/REC-xml/#sec-pi>`_.
 
-
-======================
- Navegar por el árbol
-======================
+Navegar por el árbol
+====================
 
 Aquí está el documento HTML de las "Tres hermanas" de nuevo::
 
@@ -628,17 +629,17 @@ Usaré este como ejemplo para enseñarte cómo mover una parte de un
 documento a otra.
 
 Bajar
-=====
+-----
 
 Las etiquetas pueden contener cadenas u otras etiquetas. Estos elementos
-son los hijos (`children`) de la etiqueta. Beautiful Soup ofrece muchos
+son los hijos (*children*) de la etiqueta. Beautiful Soup ofrece muchos
 atributos para navegar e iterar por los hijos de una etiqueta.
 
 Debe notarse que las cadenas de Beautiful Soup no soportan ninguno
 de estos atributos, porque una cadena no puede tener hijos.
 
 Navegar usando nombres de etiquetas
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 La manera más simple de navegar por el árbol analizado es indicar
 el nombre de la etiqueta que quieres. Si quieres la etiqueta <head>,
@@ -657,16 +658,16 @@ de la etiqueta <body>::
  soup.body.b
  # <b>The Dormouse's story</b>
 
-Usar el nombre de la etiqueta como atributo te dará solo la `primera`
+Usar el nombre de la etiqueta como atributo te dará solo la *primera*
 etiqueta con ese nombre::
 
  soup.a
  # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
 
-Si necesitas obtener `todas` las etiquetas <a>, o cualquier
+Si necesitas obtener *todas* las etiquetas <a>, o cualquier
 cosa más complicada que la primera etiqueta con cierto nombre, tendrás
 que usar uno de los métodos descritos en `Buscar en el árbol`_, como
-`find_all()`::
+``find_all()``::
 
  soup.find_all('a')
  # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
@@ -674,7 +675,7 @@ que usar uno de los métodos descritos en `Buscar en el árbol`_, como
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
 ``.contents`` y ``.children``
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Los hijos de una etiqueta están disponibles en una lista llamada
 ``.contents``::
@@ -720,11 +721,11 @@ ser sutiles y difíciles de detectar.
 
  
 ``.descendants``
-----------------
+^^^^^^^^^^^^^^^^
 
 Los atributos ``.contents`` y ``.children`` tan solo consideran los
-hijos `directos` de una etiqueta. Por ejemplo, la etiqueta <head>
-tiene un único hijo directo--la etiqueta <title>::
+hijos *directos* de una etiqueta. Por ejemplo, la etiqueta <head>
+tiene un único hijo directo—la etiqueta <title>::
 
  head_tag.contents
  # [<title>The Dormouse's story</title>]
@@ -732,7 +733,7 @@ tiene un único hijo directo--la etiqueta <title>::
 Pero la etiqueta <title> tiene un hijo: la cadena "The Dormouse's
 story". Puede dar la sensación de que esa cadena es también hija de
 la etiqueta <head>. El atributo ``.descendants`` te permite iterar
-sobre `todos` los hijos de una etiqueta recursivamente: sus hijos,
+sobre *todos* los hijos de una etiqueta recursivamente: sus hijos,
 hijos de sus hijos directos, y así sucesivamente::
 
  for child in head_tag.descendants:
@@ -753,7 +754,7 @@ tiene otros muchos descendientes::
 .. _.string:
 
 ``.string``
------------
+^^^^^^^^^^^
 
 Si una etiqueta tiene solo un hijo, y dicho hijo es un :py:class:`NavigableString`,
 el hijo se obtiene mediante ``.string``::
@@ -761,7 +762,7 @@ el hijo se obtiene mediante ``.string``::
  title_tag.string
  # 'The Dormouse's story'
 
-Si el único hijo de una etiqueta es otra etiqueta, y `esa`
+Si el único hijo de una etiqueta es otra etiqueta, y *esa*
 etiqueta tiene un ``.string``, entonces se considera que
 la etiqueta madre tiene el mismo ``.string`` que su hijo::
 
@@ -781,7 +782,7 @@ pasa a valer ``None``::
 .. _string-generators:
 
 ``.strings`` y ``stripped_strings``
------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Si hay más de una cosa dentro de una etiqueta, puedes seguir
 obteniendo las cadenas. Usa el generador ``.string``::
@@ -826,15 +827,15 @@ se ignoran, y espacios en blanco al principio y final de las cadenas
 se eliminan.
 
 Subir
-=====
+-----
 
 Continuando con la analogía del árbol genealógico, toda etiqueta
-tiene una `madre`: la etiqueta que la contiene.
+tiene una *madre*: la etiqueta que la contiene.
 
 .. _.parent:
 
 ``.parent``
------------
+^^^^^^^^^^^
 
 Puedes acceder a la madre de una etiqueta con el atributo ``.parent``. En
 el ejemplo de "Las tres hermanas", la etiqueta <head> es la madre
@@ -867,7 +868,7 @@ Y el ``.parent`` de un objeto :py:class:`BeautifulSoup` se define como ``None``:
 .. _.parents:
 
 ``.parents``
-------------
+^^^^^^^^^^^^
 
 Puedes iterar sobre todas las madres de los elementos con
 ``.parents``. Este ejemplo usa ``.parent`` para moverse' de una
@@ -883,8 +884,23 @@ etiqueta <a> en medio del documento a lo más alto del documento::
  # html
  # [document]
 
+``.self_and_parents``
+^^^^^^^^^^^^^^^^^^^^^
+
+El generador ``.self_and_parents`` es una variante de ``.parents`` que
+te ofrece toda la ascendencia de un elemento, incluyendo el mismo elemento::
+
+  for parent in link.parents:
+     print(parent.name)
+ # link
+ # p
+ # body
+ # html
+ # [document]
+
+
 Hacia los lados
-===============
+---------------
 
 Considera un documento sencillo como este::
 
@@ -900,12 +916,12 @@ Considera un documento sencillo como este::
  #   </a>
 
 Las etiquetas <b> y <c> están al mismo nivel: son hijas directas de la misma
-etiqueta. Las llamamos `hermanas`. Cuando un documento está bien formateado,
+etiqueta. Las llamamos *hermanas*. Cuando un documento está bien formateado,
 las hermanas están al mismo nivel de sangría. Puedes usar también esta
 relación en el código que escribas.
 
 ``.next_sibling`` y ``.previous_sibling``
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Puedes usar ``.next_sibling`` y ``.previous_sibling`` para navegar
 entre elementos de la página que están al mismo nivel del árbol
@@ -918,7 +934,7 @@ analizado::
  # <b>text1</b>
 
 La etiqueta <b> tiene un ``.next_sibling``, pero no ``.previous_sibling``,
-porque no hay nada antes de la etiqueta <b> `al mismo nivel del árbol`.
+porque no hay nada antes de la etiqueta <b> *al mismo nivel del árbol*.
 Por la misma razón, la etiqueta <c> tiene un ``.previous_sibling`` pero no
 un ``.next_sibling``::
 
@@ -927,7 +943,7 @@ un ``.next_sibling``::
  print(sibling_soup.c.next_sibling)
  # None
 
-Las cadenas "text1" y "text2" `no` son hermanas, porque no tienen la misma
+Las cadenas "text1" y "text2" *no* son hermanas, porque no tienen la misma
 madre::
 
  sibling_soup.b.string
@@ -964,7 +980,7 @@ La segunda etiqueta <a> es realmente la ``.next_sibling`` de la coma::
 .. _sibling-generators:
 
 ``.next_siblings`` y ``.previous_siblings``
--------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Puedes iterar sobre las hermanas de una etiqueta con ``.next_siblings`` o
 ``.previuos_siblings``::
@@ -986,7 +1002,7 @@ Puedes iterar sobre las hermanas de una etiqueta con ``.next_siblings`` o
  # 'Once upon a time there were three little sisters; and their names were\n'
 
 Hacia delante y hacia atrás
-===========================
+---------------------------
 
 Échale un vistazo al comienzo del documento de "Las tres hermanas"::
 
@@ -1003,7 +1019,7 @@ el análisis inicial del documento.
 .. _element-generators:
 
 ``.next_element`` y ``.previous_element``
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 El atributo ``.next_element`` de una cadena o etiqueta apunta a cualquiera
 que fue analizado inmediatamente después. Podría ser igual que ``.next_sibling``,
@@ -1021,7 +1037,7 @@ interrumpida por el comienzo de la etiqueta <a>.::
  # ';\nand they lived at the bottom of a well.'
 
 Pero el ``.next_element`` de esa etiqueta <a>, lo que fue analizado
-inmediatamente después de la etiqueta <a>, `no` es el resto de la
+inmediatamente después de la etiqueta <a>, *no* es el resto de la
 oración: es la palabra "Tillie"::
 
  last_a_tag.next_element
@@ -1044,7 +1060,7 @@ fue analizado inmediatamente antes que este::
  # <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>
 
 ``.next_elements`` y ``.previous_elements``
--------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Ya te estarás haciendo a la idea. Puedes usar estos iteradores
 para moverte hacia delante y hacia atrás en el documento tal y como
@@ -1059,9 +1075,8 @@ fue analizado::
  # '...'
  # '\n'
 
-======================
- Buscar en el árbol
-======================
+Buscar en el árbol
+==================
 
 Beautiful Soup define una gran cantidad de métodos para buscar en
 el árbol analizado, pero todos son muy similares. Dedicaré mucho
@@ -1092,7 +1107,7 @@ Empleando en un filtro un argumento como ``find_all()``, puedes
 "acercar" aquellas partes del documento en las que estés interesado.
 
 Tipos de filtros
-================
+----------------
 
 Antes de entrar en detalle sobre ``find_all()`` y métodos similares,
 me gustaría mostrar ejemplos de diferentes filtros que puedes
@@ -1104,7 +1119,7 @@ combinación de estos.
 .. _a string:
 
 Una cadena
-----------
+^^^^^^^^^^
 
 El filtro más simple es una cadena. Pasa una cadena a un método de
 búsqueda y Beautiful Soup buscará un resultado para esa cadena
@@ -1121,7 +1136,7 @@ Unicode.
 .. _a regular expression:
 
 Una expresión regular
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Si pasas un objeto que sea una expresión regular, Beautiful Soup filtrará
 mediante dicho expresión regular usando si su método ``search()``. Este
@@ -1142,28 +1157,13 @@ la letra 't'::
  # html
  # title
 
-.. _a list:
-
-Una lista
----------
-
-Si pasas una lista, Beautiful Soup hará una búsqueda por cadenas
-con `cualquier` elemento en dicha lista. Este código encuentra
-todas las etiquetas <a> `y` todas las etiquetas <b>::
-
- soup.find_all(["a", "b"])
- # [<b>The Dormouse's story</b>,
- #  <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
- #  <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
- #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
-
 .. _the value True:
 
 ``True``
---------
+^^^^^^^^
 
 El valor ``True`` empareja todo lo que pueda. Este código encuentra
-``todas`` las etiquetas del documento, pero ninguna de las cadenas
+*todas* las etiquetas del documento, pero ninguna de las cadenas
 de texto::
 
  for tag in soup.find_all(True):
@@ -1183,7 +1183,7 @@ de texto::
 .. a function:
 
 Una función
------------
+^^^^^^^^^^^
 
 Si ninguna de las formas de búsqueda anteriores te sirven, define
 una función que tome un elemento como su único argumento. La función
@@ -1241,17 +1241,32 @@ objetos *string*::
  # a
  # p
 
+ .. _a list:
+
+Una lista
+^^^^^^^^^
+
+Si pasas una lista, Beautiful Soup hará una búsqueda por cadenas
+con *cualquier* elemento en dicha lista. Este código encuentra
+todas las etiquetas <a> *y* todas las etiquetas <b>::
+
+ soup.find_all(["a", "b"])
+ # [<b>The Dormouse's story</b>,
+ #  <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>,
+ #  <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
+ #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
+
 Ahora ya estamos listos para entrar en detalle en los métodos
 de búsqueda.
 
 ``find_all()``
-==============
+--------------
 
 Firma del método: find_all(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`recursive
 <recursive>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
 El método ``find_all()`` busca por los descendientes de una etiqueta y
-obtiene `todos` aquellos que casan con tus filtros. He mostrado varios
+obtiene *todos* aquellos que casan con tus filtros. He mostrado varios
 ejemplos en `Tipos de filtros`_, pero aquí hay unos cuantos más::
 
  soup.find_all("title")
@@ -1280,7 +1295,7 @@ CSS "title"? Echemos un vistazo a los argumentos de ``find_all()``.
 .. _name:
 
 El argumento ``name``
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Pasa un valor para ``name`` y notarás que Beautiful Soup solo
 considera etiquetas con ciertos nombres. Las cadenas de texto se
@@ -1298,7 +1313,7 @@ o el valor `True`_.
 .. _kwargs:
 
 El argumento palabras-clave
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Cualquier argumento que no se reconozca se tomará como un filtro para alguno
 de los atributos de una etiqueta. Si pasas un valor para un argumento llamado
@@ -1358,7 +1373,7 @@ darle valor a 'name' en el argumento ``attrs``::
 .. _attrs:
 
 Buscando por clase CSS
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 Es muy útil para buscar una etiqueta que tenga una clase CSS específica,
 pero el nombre del atributo CSS, "class", es una palabra reservada de
@@ -1389,7 +1404,7 @@ de caracteres a ``class_``, una expresión regular, una función, o
 :ref:`Recuerda <multivalue>` que una sola etiqueta puede tener varios
 valores para su atributo "class". Cuando se busca por una etiqueta
 que case una cierta clase CSS, se está intentando emparejar por
-`cualquiera` de sus clases CSS::
+*cualquiera* de sus clases CSS::
 
  css_soup = BeautifulSoup('<p class="body strikeout"></p>', 'html.parser')
  css_soup.find_all("p", class_="strikeout")
@@ -1426,10 +1441,16 @@ quieras buscar::
  #  <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>,
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
+Para buscar etiquetas que coincidan con dos o más clases CSS a la vez, usa el
+método de selección CSS :py:meth:`Tag.select` :ref:`descrito aquí <css-selectors>`::
+
+ css_soup.select("p.strikeout.body")
+ # [<p class="body strikeout"></p>]
+
 .. _string:
 
 El argumento ``string``
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Con ``string`` puedes buscar por cadenas de caracteres en vez de
 etiquetas. Como con ``name`` y argumentos palabras-clave, puedes
@@ -1472,11 +1493,11 @@ anteriores se llamaba ``text``::
 .. _limit:
 
 El argumento``limit``
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 ``find_all()`` devuelve todas las etiquetas y cadenas que emparejan
 con tus filtros. Esto puede tardar un poco si el documento es grande.
-Si no necesitas `todos` los resultados, puedes pasar un número para
+Si no necesitas *todos* los resultados, puedes pasar un número para
 ``limit``. Esto funciona tal y como lo hace la palabra LIMIT en SQL.
 Indica a Beautiful Soup dejar de obtener resultados después de
 haber encontrado un cierto número.
@@ -1491,7 +1512,7 @@ código tan solo obtiene los dos primeros::
 .. _recursive:
 
 El argumento ``recursive``
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Si llamas a ``mytag.find_all()``, Beautiful Soup examinará todos los
 descendientes de ``mytag``: sus hijos, los hijos de sus hijos, y
@@ -1516,7 +1537,7 @@ Aquí está esa parte del documento::
  ...
 
 La etiqueta <title> va después de la etiqueta <html>, pero no está
-`directamente` debajo de la etiqueta <html>: la etiqueta <head>
+*directamente* debajo de la etiqueta <html>: la etiqueta <head>
 está en medio de ambas. Beautiful Soup encuentra la etiqueta <title> cuando
 se permite observar todos los descendientes de la etiqueta <html>,
 pero cuando ``recursive=False`` restringe a los hijos directos
@@ -1531,7 +1552,7 @@ Pasar ``recursive=False`` en un método como ``find_parents()`` no sería
 muy útil.
 
 Llamar a una etiqueta es como llamar a ``find_all()``
-=====================================================
+-----------------------------------------------------
 
 Como ``find_all()`` es el método más popular en la API de búsqueda
 de Beautiful Soup, puedes usar un atajo para usarlo. Si utilizas
@@ -1549,7 +1570,7 @@ Estas dos líneas de código son también equivalentes::
  soup.title(string=True)
 
 ``find()``
-==========
+----------
 
 Firma del método: find(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`recursive
 <recursive>`, :ref:`string <string>`, :ref:`**kwargs <kwargs>`)
@@ -1560,7 +1581,7 @@ Si sabes que un documento solo tiene una etiqueta <body>, es una
 pérdida de tiempo examinar todo el documento buscando más
 emparejamientos. En lugar de pasar ``limit=1`` siempre que se llame
 a ``find_all(), puedes usar el método ``find()``. Estas dos líneas
-de código son `casi` equivalentes::
+de código son *casi* equivalentes::
 
  soup.find_all('title', limit=1)
  # [<title>The Dormouse's story</title>]
@@ -1588,7 +1609,7 @@ de etiquetas`_? Ese truco funciona porque se llama repetidamente a
  # <title>The Dormouse's story</title>
 
 ``find_parents()`` y ``find_parent()``
-======================================
+--------------------------------------
 
 Firma del método: find_parents(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
@@ -1604,7 +1625,7 @@ iguales a ``find()``. La única diferencia reside en qué partes del
 Primero consideremos ``find_parents()`` y ``find_paren()``. Recuerda
 que ``find_all()`` y ``find()`` trabajan bajando por el árbol,
 examinando a los descendientes de una etiqueta. Estos métodos realizan
-lo contrario: trabajan `subiendo` por el árbol, buscando a las madres
+lo contrario: trabajan *subiendo* por el árbol, buscando a las madres
 de las etiquetas (o cadenas). Probémoslos, empezando por una cadena
 de caracteres que esté bien enterrada en el documento de "Las tres
 hermanas"::
@@ -1630,7 +1651,7 @@ Una de la tres etiquetas <a> is la madre directa de la cadena
 en cuestión, así que nuestra búsqueda la encuentra. Una de las
 tres etiquetas <p> es una madre indirecta de la cadena, y nuestra
 búsqueda también la encuentra. Hay una etiqueta <p> con la clase
-CSS "title" `en algún sitio` del documento, pero no en ninguno
+CSS "title" *en algún sitio* del documento, pero no en ninguno
 de las madres de la cadena, así que no podemos encontrarla con
 ``find_parents()``.
 
@@ -1642,7 +1663,7 @@ sobre todas las madres, y comprobar cada una con el filtro
 provisto para ver si emparejan.
 
 ``find_next_siblings()`` y ``find_next_sibling()``
-==================================================
+--------------------------------------------------
 
 Firma del método: find_next_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
@@ -1667,7 +1688,7 @@ el primero de ellos::
  # <p class="story">...</p>
 
 ``find_previous_siblings()`` y ``find_previous_sibling()``
-==========================================================
+----------------------------------------------------------
 
 Firma del método: find_previous_siblings(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
@@ -1690,9 +1711,8 @@ los hermanos de un elemento que les precede en el árbol. El método
  first_story_paragraph.find_previous_sibling("p")
  # <p class="title"><b>The Dormouse's story</b></p>
 
-
 ``find_all_next()`` y ``find_next()``
-=====================================
+-------------------------------------
 
 Firma del método: find_all_next(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
@@ -1723,7 +1743,7 @@ elemento cumple con el filtro, y que aparezca en el documento
 después del elemento inicial.
 
 ``find_all_previous()`` y ``find_previous()``
-=============================================
+---------------------------------------------
 
 Firma del método: find_all_previous(:ref:`name <name>`, :ref:`attrs <attrs>`, :ref:`string <string>`, :ref:`limit <limit>`, :ref:`**kwargs <kwargs>`)
 
@@ -1754,8 +1774,12 @@ que aparecen en el documento después de la etiqueta con la que se
 comienza. Una etiqueta <p> que contiene una <a> debe aparecer
 antes de la etiqueta <a> que contiene.
 
+.. _css-selectors:
+
 Selectores CSS mediante la propiedad ``.css``
-=============================================
+---------------------------------------------
+
+.. _select:
 
 Los objetos :py:class:`BeautifulSoup` y :py:class:`Tag` soportan los selectores
 CSS a través de su atributo ``.css``. El paquete `Soup Sieve <https://facelessuser.github.io/soupsieve/>`_,
@@ -1783,7 +1807,7 @@ Encontrar etiquetas dentro de otras etiquetas::
  soup.css.select("html head title")
  # [<title>The Dormouse's story</title>]
 
-Encontrar etiquetas `directamente` después de otras etiquetas::
+Encontrar etiquetas *directamente* después de otras etiquetas::
 
  soup.css.select("head > title")
  # [<title>The Dormouse's story</title>]
@@ -1881,11 +1905,11 @@ El soporte de selectores CSS es conveniente para personas que ya conocen
 la sintaxis de los selectores CSS. Puedes hacer todo esto con la API
 de Beautiful Soup. Si todo lo que necesitas son los selectores CSS, deberías
 saltarte Beautiful Soup y analizar el documento con ``lxml``: es mucho más
-rápido. Pero Soup Sieve te permite `combinar` selectores CSS con la API
+rápido. Pero Soup Sieve te permite *combinar* selectores CSS con la API
 de Beautiful Soup. 
 
 Características avanzadas de Soup Sieve
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Soup Sieve ofrece una API más amplia más allá de los métodos ``select()``
 y ``select_one()``, y puedes acceder a casi toda esa API a través del
@@ -1934,7 +1958,8 @@ forma serían inválidos::
  # '\\31 -strange-identifier'
 
 Espacios de nombres en selectores CSS
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Si has analizado XML que define espacios de nombres, puedes usarlos
 en selectores CSS::
 
@@ -1960,7 +1985,7 @@ puedes indicar tu propio diccionario de abreviaciones::
  # [<ns1:child>I'm in namespace 2</ns1:child>]
 
 Historia del soporte de selectores CSS
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 La propiedad ``.css`` fue añadida en Beautiful Soup 4.12.0. Anterior a esta,
 solo los métodos convenientes ``.select()`` y ``select_one()`` se
@@ -1970,17 +1995,15 @@ La integración de Soup Sieve fue añadida en Beautiful Soup 4.7.0. Versiones
 anteriores tenían el método ``.select()``, pero solo los selectores CSS
 más comunes eran admitidos.
  
-
-====================
- Modificar el árbol
-====================
+Modificar el árbol
+==================
 
 La mayor fortaleza de Beautiful Soup reside en buscar en el árbol
 analizado, pero puedes también modificar el árbol y escribir tus
 cambios como un nuevo documento HTML o XML.
 
 Cambiar nombres de etiquetas y atributos
-========================================
+----------------------------------------
 
 Cubrí esto anteriormente, en :py:class:`Tag.attrs`, pero vale la pena
 repetirlo. Puedes renombrar una etiqueta, cambiar el valor de sus
@@ -2001,7 +2024,7 @@ atributos, añadir nuevos atributos, y eliminar atributos::
  # <blockquote>Extremely bold</blockquote>
 
 Modificar ``.string``
-=====================
+---------------------
 
 Si quieres establecer el ``.string`` de una etiqueta a una nueva cadena de
 caracteres, los contenidos de la etiqueta se pueden reemplazar con esa cadena::
@@ -2018,21 +2041,25 @@ Ten cuidado: si una etiqueta contiene otras, ellas y todo su contenido
 serán destruidos.  
 
 ``append()``
-============
+------------
 
 Puedes añadir al contenido de una etiqueta con ``Tag.append()``.
 Funciona como llamar a ``.append()`` en una lista de Python::
 
  soup = BeautifulSoup("<a>Foo</a>", 'html.parser')
- soup.a.append("Bar")
+ new_string = soup.a.append("Bar")
 
  soup
  # <a>FooBar</a>
  soup.a.contents
  # ['Foo', 'Bar']
+ new_string
+ # 'Bar'
+
+``Tag.append()`` devuelve el elemento recién añadido.
 
 ``extend()``
-============
+------------
 
 Desde Beautiful Soup 4.7.0, :py:class:`Tag` también soporta un método
 llamado ``.extend()``, el cual añade todos los elementos de una lista
@@ -2045,11 +2072,13 @@ a una :py:class:`Tag`, en orden::
  # <a>Soup's on</a>
  soup.a.contents
  # ['Soup', ''s', ' ', 'on']
+
+``Tag.extend()`` devuelve la lista de elementos recién añadidos.
    
 ``NavigableString()`` y ``.new_tag()``
-======================================
+--------------------------------------
 
-Si necesitas añadir una cadena a un documento, sin problema--puedes
+Si necesitas añadir una cadena a un documento, sin problema—puedes
 pasar una cadena de Python a ``append()``, o puedes llamar al constructor
 de :py:class:`NavigableString`::
 
@@ -2075,10 +2104,10 @@ de :py:class:`NavigableString`, solo llama al constructor::
  tag.contents
  # ['Hello', ' there', 'Nice to see you.']
 
-`(Esto es una nueva característica en Beautiful Soup 4.4.0.)`
+*(Esto es una nueva característica en Beautiful Soup 4.4.0.)*
 
 ¿Qué ocurre si necesitas crear una etiqueta totalmente nueva? La mejor
-solución es llamar al método de construcción (`factory method`)
+solución es llamar al método de construcción (``factory method``)
 ``BeautifulSoup.new_tag()``::
 
  soup = BeautifulSoup("<b></b>", 'html.parser')
@@ -2096,26 +2125,43 @@ solución es llamar al método de construcción (`factory method`)
 Solo el primer argumento, el nombre de la etiqueta, es
 obligatorio.
 
+*(El argumento ``string`` en ``new_tag`` fue introducido en Beautiful Soup 4.13.0.)*
+
+Debido a que los métodos de inserción devuelven los elementos recién insertados,
+puedes crear, insertar, y obtener un elemento en un paso::
+
+ soup = BeautifulSoup("<html></html>", 'html.parser')
+ html = soup.html
+
+ title = html.append(soup.new_tag("title"))
+
 ``insert()``
-============
+------------
 
 ``Tag.insert()`` es justo como ``Tag.append()``, excepto que el nuevo
 elemento no necesariamente va al final del ``.contents`` de su madre.
-Se insertará en la posición numérica que le hayas indicado. Funciona
-como ``.insert()`` es una lista de Python::
+Se insertará en la posición numérica que le hayas indicado, similar
+a ``.insert()`` en una lista de Python::
 
  markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
  soup = BeautifulSoup(markup, 'html.parser')
  tag = soup.a
 
- tag.insert(1, "but did not endorse ")
+ new_string = tag.insert(1, "but did not endorse ")
  tag
  # <a href="http://example.com/">I linked to but did not endorse <i>example.com</i></a>
  tag.contents
  # ['I linked to ', 'but did not endorse', <i>example.com</i>]
+ new_string
+ # 'but did not endorse '
+
+Puedes pasar más de un elemento a ``Tag.insert()``. Todos los elementos
+se insertarán, comenzando en la posición numérica que hayas pasado. 
+
+``Tag.insert()`` devuelve la lista de elementos recién insertados.
 
 ``insert_before()`` y ``insert_after()``
-========================================
+----------------------------------------
 
 El método ``insert_before()`` inserta etiquetas o cadenas
 inmediatamente antes de algo en el árbol analizado::
@@ -2138,8 +2184,10 @@ inmediatamente después de algo en el árbol analizado::
  soup.b.contents
  # [<i>Don't</i>, ' you', <div>ever</div>, 'leave']
 
+Ambos métodos devuelven la lista de los nuevos elementos insertados.
+
 ``clear()``
-===========
+-----------
 
 ``Tag.clear()`` quita los contenidos de una etiqueta::
 
@@ -2152,7 +2200,7 @@ inmediatamente después de algo en el árbol analizado::
  # <a href="http://example.com/"></a>
 
 ``extract()``
-=============
+-------------
 
 ``PageElement.extract()`` elimina una etiqueta o una cadena de caracteres
 del árbol. Devuelve la etiqueta o la cadena que fue extraída::
@@ -2188,10 +2236,10 @@ en el hijo del elemento que extrajiste::
 
 
 ``decompose()``
-===============
+---------------
 
-``Tag.decompose()`` quita una etiqueta del árbol, y luego `lo destruye
-completamente y su contenido también`::
+``Tag.decompose()`` quita una etiqueta del árbol, y luego *lo destruye
+completamente y su contenido también*::
 
  markup = '<a href="http://example.com/">I linked to <i>example.com</i></a>'
  soup = BeautifulSoup(markup, 'html.parser')
@@ -2205,7 +2253,7 @@ completamente y su contenido también`::
 El comportamiento de una :py:class:`Tag` o :py:class:`NavigableString` descompuesta
 no está definido y no deberías usarlo para nada. Si no estás seguro si algo
 ha sido descompuesto, puedes comprobar su propiedad ``.decomposed``
-`(nuevo en Beautiful Soup 4.9.0)`::
+*(nuevo en Beautiful Soup 4.9.0)*::
 
  i_tag.decomposed
  # True
@@ -2213,11 +2261,10 @@ ha sido descompuesto, puedes comprobar su propiedad ``.decomposed``
  a_tag.decomposed
  # False
 
-
 .. _replace_with():
 
 ``replace_with()``
-==================
+------------------
 
 ``PageElement.replace_with()`` elimina una etiqueta o cadena del árbol,
 y lo reemplaza con una o más etiquetas de tu elección::
@@ -2246,12 +2293,11 @@ y lo reemplaza con una o más etiquetas de tu elección::
 ``replace_with()`` devuelve la etiqueta o cadena que se reemplazó,
 así que puedes examinarla o añadirla de nuevo a otra parte del árbol.
 
-`La capacidad de pasar múltiples argumentos a replace_with() es nueva
-en Beautiful Soup 4.10.0.`
-
+*La capacidad de pasar múltiples argumentos a replace_with() es nueva
+en Beautiful Soup 4.10.0.*
 
 ``wrap()``
-==========
+----------
 
 ``PageElement.wrap()`` envuelve un elemento en la etiqueta que especificas.
 Devuelve la nueva envoltura::
@@ -2263,10 +2309,10 @@ Devuelve la nueva envoltura::
  soup.p.wrap(soup.new_tag("div"))
  # <div><p><b>I wish I was bold.</b></p></div>
 
-`Este método es nuevo en Beautiful Soup 4.0.5.`
+*Este método es nuevo en Beautiful Soup 4.0.5.*
 
 ``unwrap()``
-============
+------------
 
 ``Tag.unwrap()`` es el opuesto de ``wrap()``. Reemplaza una
 etiqueta con lo que haya dentro de lo que haya en esa etiqueta.
@@ -2284,7 +2330,7 @@ Como ``replace_with()``, ``unwrap()`` devuelve la etiqueta que fue
 reemplazada.
 
 ``smooth()``
-============
+------------
 
 Tras llamar a un puñado de métodos que modifican el árbol analizado, puedes
 acabar con dos o más objetos :py:class:`NavigableString` uno al lado del otro.
@@ -2320,16 +2366,15 @@ cadenas adyacentes::
  #  A one, a two
  # </p>
 
-`Este método es nuevo en Beautiful Soup 4.8.0.`
+*Este método es nuevo en Beautiful Soup 4.8.0.*
 
-========
- Salida
-========
+Salida
+======
 
 .. _.prettyprinting:
 
 *Pretty-printing*
-=================
+-----------------
 
 El método ``prettify()`` convertirá un árbol analizado de Beautiful Soup
 en una cadena de caracteres Unicode bien formateado, con una línea
@@ -2371,7 +2416,7 @@ usado para reformatearlo. El objetivo de ``prettify()`` es ayudarte
 a entender visualmente la estructura del documento en el que trabajas.
   
 *Non-pretty printing*
-=====================
+---------------------
 
 Si tan solo quieres una cadena, sin ningún formateo adornado,
 puedes llamar a ``str()`` en un objeto :py:class:`BeautifulSoup`, o
@@ -2392,7 +2437,7 @@ Puedes también llamar a ``encode()`` para obtener un bytestring, y
 .. _output_formatters:
 
 Formatos de salida
-==================
+------------------
 
 Si le das a Beautiful Soup un documento que contenga entidades HTML
 como "&lquot;", serán convertidas a caracteres Unicode::
@@ -2482,8 +2527,8 @@ ejemplos::
  print(link_soup.a.encode(formatter=None))
  # b'<a href="http://example.com/?foo=val1&bar=val2">A link</a>'
 
-*Objetos Formatter*
--------------------
+Objetos *formatter*
+^^^^^^^^^^^^^^^^^^^
 
 Si necesitas un control más sofisticado sobre tu salida, puedes
 instanciar uno de las clases *formatters* de Beautiful Soup y pasar
@@ -2526,7 +2571,7 @@ Este es el *formatter* que incrementa la sangría cuando se realiza
 Usado para personalizar las reglas de formateo para documentos XML.
 
 Escribir tu propio *formatter*
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Crear una subclase a partir de :py:class:`HTMLFormatter` p :py:class:`XMLFormatter`
 te dará incluso más control sobre la salida. Por ejemplo, Beautiful Soup
@@ -2552,8 +2597,8 @@ filtra el atributo llamado "m" cuando aparezca::
  # <p z="1" a="3"></p>
 
 Una última advertencia: si creas un objeto :py:class:`CData`, el texto
-dentro de ese objeto siempre se muestra `exactamente como aparece, sin
-ningún formato`. Beautiful Soup llamará a la función de sustitución de
+dentro de ese objeto siempre se muestra *exactamente como aparece, sin
+ningún formato*. Beautiful Soup llamará a la función de sustitución de
 entidad, por si hubieses escrito una función a medida que cuenta
 todas las cadenas en el documento o algo así, pero ignorará el
 valor de retorno::
@@ -2568,7 +2613,7 @@ valor de retorno::
 
 
 ``get_text()``
-==============
+--------------
 
 Si solo necesitas el texto legible dentro de un documento o etiqueta, puedes
 usar el método ``get_text()``. Devuelve todo el texto dentro del documento o
@@ -2601,19 +2646,23 @@ por tu cuenta::
  [text for text in soup.stripped_strings]
  # ['I linked to', 'example.com']
 
-*A partir de Beautiful Soup version 4.9.0, cuando lxml o html.parser
+*A partir de Beautiful Soup versión 4.9.0, cuando lxml o html.parser
 se usan, el contenido de las etiquetas <script>, <style>, y <template>
 no se consideran texto, ya que esas etiquetas no son parte de la parte
 legible del contenido de la página.*
 
-*A partir de de Beautiful Soup version 4.10.0, puedes llamar a get_text(),
+*A partir de Beautiful Soup versión 4.10.0, puedes llamar a get_text(),
 .strings, o .stripped_strings en un objeto NavigableString. Devolverá
 el propio objeto, o nada, así que la única razón para hacerlo es cuando
 estás iterando sobre una lista mixta.*
- 
-==================================
- Especificar el analizador a usar
-==================================
+
+*A partir de Beautiful Soup 4.13, puedes llamar a .string en un objeto
+NavigableString. Se devolverá a sí mismo, así que, de nuevo, la única
+razón para hacer esto es cuando estás iterando sobre una lista 
+heterogénea.*
+
+Especificar el analizador a usar
+================================
 
 Si lo único que necesitas es analizar algún HTML, puedes ponerlo en
 el constructor de :py:class:`BeautifulSoup`, y probablemente irá bien.
@@ -2623,7 +2672,7 @@ para cambiar el analizador que se usa.
 
 El primer argumento del constructor de :py:class:`BeautifulSoup` es una cadena
 o un gestor de archivos abierto--el marcado que quieres analizar. El segundo
-argumento es `cómo` quieres que el marcado analizado.
+argumento es *cómo* quieres que el marcado analizado.
 
 Si no especificas nada, obtendrás el mejor analizador HTML que tengas
 instalado. Beautiful Soup clasifica al analizador de lxml como el mejor,
@@ -2645,7 +2694,7 @@ analizador XML es lxml. Si no tienes lxml instalado, solicitar un
 analizador XML no te dará uno, y pedir por "lxml" tampoco funcionará.
 
 Diferencias entre analizadores
-==============================
+------------------------------
 
 Beautiful Soup presenta la misma interfaz que varios analizadores,
 pero cada uno es diferente. Analizadores diferentes crearán
@@ -2718,9 +2767,8 @@ en el constructor de :py:class:`BeautifulSoup`. Eso reducirá
 las probabilidad que tus usuarios analicen un documento diferentemente
 de la manera en la que tú lo analizas.
 
-================
- Codificaciones
-================
+Codificaciones
+==============
 
 Cualquier documento HTML o XML está escrito en una codificación
 específica como ASCII o UTF-8. Pero cuando cargas ese documento en
@@ -2734,13 +2782,21 @@ Beautiful Soup, descubrirás que se convierte en Unicode::
  # 'Sacr\xe9 bleu!'
 
 No es magia (seguro que eso sería genial). Beautiful Soup usa una
-sub-librería llamada `Unicode, Dammit`_ para detectar la codificación
+sublibrería llamada `Unicode, Dammit`_ para detectar la codificación
 de un documento y convertirlo a Unicode. La codificación auto detectada
 está disponible con el atributo ``.original_encoding`` del objeto
 :py:class:`Beautiful Soup`::
 
  soup.original_encoding
- 'utf-8'
+ # 'utf-8'
+
+Si ``.original_encoding`` es ``None``, significa que el documento ya
+se encontraba en formato Unicode cuando fue pasado a Beautiful Soup::
+
+  markup = "<h1>Sacré bleu!</h1>"
+  soup = BeautifulSoup(markup, 'html.parser')
+  print(soup.original_encoding)
+  # None
 
 Unicode, Dammit estima correctamente la mayor parte del tiempo, pero
 a veces se equivoca. A veces estima correctamente, pero solo después
@@ -2790,13 +2846,13 @@ Unicode especial "REPLACEMENT CHARACTER" (U+FFFD, �). Si Unicode, Dammit
 necesita hacer esto, establecerá el atributo ``.contains_replacement_characters``
 a ``True`` en el objeto ``UnicodeDammit`` o :py:class:`BeautifulSoup`. Esto
 te permite saber si la representación Unicode no es una representación
-exacta de la original--algún dato se ha perdido. Si un documento contiene �,
+exacta de la original—algún dato se ha perdido. Si un documento contiene �,
 pero ``contains_replacement_characteres`` es ``False``, sabrás que �
 estaba allí originalmente (como lo está en este párrafo) y no implica
 datos perdidos.
 
 Codificación de salida
-======================
+----------------------
 
 Cuando escribas completamente un documento desde Beautiful Soup,
 obtienes un documento UTF-8, incluso cuando el documento no está en UTF-8
@@ -2868,7 +2924,7 @@ así que se convierte en "&#9731" para esas codificaciones::
  # b'<b>&#9731;</b>'
 
 Unicode, Dammit
-===============
+---------------
 
 Puedes usar Unicode, Dammit sin usar Beautiful Soup. Es útil cuando
 tienes datos en una codificación desconocida y solo quieres convertirlo
@@ -2896,7 +2952,7 @@ pasárselas en una lista::
 Unicode, Dammit tiene dos características especiales que Beautiful Soup no usa.
 
 Comillas inteligentes
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Puedes usar Unicode, Dammit para convertir las comillas inteligentes de Microsoft
 a entidades HTML o XML::
@@ -2923,7 +2979,7 @@ de cosas::
  # '<p>I just “love” Microsoft Word’s smart quotes</p>'
 
 Codificaciones inconsistentes
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A veces un documento está mayoritariamente en UTF-8, pero contiene
 caracteres Windows-1252 como (de nuevo) comillas inteligentes de Microsoft.
@@ -2963,13 +3019,12 @@ en tus datos antes de pasarlo a :py:class:`BeautifulSoup` o el constructor
 de ``UnicodeDammit``. Beautiful Soup asume que un documento tiene una
 sola codificación, la que sea. Si quieres pasar un documento que contiene
 ambas UTF-8 y Windows-1252, es probable que piense que todo el documento
-es Windows-1252, y el documento se parecerá a ```â˜ƒâ˜ƒâ˜ƒ“I like snowmen!”``.
+es Windows-1252, y el documento se parecerá a ``â˜ƒâ˜ƒâ˜ƒ“I like snowmen!”``.
 
 ``UnicodeDammit.detwingle()`` es nuevo en Beautiful Soup 4.1.0.
 
-==================
- Números de línea
-==================
+Números de línea
+================
 
 Los analizadores de ``html.parser`` y ``html5lib`` pueden llevar la cuenta
 de los lugares en el documento original donde se han encontrado cada etiqueta.
@@ -3002,12 +3057,11 @@ en el constructor de :py:class:`BeautifulSoup`::
  print(soup.p.sourceline)
  # None
 
-`Esta característica es nueva en 4.8.1, y los analizadores basados en lxml no la
-soportan.`
+*Esta característica es nueva en 4.8.1, y los analizadores basados en lxml no la
+soportan.*
 
-===============================
- Comparar objetos por igualdad
-===============================
+Comparar objetos por igualdad
+=============================
 
 Beautiful Soup indica que dos objetos :py:class:`NavigableString` o :py:class:`Tag`
 son iguales cuando representan al mismo marcado HTML o XML. En este ejemplo,
@@ -3029,9 +3083,8 @@ objeto, usa `is`::
  print(first_b is second_b)
  # False
 
-==================================
- Copiar objetos de Beautiful Soup
-==================================
+Copiar objetos de Beautiful Soup
+================================
 
 Puedes usar ``copy.copy()`` para crear una copia de cualquier
 :py:class:`Tag` o :py:class:`NavigableString`::
@@ -3052,24 +3105,168 @@ marcado que el original, pero no son el mismo objeto::
 
 La única diferencia real es que la copia está completamente desconectada
 del objeto árbol de Beautiful Soup, como si ``extract()`` hubiese sido
-llamada sobre ella::
+llamada sobre ella. Esto se debe a que dos objetos :py:class:`Tag` no pueden
+ocupar el mismo espacio simultáneamente.
 
- print(p_copy.parent)
- # None
+ ::
 
-Esto es porque dos diferentes objetos :py:class:`Tag` no pueden ocupar
-el mismo espacio al mismo tiempo.
+  print(p_copy.parent)
+  # None
 
-=========================================
- Personalización avanzada del analizador
-=========================================
+Puedes usar :py:meth:`Tag.copy_self` para crear una copia de un 
+:py:class:`Tag` sin copiar sus contenidos.
+
+ ::
+  
+  original = BeautifulSoup('<a id="a_tag" class="link">the <i>link</i></a>', 'html.parser')
+  print(original.a)
+  # <a class="link" id="a_tag">the <i>link</a>
+  print(original.a.copy_self())
+  # <a class="link" id="a_tag"></a>
+
+*(Tag.copy_self() fue introducido en Beautiful Soup 4.13.0.)*
+
+
+Interfaz de búsqueda a bajo nivel
+=================================
+
+Casi todo el mundo que usa Beautiful Soup para extraer información de
+un documento puede conseguir lo que necesita usando los métodos
+descritos en `Buscar en el árbol`_. Sin embargo, hay una interfaz de
+búsqueda a bajo nivel que te permite definir cualquier comportamiento
+de coincidencia. Entre bastidores, las partes de Beautiful Soup que 
+la mayoría de personas usan-- ``find_all()`` y similares—están usando
+realmente este interfaz a bajo nivel, y tú puedes usarla directamente. 
+
+*(Acceso a la interfaz de búsqueda a bajo nivel es una nueva funcionalidad
+incluida en Beautiful Soup 4.13.0.)*
+
+Elemento de filtrado personalizado
+----------------------------------
+
+La clase :py:class:`ElementFilter` es tu punto de entrada a la interfaz 
+a bajo nivel. Para usarla, define una función que tome como argumento 
+un objeto :py:class:`PageElement` (que puede ser un :py:class:`Tag` o
+un :py:class:`NavigableString`). La función debe devolver ``True`` si el 
+elemento cumple tu propio criterio, y ``False`` si no lo hace.
+
+Esta función de ejemplo busca etiquetas y cadenas de caracteres con
+contenido, pero se salta cadenas con solo espacios en blanco::
+
+  from bs4 import Tag, NavigableString
+  def non_whitespace_element_func(tag_or_string):
+     """
+     return True for:
+     * all Tag objects
+     * NavigableString objects that contain non-whitespace text
+     """
+     return (
+         isinstance(tag_or_string, Tag) or
+         (isinstance(tag_or_string, NavigableString) and
+             tag_or_string.strip() != ""))
+
+Una vez que tienes la función, pásasela al constructor de :py:class:`ElementFilter`::
+
+  from bs4.filter import ElementFilter
+  non_whitespace_filter = ElementFilter(non_whitespace_element_func)
+
+Puedes usar así este objeto :py:class:`ElementFilter` como primer argumento de
+cualquiera de los métodos en `Buscar en el árbol`_. Cualquier criterio que 
+hayas definido en tu función será usado en lugar de la lógica de coincidencia
+por defecto de Beautiful Soup::
+
+ from bs4 import BeautifulSoup
+ small_doc = """
+ <p>
+  <b>bold</b>
+  <i>italic</i>
+  and
+  <u>underline</u>
+ </p>
+ """
+ soup = BeautifulSoup(small_doc, 'html.parser')
+
+ soup.find('p').find_all(non_whitespace_filter, recursive=False)
+ # [<b>bold</b>, <i>italic</i>, '\n  and\n  ', <u>underline</u>]
+
+ soup.find("b").find_next(non_whitespace_filter)
+ # 'bold'
+
+ soup.find("i").find_next_siblings(non_whitespace_filter)
+ # ['\n  and\n  ', <u>underline</u>]
+
+Todas las coincidencias potenciales pasarán por tu función, y los únicos objetos
+:py:class:`PageElement` devueltos serán aquellos para los que tu función ha 
+devuelto ``True``. 
+
+Para resumir el comportamiento de coincidencia basada en funciones,
+
+* Una función pasada como primer argumento a un método de búsqueda (o 
+  equivalentemente, usando el argumento ``name``) considera solo objetos
+  :py:class:`Tag`.
+* Una función pasada a un método de búsqueda usando el argumento ``string``
+  considera solo objetos :py:class:`NavigableString`.
+* Una función pasada a un método de búsqueda usando un objeto :py:class:`ElementFilter`
+  considera objetos tanto :py:class:`Tag` como :py:class:`NavigableString`.
+
+Iteración sobre elementos personalizada
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. py:method:: ElementFilter.filter()
+
+Al pasar una instancia de :py:class:`ElementFilter` a uno de los métodos
+de búsqueda en el árbol de Beautiful Soup, puedes personalizar completamente
+lo que Beautiful Soup entiende por coincidencia en un elemento mientras itera sobre
+el árbol analizado. Al usar el método :py:meth:`ElementFilter.filter` puedes 
+también personalizar completamente lo que Beautiful Soup entiende por iterar sobre
+el árbol analizado.
+
+El método :py:meth:`ElementFilter.filter` toma un generador que devuelve un flujo
+de objetos :py:class:`PageElement`. No hay restricción sobre los objetos 
+:py:class:`PageElement` que aparecen, ni las veces que aparecen, ni en qué orden.
+Teóricamente, no necesitan siquiera ser del mismo documento :py:class:`BeautifulSoup`.
+Puedes cualquier cosa que tenga sentido para ti. 
+
+Aquí hay un ejemplo tonto: un generador que recorre aleatoriamente hacia adelante y 
+hacia atrás el árbol analizado::
+
+ import random
+ def random_walk(starting_location):
+     location = starting_location
+     while location is not None:
+         yield location
+         if random.random() < 0.5:
+             location = location.next_element
+         else:
+             location = location.previous_element
+         if location is None:
+             return
+
+Pasa este generador al :py:meth:`ElementFilter.filter` de ejemplo y Beautiful Soup
+deambulará aleatoriamente por el árbol analizado, aplicando la función ``non_whitespace_filter``
+a cada elemento que encuentra, y devolviendo todas las coincidencias—potencialmente
+devolviendo un objeto más de una vez::
+ 
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, 'bold', <b>bold</b>, <p><b>bold</b>...]
+
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, <b>bold</b>, 'bold', <i>italic</i>, <i>italic</i>, ...]
+
+(Ten en cuenta que, a diferencia de otros ejemplos de código en esta documentación,
+este ejemplo puede dar resultados diferentes cada vez que lo ejecutes debido al 
+recorrido aleatorio. Es muy improbable, pero esta función podría deambular
+por el árbol analizado para siempre y *nunca* acabar.)
+
+Personalización avanzada del analizador
+=======================================
 
 Beautiful Soup ofrece numerosas vías para personalizar la manera en la que
 el analizador trata HTML o XML entrante. Esta sección cubre las técnicas
 de personalizadas usadas más comúnmente.
 
 Analizar solo parte del documento
-=================================
+---------------------------------
 
 Digamos que quieres usar Beautiful Soup para observar las etiquetas <a> de un
 documento. Es un malgasto de tiempo y memoria analizar todo el documento y
@@ -3079,7 +3276,7 @@ La clase :py:class:`SoupStrainer` te permite elegir qué partes de un
 documento entrante se analizan. Tan solo crea un :py:class:`SoupStrainer` y
 pásalo al constructor de :py:class:`BeautifulSoup` en el argumento ``parse_only``.
 
-(Debe notarse que *esta característica no funcionará si estás usando el
+(Ten en cuenta que *esta característica no funcionará si estás usando el
 analizador de html5lib*. Si usas html5lib, todo el documento será analizado,
 no importa el resto. Esto es porque html5lib constantemente reorganiza el
 árbol analizado conforme trabaja, y si alguna parte del documento no
@@ -3147,17 +3344,15 @@ tres objetos :py:class:`SoupStrainer`::
  # ...
  #
 
-Puedes también pasar un :py:class:`SoupStrainer` en cualquiera de los métodos
-cubiertos en `Buscar en el árbol`_. Esto probablemente no sea terriblemente útil,
-pero pensé en mencionarlo::
+El comportamiento de :py:class:`SoupStrainer` es como sigue:
 
- soup = BeautifulSoup(html_doc, 'html.parser')
- soup.find_all(only_short_strings)
- # ['\n\n', '\n\n', 'Elsie', ',\n', 'Lacie', ' and\n', 'Tillie',
- #  '\n\n', '...', '\n']
+* Cuando una etiqueta coincide, se guarda (incluyendo todos sus contenidos, tanto
+  si coinciden también como si no).
+* Cuando una etiqueta no coincide, la etiqueta propia no se guarda, pero el análisis
+  continúa entre sus contenidos para buscar otras etiquetas que sí coincidan.
 
 Personalizar atributos multivaluados
-====================================
+------------------------------------
 
 En un documento HTML, a un atributo como ``class`` se le da una lista
 de valores, y a un atributo como ``id`` se le da un solo valor, porque
@@ -3185,10 +3380,10 @@ a ``multi_values_attributes``. Si lo necesitas, échale un vistazo a
 que Beautiful Soup usa por defecto, que está basada en la especificación
 HTML.
 
-`(Esto es una nueva característica en Beautiful Soup 4.8.0).`
+*(Esto es una nueva característica en Beautiful Soup 4.8.0).*
 
 Gestionar atributos duplicados
-==============================
+------------------------------
 
 Cuando se use el analizador de ``html.parser``, puedes usar
 el argumento del constructor ``on_duplicate_attribute`` para personalizar
@@ -3209,7 +3404,7 @@ etiqueta::
  # http://url2/
 
 Con ``on_duplicate_attribute='ignore'`` puedes indicar a Beautiful Soup que
-use el `primer` valor encontrado e ignorar el resto::
+use el *primer* valor encontrado e ignorar el resto::
 
  soup = BeautifulSoup(markup, 'html.parser', on_duplicate_attribute='ignore')
  soup.a['href']
@@ -3229,16 +3424,15 @@ Si necesitas más, puedes pasar una función que sea llamada en cada valor dupli
  soup.a['href']
  # ["http://url1/", "http://url2/"]
 
-
-`(Esto es una nueva característica en Beautiful Soup 4.9.1.)`
+*(Esto es una nueva característica en Beautiful Soup 4.9.1.)*
 
 Instanciar subclases personalizadas
-===================================
+-----------------------------------
 
 Cuando un analizador indica a Beautiful Soup sobre una etiqueta o una cadena,
 Beautiful Soup instanciará un objeto :py:class:`Tag` o :py:class:`NavigableString`
 para contener esa información. En lugar de ese comportamiento por defecto,
-puedes indicar a Beautiful Soup que instancia `subclases` de :py:class:`Tag` o
+puedes indicar a Beautiful Soup que instancia *subclases* de :py:class:`Tag` o
 :py:class:`NavigableString`, subclases que defines con comportamiento
 personalizado::
 
@@ -3265,20 +3459,18 @@ personalizado::
  isinstance(soup.div.string, MyString)
  # True  
 
-
 Esto puede ser útil cuando se incorpore Beautiful Soup en un *framework*
 de pruebas.
 
-`(Esto es una nueva característica de Beautiful Soup 4.8.1.)`
+*(Esto es una nueva característica de Beautiful Soup 4.8.1.)*
 
-=========================
- Resolución de problemas
-=========================
+Resolución de problemas
+=======================
 
 .. _diagnose:
 
 ``diagnose()``
-==============
+--------------
 
 Si estás teniendo problemas para entender qué hace Beautiful Soup a un
 documento, pasa el documento a la función ``diagnose()``. (Nuevo en
@@ -3301,12 +3493,12 @@ te falta un analizador que Beautiful Soup podría estar usando::
  # Here's what html.parser did with the document:
  # ...
 
-Tan solo mirando a la salida de diagnose() puede mostrate cómo resolver
+Tan solo mirando a la salida de diagnose() puede mostrarte cómo resolver
 el problema. Incluso si no, puedes pegar la salida de ``diagnose()``
 cuando pidas ayuda.
 
 Errores analizando un documento
-===============================
+-------------------------------
 
 Hay dos tipos diferentes de errores de análisis. Hay veces en que
 se queda colgado, donde le das a Beautiful Soup un documento y
@@ -3320,33 +3512,23 @@ de software. Es porque Beautiful Soup no incluye ningún código de
 análisis. En lugar de eso, depende de análisis externos. Si un analizador
 no está funcionando en un documento concreto, la mejor solución es probar
 con otro analizador. Échale un vistazo a `Instalar un analizador`_ para
-detalles y una comparativa de analizadores.
+más detalles y una comparativa entre analizadores. Si esto no es de ayuda, 
+tal vez tengas que inspeccionar el árbol del documento que se encuentra dentro
+del objeto ``BeautifulSoup`` para ver dónde se encuentra realmente 
+el marcado que estás buscando.
 
-Los errores de análisis más comunes son ``HTMLParser.HTMLParseError:
-malformed start tag`` y ``HTMLParser.HTMLParseError: bad end
-tag``. Ambos son generados por la librería del analizador HTML
-incluido en Python, y la solución es :ref:`instalar lxml o html5lib.
-<parser-installation>`
-
-El comportamiento inesperado más común es que no puedas encontrar
-una etiqueta que sabes que está en el documento. La viste llegar, pero
-``find_all()`` devuelve ``[]`` o ``find()`` devuelve ``None``. Esto
-es otro problema común con el analizador HTML integrado en Python, el cual
-a veces omite etiquetas que no entiende. De nuevo, la mejor solución es
-:ref:`instalar lxml o html5lib. <parser-installation>`.
-
-Problemas de incompatibilidad de versiones
-==========================================
+Problemas de incompatibilidad entre versiones
+---------------------------------------------
 
 * ``SyntaxError: Invalid syntax`` (on the line ``ROOT_TAG_NAME =
-  '[document]'``): Causado por ejecutar una version antigua de Beautiful
-  Soup de Python 2 bajo Python 3, sin convertir el código.
+  '[document]'``): Causado por ejecutar una versión antigua de Beautiful
+  Soup de Python 2 bajo Python 3, sin portar el código.
 
 * ``ImportError: No module named HTMLParser`` - Causado por ejecutar
-  una version antigua de Beautiful Soup de Python 2 bajo Python 3.
+  una versión antigua de Beautiful Soup de Python 2 bajo Python 3.
 
 * ``ImportError: No module named html.parser`` - Causado por ejecutar
-  una version de Beautiful Soup de Python 3 bajo Python 2.
+  una versión de Beautiful Soup de Python 3 bajo Python 2.
 
 * ``ImportError: No module named BeautifulSoup`` - Causado por ejecutar
   código de Beautiful Soup 3 en un sistema que no tiene BS3 instalado. O
@@ -3359,40 +3541,40 @@ Problemas de incompatibilidad de versiones
 .. _parsing-xml:
 
 Analizar XML
-============
+------------
 
 Por defecto, Beautiful Soup analiza documentos HTML. Para analizar
-un documento como XML, pasa "xml" como el segundo argumento al
-constructor :py:class:`BeautifulSoup`::
+un documento como XML, pasa "xml" como segundo argumento al
+constructor de :py:class:`BeautifulSoup`::
 
  soup = BeautifulSoup(markup, "xml")
 
 Necesitarás :ref:`tener lxml instalado <parser-installation>`.
 
 Otros problemas de análisis
-===========================
+---------------------------
 
 * Si tu script funciona en un ordenador pero no en otro, o en un
   entorno virtual pero no en otro, o fuera del entorno virtual
-  pero no dentro, es probable porque los dos entornos tienen
+  pero no dentro, probablemente sea porque los dos entornos tienen
   diferentes librerías de analizadores disponibles. Por ejemplo,
-  puedes haber desarrollado el script en un ordenador que solo
+  tal vez has desarrollado el script en un ordenador que solo
   tenga html5lib instalado. Mira `Diferencias entre analizadores`_
-  por qué esto importa, y solucionar el problema especificando una
+  por qué esto es importante, y soluciona el problema especificando una
   librería de análisis en el constructor de :py:class:`Beautiful Soup`.
 
-* Porque `las etiquetas y atributos de HTML son sensibles a mayúsculas
+* Debido a que `las etiquetas y atributos HTML son sensibles a mayúsculas
   y minúsculas <http://www.w3.org/TR/html5/syntax.html#syntax>`_,
   los tres analizadores HTML convierten los nombres de las etiquetas y
   atributos a minúscula. Esto es, el marcado <TAG></TAG> se convierte
-  a <tag></tag>. Si quieres preservar la mezcla entre minúscula y
+  en <tag></tag>. Si quieres preservar la mezcla entre minúscula y
   mayúscula o mantener las mayúsculas en etiquetas y atributos,
   necesitarás :ref:`analizar el documento como XML. <parsing-xml>`
 
 .. _misc:
 
-Diversos
-========
+Diverso
+-------
 
 * ``UnicodeEncodeError: 'charmap' codec can't encode character
   '\xfoo' in position bar`` (o cualquier otro 
@@ -3414,7 +3596,7 @@ Diversos
 * ``AttributeError: 'ResultSet' object has no attribute 'foo'`` - Esto
   normalmente ocurre cuando esperas que ``find_all()`` devuelva
   una sola etiqueta o cadena. Pero ``find_all()`` devuelve una
-  `lista` de etiquetas y cadenas--un objeto ``ResultSet``. Tienes que
+  *lista* de etiquetas y cadenas—un objeto ``ResultSet``. Tienes que
   iterar sobre la lista y comprobar el ``.foo`` de cada uno, O, si solo
   quieres un resultado, tienes que usar ``find()`` en lugar de
   ``find_all()``. 
@@ -3434,7 +3616,7 @@ Diversos
 
 
 Mejorar el rendimiento
-======================
+----------------------
 
 Beautiful Soup nunca será tan rápido como los analizadores en los que
 se basa. Si el tiempo de respuesta es crítico, si estás pagando por
@@ -3453,14 +3635,13 @@ Puedes aumentar la velocidad de detección de codificación significativamente
 instalando la librería `cchardet <http://pypi.python.org/pypi/cchardet/>`_.
 
 `Analizar solo parte del documento`_ no te ahorrará mucho tiempo de análisis, pero puede
-ahorrar mucha memoria, y hará que `buscar` en el documento sea mucho más rápido.
+ahorrar mucha memoria, y hará que *buscar* en el documento sea mucho más rápido.
 
-==============================
- Traducir esta documentación
-==============================
+Traducir esta documentación
+===========================
 
-Nuevas traducciones de la documentación de Beautiful Soup se agradecen
-enormemente. Las traducciones deberían estar bajo la licencia del MIT, tal
+Las nuevas traducciones de la documentación de Beautiful Soup se agradecen
+enormemente. Las traducciones deberían estar bajo la licencia MIT, tal
 y como están Beautiful Soup y su documentación en inglés.
 
 Hay dos maneras para que tu traducción se incorpore a la base de código
@@ -3469,18 +3650,16 @@ principal y al sitio de Beautiful Soup:
 1. Crear una rama del repositorio de Beautiful Soup, añadir tus
    traducciones, y proponer una fusión (*merge*) con la rama principal, lo
    mismo que se haría con una propuesta de código del código fuente.
-
 2. Enviar un mensaje al grupo de discusión de Beautiful Soup con un
    enlace a tu traducción, o adjuntar tu traducción al mensaje.
 
 Utiliza la traducción china o portugués-brasileño como tu modelo. En
-particular, por favor, traduce el archivo fuente ``doc/source/index.rst``,
+particular, por favor, traduce el archivo fuente ``doc/index.rst``,
 en vez de la versión HTML de la documentación. Esto hace posible que la
 documentación se pueda publicar en una variedad de formatos, no solo HTML.
 
-==================
- Beautiful Soup 3
-==================
+Beautiful Soup 3
+================
 
 Beautiful Soup 3 es la serie de lanzamientos anterior, y no está siendo
 activamente desarrollada. Actualmente está empaquetada con las
@@ -3505,7 +3684,7 @@ ejecutar ``easy_install beautifulsoup4``.
 <http://www.crummy.com/software/BeautifulSoup/bs3/documentation.html>`_.
 
 Actualizar el código a BS4
-==========================
+--------------------------
 
 La mayoría del código escrito con Beautiful Soup 3 funcionará
 con Beautiful Soup 4 con un cambio simple. Todo lo que debes hacer
@@ -3536,7 +3715,7 @@ Esto es todo lo que necesitarás saber para convertir tu código y hábitos BS3 
 BS4:
 
 Necesitas un analizador
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Beautiful Soup 3 usaba el ``SGMLParser`` de Python, un módulo que
 fue obsoleto y quitado en Python 3.0. Beautiful Soup 4 usa
@@ -3550,99 +3729,28 @@ cambias ``html.parser`` por lxml o html5lib, puedes encontrarte
 que el árbol analizado también cambia. Si esto ocurre, necesitarás
 actualizar tu código de *scraping* para gestionar el nuevo árbol.
 
-Nombre de los métodos
----------------------
-
-* ``renderContents`` -> ``encode_contents``
-* ``replaceWith`` -> ``replace_with``
-* ``replaceWithChildren`` -> ``unwrap``
-* ``findAll`` -> ``find_all``
-* ``findAllNext`` -> ``find_all_next``
-* ``findAllPrevious`` -> ``find_all_previous``
-* ``findNext`` -> ``find_next``
-* ``findNextSibling`` -> ``find_next_sibling``
-* ``findNextSiblings`` -> ``find_next_siblings``
-* ``findParent`` -> ``find_parent``
-* ``findParents`` -> ``find_parents``
-* ``findPrevious`` -> ``find_previous``
-* ``findPreviousSibling`` -> ``find_previous_sibling``
-* ``findPreviousSiblings`` -> ``find_previous_siblings``
-* ``getText`` -> ``get_text``
-* ``nextSibling`` -> ``next_sibling``
-* ``previousSibling`` -> ``previous_sibling``
-
-Algunos argumentos del constructor de Beautiful Soup fueron renombrados
-por la misma razón:
-
-* ``BeautifulSoup(parseOnlyThese=...)`` -> ``BeautifulSoup(parse_only=...)``
-* ``BeautifulSoup(fromEncoding=...)`` -> ``BeautifulSoup(from_encoding=...)``
-
-Renombré un método para compatibilidad con Python 3:
-
-* ``Tag.has_key()`` -> ``Tag.has_attr()``
-
-Renombré un atributo para usar terminología más precisa:
-
-* ``Tag.isSelfClosing`` -> ``Tag.is_empty_element``
+Nombre de las propiedades
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Renombré tres atributos para evitar usar palabras que tienen un significado
-especial en Python. A diferencia de otros, estos cambios no soportan
-*compatibilidad hacia atrás*. Si usaste estos atributos en BS3, tu código
-se romperá en BS4 hasta que lo cambies.
+especial en Python. A diferencia de mis cambios a los nombres de los métodos 
+(que verás en forma de avisos de no soporte futuro), estos cambios *no preservan
+compatibilidad hacia atrás.* Si usabas estos atributos en BS3, tu código
+no funcionará en BS4 hasta que los cambies.
 
 * ``UnicodeDammit.unicode`` -> ``UnicodeDammit.unicode_markup``
 * ``Tag.next`` -> ``Tag.next_element``
 * ``Tag.previous`` -> ``Tag.previous_element``
 
-Estos métodos sobras desde la API de Beautiful Soup 2. Han quedado
-obsoletos desde 2006, y no deberían usarse en absoluto:
-
-* ``Tag.fetchNextSiblings``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchPrevious``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchParents``
-* ``Tag.findChild``
-* ``Tag.findChildren``
-
-
 Generadores
------------
-
-Le di a los generadores nombres que cumplan con PEP 8, y se transformaron
-en propiedades:
-
-* ``childGenerator()`` -> ``children``
-* ``nextGenerator()`` -> ``next_elements``
-* ``nextSiblingGenerator()`` -> ``next_siblings``
-* ``previousGenerator()`` -> ``previous_elements``
-* ``previousSiblingGenerator()`` -> ``previous_siblings``
-* ``recursiveChildGenerator()`` -> ``descendants``
-* ``parentGenerator()`` -> ``parents``
-
-Así que en lugar de esto::
-
- for parent in tag.parentGenerator():
-     ...
-
-Puedes escribir esto::
-
- for parent in tag.parents:
-     ...
-
-(Pero el código antiguo seguirá funcionando).
+^^^^^^^^^^^
 
 Algunos de los generadores solían devolver ``None`` después de que hayan
 terminado, y después paran. Eso era un error. Ahora el generador tan solo
-para.
-
-Hay dos nuevos generadores, :ref:`.strings y .stripped_strings
-<string-generators>`. ``.strings`` devuelve objetos NavigableString,
-y ``.stripped_strings`` devuelve cadenas de Python cuyos espacios
-en blanco al comienzo y al final han sido quitados.
+se detiene.
 
 XML
----
+^^^
 
 Ya no hay una clase ``BeautifulStoneSoup`` para analizar XML. Para
 analizar XML pasas "xml" como el segundo argumento del constructor
@@ -3658,7 +3766,7 @@ una etiqueta sin elementos. Si añades un hijo a una etiqueta sin elementos,
 deja de ser una etiqueta sin elementos.
 
 Entidades
----------
+^^^^^^^^^
 
 Una entidad HTML o XML entrante siempre se convierte al correspondiente
 carácter Unicode. Beautiful Soup 3 tenía varias formas solapadas para
@@ -3676,7 +3784,7 @@ a la salida, en lugar de transformarlos a caracteres UTF-8, necesitas
 usar un :ref:`*formatter* de salida <output_formatters>`.
 
 Otro
-----
+^^^^
 
 :ref:`Tag.string <.string>` ahora funciona recursivamente. Si una
 etiqueta A contiene una sola etiqueta B y nada más, entonces
@@ -3695,11 +3803,11 @@ Si pasas a unos de los métodos ``find*`` una :ref:`cadena <string>` y
 un argumento específico de una etiqueta como :ref:`name <name>`, Beautiful
 Soup buscará etiquetas que casen con tu criterio específico de la etiqueta
 y cuyo :ref:`Tag.string <.string>` case con tu valor para la :ref:`cadena <string>`.
-`No` encontrará las cadenas mismas. Anteriormente, Beautiful Soup ignoraba el
+*No* encontrará las cadenas mismas. Anteriormente, Beautiful Soup ignoraba el
 argumento específico de la etiqueta y buscaba por cadenas de caracteres.
 
 El constructor de :py:class:`Beautiful Soup` ya no reconoce el argumento
-`markupMassage`. Es ahora responsabilidad del analizador gestionar el marcado
+``markupMassage``. Es ahora responsabilidad del analizador gestionar el marcado
 correctamente.
 
 Los analizadores alternativos, que rara vez se utilizaban, como

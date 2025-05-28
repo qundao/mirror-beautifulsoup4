@@ -8,7 +8,7 @@ import pickle
 import importlib
 import copy
 import warnings
-import pytest
+import pytest # type:ignore
 from bs4 import BeautifulSoup
 from bs4.element import (
     AttributeValueList,
@@ -49,10 +49,10 @@ try:
 except ImportError:
     SOUP_SIEVE_PRESENT = False
 
-HTML5LIB_PRESENT = importlib.util.find_spec("html5lib") is not None
+HTML5LIB_PRESENT = importlib.util.find_spec("html5lib") is not None # type:ignore
 
 try:
-    import lxml.etree
+    import lxml.etree # type:ignore
     LXML_PRESENT = True
     LXML_VERSION = lxml.etree.LXML_VERSION
 except ImportError:
@@ -431,10 +431,23 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         # Pickling a tree, then unpickling it, yields a tree identical
         # to the original.
         tree = self.soup("<a><b>foo</a>")
-        dumped = pickle.dumps(tree, 2)
+        dumped = pickle.dumps(tree, pickle.HIGHEST_PROTOCOL)
         loaded = pickle.loads(dumped)
         assert loaded.__class__ == BeautifulSoup
         assert loaded.decode() == tree.decode()
+
+    def test_pickle_and_unpickle_bad_markup(self):
+        markup = """
+<!DOCTYPE html>
+<html lang="en">
+<head><title>blabla</title></head>
+<body><?xml encoding="utf-8" ?><html></html></body>
+</html>
+"""
+        soup = self.soup(markup)
+        pickled = pickle.dumps(soup, pickle.HIGHEST_PROTOCOL)
+        soup = pickle.loads(pickled)
+        assert soup.builder.is_xml is False
 
     def assertDoctypeHandled(self, doctype_fragment: str) -> None:
         """Assert that a given doctype string is handled correctly."""

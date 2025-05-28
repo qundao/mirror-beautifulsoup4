@@ -1,5 +1,5 @@
 # encoding: utf-8
-import pytest
+import pytest # type:ignore
 import logging
 import warnings
 import bs4
@@ -18,6 +18,17 @@ class TestUnicodeDammit(object):
         markup = "I'm already Unicode! \N{SNOWMAN}"
         dammit = UnicodeDammit(markup)
         assert dammit.unicode_markup == markup
+
+    def test_empty_input(self):
+        markup = ""
+        dammit = UnicodeDammit(markup)
+        assert dammit.unicode_markup == markup
+        assert dammit.original_encoding == None
+
+        markup = b""
+        dammit = UnicodeDammit(markup)
+        assert dammit.unicode_markup == ""
+        assert dammit.original_encoding == "utf-8"
 
     @pytest.mark.parametrize(
         "smart_quotes_to,expect_converted",

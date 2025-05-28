@@ -9,9 +9,9 @@ same markup, but all Beautiful Soup trees can be traversed with the
 methods tested here.
 """
 
-import pytest
 import re
 import warnings
+import pytest # type:ignore
 from bs4 import BeautifulSoup
 from bs4.builder import builder_registry
 from bs4.element import (
@@ -29,9 +29,6 @@ from . import (
 
 class TestFind(SoupTest):
     """Basic tests of the find() method.
-
-    find() just calls find_all() with limit=1, so it's not tested all
-    that thouroughly here.
     """
 
     def test_find_tag(self):
@@ -57,9 +54,31 @@ class TestFind(SoupTest):
         soup = self.soup("<a>foo</a><b>bar</b><a>baz</a>")
         assert 2 == len(soup.find_all("a"))
 
+    def test_find_with_no_arguments(self):
+        soup = self.soup("<div></div><p></p>")
+        assert "div" == soup.find().name
+        assert "div" == soup.find("p").find_previous_sibling().name
+        assert "p" == soup.find("div").find_next_sibling().name
+
+    def test_find_with_no_arguments_only_finds_tags(self):
+        soup = self.soup("text<div>text</div>text<p>text</p>")
+        assert "div" == soup.find().name
+        assert "div" == soup.find("p").find_previous_sibling().name
+        assert "p" == soup.find("div").find_next_sibling().name
+
+    def test_find_with_function_can_only_find_tags(self):
+        soup = self.soup("text<div>text</div>text<p>text</p>")
+        assert "p" == soup.find(lambda t: t.name=="p").name
+        assert None == soup.find(lambda t: t=="text")
 
 class TestFindAll(SoupTest):
     """Basic tests of the find_all() method."""
+
+    def test_find_all_with_no_arguments_only_finds_tags(self):
+        soup = self.soup("<body>text<div>text</div>text<p>text</p></body>")
+        assert 2 == len(soup.body.find_all())
+        assert 1 == len(soup.find("p").find_previous_siblings())
+        assert 1 == len(soup.find("div").find_next_siblings())
 
     def test_find_all_text_nodes(self):
         """You can search the tree for text nodes."""

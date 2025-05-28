@@ -2,7 +2,7 @@
 trees."""
 
 import pickle
-import pytest
+import pytest # type:ignore
 from bs4.builder._htmlparser import (
     _DuplicateAttributeHandler,
     BeautifulSoupHTMLParser,
@@ -16,6 +16,8 @@ from . import HTMLTreeBuilderSmokeTest
 class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
     default_builder = HTMLParserTreeBuilder
 
+    # Fixed in https://github.com/python/cpython/issues/77057
+    @pytest.mark.skipif("sys.version_info >= (3, 13)")
     def test_rejected_input(self):
         # Python's html.parser will occasionally reject markup,
         # especially when there is a problem with the initial DOCTYPE

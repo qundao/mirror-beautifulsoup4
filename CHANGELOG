@@ -1,3 +1,71 @@
+= 4.13.5 (Unreleased)
+
+* Unit tests and test case data are no longer packaged with the wheel. [bug=2107495]
+* Fixed a bug that gave the wrong result when parsing the empty bytestring. [bug=2110492]
+* Brought the Spanish translation of the documentation up to date with
+  4.13.4. Courtesy of Carlos Romero.
+* For Python 3.13 and above, disabled tests that verify Beautiful Soup's handling of htmlparser's
+  exceptions when given very bad markup. The bug in htmlparser that caused
+  this behavior has been fixed. Patch courtesy of Stefano Rivera.
+* Used overloading to improve type hints for prettify().
+* Updated the SoupStrainer documentation to clarify that during initial
+  parsing, attribute values are always passed into the SoupStrainer as raw strings. [bug=2111651]
+
+= 4.13.4 (20250415)
+
+* If you pass a function as the first argument to a find* method, the
+  function will only ever be called once per tag, with the Tag object
+  as the argument. Starting in 4.13.0, there were cases where the
+  function would be called with a Tag object and then called again
+  with the name of the tag. [bug=2106435]
+
+* Added a passthrough implementation for NavigableString.__getitem__ which gives a
+  more helpful exception if the user tries to treat it as a Tag and
+  access its HTML attributes.
+
+* Fixed a bug that caused an exception when unpickling the result of
+  parsing certain invalid markup with lxml as the tree builder. [bug=2103126]
+
+* Converted the AUTHORS file to UTF-8 for PEP8 compliance. [bug=2107405]
+
+= 4.13.3 (20250204)
+
+* Modified the 4.13.2 change slightly to restore backwards
+  compatibility. Specifically, calling a find_* method with no
+  arguments should return the first Tag out of the iterator, not the
+  first PageElement. [bug=2097333]
+
+= 4.13.2 (20250204)
+
+* Gave ElementFilter the ability to explicitly say that it excludes
+  every item in the parse tree. This is used internally in situations
+  where the provided filters are logically inconsistent or match a
+  value against the null set.
+
+  Without this, it's not always possible to distinguish between
+  a SoupStrainer that excludes everything and one that excludes
+  nothing.
+
+  This fixes a bug where calls to find_* methods with no arguments
+  returned None, instead of the first item out of the iterator. [bug=2097333]
+
+  Things added to the API to support this:
+
+  - The ElementFilter.includes_everything property
+  - The MatchRule.exclude_everything member
+  - The _known_rules argument to ElementFilter.match. This is an optional
+    argument used internally to indicate that an optimization is safe.
+
+= 4.13.1 (20250203)
+
+* Updated pyproject.toml to require Python 3.7 or above. [bug=2097263]
+* Pinned the typing-extensions dependency to a minimum version of 4.0.0.
+  [bug=2097262]
+* Restored the English documentation to the source distribution.
+  [bug=2097237]
+* Fixed a regression where HTMLFormatter and XMLFormatter were not
+  propagating the indent parameter to the superconstructor. [bug=2097272]
+
 = 4.13.0 (20250202)
 
 This release introduces Python type hints to all public classes and
@@ -8,6 +76,11 @@ and changes that may break backwards compatibility.
 
 Chris Papademetrious deserves a special thanks for his work on this
 release through its long beta process.
+
+NOTE: This release was yanked from PyPI on 20250203, because bug 2097263
+made it difficult to install Beautiful Soup on Python 3.6. You can still
+install this version by explicitly pinning beautifulsoup4==4.13.0, but
+you really shouldn't need to.
 
 # Deprecation notices
 

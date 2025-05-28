@@ -1,8 +1,8 @@
 """Tests to ensure that the lxml tree builder generates good trees."""
 
 import pickle
-import pytest
 import warnings
+import pytest # type:ignore
 from . import LXML_PRESENT, LXML_VERSION
 
 if LXML_PRESENT:

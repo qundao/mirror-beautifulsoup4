@@ -16,7 +16,7 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.13.0. The examples in
+This document covers Beautiful Soup version 4.13.4. The examples in
 this documentation were written for Python 3.8.
 
 You might be looking for the documentation for `Beautiful Soup 3
@@ -725,7 +725,7 @@ spot.
 
 The ``.contents`` and ``.children`` attributes consider only a tag's
 *direct* children. For instance, the <head> tag has a single direct
-child--the <title> tag::
+child—the <title> tag::
 
  head_tag.contents
  # [<title>The Dormouse's story</title>]
@@ -2057,7 +2057,7 @@ in order::
 ``NavigableString()`` and ``.new_tag()``
 ----------------------------------------
 
-If you need to add a string to a document, no problem--you can pass a
+If you need to add a string to a document, no problem—you can pass a
 Python string in to ``append()``, or you can call the :py:class:`NavigableString`
 constructor::
 
@@ -2806,7 +2806,7 @@ to replace some characters with the special Unicode character
 this, it will set the ``.contains_replacement_characters`` attribute
 to ``True`` on the ``UnicodeDammit`` or :py:class:`BeautifulSoup` object. This
 lets you know that the Unicode representation is not an exact
-representation of the original--some data was lost. If a document
+representation of the original—some data was lost. If a document
 contains �, but ``.contains_replacement_characters`` is ``False``,
 you'll know that the � was there originally (as it is in this
 paragraph) and doesn't stand in for missing data.
@@ -3099,7 +3099,7 @@ document can get what they need using the methods described in
 `Searching the tree`_. However, there's a lower-level interface that
 lets you define any matching behavior you want. Behind the scenes, the
 parts of the Beautiful Soup API that most people use--``find_all()``
-and the like--are actually using this low-level interface, and you
+and the like—are actually using this low-level interface, and you
 can use it directly.
 
 *(Access to the low-level search interface is a new feature in
@@ -3120,6 +3120,7 @@ return ``True`` if the element matches your custom criteria, and
 This example function looks for content-containing tags and strings,
 but skips whitespace-only strings::
 
+ from bs4 import Tag, NavigableString
  def non_whitespace_element_func(tag_or_string):
      """
      return True for:
@@ -3142,7 +3143,7 @@ criteria you defined in your function will be used instead of the
 default Beautiful Soup match logic::
 
  from bs4 import BeautifulSoup
- html_doc = """
+ small_doc = """
  <p>
    <b>bold</b>
    <i>italic</i>
@@ -3150,7 +3151,7 @@ default Beautiful Soup match logic::
    <u>underline</u>
  </p>
  """
- soup = BeautifulSoup(html_doc, 'html.parser')
+ soup = BeautifulSoup(small_doc, 'html.parser')
 
  soup.find('p').find_all(non_whitespace_filter, recursive=False)
  # [<b>bold</b>, <i>italic</i>, '\n  and\n  ', <u>underline</u>]
@@ -3212,16 +3213,15 @@ through the parse tree::
 
 Pass this generator into the example :py:meth:`ElementFilter.filter()`
 and Beautiful Soup will wander randomly around the parse tree,
-applying the ``something_short`` function to every element it finds,
-and yielding all of the matches--potentially yielding a given object
+applying the ``non_whitespace_filter`` function to every element it finds,
+and yielding all of the matches—potentially yielding a given object
 more than once::
 
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n', '\n']
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n']
- [x for x in element_filter.filter(random_walk(soup.body))]
- # ['\n', '\n', '\n']
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, 'bold', <b>bold</b>, <p><b>bold</b>...]
+
+ [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+ # [<b>bold</b>, <b>bold</b>, 'bold', <i>italic</i>, <i>italic</i>, ...]
 
 (Note that unlike the other code examples in this documentation, this
 example can give different results every time you run it, thanks
@@ -3314,13 +3314,21 @@ three :py:class:`SoupStrainer` objects::
  # ...
  #
 
-The :py:class:`SoupStrainer` behavior is as follows:
+When selectively parsing a document, the behavior of :py:class:`SoupStrainer` is as follows:
 
-* When a tag matches, it is kept (including all its contents, whether they also
-  match or not).
-* When a tag does not match, the tag itself is not kept, but parsing continues
-  into its contents to look for other tags that do match.
-
+* When the name and attributes for a potential tag matches the
+  :py:class:`SoupStrainer`, the tag is parsed. All of its
+  children are automatically parsed, without the
+  :py:class:`SoupStrainer` being consulted.
+* When the name and attributes for a potential tag do not match, the tag is
+  not parsed. But its children will be compared against the
+  :py:class:`SoupStrainer` and may end up being parsed.
+* The tag names and attribute values passed in to the
+  :py:class:`SoupStrainer` are the same ones that would be passed into
+  the :py:class:`Tag` constructor. These values will be in a less
+  processed form here than in other parts of Beautiful Soup. In particular,
+  attribute values are always passed in as Unicode strings, even if (as with
+  the `class` attribute in HTML) that value would become a list after parsing.
 
 Customizing multi-valued attributes
 -----------------------------------
@@ -3566,7 +3574,7 @@ Miscellaneous
 * ``AttributeError: 'ResultSet' object has no attribute 'foo'`` - This
   usually happens because you expected ``find_all()`` to return a
   single tag or string. But ``find_all()`` returns a *list* of tags
-  and strings--a ``ResultSet`` object. You need to iterate over the
+  and strings—a ``ResultSet`` object. You need to iterate over the
   list and look at the ``.foo`` of each one. Or, if you really only
   want one result, you need to use ``find()`` instead of
   ``find_all()``.
@@ -3623,7 +3631,7 @@ and onto the Beautiful Soup website:
    your translation, or attach your translation to the message.
 
 Use the Chinese or Brazilian Portuguese translations as your model. In
-particular, please translate the source file ``doc/source/index.rst``,
+particular, please translate the source file ``doc/index.rst``,
 rather than the HTML version of the documentation. This makes it
 possible to publish the documentation in a variety of formats, not
 just HTML.
@@ -3692,95 +3700,25 @@ for lxml or html5lib, you may find that the parse tree changes yet
 again. If this happens, you'll need to update your scraping code to
 process the new tree.
 
-Method names
-^^^^^^^^^^^^
-
-* ``renderContents`` -> ``encode_contents``
-* ``replaceWith`` -> ``replace_with``
-* ``replaceWithChildren`` -> ``unwrap``
-* ``findAll`` -> ``find_all``
-* ``findAllNext`` -> ``find_all_next``
-* ``findAllPrevious`` -> ``find_all_previous``
-* ``findNext`` -> ``find_next``
-* ``findNextSibling`` -> ``find_next_sibling``
-* ``findNextSiblings`` -> ``find_next_siblings``
-* ``findParent`` -> ``find_parent``
-* ``findParents`` -> ``find_parents``
-* ``findPrevious`` -> ``find_previous``
-* ``findPreviousSibling`` -> ``find_previous_sibling``
-* ``findPreviousSiblings`` -> ``find_previous_siblings``
-* ``getText`` -> ``get_text``
-* ``nextSibling`` -> ``next_sibling``
-* ``previousSibling`` -> ``previous_sibling``
-
-Some arguments to the Beautiful Soup constructor were renamed for the
-same reasons:
-
-* ``BeautifulSoup(parseOnlyThese=...)`` -> ``BeautifulSoup(parse_only=...)``
-* ``BeautifulSoup(fromEncoding=...)`` -> ``BeautifulSoup(from_encoding=...)``
-
-I renamed one method for compatibility with Python 3:
-
-* ``Tag.has_key()`` -> ``Tag.has_attr()``
-
-I renamed one attribute to use more accurate terminology:
-
-* ``Tag.isSelfClosing`` -> ``Tag.is_empty_element``
+Property names
+^^^^^^^^^^^^^^
 
 I renamed three attributes to avoid using words that have special
-meaning to Python. Unlike the others, these changes are *not backwards
-compatible.* If you used these attributes in BS3, your code will break
-in BS4 until you change them.
+meaning to Python. Unlike my changes to method names (which you'll see
+in the form of deprecation warnings), these changes *did not
+preserve backwards compatibility.* If you used these attributes in
+BS3, your code will break in BS4 until you change them.
 
 * ``UnicodeDammit.unicode`` -> ``UnicodeDammit.unicode_markup``
 * ``Tag.next`` -> ``Tag.next_element``
 * ``Tag.previous`` -> ``Tag.previous_element``
 
-These methods are left over from the Beautiful Soup 2 API. They've
-been deprecated since 2006 and should not be used at all:
-
-* ``Tag.fetchNextSiblings``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchPrevious``
-* ``Tag.fetchPreviousSiblings``
-* ``Tag.fetchParents``
-* ``Tag.findChild``
-* ``Tag.findChildren``
-
 
 Generators
 ^^^^^^^^^^
 
-I gave the generators PEP 8-compliant names, and transformed them into
-properties:
-
-* ``childGenerator()`` -> ``children``
-* ``nextGenerator()`` -> ``next_elements``
-* ``nextSiblingGenerator()`` -> ``next_siblings``
-* ``previousGenerator()`` -> ``previous_elements``
-* ``previousSiblingGenerator()`` -> ``previous_siblings``
-* ``recursiveChildGenerator()`` -> ``descendants``
-* ``parentGenerator()`` -> ``parents``
-
-So instead of this::
-
- for parent in tag.parentGenerator():
-     ...
-
-You can write this::
-
- for parent in tag.parents:
-     ...
-
-(But the old code will still work.)
-
 Some of the generators used to yield ``None`` after they were done, and
 then stop. That was a bug. Now the generators just stop.
-
-There are two new generators, :ref:`.strings and
-.stripped_strings <string-generators>`. ``.strings`` yields
-NavigableString objects, and ``.stripped_strings`` yields Python
-strings that have had whitespace stripped.
 
 XML
 ^^^

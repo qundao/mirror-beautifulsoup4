@@ -37,6 +37,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 from typing_extensions import (
     Self,
@@ -389,7 +390,7 @@ class PageElement(object):
         :param previous_element: The element parsed immediately before
             this one.
 
-        :param next_element: The element parsed immediately before
+        :param next_element: The element parsed immediately after
             this one.
 
         :param previous_sibling: The most recently encountered element
@@ -1316,6 +1317,14 @@ class NavigableString(str, PageElement):
 
     def __getnewargs__(self) -> Tuple[str]:
         return (str(self),)
+
+    # TODO-TYPING This should be SupportsIndex|slice but SupportsIndex
+    # is introduced in 3.8. This can be changed once 3.7 support is dropped.
+    def __getitem__(self, key: Union[int|slice]) -> str: # type:ignore
+        """Raise an exception """
+        if isinstance(key, str):
+            raise TypeError("string indices must be integers, not '{0}'. Are you treating a NavigableString like a Tag?".format(key.__class__.__name__))
+        return super(NavigableString, self).__getitem__(key)
 
     @property
     def string(self) -> str:
@@ -2597,6 +2606,22 @@ class Tag(PageElement):
             not self.preserve_whitespace_tags
             or self.name not in self.preserve_whitespace_tags
         )
+
+    @overload
+    def prettify(
+        self,
+        encoding: None = None,
+        formatter: _FormatterOrName = "minimal",
+    ) -> str:
+        ...
+
+    @overload
+    def prettify(
+        self,
+        encoding: _Encoding,
+        formatter: _FormatterOrName = "minimal",
+    ) -> bytes:
+        ...
 
     def prettify(
         self,

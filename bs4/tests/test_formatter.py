@@ -1,4 +1,4 @@
-import pytest
+import pytest # type:ignore
 
 from bs4.element import Tag
 from bs4.formatter import (
@@ -108,6 +108,17 @@ class TestFormatter(SoupTest):
     def test_default_indent_value(self):
         formatter = Formatter()
         assert formatter.indent == " "
+
+    @pytest.mark.parametrize("formatter,expect",
+        [
+            (HTMLFormatter(indent=1), "<p>\n a\n</p>\n"),
+            (HTMLFormatter(indent=2), "<p>\n  a\n</p>\n"),
+            (XMLFormatter(indent=1), "<p>\n a\n</p>\n"),
+            (XMLFormatter(indent="\t"), "<p>\n\ta\n</p>\n"),
+        ]                             )
+    def test_indent_subclasses(self, formatter, expect):
+        soup = self.soup("<p>a</p>")
+        assert expect == soup.p.prettify(formatter=formatter)
 
     @pytest.mark.parametrize(
         "s,expect_html,expect_html5",
