@@ -26,12 +26,16 @@ from bs4.element import (
 )
 from bs4._typing import (
     _AtMostOneElement,
+    _AtMostOneTag,
+    _AtMostOneNavigableString,
     _AttributeValue,
     _OneElement,
     _PageElementMatchFunction,
     _QueryResults,
     _RawAttributeValues,
     _RegularExpressionProtocol,
+    _SomeTags,
+    _SomeNavigableStrings,
     _StrainableAttribute,
     _StrainableElement,
     _StrainableString,
@@ -769,6 +773,17 @@ class TagStrainer(SoupStrainer):
     def allow_string_creation(self, string: str) -> bool:
         """We don't match strings, so we don't allow the creation of strings."""
         return False
+
+    def find(self, generator: Iterator[PageElement]) -> _AtMostOneTag:
+        m = super().find(generator)
+        assert isinstance(m, _AtMostOneTag)
+        return m
+
+    def find_all(
+        self, generator: Iterator[PageElement], limit: Optional[int] = None
+    ) -> _SomeTags:
+        m = super().find_all(generator, limit)
+        return cast(_SomeTags, m)
 
 
 class StringStrainer(SoupStrainer):
