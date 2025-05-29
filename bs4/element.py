@@ -775,7 +775,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Find all `PageElement` objects that match the given criteria and
         appear later in the document than this `PageElement`.
 
@@ -833,7 +833,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Find all siblings of this `PageElement` that match the given criteria
         and appear later in the document.
 
@@ -894,7 +894,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Look backwards in the document from this `PageElement` and find all
         `PageElement` that match the given criteria.
 
@@ -959,7 +959,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
 
@@ -1027,7 +1027,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Find all parents of this `PageElement` that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
@@ -2255,7 +2255,7 @@ class Tag(PageElement):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
@@ -2714,10 +2714,38 @@ class Tag(PageElement):
 
     # Soup methods
 
+    @overload
+    def find(
+            self,
+            name: ElementFilter,
+    ) -> _AtMostOneElement:
+        ...
+
+    @overload
+    def find(
+            self,
+            name: Optional[_StrainableElement] = None,
+            attrs: _StrainableAttributes = None,
+            recursive: bool = True,
+            string: None = None,
+            **kwargs: _StrainableAttribute,
+    ) -> Tag:
+        ...
+
+    @overload
+    def find(
+            self,
+            name: None = None,
+            attrs: None = None,
+            recursive: bool = True,
+            string: _StrainableString = "",
+    ) -> NavigableString:
+        ...
+
     def find(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: _StrainableAttributes = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -2745,16 +2773,48 @@ class Tag(PageElement):
 
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")
 
+    @overload
+    def find_all(
+            self,
+            name: ElementFilter,
+    ) -> _QueryResults:
+        ...
+
+    @overload
+    def find_all(
+            self,
+            name: Optional[_StrainableElement] = None,
+            attrs: _StrainableAttributes = None,
+            recursive: bool = True,
+            string: None = None,
+            limit: Optional[int] = None,
+            _stacklevel: int = 2,
+            **kwargs: _StrainableAttribute,
+    ) -> ResultSet[Tag]:
+        ...
+
+    @overload
+    def find_all(
+            self,
+            name: None = None,
+            attrs: None = None,
+            recursive: bool = True,
+            string: _StrainableString = "",
+            limit: Optional[int] = None,
+            _stacklevel: int = 2,
+    ) -> ResultSet[NavigableString]:
+        ...
+
     def find_all(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: _StrainableAttributes = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_QueryResults, ResultSet[Tag], ResultSet[NavigableString]]:
         """Look in the children of this `PageElement` and find all
         `PageElement` objects that match the given criteria.
 

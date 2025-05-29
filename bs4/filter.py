@@ -37,6 +37,7 @@ from bs4._typing import (
     _SomeTags,
     _SomeNavigableStrings,
     _StrainableAttribute,
+    _StrainableAttributes,
     _StrainableElement,
     _StrainableString,
     _StringMatchFunction,
@@ -382,7 +383,7 @@ class SoupStrainer(ElementFilter):
     def __init__(
         self,
         name: Optional[_StrainableElement] = None,
-        attrs: Dict[str, _StrainableAttribute] = {},
+        attrs: _StrainableAttributes = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ):
@@ -394,6 +395,8 @@ class SoupStrainer(ElementFilter):
                 stacklevel=2,
             )
 
+        if attrs is None:
+            attrs = {}
         if name is None and not attrs and not string and not kwargs:
             # Special case for backwards compatibility. Instantiating
             # a SoupStrainer with no arguments whatsoever gets you one

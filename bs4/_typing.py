@@ -184,8 +184,8 @@ _StrainableAttribute: TypeAlias = Union[
 #: an attribute value.
 _StrainableString: TypeAlias = _StrainableAttribute
 
-#: A dictionary may be used to match against multiple attribute vlaues at once.
-_StrainableAttributes: TypeAlias = Dict[str, _StrainableAttribute]
+#: A dictionary may be used to match against multiple attribute values at once.
+_StrainableAttributes: TypeAlias = Optional[Dict[str, _StrainableAttribute]]
 
 #: Many Beautiful soup methods return a PageElement or an ResultSet of
 #: PageElements. A PageElement is either a Tag or a NavigableString.
