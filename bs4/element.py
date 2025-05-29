@@ -2259,8 +2259,12 @@ class Tag(PageElement):
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
-        return self.find_all(
-            name, attrs, recursive, string, limit, _stacklevel, **kwargs
+        generator = self.descendants
+        if not recursive:
+            generator = self.children
+
+        return self._find_all(
+            name, attrs, string, limit, generator,_stacklevel, **kwargs
         )
 
     def __getattr__(self, subtag: str) -> Optional[Tag]:
@@ -2724,22 +2728,22 @@ class Tag(PageElement):
     @overload
     def find(
             self,
+            name: None = None,
+            attrs: None = None,
+            recursive: bool = True,
+            string: _StrainableString = "",
+    ) -> NavigableString:
+        ...
+
+    @overload
+    def find(
+            self,
             name: Optional[_StrainableElement] = None,
             attrs: _StrainableAttributes = None,
             recursive: bool = True,
             string: None = None,
             **kwargs: _StrainableAttribute,
     ) -> Tag:
-        ...
-
-    @overload
-    def find(
-            self,
-            name: None = None,
-            attrs: None = None,
-            recursive: bool = True,
-            string: _StrainableString = "",
-    ) -> NavigableString:
         ...
 
     def find(
@@ -2766,13 +2770,18 @@ class Tag(PageElement):
         :kwargs: Additional filters on attribute values.
         """
         r = None
-        results = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3, **kwargs)
+        generator = self.descendants
+        if not recursive:
+            generator = self.children
+        results = self._find_all(name, attrs, string, 1, generator, _stacklevel=3, **kwargs)
         if results:
             r = results[0]
         return r
 
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")
 
+    # Call find_all with an ElementFilter and you might get a mixed list of
+    # Tags and NavigableStrings.
     @overload
     def find_all(
             self,
@@ -2780,10 +2789,12 @@ class Tag(PageElement):
     ) -> _QueryResults:
         ...
 
+    # As long as you don't provide a value for string, you'll
+    # get a list of NavigableStrings.
     @overload
     def find_all(
             self,
-            name: Optional[_StrainableElement] = None,
+            name: Optional[_StrainableElement],
             attrs: _StrainableAttributes = None,
             recursive: bool = True,
             string: None = None,
@@ -2793,6 +2804,8 @@ class Tag(PageElement):
     ) -> ResultSet[Tag]:
         ...
 
+    # Call with a value for string and no other filter values, and you'll
+    # get a list of NavigableStrings.
     @overload
     def find_all(
             self,
