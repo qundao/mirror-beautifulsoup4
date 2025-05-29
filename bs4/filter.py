@@ -166,7 +166,7 @@ class ElementFilter(object):
 
     def find_all(
         self, generator: Iterator[PageElement], limit: Optional[int] = None
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags, _SomeNavigableStrings, _QueryResults]:
         """A lower-level equivalent of :py:meth:`Tag.find_all`.
 
         You can pass in your own generator for iterating over
@@ -798,3 +798,9 @@ class StringStrainer(SoupStrainer):
     ) -> bool:
         """We don't match tags, so we don't allow the creation of tags."""
         return False
+
+    def find_all(
+        self, generator: Iterator[PageElement], limit: Optional[int] = None
+    ) -> _SomeNavigableStrings:
+        m = super().find_all(generator, limit)
+        return cast(_SomeNavigableStrings, m)

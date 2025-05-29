@@ -1086,7 +1086,7 @@ class PageElement(object):
         generator: Iterator[PageElement],
         _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[ResultSet[Tag], ResultSet[NavigableString],_QueryResults]:
         """Iterates over a generator looking for things that match."""
 
         if string is None and "text" in kwargs:
@@ -1112,17 +1112,13 @@ class PageElement(object):
 
         strainer: ElementFilter
         if isinstance(name, ElementFilter):
-            strainer = name
-        else:
-            if name is None and not attrs and not kwargs and string is not None:
-                strainer = StringStrainer(name, attrs, string, **kwargs)
-            else:
-                strainer = TagStrainer(name, attrs, string, **kwargs)
-            strainer = SoupStrainer(name, attrs, string, **kwargs)
+            # This is the only case where the QueryResults might contain both tags and strings.
+            return name.find_all(generator, limit)
 
-        # Optimizations for common (or easy) cases where the entire infrastructure of
-        # SoupStrainer isn't necessary.
+        # Optimizations for cases where the full matching functionality isn't
+        # necessary.
         if string is None and not limit and not attrs and not kwargs:
+            strainer = TagStrainer(name, attrs, string, **kwargs)
             if name is True or name is None:
                 # Optimization to grab all tags.
                 result = [element for element in generator if isinstance(element, Tag)]
@@ -1132,10 +1128,12 @@ class PageElement(object):
                 result = list(self._all_tags_with_name(generator, name))
                 return cast(ResultSet[Tag], ResultSet(strainer, result))
 
-        return strainer.find_all(generator, limit)
+        if name is None and not attrs and not kwargs and string is not None:
+            return StringStrainer(name, attrs, string, **kwargs).find_all(generator, limit)
+        return TagStrainer(name, attrs, string, **kwargs).find_all(generator, limit)
 
-    def _all_tags_with_name(self, generator: Iterator[PageElement], name:string) -> Iterator[Tag]:
-        """Optimization to find all tags with a given name, without running the full ElementFilter code."""
+    def _all_tags_with_name(self, generator: Iterator[PageElement], name:str) -> Iterator[Tag]:
+        """Optimization to yield all tags with a given name, without running the full ElementFilter code."""
         if name.count(":") == 1:
             # This is a name with a prefix. If this is a namespace-aware document,
             # we need to match the local name against tag.name. If not,
@@ -1144,7 +1142,6 @@ class PageElement(object):
         else:
             prefix = None
             local_name = name
-        result = []
         for element in generator:
             if not isinstance(element, Tag):
                 continue
