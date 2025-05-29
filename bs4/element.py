@@ -1108,40 +1108,51 @@ class PageElement(object):
                 stacklevel=_stacklevel,
             )
 
-        from bs4.filter import ElementFilter
+        from bs4.filter import ElementFilter, TagStrainer, StringStrainer
 
+        strainer: ElementFilter
         if isinstance(name, ElementFilter):
-            matcher = name
+            strainer = name
         else:
-            matcher = SoupStrainer(name, attrs, string, **kwargs)
+            if name is None and not attrs and not kwargs and string is not None:
+                strainer = StringStrainer(name, attrs, string, **kwargs)
+            else:
+                strainer = TagStrainer(name, attrs, string, **kwargs)
+            strainer = SoupStrainer(name, attrs, string, **kwargs)
 
-        result: Iterable[_OneElement]
+        # Optimizations for common (or easy) cases where the entire infrastructure of
+        # SoupStrainer isn't necessary.
         if string is None and not limit and not attrs and not kwargs:
             if name is True or name is None:
-                # Optimization to find all tags.
-                result = (element for element in generator if isinstance(element, Tag))
-                return ResultSet(matcher, result)
-            elif isinstance(name, str):
-                # Optimization to find all tags with a given name.
-                if name.count(":") == 1:
-                    # This is a name with a prefix. If this is a namespace-aware document,
-                    # we need to match the local name against tag.name. If not,
-                    # we need to match the fully-qualified name against tag.name.
-                    prefix, local_name = name.split(":", 1)
-                else:
-                    prefix = None
-                    local_name = name
-                result = []
-                for element in generator:
-                    if not isinstance(element, Tag):
-                        continue
-                    if element.name == name or (
-                        element.name == local_name
-                        and (prefix is None or element.prefix == prefix)
-                    ):
-                        result.append(element)
-                return ResultSet(matcher, result)
-        return matcher.find_all(generator, limit)
+                # Optimization to grab all tags.
+                result = [element for element in generator if isinstance(element, Tag)]
+                return cast(ResultSet[Tag], ResultSet(strainer, result))
+            if isinstance(name, str):
+                # Optimization to grab all tags with a given name.
+                result = list(self._all_tags_with_name(generator, name))
+                return cast(ResultSet[Tag], ResultSet(strainer, result))
+
+        return strainer.find_all(generator, limit)
+
+    def _all_tags_with_name(self, generator: Iterator[PageElement], name:string) -> Iterator[Tag]:
+        """Optimization to find all tags with a given name, without running the full ElementFilter code."""
+        if name.count(":") == 1:
+            # This is a name with a prefix. If this is a namespace-aware document,
+            # we need to match the local name against tag.name. If not,
+            # we need to match the fully-qualified name against tag.name.
+            prefix, local_name = name.split(":", 1)
+        else:
+            prefix = None
+            local_name = name
+        result = []
+        for element in generator:
+            if not isinstance(element, Tag):
+                continue
+            if element.name == name or (
+                    element.name == local_name
+                    and (prefix is None or element.prefix == prefix)
+            ):
+                yield element
 
     # These generators can be used to navigate starting from both
     # NavigableStrings and Tags.

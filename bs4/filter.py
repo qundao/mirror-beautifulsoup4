@@ -776,7 +776,7 @@ class TagStrainer(SoupStrainer):
 
     def find(self, generator: Iterator[PageElement]) -> _AtMostOneTag:
         m = super().find(generator)
-        assert isinstance(m, _AtMostOneTag)
+        assert m is None or isinstance(m, Tag)
         return m
 
     def find_all(
