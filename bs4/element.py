@@ -54,6 +54,8 @@ if TYPE_CHECKING:
     )
     from bs4._typing import (
         _AtMostOneElement,
+        _AtMostOneTag,
+        _AtMostOneNavigableString,
         _AttributeValue,
         _AttributeValues,
         _Encoding,
@@ -2732,7 +2734,7 @@ class Tag(PageElement):
             attrs: None = None,
             recursive: bool = True,
             string: _StrainableString = "",
-    ) -> NavigableString:
+    ) -> _AtMostOneNavigableString:
         ...
 
     @overload
@@ -2743,7 +2745,7 @@ class Tag(PageElement):
             recursive: bool = True,
             string: None = None,
             **kwargs: _StrainableAttribute,
-    ) -> Tag:
+    ) -> _AtMostOneTag:
         ...
 
     def find(
