@@ -10,6 +10,16 @@
 * Used overloading to improve type hints for prettify().
 * Updated the SoupStrainer documentation to clarify that during initial
   parsing, attribute values are always passed into the SoupStrainer as raw strings. [bug=2111651]
+* Modified some of the lxml tests to accommodate behavioral changes in libxml2
+  2.14.3. Specifically:
+
+  1. XML declarations and processing instructions in HTML documents
+  are rewritten as comments. Note that this means XHTML documents will
+  now turn into regular HTML documents if run through the 'lxml'
+  parser. The 'xml' parser is unaffected.
+
+  2. Out-of-range numeric entities are replaced with REPLACEMENT
+  CHARACTER rather than omitted entirely. [bug=2112242]
 
 = 4.13.4 (20250415)
 
