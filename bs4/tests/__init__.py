@@ -1111,6 +1111,14 @@ Hello, world!
         soup = self.soup("<body><div><p>text1</p></span>text2</div></body>")
         assert "<body><div><p>text1</p>text2</div></body>" == soup.body.decode()
 
+    def test_not_really_a_namespace(self):
+        # There's some markup here that looks a bit like a namespace ({value: 20000.00}) but isn't.
+        markup = '<!DOCTYPE html><html lang="id"><head><noscript><img height="1" width="1" style="display:none" src="http://example.com/" fbq(\'track\', \'Purchase\' , {value: 20000.00}); /></noscript></head><body></body>'
+        soup = self.soup(markup)
+
+        # We don't care what the parser makes of this, but it needs to be able to parse this markup without crashing.
+        soup.body.decode()
+
     def test_worst_case(self):
         """Test the worst case (currently) for linking issues."""
 
