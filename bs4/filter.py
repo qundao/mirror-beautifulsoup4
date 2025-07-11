@@ -632,18 +632,21 @@ class SoupStrainer(ElementFilter):
             return False
 
         this_attr_match = _match_attribute_value_helper(attr_values)
-        if not this_attr_match and len(attr_values) > 1:
+        if not this_attr_match and len(attr_values) != 1:
+            # Try again but treat the attribute value as a single
+            # string instead of a list. The result can only be
+            # different if the list of values contains more or less
+            # than one item.
+
             # This cast converts Optional[str] to plain str.
             #
-            # We know if there's more than one value, there can't be
-            # any None in the list, because Beautiful Soup never uses
-            # None as a value of a multi-valued attribute, and if None
-            # is passed in as attr_value, it's turned into a list with
-            # a single element (thus len(attr_values) > 1 fails).
+            # We know there can't be any None in the list. Beautiful
+            # Soup never uses None as a value of a multi-valued
+            # attribute, and if None is passed in as attr_value, it's
+            # turned into a list with 1 element, which was excluded by
+            # the if statement above.
             attr_values = cast(Sequence[str], attr_values)
 
-            # Try again but treat the attribute value
-            # as a single string.
             joined_attr_value = " ".join(attr_values)
             this_attr_match = _match_attribute_value_helper([joined_attr_value])
         return this_attr_match
