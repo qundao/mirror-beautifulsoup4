@@ -550,8 +550,8 @@ class PageElement(object):
     getText = get_text
     text = property(get_text)
 
-    def replace_with(self, *args: PageElement) -> Self:
-        """Replace this `PageElement` with one or more other `PageElement`,
+    def replace_with(self, *args: _InsertableElement) -> Self:
+        """Replace this `PageElement` with one or more other elements,
         objects, keeping the rest of the tree the same.
 
         :return: This `PageElement`, no longer part of the tree.

@@ -24,6 +24,7 @@
 
   2. Out-of-range numeric entities are replaced with REPLACEMENT
   CHARACTER rather than omitted entirely. [bug=2112242]
+* Improved the type hints for PageElement.replace_with. [bug=2114746]
 
 = 4.13.4 (20250415)
 
