@@ -27,6 +27,7 @@ from bs4.element import (
 from bs4._typing import (
     _AtMostOneElement,
     _AttributeValue,
+    _NullableStringMatchFunction,
     _OneElement,
     _PageElementMatchFunction,
     _QueryResults,
@@ -334,7 +335,7 @@ class TagNameMatchRule(MatchRule):
 class AttributeValueMatchRule(MatchRule):
     """A MatchRule implementing the rules for matches against attribute value."""
 
-    function: Optional[_StringMatchFunction]
+    function: Optional[_NullableStringMatchFunction]
 
 
 class StringMatchRule(MatchRule):

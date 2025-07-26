@@ -25,6 +25,8 @@
   2. Out-of-range numeric entities are replaced with REPLACEMENT
   CHARACTER rather than omitted entirely. [bug=2112242]
 * Improved the type hints for PageElement.replace_with. [bug=2114746]
+* Improved the type hint for the arguments of the lambda function that can
+  be used to match a tag's attribute. [bug=2110401]
 
 = 4.13.4 (20250415)
 
