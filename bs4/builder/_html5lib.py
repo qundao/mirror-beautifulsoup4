@@ -75,7 +75,7 @@ class HTML5TreeBuilder(HTMLTreeBuilder):
 
     NAME: str = "html5lib"
 
-    features: Sequence[str] = [NAME, PERMISSIVE, HTML_5, HTML]
+    features: Iterable[str] = [NAME, PERMISSIVE, HTML_5, HTML]
 
     #: html5lib can tell us which line number and position in the
     #: original file is the source of an element.

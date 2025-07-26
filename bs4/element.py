@@ -1512,7 +1512,7 @@ class Doctype(PreformattedString):
 
     @classmethod
     def _string_for_name_and_ids(
-        self, name: str, pub_id: Optional[str], system_id: Optional[str]
+        cls, name: str, pub_id: Optional[str], system_id: Optional[str]
     ) -> str:
         """Generate a string to be used as the basis of a Doctype object.
 
