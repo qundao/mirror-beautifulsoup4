@@ -194,11 +194,10 @@ class LXMLTreeBuilderForXML(TreeBuilder):
     def _getNsTag(self, tag: str) -> Tuple[Optional[str], str]:
         # Split the namespace URL out of a fully-qualified lxml tag
         # name. Copied from lxml's src/lxml/sax.py.
-        if tag[0] == "{":
+        if tag[0] == "{" and "}" in tag:
             namespace, name = tag[1:].split("}", 1)
             return (namespace, name)
-        else:
-            return (None, tag)
+        return (None, tag)
 
     def prepare_markup(
         self,

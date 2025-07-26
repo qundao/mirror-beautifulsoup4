@@ -1,5 +1,9 @@
 = 4.13.5 (Unreleased)
 
+* Fixed an unhandled exception when parsing invalid markup that contains the { character
+  when using lxml==6.0.0. [bug=2116306]
+* Fixed a regression when matching a multi-valued attribute against the
+  empty string. [bug=2115352]
 * Unit tests and test case data are no longer packaged with the wheel. [bug=2107495]
 * Fixed a bug that gave the wrong result when parsing the empty bytestring. [bug=2110492]
 * Brought the Spanish translation of the documentation up to date with
@@ -10,6 +14,19 @@
 * Used overloading to improve type hints for prettify().
 * Updated the SoupStrainer documentation to clarify that during initial
   parsing, attribute values are always passed into the SoupStrainer as raw strings. [bug=2111651]
+* Modified some of the lxml tests to accommodate behavioral changes in libxml2
+  2.14.3. Specifically:
+
+  1. XML declarations and processing instructions in HTML documents
+  are rewritten as comments. Note that this means XHTML documents will
+  now turn into regular HTML documents if run through the 'lxml'
+  parser. The 'xml' parser is unaffected.
+
+  2. Out-of-range numeric entities are replaced with REPLACEMENT
+  CHARACTER rather than omitted entirely. [bug=2112242]
+* Improved the type hints for PageElement.replace_with. [bug=2114746]
+* Improved the type hint for the arguments of the lambda function that can
+  be used to match a tag's attribute. [bug=2110401]
 
 = 4.13.4 (20250415)
 

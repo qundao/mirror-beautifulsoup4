@@ -579,6 +579,24 @@ class TestSoupStrainer(SoupTest):
         # order they were originally present in the document.
         assert not self.tag_matches(SoupStrainer(attrs=["big main"]), **kwargs)
 
+    def test_match_against_empty_multi_valued_attribute(self):
+        # These two cases match a tag where the class attribute (a
+        # multi-valued attribute) exists but has no value.
+        kwargs = dict(name="b", attrs={"class": []})
+        assert self.tag_matches(SoupStrainer(attrs={"class":""}), **kwargs)
+
+        kwargs = dict(name="b", attrs={"class": ""})
+        assert self.tag_matches(SoupStrainer(attrs={"class":""}), **kwargs)
+
+        # This matches a tag that does not have the class attribute, not a tag where the
+        # class attribute has an empty value.
+        assert not self.tag_matches(SoupStrainer(attrs={"class":None}), **kwargs)
+
+        # This matches a tag that where the class attribute is empty,
+        # but here that attribute isn't empty.
+        kwargs = dict(name="b", attrs={"class": "a"})
+        assert not self.tag_matches(SoupStrainer(attrs={"class":""}), **kwargs)
+
     def test_one_string_rule_must_match(self):
         # If there's a TagNameMatchRule and/or an
         # AttributeValueMatchRule, then the StringMatchRule is _not_

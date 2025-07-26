@@ -524,9 +524,17 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
 <head><title>Hello.</title></head>
 <body>Goodbye.</body>
 </html>"""
+
+        # libxml 2.14.3 turns the XML declaration into a comment, turning the document
+        # from XHTML to regular HTML. That's fine with this test.
+        markup_as_html = markup.replace(b'<?xml version="1.0" encoding="utf-8"?>',
+                                        b'<!--?xml version="1.0" encoding="utf-8"?-->')
+
         with warnings.catch_warnings(record=True) as w:
             soup = self.soup(markup)
-        assert soup.encode("utf-8").replace(b"\n", b"") == markup.replace(b"\n", b"")
+        without_minor_differences = soup.encode("utf-8").replace(b"\n", b"")
+        assert (without_minor_differences == markup.replace(b"\n", b"")
+                or without_minor_differences == markup_as_html.replace(b"\n", b""))
 
         # No warning was issued about parsing an XML document as HTML,
         # because XHTML is both.
@@ -566,13 +574,18 @@ class HTMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
         # process_markup correctly sets processing_instruction_class
         # even when the markup is already Unicode and there is no
         # need to process anything.
+        #
+        # Since HTML doesn't have any processing instructions, it's also
+        # legal to convert the PI into a comment, as libxml2 2.14.3 does.
         markup = """<?PITarget PIContent?>"""
+        markup_as_comment = "<!--?PITarget PIContent?-->"
         soup = self.soup(markup)
-        assert markup == soup.decode()
+        assert soup.decode() in [markup, markup_as_comment]
 
-        markup = b"""<?PITarget PIContent?>"""
+        markup = markup.encode("utf8")
+        markup_as_comment = markup_as_comment.encode("utf8")
         soup = self.soup(markup)
-        assert markup == soup.encode("utf8")
+        assert soup.encode("utf8") in [markup, markup_as_comment]
 
     def test_deepcopy(self):
         """Make sure you can copy the tree builder.
@@ -1097,6 +1110,14 @@ Hello, world!
         # will show up outside the body of the document.
         soup = self.soup("<body><div><p>text1</p></span>text2</div></body>")
         assert "<body><div><p>text1</p>text2</div></body>" == soup.body.decode()
+
+    def test_not_really_a_namespace(self):
+        # There's some markup here that looks a bit like a namespace ({value: 20000.00}) but isn't.
+        markup = '<!DOCTYPE html><html lang="id"><head><noscript><img height="1" width="1" style="display:none" src="http://example.com/" fbq(\'track\', \'Purchase\' , {value: 20000.00}); /></noscript></head><body></body>'
+        soup = self.soup(markup)
+
+        # We don't care what the parser makes of this, but it needs to be able to parse this markup without crashing.
+        soup.body.decode()
 
     def test_worst_case(self):
         """Test the worst case (currently) for linking issues."""

@@ -29,10 +29,15 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
     def default_builder(self):
         return LXMLTreeBuilder
 
-    def test_out_of_range_entity(self):
-        self.assert_soup("<p>foo&#10000000000000;bar</p>", "<p>foobar</p>")
-        self.assert_soup("<p>foo&#x10000000000000;bar</p>", "<p>foobar</p>")
-        self.assert_soup("<p>foo&#1000000000;bar</p>", "<p>foobar</p>")
+    @pytest.mark.parametrize("entity", ["&#10000000000000;", "&#x10000000000000;", "&#1000000000;"])
+    def test_out_of_range_entity(self, entity):
+        # Prior to libxml2 2.14.3, out-of-range entities are discarded.
+        # As of 2.14.3 they are converted to REPLACEMENT CHARACTER. Either one is fine.
+
+        markup = f"<p>foo{entity}bar</p>"
+
+        soup = self.soup(markup)
+        assert soup.p.decode() in ["<p>foobar</p>", "<p>foo�bar</p>"]
 
     def test_entities_in_foreign_document_encoding(self):
         # We can't implement this case correctly because by the time we
