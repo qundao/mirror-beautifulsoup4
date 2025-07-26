@@ -51,6 +51,7 @@ __all__ = [
 ]
 
 from collections import Counter
+import io
 import sys
 import warnings
 
@@ -349,7 +350,7 @@ class BeautifulSoup(Tag):
         original_builder = builder
         original_features = features
 
-        builder_class: Type[TreeBuilder]
+        builder_class: Optional[Type[TreeBuilder]] = None
         if isinstance(builder, type):
             # A builder class was passed in; it needs to be instantiated.
             builder_class = builder
@@ -372,6 +373,7 @@ class BeautifulSoup(Tag):
         # builder, or we have a builder_class that we can instantiate
         # with the remaining **kwargs.
         if builder is None:
+            assert builder_class is not None
             builder = builder_class(**kwargs)
             if (
                 not original_builder
@@ -437,7 +439,7 @@ class BeautifulSoup(Tag):
         self.parse_only = parse_only
 
         if hasattr(markup, "read"):  # It's a file-type object.
-            markup = markup.read()
+            markup = cast(io.IOBase, markup).read()
         elif not isinstance(markup, (bytes, str)) and not hasattr(markup, "__len__"):
             raise TypeError(
                 f"Incoming markup is of an invalid type: {markup!r}. Markup must be a string, a bytestring, or an open filehandle."
@@ -1118,6 +1120,7 @@ class BeautifulSoup(Tag):
         # argument to this method (or a keyword argument with the old
         # name), we can handle it and put out a DeprecationWarning.
         warning: Optional[str] = None
+        pretty_print: Optional[bool] = None
         if isinstance(indent_level, bool):
             if indent_level is True:
                 indent_level = 0
