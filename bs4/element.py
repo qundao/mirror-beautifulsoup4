@@ -3000,7 +3000,7 @@ _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
 
 class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
-    """A ResultSet is a list of `PageElement` objects, gathered as the result
+    """A ResultSet is a sequence of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
     """
