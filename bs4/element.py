@@ -2283,19 +2283,20 @@ class Tag(PageElement):
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
         if string is not None and (name is not None or attrs is not None or kwargs):
-            # This is the version that can't be expressed using the @overload
-            # decorator--searching for a mixed list of tags and strings.
-            return self.find_all(name, attrs, recursive, string, limit, _stacklevel, **kwargs) #type: ignore
+            # TODO: Using the @overload decorator to express the three ways you
+            # could get into this path is way too much code for a rarely(?) used
+            # feature.
+            return cast(_SomeTags, self.find_all(name, attrs, recursive, string, limit, _stacklevel, **kwargs)) #type: ignore
 
         if string is None:
             # If string is None, we're searching for tags.
-            tags:ResultSet[Tag] = self.find_all(
+            tags:_SomeTags = self.find_all(
                 name, attrs, recursive, None, limit, _stacklevel, **kwargs
             )
             return tags
 
         # Otherwise, we're searching for strings.
-        strings = self.find_all(
+        strings:_SomeNavigableStrings = self.find_all(
             None, None, recursive, string, limit, _stacklevel, **kwargs
         )
         return strings
@@ -2795,11 +2796,12 @@ class Tag(PageElement):
         :kwargs: Additional filters on attribute values.
         """
         if string is not None and (name is not None or attrs is not None or kwargs):
-            # This is the version that can't be expressed using the @overload
-            # decorator--searching for a mixed list of tags and strings.
+            # TODO: Using the @overload decorator to express the three ways you
+            # could get into this path is way too much code for a rarely(?) used
+            # feature.
             elements = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3, **kwargs) # type:ignore
             if elements:
-                return cast(PageElement, elements[0])
+                return cast(Tag, elements[0])
         elif string is None:
             tags = self.find_all(name, attrs, recursive, None, 1, _stacklevel=3, **kwargs)
             if tags:
@@ -2869,19 +2871,22 @@ class Tag(PageElement):
         _stacklevel += 1
 
         if string is not None and (name is not None or attrs is not None or kwargs):
-            # This is the version that can't be expressed using the
-            # @overload decorator--searching for a mixed list of strings and tags.
-            return self._find_all(name, attrs, string, limit, generator,
-                                  _stacklevel=_stacklevel, **kwargs)
+            # TODO: Using the @overload decorator to express the three ways you
+            # could get into this path is way too much code for a rarely(?) used
+            # feature.
+            return cast(_SomeTags,
+                        self._find_all(name, attrs, string, limit, generator,
+                                       _stacklevel=_stacklevel, **kwargs)
+                        )
 
         if string is None:
             # If string is None, we're searching for tags.
-            return cast(ResultSet[Tag], self._find_all(
+            return cast(_SomeTags, self._find_all(
                 name, attrs, None, limit, generator, _stacklevel=_stacklevel, **kwargs
             ))
 
         # Otherwise, we're searching for strings.
-        return cast(ResultSet[NavigableString], self._find_all(
+        return cast(_SomeNavigableStrings, self._find_all(
             None, None, string, limit, generator, _stacklevel=_stacklevel, **kwargs
         ))
 

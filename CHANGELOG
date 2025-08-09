@@ -1,5 +1,19 @@
 = 4.13.5 (Unreleased)
 
+* This version adds function overloading to find() and find_all() to
+  make it easier to write type-safe Python. In most cases you can just
+  assign the result of a find() or find_all() call to the type of
+  object you're expecting to get back: a Tag, a NavigableString, a
+  Sequence[Tag], or a Sequence[NavigableString]. It's very rare that
+  you'll have to do a cast like you did in previous versions of
+  Beautiful Soup.
+
+  If this solution works well for people, a future version of
+  Beautiful Soup will add function overloading to the other find*
+  methods, e.g. find_all_parents(), find_next, etc.
+
+* ResultSet is now a Sequence,
+
 * Fixed an unhandled exception when parsing invalid markup that contains the { character
   when using lxml==6.0.0. [bug=2116306]
 * Fixed a regression when matching a multi-valued attribute against the
