@@ -3228,6 +3228,42 @@ example can give different results every time you run it, thanks
 to the random element. It's very unlikely, but this function could
 wander around the parse tree forever and *never* complete.)
 
+.. py:method:: ElementFilter.filter_tags()
+
+The :py:meth:`ElementFilter.filter_tags()` method works exactly like
+the :py:meth:`ElementFilter.filter()` method, but it is constrained to
+only yield `Tag` objects. Anything it encounters that is not a `Tag`
+will just be ignored. This can be useful if you're writing type-safe
+Python and want to be able to process the results as `Tag` objects
+without doing a cast::
+
+ from typing import List
+ tags:List[Tag]
+
+ # This will give a mypy error:
+ # List comprehension has incompatible type List[PageElement | Tag | NavigableString]; expected List[Tag]
+ tags = [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+
+ # This will not give a mypy error:
+ tags = [x for x in non_whitespace_filter.filter_tags(random_walk(soup.b))]
+
+.. py:method:: ElementFilter.filter_strings()
+
+The :py:meth:`ElementFilter.filter_strings()` method is also designed
+for use in type-safe Python. It works like
+:py:meth:`ElementFilter.filter_tags()` but it's constrained to only
+yield `NavigableString` objects::
+
+ strings:List[NavigableString]
+
+ # This will give a mypy error:
+ # List comprehension has incompatible type List[PageElement | Tag | NavigableString]; expected List[NavigableString]
+ strings = [x for x in non_whitespace_filter.filter(random_walk(soup.b))]
+
+ # This will not give a mypy error:
+ strings = [x for x in non_whitespace_filter.filter_strings(random_walk(soup.b))]
+
+
 Advanced parser customization
 =============================
 
