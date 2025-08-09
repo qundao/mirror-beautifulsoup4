@@ -2286,17 +2286,17 @@ class Tag(PageElement):
             # TODO: Using the @overload decorator to express the three ways you
             # could get into this path is way too much code for a rarely(?) used
             # feature.
-            return cast(_SomeTags, self.find_all(name, attrs, recursive, string, limit, _stacklevel, **kwargs)) #type: ignore
+            return cast(ResultSet[Tag], self.find_all(name, attrs, recursive, string, limit, _stacklevel, **kwargs)) #type: ignore
 
         if string is None:
             # If string is None, we're searching for tags.
-            tags:_SomeTags = self.find_all(
+            tags:ResultSet[Tag] = self.find_all(
                 name, attrs, recursive, None, limit, _stacklevel, **kwargs
             )
             return tags
 
         # Otherwise, we're searching for strings.
-        strings:_SomeNavigableStrings = self.find_all(
+        strings:ResultSet[NavigableString] = self.find_all(
             None, None, recursive, string, limit, _stacklevel, **kwargs
         )
         return strings
@@ -2874,19 +2874,19 @@ class Tag(PageElement):
             # TODO: Using the @overload decorator to express the three ways you
             # could get into this path is way too much code for a rarely(?) used
             # feature.
-            return cast(_SomeTags,
+            return cast(ResultSet[Tag],
                         self._find_all(name, attrs, string, limit, generator,
                                        _stacklevel=_stacklevel, **kwargs)
                         )
 
         if string is None:
             # If string is None, we're searching for tags.
-            return cast(_SomeTags, self._find_all(
+            return cast(ResultSet[Tag], self._find_all(
                 name, attrs, None, limit, generator, _stacklevel=_stacklevel, **kwargs
             ))
 
         # Otherwise, we're searching for strings.
-        return cast(_SomeNavigableStrings, self._find_all(
+        return cast(ResultSet[NavigableString], self._find_all(
             None, None, string, limit, generator, _stacklevel=_stacklevel, **kwargs
         ))
 
