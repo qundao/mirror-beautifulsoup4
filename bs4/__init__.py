@@ -101,6 +101,7 @@ from typing import (
     Iterator,
     List,
     Sequence,
+    Sized,
     Optional,
     Type,
     Union,
@@ -444,7 +445,7 @@ class BeautifulSoup(Tag):
             raise TypeError(
                 f"Incoming markup is of an invalid type: {markup!r}. Markup must be a string, a bytestring, or an open filehandle."
             )
-        elif len(markup) <= 256 and (
+        elif isinstance(markup, Sized) and len(markup) <= 256 and (
             (isinstance(markup, bytes) and b"<" not in markup and b"\n" not in markup)
             or (isinstance(markup, str) and "<" not in markup and "\n" not in markup)
         ):

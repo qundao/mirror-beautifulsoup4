@@ -266,7 +266,7 @@ class TreeBuilderForHtml5lib(treebuilder_base.TreeBuilder):
     def getDocument(self) -> "BeautifulSoup":
         return self.soup
 
-    def testSerializer(self, element: "Element") -> None:
+    def testSerializer(self, node: "Element") -> None:
         """This is only used by the html5lib unit tests. Since we
         don't currently hook into those tests, the implementation is
         left blank.
@@ -321,9 +321,20 @@ class AttrList(object):
 
 
 class BeautifulSoupNode(treebuilder_base.Node):
-    element: PageElement
+    # A node can correspond to _either_ a Tag _or_ a NavigableString.
+    tag: Optional[Tag]
+    string: Optional[NavigableString]
     soup: "BeautifulSoup"
     namespace: Optional[_NamespaceURL]
+
+    @property
+    def element(self) -> PageElement:
+        assert self.tag is not None or self.string is not None
+        if self.tag is not None:
+            return self.tag
+        else:
+            assert self.string is not None
+            return self.string
 
     @property
     def nodeType(self) -> int:
@@ -342,22 +353,24 @@ class BeautifulSoupNode(treebuilder_base.Node):
 
 
 class Element(BeautifulSoupNode):
-    element: Tag
     namespace: Optional[_NamespaceURL]
 
     def __init__(
         self, element: Tag, soup: "BeautifulSoup", namespace: Optional[_NamespaceURL]
     ):
         treebuilder_base.Node.__init__(self, element.name)
-        self.element = element
+        self.tag = element
+        self.string = None
         self.soup = soup
         self.namespace = namespace
 
     def appendChild(self, node: "BeautifulSoupNode") -> None:
         string_child: Optional[NavigableString] = None
         child: PageElement
-        if type(node.element) is NavigableString:
-            string_child = child = node.element
+        if type(node.string) is NavigableString:
+            # We check for NavigableString *only* because we want to avoid
+            # joining PreformattedStrings, such as Comments, with nearby strings.
+            string_child = child = node.string
         else:
             child = node.element
         node.parent = self
@@ -371,13 +384,13 @@ class Element(BeautifulSoupNode):
 
         if (
             string_child is not None
-            and self.element.contents
-            and type(self.element.contents[-1]) is NavigableString
+            and self.tag is not None and self.tag.contents
+            and type(self.tag.contents[-1]) is NavigableString
         ):
             # We are appending a string onto another string.
             # TODO This has O(n^2) performance, for input like
             # "a</a>a</a>a</a>..."
-            old_element = self.element.contents[-1]
+            old_element = self.tag.contents[-1]
             new_element = self.soup.new_string(old_element + string_child)
             old_element.replace_with(new_element)
             self.soup._most_recent_element = new_element
@@ -389,8 +402,8 @@ class Element(BeautifulSoupNode):
             # Tell Beautiful Soup to act as if it parsed this element
             # immediately after the parent's last descendant. (Or
             # immediately after the parent, if it has no children.)
-            if self.element.contents:
-                most_recent_element = self.element._last_descendant(False)
+            if self.tag is not None and self.tag.contents:
+                most_recent_element = self.tag._last_descendant(False)
             elif self.element.next_element is not None:
                 # Something from further ahead in the parse tree is
                 # being inserted into this earlier element. This is
@@ -401,13 +414,14 @@ class Element(BeautifulSoupNode):
                 most_recent_element = self.element
 
             self.soup.object_was_parsed(
-                child, parent=self.element, most_recent_element=most_recent_element
+                child, parent=self.tag, most_recent_element=most_recent_element
             )
 
     def getAttributes(self) -> AttrList:
         if isinstance(self.element, Comment):
             return {}
-        return AttrList(self.element)
+        assert self.tag is not None
+        return AttrList(self.tag)
 
     # An HTML5lib attribute name may either be a single string,
     # or a tuple (namespace, name).
@@ -462,19 +476,20 @@ class Element(BeautifulSoupNode):
     def insertBefore(
         self, node: "BeautifulSoupNode", refNode: "BeautifulSoupNode"
     ) -> None:
-        index = self.element.index(refNode.element)
+        assert self.tag is not None
+        index = self.tag.index(refNode.element)
         if (
             type(node.element) is NavigableString
-            and self.element.contents
-            and type(self.element.contents[index - 1]) is NavigableString
+            and self.tag.contents
+            and type(self.tag.contents[index - 1]) is NavigableString
         ):
             # (See comments in appendChild)
-            old_node = self.element.contents[index - 1]
+            old_node = self.tag.contents[index - 1]
             assert type(old_node) is NavigableString
             new_str = self.soup.new_string(old_node + node.element)
             old_node.replace_with(new_str)
         else:
-            self.element.insert(index, node.element)
+            self.tag.insert(index, node.element)
             node.parent = self
 
     def removeChild(self, node: "Element") -> None:
@@ -486,8 +501,8 @@ class Element(BeautifulSoupNode):
         # print("FROM", self.element)
         # print("TO", new_parent.element)
 
-        element = self.element
-        new_parent_element = new_parent.element
+        element = self.tag or self.string
+        new_parent_element = new_parent.tag
         # Determine what this tag's next_element will be once all the children
         # are removed.
         final_next_element = element.next_sibling
@@ -565,12 +580,12 @@ class Element(BeautifulSoupNode):
     # TODO-TYPING: typeshed stubs are incorrect about this;
     # hasContent returns a boolean, not None.
     def hasContent(self) -> bool: # type:ignore
-        return len(self.element.contents) > 0
+        return len(self.tag.contents) > 0
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a new Node, not None.
     def cloneNode(self) -> treebuilder_base.Node: # type:ignore
-        tag = self.soup.new_tag(self.element.name, self.namespace)
+        tag = self.soup.new_tag(self.tag.name, self.namespace)
         node = Element(tag, self.soup, self.namespace)
         for key, value in self.attributes:
             node.attributes[key] = value
@@ -586,9 +601,9 @@ class Element(BeautifulSoupNode):
 
 
 class TextNode(BeautifulSoupNode):
-    element: NavigableString
 
     def __init__(self, element: NavigableString, soup: "BeautifulSoup"):
         treebuilder_base.Node.__init__(self, None)
-        self.element = element
+        self.tag = None
+        self.string = element
         self.soup = soup
