@@ -358,11 +358,11 @@ class Element(BeautifulSoupNode):
     def __init__(
         self, element: Tag, soup: "BeautifulSoup", namespace: Optional[_NamespaceURL]
     ):
-        treebuilder_base.Node.__init__(self, element.name)
         self.tag = element
         self.string = None
         self.soup = soup
         self.namespace = namespace
+        treebuilder_base.Node.__init__(self, element.name)
 
     def appendChild(self, node: "BeautifulSoupNode") -> None:
         string_child: Optional[NavigableString] = None
