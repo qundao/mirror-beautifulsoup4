@@ -3090,7 +3090,6 @@ You can use :py:meth:`Tag.copy_self` to create a copy of a
       
 *(Tag.copy_self() is introduced in Beautiful Soup 4.13.0.)*
 
-
 Low-level search interface
 ==========================
 
@@ -3104,6 +3103,34 @@ can use it directly.
 
 *(Access to the low-level search interface is a new feature in
 Beautiful Soup 4.13.0.)*
+
+Type safety
+-----------
+
+If you're trying to write type-safe Python, you'll probably be
+frustrated by the find* methods described earlier in this
+document. When you call a method like ``find_all``, _you_ know whether
+you ought to be getting ``Tag`` or ``NavigableString`` in return, but
+Beautiful Soup doesn't know.
+
+.. py:class:: SoupStrainer
+              
+The :py:class:`SoupStrainer` class takes the same arguments as a typical
+method from `Searching the tree`_: :ref:`name <name>`, :ref:`attrs
+<attrs>`, :ref:`string <string>`, and :ref:`**kwargs <kwargs>`. Here are
+three :py:class:`SoupStrainer` objects::
+
+ from bs4 import SoupStrainer
+
+ only_a_tags = SoupStrainer("a")
+
+ only_tags_with_id_link2 = SoupStrainer(id="link2")
+
+ def is_short_string(string):
+     return string is not None and len(string) < 10
+
+ only_short_strings = SoupStrainer(string=is_short_string)
+
 
 Custom element filtering
 ------------------------
@@ -3253,24 +3280,6 @@ tree as it works, and if some part of the document didn't actually
 make it into the parse tree, it'll crash. To avoid confusion, in the
 examples below I'll be forcing Beautiful Soup to use Python's
 built-in parser.)
-
-.. py:class:: SoupStrainer
-
-The :py:class:`SoupStrainer` class takes the same arguments as a typical
-method from `Searching the tree`_: :ref:`name <name>`, :ref:`attrs
-<attrs>`, :ref:`string <string>`, and :ref:`**kwargs <kwargs>`. Here are
-three :py:class:`SoupStrainer` objects::
-
- from bs4 import SoupStrainer
-
- only_a_tags = SoupStrainer("a")
-
- only_tags_with_id_link2 = SoupStrainer(id="link2")
-
- def is_short_string(string):
-     return string is not None and len(string) < 10
-
- only_short_strings = SoupStrainer(string=is_short_string)
 
 I'm going to bring back the "three sisters" document one more time,
 and we'll see what the document looks like when it's parsed with these

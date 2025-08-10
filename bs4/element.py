@@ -748,7 +748,7 @@ class PageElement(object):
     def find_next(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -770,7 +770,7 @@ class PageElement(object):
     def find_all_next(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -804,7 +804,7 @@ class PageElement(object):
     def find_next_sibling(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -828,7 +828,7 @@ class PageElement(object):
     def find_next_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -867,7 +867,7 @@ class PageElement(object):
     def find_previous(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -889,7 +889,7 @@ class PageElement(object):
     def find_all_previous(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -928,7 +928,7 @@ class PageElement(object):
     def find_previous_sibling(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -954,7 +954,7 @@ class PageElement(object):
     def find_previous_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -993,7 +993,7 @@ class PageElement(object):
     def find_parent(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         """Find the closest parent of this PageElement that matches the given
@@ -1023,7 +1023,7 @@ class PageElement(object):
     def find_parents(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
@@ -1067,7 +1067,7 @@ class PageElement(object):
         # specific here.
         method: Callable,
         name: _FindMethodName,
-        attrs: _StrainableAttributes,
+        attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -1080,7 +1080,7 @@ class PageElement(object):
     def _find_all(
         self,
         name: _FindMethodName,
-        attrs: _StrainableAttributes,
+        attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         limit: Optional[int],
         generator: Iterator[PageElement],
@@ -1113,7 +1113,7 @@ class PageElement(object):
         if isinstance(name, ElementFilter):
             matcher = name
         else:
-            matcher = SoupStrainer(name, attrs, string, **kwargs)
+            matcher = SoupStrainer(name, attrs or {}, string, **kwargs)
 
         result: Iterable[_OneElement]
         if string is None and not limit and not attrs and not kwargs:
@@ -2241,7 +2241,7 @@ class Tag(PageElement):
     def __call__(
         self,
         name: Optional[_StrainableElement] = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -2709,7 +2709,7 @@ class Tag(PageElement):
     def find(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -2740,7 +2740,7 @@ class Tag(PageElement):
     def find_all(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = {},
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
