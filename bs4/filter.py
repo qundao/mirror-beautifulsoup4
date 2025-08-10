@@ -38,6 +38,7 @@ from bs4._typing import (
     _StrainableString,
     _StringMatchFunction,
     _TagMatchFunction,
+    _TagOrGenerator,
 )
 
 
@@ -127,12 +128,15 @@ class ElementFilter(object):
             return True
         return self.match_function(element)
 
-    def filter(self, generator: Iterator[PageElement]) -> Iterator[_OneElement]:
+    def filter(self, generator: _TagOrGenerator) -> Iterator[_OneElement]:
         """The most generic search method offered by Beautiful Soup.
 
         Acts like Python's built-in `filter`, using
         `ElementFilter.match` as the filtering function.
         """
+        if isinstance(generator, Tag):
+            generator = generator.descendants
+
         # If there are no rules at all, don't bother filtering. Let
         # anything through.
         if self.includes_everything:
@@ -147,39 +151,86 @@ class ElementFilter(object):
                 if self.match(i, _known_rules=True):
                     yield cast("_OneElement", i)
 
-    def find(self, generator: Iterator[PageElement]) -> _AtMostOneElement:
+    def find(self, generator: _TagOrGenerator) -> _AtMostOneElement:
         """A lower-level equivalent of :py:meth:`Tag.find`.
 
-        You can pass in your own generator for iterating over
-        `PageElement` objects. The first one that matches this
-        `ElementFilter` will be returned.
+        You can pass in a Tag to search, or your own generator for
+        iterating over `PageElement` objects. The first element that
+        matches this `ElementFilter` will be returned.
 
         :param generator: A way of iterating over `PageElement`
             objects.
+
         """
         for match in self.filter(generator):
             return match
         return None
 
+    def find_tag(self, generator: _TagOrGenerator) -> Optional[Tag]:
+        """Like ElementFilter.find(), but guaranteed to return either a Tag or None.
+        """
+        # NOTE: For this and the other type-safe find_* methods, we
+        # can't just call out to the non-type-safe method. That method
+        # might return an object of the wrong type, or hit its limit
+        # by counting objects that we wouldn't count.
+        for match in self.filter(generator):
+            if isinstance(match, Tag):
+                return match
+        return None
+
+    def find_string(self, generator: _TagOrGenerator) -> Optional[NavigableString]:
+        """Like ElementFilter.find(), but guaranteed to return either a NavigableString or None.
+        """
+        for match in self.filter(generator):
+            if isinstance(match, NavigableString):
+                return match
+        return None
+
     def find_all(
-        self, generator: Iterator[PageElement], limit: Optional[int] = None
+        self, generator: _TagOrGenerator, limit: Optional[int] = None
     ) -> _QueryResults:
         """A lower-level equivalent of :py:meth:`Tag.find_all`.
 
-        You can pass in your own generator for iterating over
-        `PageElement` objects. Only elements that match this
-        `ElementFilter` will be returned in the :py:class:`ResultSet`.
+        You can pass in a Tag to search, or your own generator for
+        iterating over `PageElement` objects. Only elements that match
+        this `ElementFilter` will be returned in the
+        :py:class:`ResultSet`.
 
         :param generator: A way of iterating over `PageElement`
             objects.
 
         :param limit: Stop looking after finding this many results.
+
         """
         results: _QueryResults = ResultSet(self)
         for match in self.filter(generator):
             results.append(match)
             if limit is not None and len(results) >= limit:
                 break
+        return results
+
+    def find_all_tags(self, generator: _TagOrGenerator, limit: Optional[int] = None
+    ) -> ResultSet[Tag]:
+        """Like ElementFilter.find_all(), but guaranteed to only match Tag objects.
+        """
+        results: ResultSet[Tag] = ResultSet(self)
+        for match in self.filter(generator):
+            if isinstance(match, Tag):
+                results.append(match)
+                if limit is not None and len(results) >= limit:
+                    break
+        return results
+
+    def find_all_strings(self, generator: _TagOrGenerator, limit: Optional[int] = None
+    ) -> ResultSet[NavigableString]:
+        """Like ElementFilter.find_all(), but guaranteed to only match NavigableString objects.
+        """
+        results: ResultSet[NavigableString] = ResultSet(self)
+        for match in self.filter(generator):
+            if isinstance(match, NavigableString):
+                results.append(match)
+                if limit is not None and len(results) >= limit:
+                    break
         return results
 
     def allow_tag_creation(

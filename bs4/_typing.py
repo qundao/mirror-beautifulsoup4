@@ -24,6 +24,7 @@ from typing import (
     Dict,
     IO,
     Iterable,
+    Iterator,
     Mapping,
     Optional,
     Pattern,
@@ -199,3 +200,5 @@ _StrainableAttributes: TypeAlias = Dict[str, _StrainableAttribute]
 _OneElement: TypeAlias = Union["PageElement", "Tag", "NavigableString"]
 _AtMostOneElement: TypeAlias = Optional[_OneElement]
 _QueryResults: TypeAlias = "ResultSet[_OneElement]"
+
+_TagOrGenerator: TypeAlias = Union["Tag", Iterator["PageElement"]]
