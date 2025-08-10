@@ -418,8 +418,6 @@ class Element(BeautifulSoupNode):
             )
 
     def getAttributes(self) -> AttrList:
-        if isinstance(self.element, Comment):
-            return {}
         assert self.tag is not None
         return AttrList(self.tag)
 
@@ -431,6 +429,7 @@ class Element(BeautifulSoupNode):
     _Html5libAttributes: TypeAlias = Dict[_Html5libAttributeName, str]
 
     def setAttributes(self, attributes: Optional[_Html5libAttributes]) -> None:
+        assert self.tag is not None
         if attributes is not None and len(attributes) > 0:
             # Replace any namespaced attributes with
             # NamespacedAttribute objects.
@@ -453,14 +452,14 @@ class Element(BeautifulSoupNode):
             # Then set the attributes on the Tag associated with this
             # BeautifulSoupNode.
             for name, value_or_values in list(normalized_attributes.items()):
-                self.element[name] = value_or_values
+                self.tag[name] = value_or_values
 
             # The attributes may contain variables that need substitution.
             # Call set_up_substitutions manually.
             #
             # The Tag constructor called this method when the Tag was created,
             # but we just set/changed the attributes, so call it again.
-            self.soup.builder.set_up_substitutions(self.element)
+            self.soup.builder.set_up_substitutions(self.tag)
 
     attributes = property(getAttributes, setAttributes)
 
@@ -495,14 +494,16 @@ class Element(BeautifulSoupNode):
     def removeChild(self, node: "Element") -> None:
         node.element.extract()
 
-    def reparentChildren(self, new_parent: "Element") -> None:
+    def reparentChildren(self, newParent: "Element") -> None:
         """Move all of this tag's children into another tag."""
         # print("MOVE", self.element.contents)
         # print("FROM", self.element)
         # print("TO", new_parent.element)
 
-        element = self.tag or self.string
-        new_parent_element = new_parent.tag
+        element = self.tag
+        assert element is not None
+        new_parent_element = newParent.tag
+        assert new_parent_element is not None
         # Determine what this tag's next_element will be once all the children
         # are removed.
         final_next_element = element.next_sibling
@@ -580,11 +581,12 @@ class Element(BeautifulSoupNode):
     # TODO-TYPING: typeshed stubs are incorrect about this;
     # hasContent returns a boolean, not None.
     def hasContent(self) -> bool: # type:ignore
-        return len(self.tag.contents) > 0
+        return self.tag is None or len(self.tag.contents) > 0
 
     # TODO-TYPING: typeshed stubs are incorrect about this;
     # cloneNode returns a new Node, not None.
     def cloneNode(self) -> treebuilder_base.Node: # type:ignore
+        assert self.tag is not None
         tag = self.soup.new_tag(self.tag.name, self.namespace)
         node = Element(tag, self.soup, self.namespace)
         for key, value in self.attributes:
