@@ -16,7 +16,7 @@ with examples. I show you what the library is good for, how it works,
 how to use it, how to make it do what you want, and what to do when it
 violates your expectations.
 
-This document covers Beautiful Soup version 4.13.4. The examples in
+This document covers Beautiful Soup version 4.14.0. The examples in
 this documentation were written for Python 3.8.
 
 You might be looking for the documentation for `Beautiful Soup 3
@@ -479,7 +479,7 @@ Unicode string. If you don't, your string will carry around a
 reference to the entire Beautiful Soup parse tree, even when you're
 done using Beautiful Soup. This is a big waste of memory.
 
-.. BeautifulSoup
+.. py:class:: BeautifulSoup
 
 ---------------------------
 
@@ -509,6 +509,24 @@ so it's been given the special ``.name`` "[document]"::
  soup.name
  # '[document]'
 
+.. py:class:: PageElement
+
+-------------------------
+
+You may sometimes see a reference to a class called
+:py:class:`PageElement`, especially if you are :ref:`running a type
+checker <Type-safe programming>` against your Beautiful Soup
+code.
+
+:py:class:`PageElement` is the base class of both
+:py:class:`Tag` and :py:class:`NavigableString` (and
+:py:class:`BeautifulSoup` itself). Everything that originally came from an XML or HTML document is a
+:py:class:`PageElement`. The class has some methods and attributes that are common to both
+:py:class:`Tag` and :py:class:`NavigableString`, like
+:ref:`.parent <.parent>`. But most of the time, if you
+have a :py:class:`PageElement`, you need to figure out whether it's a
+:py:class:`Tag` or a :py:class:`NavigableString` before you can use it.
+ 
 Special strings
 ---------------
 
@@ -597,23 +615,6 @@ A :py:class:`NavigableString` subclass that represents a `CData section <https:/
 
 A :py:class:`NavigableString` subclass that represents the contents
 of an `XML processing instruction <https://www.w3.org/TR/REC-xml/#sec-pi>`_.
-
-.. py:class:: PageElement
-
-=========================
-
-You may sometimes see a reference to a class called
-:py:class:`PageElement`, especially if you are :ref:`running a type
-checker <Type-safe programming>` against your Beautiful Soup
-code.
-
-:py:class:`PageElement` is the base class of both
-:py:class:`Tag` and :py:class:`NavigableString`. Everything that originally came from an XML or HTML document is a
-:py:class:`PageElement`. The class has some methods and attributes that are common to both
-:py:class:`Tag` and :py:class:`NavigableString`, like
-:ref:`.parent <.parent>`. But most of the time, if you
-have a :py:class:`PageElement`, you need to figure out whether it's a
-:py:class:`Tag` or a :py:class:`NavigableString` before you can use it.
 
 Navigating the tree
 ===================
