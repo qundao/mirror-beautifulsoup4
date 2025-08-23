@@ -2724,7 +2724,7 @@ class Tag(PageElement):
             name: _FindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             recursive: bool = True,
-            string: _StrainableString,
+            string: _StrainableString="",
             **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         ...
@@ -2794,6 +2794,22 @@ class Tag(PageElement):
 
     findAll = _deprecated_function_alias("findAll", "find_all", "4.0.0")
     findChildren = _deprecated_function_alias("findChildren", "find_all", "3.0.0")
+
+    def find_tag(self, filter_:ElementFilter) -> Optional[Tag]:
+        """Find the first `Tag` that matches the given `ElementFilter`."""
+        return filter_.find_tag(self)
+
+    def find_string(self, filter_:ElementFilter) -> Optional[NavigableString]:
+        """Find the first `NavigableString` that matches the given `ElementFilter`."""
+        return filter_.find_string(self)
+
+    def find_tags(self, filter_:ElementFilter) -> ResultSet[Tag]:
+        """Find all `Tag`s that match the given `ElementFilter`."""
+        return filter_.find_tags(self)
+
+    def find_strings(self, filter_:ElementFilter) -> ResultSet[NavigableString]:
+        """Find all `NavigableString`s that match the given `ElementFilter`."""
+        return filter_.find_strings(self)
 
     # Generator methods
     @property

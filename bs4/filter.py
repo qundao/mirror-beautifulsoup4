@@ -140,8 +140,7 @@ class ElementFilter(object):
         # If there are no rules at all, don't bother filtering. Let
         # anything through.
         if self.includes_everything:
-            for i in generator:
-                yield i
+            yield from generator
         while True:
             try:
                 i = next(generator)
@@ -160,7 +159,6 @@ class ElementFilter(object):
 
         :param generator: A way of iterating over `PageElement`
             objects.
-
         """
         for match in self.filter(generator):
             return match
@@ -170,9 +168,10 @@ class ElementFilter(object):
         """Like ElementFilter.find(), but guaranteed to return either a Tag or None.
         """
         # NOTE: For this and the other type-safe find_* methods, we
-        # can't just call out to the non-type-safe method. That method
-        # might return an object of the wrong type, or hit its limit
-        # by counting objects that we wouldn't count.
+        # can't just call out to the non-type-safe method (find(), in
+        # this case). That method might return an object of the wrong
+        # type, or hit its limit by counting objects that we wouldn't
+        # count.
         for match in self.filter(generator):
             if isinstance(match, Tag):
                 return match
@@ -209,7 +208,7 @@ class ElementFilter(object):
                 break
         return results
 
-    def find_all_tags(self, generator: _TagOrGenerator, limit: Optional[int] = None
+    def find_tags(self, generator: _TagOrGenerator, limit: Optional[int] = None
     ) -> ResultSet[Tag]:
         """Like ElementFilter.find_all(), but guaranteed to only match Tag objects.
         """
@@ -221,7 +220,7 @@ class ElementFilter(object):
                     break
         return results
 
-    def find_all_strings(self, generator: _TagOrGenerator, limit: Optional[int] = None
+    def find_strings(self, generator: _TagOrGenerator, limit: Optional[int] = None
     ) -> ResultSet[NavigableString]:
         """Like ElementFilter.find_all(), but guaranteed to only match NavigableString objects.
         """

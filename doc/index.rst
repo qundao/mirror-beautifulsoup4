@@ -64,7 +64,7 @@ Quick Start
 Here's an HTML document I'll be using as an example throughout this
 document. It's part of a story from *Alice in Wonderland*::
 
- html_doc = """<html><head><title>The Dormouse's story</title></head>
+ sisters_doc = """<html><head><title>The Dormouse's story</title></head>
  <body>
  <p class="title"><b>The Dormouse's story</b></p>
 
@@ -82,7 +82,7 @@ Running the "three sisters" document through Beautiful Soup gives us a
 data structure::
 
  from bs4 import BeautifulSoup
- soup = BeautifulSoup(html_doc, 'html.parser')
+ soup = BeautifulSoup(sisters_doc, 'html.parser')
 
  print(soup.prettify())
  # <html>
@@ -598,12 +598,29 @@ A :py:class:`NavigableString` subclass that represents a `CData section <https:/
 A :py:class:`NavigableString` subclass that represents the contents
 of an `XML processing instruction <https://www.w3.org/TR/REC-xml/#sec-pi>`_.
 
+.. py:class:: PageElement
+
+-------------------------
+
+You may sometimes see a reference to a class called
+:py:class:`PageElement`, especially if you are :ref:`running a type
+checker <Type-safe programming>` against your Beautiful Soup
+code.
+
+:py:class:`PageElement` is the base class of both
+:py:class:`Tag` and :py:class:`NavigableString`. Everything that originally came from an XML or HTML document is a
+:py:class:`PageElement`. The class has some methods and attributes that are common to both
+:py:class:`Tag` and :py:class:`NavigableString`, like
+:ref:`.parent <.parent>`. But most of the time, if you
+have a :py:class:`PageElement`, you need to figure out whether it's a
+:py:class:`Tag` or a :py:class:`NavigableString` before you can use it.
+
 Navigating the tree
 ===================
 
 Here's the "Three sisters" HTML document again::
 
- html_doc = """
+ sisters_doc = """
  <html><head><title>The Dormouse's story</title></head>
  <body>
  <p class="title"><b>The Dormouse's story</b></p>
@@ -618,7 +635,7 @@ Here's the "Three sisters" HTML document again::
  """
 
  from bs4 import BeautifulSoup
- soup = BeautifulSoup(html_doc, 'html.parser')
+ soup = BeautifulSoup(sisters_doc, 'html.parser')
 
 I'll use this as an example to show you how to move from one part of
 a document to another.
@@ -1089,7 +1106,7 @@ them briefly.
 
 Once again, I'll be using the "three sisters" document as an example::
 
- html_doc = """
+ sisters_doc = """
  <html><head><title>The Dormouse's story</title></head>
  <body>
  <p class="title"><b>The Dormouse's story</b></p>
@@ -1104,7 +1121,7 @@ Once again, I'll be using the "three sisters" document as an example::
  """
 
  from bs4 import BeautifulSoup
- soup = BeautifulSoup(html_doc, 'html.parser')
+ soup = BeautifulSoup(sisters_doc, 'html.parser')
 
 By passing in a filter to a method like ``find_all()``, you can
 zoom in on the parts of the document you're interested in.
@@ -1241,6 +1258,8 @@ code finds all the <a> tags *and* all the <b> tags::
  #  <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
 
 Now we're ready to look at the search methods in detail.
+
+.. _find_all:
 
 ``find_all()``
 --------------
@@ -1556,6 +1575,8 @@ These two lines are also equivalent::
 
  soup.title.find_all(string=True)
  soup.title(string=True)
+
+.. _find:
 
 ``find()``
 ----------
@@ -3090,35 +3111,48 @@ You can use :py:meth:`Tag.copy_self` to create a copy of a
       
 *(Tag.copy_self() is introduced in Beautiful Soup 4.13.0.)*
 
-Low-level search interface
-==========================
+.. _Type-safe programming:
 
-Almost everyone who uses Beautiful Soup to extract information from a
-document can get what they need using the methods described in
-`Searching the tree`_. However, there's a lower-level interface that
-lets you define any matching behavior you want. Behind the scenes, the
-parts of the Beautiful Soup API that most people use--``find_all()``
-and the like—are actually using this low-level interface, and you
-can use it directly.
+Type-safe programming
+=====================
 
-*(Access to the low-level search interface is a new feature in
-Beautiful Soup 4.13.0.)*
+If you're trying to write type-safe Python using a type checker,
+you'll probably find yourself frustrated by the methods described in
+`Searching the tree`_. When you call a method like ``find_all``,
+*you* know whether you ought to be getting ``Tag`` objects or
+``NavigableString`` objects in return, but your type checker doesn't
+necessarily know. These methods just have too many possible
+combinations of inputs and outputs.
 
-Type safety
------------
+Because of this, most code that uses Beautiful Soup will generate
+errors like these when run through a type checker like ``pyright`` or
+``mypy``:
 
-If you're trying to write type-safe Python, you'll probably be
-frustrated by the find* methods described earlier in this
-document. When you call a method like ``find_all``, _you_ know whether
-you ought to be getting ``Tag`` or ``NavigableString`` in return, but
-Beautiful Soup doesn't know.
+* ``error: Incompatible types in assignment (expression has type "ResultSet[PageElement | Tag | NavigableString]", variable has type "ResultSet[Tag]") [assignment]``
+
+* ``Type "_QueryResults" is not assignable to declared type "ResultSet[Tag]"``
+
+If you're using Beautiful Soup to write a quick script, this doesn't
+matter. But if you're using Beautiful Soup in production code and
+trying to be type-safe, it can be annoying to cast the results of
+every :ref:`find <find>` or :ref:`find_all <find_all>` call to the appropriate data type.
+
+Fortunately, you can use the :py:class:`SoupStrainer` class to write
+type-safe code fairly easily.
+
+*(Although the SoupStrainer class has been part of Beautiful
+Soup for many years, using it as described below to do type-safe
+programming requires new features that were introduced in Beautiful
+Soup 4.14.0.)*
 
 .. py:class:: SoupStrainer
-              
-The :py:class:`SoupStrainer` class takes the same arguments as a typical
-method from `Searching the tree`_: :ref:`name <name>`, :ref:`attrs
-<attrs>`, :ref:`string <string>`, and :ref:`**kwargs <kwargs>`. Here are
-three :py:class:`SoupStrainer` objects::
+
+The :py:class:`SoupStrainer` class encapsulates a set of rules for
+finding tags and strings in a document. The :py:class:`SoupStrainer`
+constructor takes the same arguments as a typical method from
+`Searching the tree`_: :ref:`name <name>`, :ref:`attrs <attrs>`,
+:ref:`string <string>`, and :ref:`**kwargs <kwargs>`. Here are four
+example :py:class:`SoupStrainer` objects::
 
  from bs4 import SoupStrainer
 
@@ -3126,26 +3160,146 @@ three :py:class:`SoupStrainer` objects::
 
  only_tags_with_id_link2 = SoupStrainer(id="link2")
 
+ only_a_tags_with_id_link2 = SoupStrainer(name="a", id="link2")
+ 
  def is_short_string(string):
      return string is not None and len(string) < 10
 
  only_short_strings = SoupStrainer(string=is_short_string)
 
+I'm going to bring back the "three sisters" document again, and we'll
+see how :py:class:`SoupStrainer` objects can be used to find parts of
+a document in a way that will pass type checking::
 
+ from bs4 import BeautifulSoup, Tag, NavigableString, ResultSet
+ from typing import Optional, Sequence
+  
+ sisters_doc = """<html><head><title>The Dormouse's story</title></head>
+ <body>
+ <p class="title"><b>The Dormouse's story</b></p>
+
+ <p class="story">Once upon a time there were three little sisters; and their names were
+ <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
+ <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
+ <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
+ and they lived at the bottom of a well.</p>
+
+ <p class="story">...</p>
+ """
+ three_sisters = BeautifulSoup(sisters_doc, "html.parser")
+
+.. py:method:: Tag.find_tag
+
+This method takes a :py:class:`SoupStrainer` (or other
+:py:class:`ElementFilter`; see below) and returns either the first
+:py:class:`Tag` that matches it, or ``None`` if there is no match.
+
+Since :py:class:`BeautifulSoup` is itself a :py:class:`Tag` object,
+you can call all of these methods on the :py:class:`BeautifulSoup`
+object itself. This is probably the most common way to use them::
+
+ tag:Optional[Tag] = three_sisters.find_tag(only_a_tags)
+ # <a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>
+
+You can also call these methods on any :py:class:`Tag` in the
+document, though to be type safe you'll probably need to assert that
+the :py:class:`Tag` isn't ``None``::
+
+ title:Optional[Tag] = three_sisters.title
+ assert title is not None
+ tag = title.find_tag(only_a_tags)
+ # None 
+
+.. py:method:: Tag.find_string
+
+This method takes a :py:class:`SoupStrainer` (or other
+:py:class:`ElementFilter`) and returns either the first
+:py:class:`NavigableString` that matches it, or ``None`` if there is no
+match::
+
+ string:Optional[NavigableString] = three_sisters.find_string(only_short_strings)
+ # 'Elsie'
+
+.. py:method:: Tag.find_tags
+
+This method takes a :py:class:`SoupStrainer` (or other
+:py:class:`ElementFilter`) and returns a :py:class:`ResultSet`
+containing all of the matching :py:class:`Tag` objects::
+
+ tags:Sequence[Tag] = three_sisters.find_tags(only_a_tags)
+ # [<a class="sister" href="http://example.com/elsie" id="link1">Elsie</a>, <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>, <a class="sister" href="http://example.com/tillie" id="link3">Tillie</a>]
+
+.. py:method: Tag.find_strings
+
+This method takes a :py:class:`SoupStrainer` (or other
+:py:class:`ElementFilter`) and returns a :py:class:`ResultSet`
+containing all of the matching :py:class:`NavigableString` objects::
+
+ strings:Sequence[NavigableString] = three_sisters.find_strings(only_short_strings)
+ # ['\n', '\n', '\n', 'Elsie', ',\n ', 'Lacie', ' and\n ', 'Tillie', '\n', '...', '\n'] 
+
+.. py:method:: SoupStrainer.find_tag(generator)
+.. py:method:: SoupStrainer.find_tags(generator)
+.. py:method:: SoupStrainer.find_string(generator)
+.. py:method:: SoupStrainer.find_strings(generator)
+
+The four :py:class:`Tag` methods mentioned above provide type-safe
+equivalents of :py:meth:`Tag.find` and :py:meth:`Tag.find_all`. If you
+want to call one of the other ``find*`` methods in a type-safe way,
+the :py:class:`SoupStrainer` class itself offers four methods that you
+can use, with the same names as the :py:class:`Tag` methods. The twist
+is that the :py:class:`SoupStrainer` methods need to take a generator
+as an argument. The generator determines which tags and strings will be
+considered for matching in the first place.
+
+The generators to use are the ones described in `Navigating the tree`_:
+``next_elements``, ``previous_siblings``, ``self_and_parents``, and so
+on. Here are some examples of type-safe Python using these generators::
+   
+ link:Tag = three_sisters.a
+ assert link is not None
+
+ only_a_tags.find_tag(link.next_siblings)
+ # <a class="sister" href="http://example.com/lacie" id="link2">Lacie</a>
+
+ only_short_strings.find_strings(link.next_elements)
+ link.find_all_next(only_short_strings)
+ # ['Elsie', ',\n ', 'Lacie', ' and\n ', 'Tillie', '\n', '...', '\n']
+
+ # This type-safe code...
+ SoupStrainer("title").find_tags(link.previous_elements)
+ # [<title>The Dormouse's story</title>]
+
+ # ...does the same thing as this simpler, but non-type-safe code:
+ link.find_all_previous("title")
+ # [<title>The Dormouse's story</title>]
+
+               
 Custom element filtering
-------------------------
+========================
 
 .. py:class:: ElementFilter
 
-The :py:class:`ElementFilter` class is your entry point to the
-low-level interface. To use it, define a function that takes a
+When the ``find`` methods and :py:class:`SoupStrainer` aren't enough
+to support your complicated logic for locating something in a
+document, you can use :py:class:`ElementFilter` instead. This class
+lets you completely customize which elements are considered, in which
+order, and what it means to "match" an element. In fact,
+:py:class:`SoupStrainer` is just a subclass of :py:class:`ElementFilter`,
+designed to work like the ``find`` methods that are the core of
+Beautiful Soup.
+
+*(The ElementFilter class was introduced in Beautiful Soup
+4.13.0.)*
+
+To use :py:class:`ElementFilter`, define a function that takes a
 :py:class:`PageElement` object (which could be either a
 :py:class:`Tag` or a :py:class:`NavigableString`). The function must
 return ``True`` if the element matches your custom criteria, and
 ``False`` if it doesn't.
 
-This example function looks for content-containing tags and strings,
-but skips whitespace-only strings::
+This example function looks for both tags and strings, but but skips
+strings that only contain whitespace::
 
  from bs4 import Tag, NavigableString
  def non_whitespace_element_func(tag_or_string):
@@ -3159,16 +3313,26 @@ but skips whitespace-only strings::
          (isinstance(tag_or_string, NavigableString) and
              tag_or_string.strip() != ""))
 
-Once you have a function, pass it into the :py:class:`ElementFilter` constructor::
+Once you have a function that matches what you want to match, pass it
+into the :py:class:`ElementFilter` constructor::
 
  from bs4.filter import ElementFilter
  non_whitespace_filter = ElementFilter(non_whitespace_element_func)
 
 You can then use this :py:class:`ElementFilter` object as the first
-argument to any of the `Searching the tree`_ methods. Whatever
-criteria you defined in your function will be used instead of the
-default Beautiful Soup match logic::
+and only argument to any of the methods described in `Searching the
+tree`_ or `Type-safe programming`_. You can also call methods like
+:py:meth:`find_string <SoupStrainer.find_string>` or
+:py:meth:`find_tags <SoupStrainer.find_tags>` on the
+:py:class:`ElementFilter` object itself, though you'll also have to
+pass in a generator.
 
+However you use it, Beautiful Soup will use your function instead of its
+default match logic. Every potential match will be run through your
+function, and the only :py:class:`PageElement` objects returned will
+be the ones where your function returned ``True``::
+
+  
  from bs4 import BeautifulSoup
  small_doc = """
  <p>
@@ -3189,25 +3353,36 @@ default Beautiful Soup match logic::
  soup.find("i").find_next_siblings(non_whitespace_filter)
  # ['\n  and\n  ', <u>underline</u>]
 
-Every potential match will be run through your function, and the only
-:py:class:`PageElement` objects returned will be the ones where your
-function returned ``True``.
+ soup.find_strings(non_whitespace_filter)
+ # ['bold', 'italic', '\n  and\n  ', 'underline']
 
-To summarize the function-based matching behaviors,
+ soup.find_tags(non_whitespace_filter)
+ # [<p><b>bold</b><i>italic</i>  and <u>underline</u></p>, <b>bold</b>, <i>italic</i>, <u>underline</u>]
 
-* A function passed as the first argument to a search method
-  (or equivalently, using the ``name`` argument) considers only
-  :py:class:`Tag` objects.
-* A function passed to a search method using the ``string`` argument
-  considers only :py:class:`NavigableString` objects.
-* A function passed to a search method using an :py:class:`ElementFilter`
-  object considers both :py:class:`Tag` and :py:class:`NavigableString`
-  objects.
+ non_whitespace_filter.find_tags(soup.find("b").next_elements)
+ # [<i>italic</i>, <u>underline</u>]
+
+ non_whitespace_filter.find_strings(soup.find("u").previous_siblings)
+ # ['\n  and\n  ']
+
+ non_whitespace_filter.find_strings(soup.find("u").previous_elements)
+ # ['\n  and\n  ', 'italic', 'bold']
+
+To summarize the rules for using custom functions in matches:
+
+* A function passed as the first argument to a ``find`` method
+  (or passed in using the ``name`` argument) should take a
+  :py:class:`Tag` object as its single argument.
+* A function passed to a ``find`` method using the ``string`` argument
+  should take a :class:`NavigableString` object as its single argument.
+* A function used to build an :py:class:`ElementFilter` object should
+  be prepared for either a :py:class:`Tag` or a
+  :py:class:`NavigableString` as its single argument.
 
 Custom element iteration
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
-.. py:method:: ElementFilter.filter()
+.. py:method: ElementFilter.filter
 
 By passing an :py:class:`ElementFilter` instance into Beautiful Soup's
 tree-searching methods, you can completely customize what it means for
@@ -3217,7 +3392,8 @@ also completely customize what it means for Beautiful Soup to iterate
 over the parse tree in the first place.
 
 The :py:meth:`ElementFilter.filter()` method takes a generator that yields
-a stream of :py:class:`PageElement` objects. There is no restriction
+a stream of :py:class:`PageElement` objects—that is, a mixed list of
+:py:class:`Tag` and :py:class:`NavigableString` objects. There is no restriction
 on which :py:class:`PageElement` objects show up, how many times they
 show up, or in which order. Theoretically, they don't even need to be
 from the same :py:class:`BeautifulSoup` document. You can do whatever
@@ -3268,9 +3444,10 @@ Parsing only part of a document
 Let's say you want to use Beautiful Soup to look at a document's <a>
 tags. It's a waste of time and memory to parse the entire document and
 then go over it again looking for <a> tags. It would be much faster to
-ignore everything that wasn't an <a> tag in the first place. The
-:py:class:`SoupStrainer` class allows you to choose which parts of an incoming
-document are parsed. You just create a :py:class:`SoupStrainer` and pass it in
+ignore everything that wasn't an <a> tag in the first place.
+
+You can do this by creating a :py:class:`SoupStrainer` class object,
+as described in `Type-safe programming`_, and passing it in
 to the :py:class:`BeautifulSoup` constructor as the ``parse_only`` argument.
 
 (Note that *this feature won't work if you're using the html5lib parser*.
@@ -3281,24 +3458,10 @@ make it into the parse tree, it'll crash. To avoid confusion, in the
 examples below I'll be forcing Beautiful Soup to use Python's
 built-in parser.)
 
-I'm going to bring back the "three sisters" document one more time,
-and we'll see what the document looks like when it's parsed with these
-three :py:class:`SoupStrainer` objects::
+Here's what the "three sisters" document looks like when it's parsed
+with the :py:class:`SoupStrainer` objects defined back in `Type-safe programming`_::
 
- html_doc = """<html><head><title>The Dormouse's story</title></head>
- <body>
- <p class="title"><b>The Dormouse's story</b></p>
-
- <p class="story">Once upon a time there were three little sisters; and their names were
- <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
- <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
- <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
- and they lived at the bottom of a well.</p>
-
- <p class="story">...</p>
- """
-
- print(BeautifulSoup(html_doc, "html.parser", parse_only=only_a_tags).prettify())
+ print(BeautifulSoup(three_sisters, "html.parser", parse_only=only_a_tags).prettify())
  # <a class="sister" href="http://example.com/elsie" id="link1">
  #  Elsie
  # </a>
@@ -3309,12 +3472,12 @@ three :py:class:`SoupStrainer` objects::
  #  Tillie
  # </a>
 
- print(BeautifulSoup(html_doc, "html.parser", parse_only=only_tags_with_id_link2).prettify())
+ print(BeautifulSoup(sisters_doc, "html.parser", parse_only=only_tags_with_id_link2).prettify())
  # <a class="sister" href="http://example.com/lacie" id="link2">
  #  Lacie
  # </a>
 
- print(BeautifulSoup(html_doc, "html.parser", parse_only=only_short_strings).prettify())
+ print(BeautifulSoup(sisters_doc, "html.parser", parse_only=only_short_strings).prettify())
  # Elsie
  # ,
  # Lacie
@@ -3428,10 +3591,8 @@ tell Beautiful Soup to instantiate *subclasses* of :py:class:`Tag` or
  class MyTag(Tag):
      pass
 
-
  class MyString(NavigableString):
      pass
-
 
  markup = "<div>some text</div>"
  soup = BeautifulSoup(markup, 'html.parser')
