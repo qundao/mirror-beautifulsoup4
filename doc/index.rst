@@ -600,7 +600,7 @@ of an `XML processing instruction <https://www.w3.org/TR/REC-xml/#sec-pi>`_.
 
 .. py:class:: PageElement
 
--------------------------
+=========================
 
 You may sometimes see a reference to a class called
 :py:class:`PageElement`, especially if you are :ref:`running a type
