@@ -651,6 +651,7 @@ class PageElement(object):
             next_up = e.next_element
             e.__dict__.clear()
             if isinstance(e, Tag):
+                e.name = ""
                 e.contents = []
             e._decomposed = True
             e = next_up

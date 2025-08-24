@@ -1,4 +1,10 @@
-= 4.13.5 (Unreleased)
+= Unreleased
+
+* Fixed an unhandled exception when creating the string representation of
+  a decomposed element. (The output is not *useful* and you still
+  shouldn't do this, but it won't raise an exception anymore.) [bug=2120300]
+
+= 4.13.5 (20250824)
 
 * Fixed an unhandled exception when parsing invalid markup that contains the { character
   when using lxml==6.0.0. [bug=2116306]
@@ -14,6 +20,11 @@
 * Used overloading to improve type hints for prettify().
 * Updated the SoupStrainer documentation to clarify that during initial
   parsing, attribute values are always passed into the SoupStrainer as raw strings. [bug=2111651]
+* Fixed all type checking errors issued by pyright. (Previously only mypy
+  was used for type checking.)
+* Improved the type hints for PageElement.replace_with. [bug=2114746]
+* Improved the type hint for the arguments of the lambda function that can
+  be used to match a tag's attribute. [bug=2110401]
 * Modified some of the lxml tests to accommodate behavioral changes in libxml2
   2.14.3. Specifically:
 
@@ -24,9 +35,6 @@
 
   2. Out-of-range numeric entities are replaced with REPLACEMENT
   CHARACTER rather than omitted entirely. [bug=2112242]
-* Improved the type hints for PageElement.replace_with. [bug=2114746]
-* Improved the type hint for the arguments of the lambda function that can
-  be used to match a tag's attribute. [bug=2110401]
 
 = 4.13.4 (20250415)
 

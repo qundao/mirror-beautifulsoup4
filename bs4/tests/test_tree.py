@@ -1378,6 +1378,8 @@ class TestTreeModification(SoupTest):
         # p2 is unaffected.
         assert False is p2.decomposed
 
+        assert "<></>" == str(p1)
+
     def test_decompose_string(self):
         soup = self.soup("<div><p>String 1</p><p>String 2</p></p>")
         div = soup.div
@@ -1386,6 +1388,7 @@ class TestTreeModification(SoupTest):
         text.decompose()
         assert True is text.decomposed
         assert "<div><p></p><p>String 2</p></div>" == div.decode()
+        assert "String 1" == str(text)
 
     def test_string_set(self):
         """Tag.string = 'string'"""
