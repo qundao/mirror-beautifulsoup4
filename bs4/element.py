@@ -2279,7 +2279,7 @@ class Tag(PageElement):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> Union[_SomeTags|_SomeNavigableStrings|_QueryResults]:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
@@ -2781,7 +2781,7 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
-    ) -> Union[_AtMostOneTag|_AtMostOneNavigableString|_AtMostOneElement]:
+    ) -> Union[_AtMostOneTag,_AtMostOneNavigableString,_AtMostOneElement]:
         """Look in the children of this PageElement and find the first
         PageElement that matches the given criteria.
 
@@ -2850,7 +2850,7 @@ class Tag(PageElement):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> Union[_SomeTags|_SomeNavigableStrings|_QueryResults]:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Look in the children of this `PageElement` and find all
         `PageElement` objects that match the given criteria.
 
