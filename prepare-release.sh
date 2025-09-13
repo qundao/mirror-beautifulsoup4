@@ -23,12 +23,13 @@ tox run-parallel
 # Build sdist and wheel.
 hatch build
 
-# Install the sdist locally and run unit tests.
+# Install the sdist locally and run unit tests. Note that we run the tests from the original source tree because
+# the tests are no longer installed (tarball) or packaged (wheel)
 pyenv virtualenv-delete -f py3-install-test-virtualenv
 pyenv virtualenv 3.13.1 py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
 pip install dist/beautifulsoup4-*.tar.gz pytest lxml html5lib soupsieve
-python -m pytest ~/.pyenv/versions/3.13.*/envs/py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/tests
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
@@ -36,11 +37,10 @@ echo "EXPECT HTML ON LINE BELOW"
 # [new version number] <a>foo</a>
 
 
-# Install the wheel locally and test basic functionality. Note that we
-# don't run the unit tests because tests are not included with the
-# wheel.
+# Install the wheel locally and test basic functionality.
 pip uninstall beautifulsoup4
 pip install dist/beautifulsoup4-*.whl
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && python --version && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 
@@ -58,7 +58,7 @@ pip install pytest lxml html5lib soupsieve typing-extensions hatchling
 
 # First, install from source and run the tests.
 pip install -i https://test.pypi.org/simple/ beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
-python -m pytest ~/.pyenv/versions/py3-install-test-virtualenv/lib/python3.13/site-packages/bs4/
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
@@ -68,6 +68,7 @@ echo "EXPECT HTML ON LINE BELOW"
 # Next, install the wheel and test basic functionality.
 pip uninstall beautifulsoup4
 pip install -i https://test.pypi.org/simple/ beautifulsoup4 --extra-index-url=https://pypi.python.org/pypi --no-binary beautifulsoup4
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'lxml'))")
 # That should print something like:
@@ -88,7 +89,7 @@ pyenv virtualenv py3-install-test-virtualenv
 pyenv activate py3-install-test-virtualenv
 
 pip install pytest lxml html5lib beautifulsoup4 --no-binary beautifulsoup4
-python -m pytest ~/.pyenv/versions/py3-install-test-virtualenv/lib/python3.*/site-packages/bs4/
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'html.parser'))")
 # That should print something like:
@@ -98,6 +99,7 @@ echo "EXPECT HTML ON LINE BELOW"
 # Next, from the wheel
 pip uninstall beautifulsoup4
 pip install beautifulsoup4
+python -m pytest bs4/tests
 echo "EXPECT HTML ON LINE BELOW"
 (cd .. && which python && python -c "from bs4 import _s, __version__; print(__version__, _s('<a>foo', 'html.parser'))")
 # That should print something like:
@@ -106,3 +108,12 @@ echo "EXPECT HTML ON LINE BELOW"
 
 # Cleanup
 pyenv virtualenv-delete -f py3-install-test-virtualenv
+
+# Copy source distro
+scp dist/beautifulsoup4-*.tar.gz crummy.com:public_html/software/BeautifulSoup/bs4/download/4.13/
+
+# Refresh docs
+cd doc
+make clean; rm -rf _build build
+make html
+rsync -avp _build/html/* crummy.com:public_html/software/BeautifulSoup/bs4/doc/

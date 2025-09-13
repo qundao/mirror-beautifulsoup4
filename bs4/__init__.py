@@ -15,7 +15,7 @@ documentation: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 __author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "4.13.4"
+__version__ = "4.13.5"
 __copyright__ = "Copyright (c) 2004-2025 Leonard Richardson"
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
@@ -101,6 +101,7 @@ from typing import (
     Iterator,
     List,
     Sequence,
+    Sized,
     Optional,
     Type,
     Union,
@@ -444,7 +445,7 @@ class BeautifulSoup(Tag):
             raise TypeError(
                 f"Incoming markup is of an invalid type: {markup!r}. Markup must be a string, a bytestring, or an open filehandle."
             )
-        elif len(markup) <= 256 and (
+        elif isinstance(markup, Sized) and len(markup) <= 256 and (
             (isinstance(markup, bytes) and b"<" not in markup and b"\n" not in markup)
             or (isinstance(markup, str) and "<" not in markup and "\n" not in markup)
         ):
