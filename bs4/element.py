@@ -1113,7 +1113,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> _SomeTags:
         """Find all parents of this `PageElement` that match the given criteria.
 
         All find_* methods take a common set of arguments. See the online
@@ -1126,9 +1126,11 @@ class PageElement(object):
         :kwargs: Additional filters on attribute values.
         """
         iterator = self.parents
-        return self._find_all(
+        # Only Tags can have children, so this ResultSet will contain
+        # nothing but Tags.
+        return cast(ResultSet[Tag], self._find_all(
             name, attrs, None, limit, iterator, _stacklevel=_stacklevel + 1, **kwargs
-        )
+        ))
 
     findParents = _deprecated_function_alias("findParents", "find_parents", "4.0.0")
     fetchParents = _deprecated_function_alias("fetchParents", "find_parents", "3.0.0")
