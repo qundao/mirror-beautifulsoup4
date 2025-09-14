@@ -751,13 +751,33 @@ class PageElement(object):
 
         return results
 
+    @overload
+    def find_next( # pyright: ignore [reportOverlappingOverload]
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None=None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_next(
+            self,
+            name: None=None,
+            attrs: None=None,
+            string: _StrainableString="",
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_next(
         self,
         name: _FindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneElement:
+    ) -> Union[_AtMostOneTag,_AtMostOneNavigableString,_AtMostOneElement]:
         """Find the first PageElement that matches the given criteria and
         appears later in the document than this PageElement.
 
@@ -834,7 +854,7 @@ class PageElement(object):
     def find_next_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -873,7 +893,7 @@ class PageElement(object):
     def find_previous(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -895,7 +915,7 @@ class PageElement(object):
     def find_all_previous(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -934,7 +954,7 @@ class PageElement(object):
     def find_previous_sibling(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
@@ -960,7 +980,7 @@ class PageElement(object):
     def find_previous_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -999,7 +1019,7 @@ class PageElement(object):
     def find_parent(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         """Find the closest parent of this PageElement that matches the given
@@ -1029,7 +1049,7 @@ class PageElement(object):
     def find_parents(
         self,
         name: _FindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        attrs: _StrainableAttributes = {},
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
