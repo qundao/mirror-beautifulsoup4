@@ -910,13 +910,33 @@ class PageElement(object):
         "fetchNextSiblings", "find_next_siblings", "3.0.0"
     )
 
+    @overload
+    def find_previous( # pyright: ignore [reportOverlappingOverload]
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None=None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_previous(
+            self,
+            name: None=None,
+            attrs: None=None,
+            string: _StrainableString="",
+           **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_previous(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneElement:
+    ) -> Union[_AtMostOneTag,_AtMostOneNavigableString,_AtMostOneElement]:
         """Look backwards in the document from this `PageElement` and find the
         first `PageElement` that matches the given criteria.
 
