@@ -792,6 +792,29 @@ class PageElement(object):
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
 
     findNext = _deprecated_function_alias("findNext", "find_next", "4.0.0")
+    @overload
+    def find_all_next( # pyright: ignore [reportOverlappingOverload]
+        self,
+        name: _FindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def find_all_next(
+        self,
+        name: None = None,
+        attrs: None = None,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
 
     def find_all_next(
         self,
@@ -801,7 +824,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Find all `PageElement` objects that match the given criteria and
         appear later in the document than this `PageElement`.
 

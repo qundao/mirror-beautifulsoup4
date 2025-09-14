@@ -6,6 +6,7 @@
     * find()
     * find_all()
     * find_next()
+    * find_all_next()
     * find_next_sibling()
     * find_previous()
     * find_all_previous()
@@ -30,7 +31,6 @@
 * The results of the following methods will still require casts if you
   are running your code through a type checker:
 
-  * find_all_next()
   * find_next_siblings()
   * find_previous_siblings()
 
