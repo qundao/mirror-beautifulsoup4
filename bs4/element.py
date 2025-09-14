@@ -952,6 +952,30 @@ class PageElement(object):
 
     findPrevious = _deprecated_function_alias("findPrevious", "find_previous", "3.0.0")
 
+    @overload
+    def find_all_previous( # pyright: ignore [reportOverlappingOverload]
+        self,
+        name: _FindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def find_all_previous(
+        self,
+        name: None = None,
+        attrs: None = None,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
     def find_all_previous(
         self,
         name: _FindMethodName = None,
@@ -960,7 +984,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Look backwards in the document from this `PageElement` and find all
         `PageElement` that match the given criteria.
 

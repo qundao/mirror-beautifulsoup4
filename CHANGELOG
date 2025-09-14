@@ -8,6 +8,7 @@
     * find_next()
     * find_next_sibling()
     * find_previous()
+    * find_all_previous()
     * find_previous_sibling()
     * __call__() (i.e. calling a Tag as if it were a function)
 
@@ -31,7 +32,6 @@
 
   * find_all_next()
   * find_next_siblings()
-  * find_all_previous()
   * find_previous_siblings()
 
   This will hopefully be improved in a future version of Beautiful Soup.
