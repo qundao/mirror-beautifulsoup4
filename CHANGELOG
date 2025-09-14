@@ -1,17 +1,7 @@
 = Unreleased
 
-* This version adds function overloading to most (but not all) of the
-  find_* methods to make it easier to write type-safe Python:
-
-    * find()
-    * find_all()
-    * find_next()
-    * find_all_next()
-    * find_next_sibling()
-    * find_previous()
-    * find_all_previous()
-    * find_previous_sibling()
-    * __call__() (i.e. calling a Tag as if it were a function)
+* This version adds function overloading to the find_* methods to make
+  it easier to write type-safe Python.
 
   In most cases you can just assign the result of a find() or
   find_all() call to the type of object you're expecting to get back:
@@ -23,18 +13,9 @@
   you pass both 'string' and one of the other arguments into one of
   these methods, e.g. tag.find("a", string="tag contents".)
 
-* The typing for find_parent() and find_parents() was also improved, but
-  this didn't require any overloading. Casts should no longer be
-  necessary, since those methods only ever return Tag and
-  ResultSet[Tag], respectively.
-
-* The results of the following methods will still require casts if you
-  are running your code through a type checker:
-
-  * find_next_siblings()
-  * find_previous_siblings()
-
-  This will hopefully be improved in a future version of Beautiful Soup.
+* The typing for find_parent() and find_parents() was improved without
+  any overloading. Casts should never be necessary, since those
+  methods only ever return Tag and ResultSet[Tag], respectively.
 
 * ResultSet now inherits from Sequence. This should make it easier to
   incorporate ResultSets into your type system without needing to

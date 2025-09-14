@@ -792,6 +792,7 @@ class PageElement(object):
         return self._find_one(self.find_all_next, name, attrs, string, **kwargs)
 
     findNext = _deprecated_function_alias("findNext", "find_next", "4.0.0")
+
     @overload
     def find_all_next( # pyright: ignore [reportOverlappingOverload]
         self,
@@ -894,6 +895,30 @@ class PageElement(object):
         "findNextSibling", "find_next_sibling", "4.0.0"
     )
 
+    @overload
+    def find_next_siblings( # pyright: ignore [reportOverlappingOverload]
+        self,
+        name: _FindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def find_next_siblings(
+        self,
+        name: None = None,
+        attrs: None = None,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
     def find_next_siblings(
         self,
         name: _FindMethodName = None,
@@ -902,7 +927,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Find all siblings of this `PageElement` that match the given criteria
         and appear later in the document.
 
@@ -1084,6 +1109,30 @@ class PageElement(object):
         "findPreviousSibling", "find_previous_sibling", "4.0.0"
     )
 
+    @overload
+    def find_previous_siblings( # pyright: ignore [reportOverlappingOverload]
+        self,
+        name: _FindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def find_previous_siblings(
+        self,
+        name: None = None,
+        attrs: None = None,
+        string: _StrainableString = "",
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
     def find_previous_siblings(
         self,
         name: _FindMethodName = None,
@@ -1092,7 +1141,7 @@ class PageElement(object):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Returns all siblings to this PageElement that match the
         given criteria and appear earlier in the document.
 
