@@ -44,6 +44,10 @@
   a decomposed element. (The output is not *useful* and you still
   shouldn't do this, but it won't raise an exception anymore.) [bug=2120300]
 
+* The default value for the 'attrs' attribute in find() method is now
+  None, not the empty dictionary. This should have no visible effect
+  on anything.
+
 = 4.13.5 (20250824)
 
 * Fixed an unhandled exception when parsing invalid markup that contains the { character
