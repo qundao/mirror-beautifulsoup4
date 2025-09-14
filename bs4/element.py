@@ -751,6 +751,25 @@ class PageElement(object):
 
         return results
 
+    @overload
+    def find_next(
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None=None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_next(
+            self,
+            name: None=None,
+            attrs: None=None,
+            string: _StrainableString="",
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_next(
         self,
         name: _FindMethodName = None,
@@ -1089,10 +1108,10 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         limit: Optional[int],
-        generator: Optional[Iterator[PageElement]]=None,
+        generator: Iterator[PageElement],
         _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
-    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
+    ) -> _QueryResults:
         """Iterates over a generator looking for things that match."""
 
         if string is None and "text" in kwargs:
