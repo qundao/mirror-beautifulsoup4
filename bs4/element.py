@@ -827,6 +827,26 @@ class PageElement(object):
 
     findAllNext = _deprecated_function_alias("findAllNext", "find_all_next", "4.0.0")
 
+    @overload
+    def find_next_sibling( # pyright: ignore [reportOverlappingOverload]
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None=None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_next_sibling(
+            self,
+            name: None=None,
+            attrs: None=None,
+            string: _StrainableString="",
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_next_sibling(
         self,
         name: _FindMethodName = None,
