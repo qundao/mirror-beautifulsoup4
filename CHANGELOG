@@ -1,24 +1,50 @@
 = Unreleased
 
+* This version adds function overloading to most (but not all) of the
+  find_* methods to make it easier to write type-safe Python:
+
+    * find()
+    * find_all()
+    * find_next()
+    * find_next_sibling()
+    * find_previous()
+    * find_previous_sibling()
+    * __call__() (i.e. calling a Tag as if it were a function)
+
+  In most cases you can just assign the result of a find() or
+  find_all() call to the type of object you're expecting to get back:
+  a Tag, a NavigableString, a Sequence[Tag], or a
+  Sequence[NavigableString]. It's very rare that you'll have to do a
+  cast like you did in previous versions of Beautiful Soup.
+
+  (In fact, the only time you should still have to use a cast is if
+  you pass both 'string' and one of the other arguments into one of
+  these methods, e.g. tag.find("a", string="tag contents".)
+
+* The typing for find_parent() and find_parents() was also improved, but
+  this didn't require any overloading. Casts should no longer be
+  necessary, since those methods only ever return Tag and
+  ResultSet[Tag], respectively.
+
+* The results of the following methods will still require casts if you
+  are running your code through a type checker:
+
+  * find_all_next()
+  * find_next_siblings()
+  * find_all_previous()
+  * find_previous_siblings()
+
+  This will hopefully be improved in a future version of Beautiful Soup.
+
+* ResultSet now inherits from Sequence. This should make it easier to
+  incorporate ResultSets into your type system without needing to
+  handle ResultSet specially.
+
 * Fixed an unhandled exception when creating the string representation of
   a decomposed element. (The output is not *useful* and you still
   shouldn't do this, but it won't raise an exception anymore.) [bug=2120300]
 
 = 4.13.5 (20250824)
-
-* This version adds function overloading to find() and find_all() to
-  make it easier to write type-safe Python. In most cases you can just
-  assign the result of a find() or find_all() call to the type of
-  object you're expecting to get back: a Tag, a NavigableString, a
-  Sequence[Tag], or a Sequence[NavigableString]. It's very rare that
-  you'll have to do a cast like you did in previous versions of
-  Beautiful Soup.
-
-  If this solution works well for people, a future version of
-  Beautiful Soup will add function overloading to the other find*
-  methods, e.g. find_all_parents(), find_next, etc.
-
-* ResultSet is now a Sequence,
 
 * Fixed an unhandled exception when parsing invalid markup that contains the { character
   when using lxml==6.0.0. [bug=2116306]
