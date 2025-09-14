@@ -991,13 +991,33 @@ class PageElement(object):
         "fetchAllPrevious", "find_all_previous", "3.0.0"
     )
 
+    @overload
+    def find_previous_sibling( # pyright: ignore [reportOverlappingOverload]
+            self,
+            name: _FindMethodName = None,
+            attrs: Optional[_StrainableAttributes] = None,
+            string: None=None,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    @overload
+    def find_previous_sibling(
+            self,
+            name: None=None,
+            attrs: None=None,
+            string: _StrainableString="",
+           **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
     def find_previous_sibling(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneElement:
+    ) -> Union[_AtMostOneTag,_AtMostOneNavigableString,_AtMostOneElement]:
         """Returns the closest sibling to this `PageElement` that matches the
         given criteria and appears earlier in the document.
 
