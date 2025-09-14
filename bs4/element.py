@@ -853,7 +853,7 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneElement:
+    ) -> Union[_AtMostOneTag,_AtMostOneNavigableString,_AtMostOneElement]:
         """Find the closest sibling to this PageElement that matches the
         given criteria and appears later in the document.
 
@@ -874,7 +874,7 @@ class PageElement(object):
     def find_next_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -955,7 +955,7 @@ class PageElement(object):
     def find_all_previous(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -1040,7 +1040,7 @@ class PageElement(object):
     def find_previous_siblings(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -1079,9 +1079,9 @@ class PageElement(object):
     def find_parent(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneElement:
+    ) -> _AtMostOneTag:
         """Find the closest parent of this PageElement that matches the given
         criteria.
 
@@ -1109,7 +1109,7 @@ class PageElement(object):
     def find_parents(
         self,
         name: _FindMethodName = None,
-        attrs: _StrainableAttributes = {},
+        attrs: Optional[_StrainableAttributes] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
