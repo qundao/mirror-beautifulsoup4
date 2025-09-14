@@ -1089,10 +1089,10 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         limit: Optional[int],
-        generator: Iterator[PageElement],
+        generator: Optional[Iterator[PageElement]]=None,
         _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
-    ) -> _QueryResults:
+    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Iterates over a generator looking for things that match."""
 
         if string is None and "text" in kwargs:
@@ -2245,7 +2245,7 @@ class Tag(PageElement):
         self.attrs.pop(key, None)
 
     @overload
-    def __call__(
+    def __call__( # pyright: ignore [reportOverlappingOverload]
         self,
         name: _FindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
@@ -2816,7 +2816,7 @@ class Tag(PageElement):
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")
 
     @overload
-    def find_all(
+    def find_all( # pyright: ignore [reportOverlappingOverload]
         self,
         name: _FindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
