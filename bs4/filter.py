@@ -26,8 +26,6 @@ from bs4.element import (
 )
 from bs4._typing import (
     _AtMostOneElement,
-    _AtMostOneTag,
-    _AtMostOneNavigableString,
     _AttributeValue,
     _NullableStringMatchFunction,
     _OneElement,
@@ -35,8 +33,6 @@ from bs4._typing import (
     _QueryResults,
     _RawAttributeValues,
     _RegularExpressionProtocol,
-    _SomeTags,
-    _SomeNavigableStrings,
     _StrainableAttribute,
     _StrainableElement,
     _StrainableString,
@@ -150,36 +146,6 @@ class ElementFilter(object):
                 if self.match(i, _known_rules=True):
                     yield cast("_OneElement", i)
 
-    def filter_tags(self, generator: Iterator[PageElement]) -> Iterator[Tag]:
-        """A version of :py:meth:`ElementFilter.filter` constrained, for type
-        safety reasons, to check only `Tag` objects.
-        """
-        while True:
-            try:
-                i = next(generator)
-            except StopIteration:
-                break
-            if i:
-                if not isinstance(i, Tag):
-                    continue
-                if self.match(i, _known_rules=True):
-                    yield i
-
-    def filter_strings(self, generator: Iterator[PageElement]) -> Iterator[NavigableString]:
-        """A version of :py:meth:`ElementFilter.filter` constrained, for type
-        safety reasons, to check only `NavigableString` objects.
-        """
-        while True:
-            try:
-                i = next(generator)
-            except StopIteration:
-                break
-            if i:
-                if not isinstance(i, NavigableString):
-                    continue
-                if self.match(i, _known_rules=True):
-                    yield i
-
     def find(self, generator: Iterator[PageElement]) -> _AtMostOneElement:
         """A lower-level equivalent of :py:meth:`Tag.find`.
 
@@ -191,22 +157,6 @@ class ElementFilter(object):
             objects.
         """
         for match in self.filter(generator):
-            return match
-        return None
-
-    def find_tag(self, generator: Iterator[PageElement]) -> _AtMostOneTag:
-        """A version of :py:meth:`ElementFilter.find` constrained, for type
-        safety reasons, to finding the first `Tag` object.
-        """
-        for match in self.filter_tags(generator):
-            return match
-        return None
-
-    def find_string(self, generator: Iterator[PageElement]) -> _AtMostOneNavigableString:
-        """A version of :py:meth:`ElementFilter.find` constrained, for type
-        safety reasons, to finding the first `NavigableString` object.
-        """
-        for match in self.filter_strings(generator):
             return match
         return None
 
@@ -226,42 +176,6 @@ class ElementFilter(object):
         """
         results = []
         for match in self.filter(generator):
-            results.append(match)
-            if limit is not None and len(results) >= limit:
-                break
-        return ResultSet(self, results)
-
-    def find_all_tags(
-        self, generator: Iterator[PageElement], limit: Optional[int] = None
-    ) -> _SomeTags:
-        """A version of :py:meth:`ElementFilter.find_all`, constrained, for type
-        safety reasons, to checking only `Tag` objects.
-
-        :param generator: A way of iterating over `PageElement`
-            objects.
-
-        :param limit: Stop looking after finding this many results.
-        """
-        results = []
-        for match in self.filter_tags(generator):
-            results.append(match)
-            if limit is not None and len(results) >= limit:
-                break
-        return ResultSet(self, results)
-
-    def find_all_strings(
-        self, generator: Iterator[PageElement], limit: Optional[int] = None
-    ) -> _SomeNavigableStrings:
-        """A version of :py:meth:`ElementFilter.find_all`, constrained, for type
-        safety reasons, to checking only `NavigableString` objects.
-
-        :param generator: A way of iterating over `PageElement`
-            objects.
-
-        :param limit: Stop looking after finding this many results.
-        """
-        results : List[NavigableString] = []
-        for match in self.filter_strings(generator):
             results.append(match)
             if limit is not None and len(results) >= limit:
                 break
@@ -837,9 +751,8 @@ class SoupStrainer(ElementFilter):
 
     @_deprecated("allow_tag_creation", "4.13.0")
     def search_tag(self, name: str, attrs: Optional[_RawAttributeValues]) -> bool:
-        """A less elegant version of `allow_tag_creation`. Deprecated as of 4.13.0
-        :meta private:
-        """
+        """A less elegant version of `allow_tag_creation`. Deprecated as of 4.13.0"""
+        ":meta private:"
         return self.allow_tag_creation(None, name, attrs)
 
     @_deprecated("match", "4.13.0")
