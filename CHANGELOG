@@ -77,7 +77,7 @@ tag = soup.find_parent(id="a")
 tags = soup.find_parents()
 tags = soup.find_parents(id="a")
 
-# This code will work, but mypy and PyLance will both flag it.
+# This code will work, but mypy and pyright will both flag it.
 tags = soup.find_all("a", string="b")
 ---
 
