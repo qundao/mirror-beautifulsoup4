@@ -3209,12 +3209,13 @@ class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
     def __getattr__(self, key: str) -> None:
         """Raise a helpful exception to explain a common code fix."""
         raise AttributeError(
-            f"""ResultSet object has no attribute "{key}". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"""
+            f"""ResultSet object has no attribute "{key}". You're probably treating a sequence of elements like a single element. Did you call find_all() when you meant to call find()?"""
         )
 
     def __eq__(self, other: Any) -> bool:
         """A ResultSet is equal to a list if its results are equal to that list.
-        A ResultSet is equal to another ResultSet if their results are equal.
+        A ResultSet is equal to another ResultSet if their results are equal,
+        even if the results come from different sources.
         """
         return bool(self.result == other)
 
