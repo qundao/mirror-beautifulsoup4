@@ -751,6 +751,8 @@ class PageElement(object):
 
         return results
 
+    # For the suppression of this pyright warning, see discussion here:
+    # https://github.com/microsoft/pyright/issues/10929
     @overload
     def find_next( # pyright: ignore [reportOverlappingOverload]
             self,
