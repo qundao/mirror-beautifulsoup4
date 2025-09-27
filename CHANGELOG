@@ -15,7 +15,8 @@
   find* methods, e.g. tag.find("a", string="tag contents".)
 
   The following code has been verified to pass type checking using
-  mypy, pyright, and the Visual Studio Code IDE:
+  mypy, pyright, and the Visual Studio Code IDE. It's available in
+  the source repository as scripts/type_checking_smoke_test.py.
 
 ---
 from typing import Optional, Sequence

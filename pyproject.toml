@@ -81,7 +81,7 @@ include = [
 
     # Scripts.
     "/test-all-versions",
-    "/scripts/*.py",
+    "/scripts/demonstrate_parser_differences.py",
 
     # Documentation source in various languages.
     "/doc*/Makefile",
