@@ -1,4 +1,4 @@
-= Unreleased
+= 4.14.0 (20250927)
 
 * This version adds function overloading to the find_* methods to make
   it easier to write type-safe Python.
@@ -7,18 +7,85 @@
   find_all() call to the type of object you're expecting to get back:
   a Tag, a NavigableString, a Sequence[Tag], or a
   Sequence[NavigableString]. It's very rare that you'll have to do a
-  cast like you did in previous versions of Beautiful Soup.
+  cast or suppress type-checker warnings like you did in previous
+  versions of Beautiful Soup.
 
-  (In fact, the only time you should still have to use a cast is if
-  you pass both 'string' and one of the other arguments into one of
-  these methods, e.g. tag.find("a", string="tag contents".)
+  (In fact, the only time you should still have to do this is if you
+  pass both 'string' and one of the other arguments into one of the
+  find* methods, e.g. tag.find("a", string="tag contents".)
+
+  The following code has been verified to pass type checking using
+  mypy, PyLance, and the Visual Studio Code IDE:
+
+---
+from typing import Optional, Sequence
+from bs4 import BeautifulSoup, Tag, NavigableString
+soup = BeautifulSoup("<p>", 'html.parser')
+
+tag:Optional[Tag]
+string:Optional[NavigableString]
+tags:Sequence[Tag]
+strings:Sequence[NavigableString]
+
+tag = soup.find()
+tag = soup.find(id="a")
+string = soup.find(string="b")
+
+tags = soup()
+tags = soup(id="a")
+strings = soup(string="b")
+
+tags = soup.find_all()
+tags = soup.find_all(id="a")
+strings = soup.find_all(string="b")
+
+tag = soup.find_next()
+tag = soup.find_next(id="a")
+string = soup.find_next(string="b")
+
+tags = soup.find_all_next()
+tags = soup.find_all_next(id="a")
+strings = soup.find_all_next(string="b")
+
+tag = soup.find_next_sibling()
+tag = soup.find_next_sibling(id="a")
+string = soup.find_next_sibling(string="b")
+
+tags = soup.find_next_siblings()
+tags = soup.find_next_siblings(id="a")
+strings = soup.find_next_siblings(string="b")
+
+tag = soup.find_previous()
+tag = soup.find_previous(id="a")
+string = soup.find_previous(string="b")
+
+tags = soup.find_all_previous()
+tags = soup.find_all_previous(id="a")
+strings = soup.find_all_previous(string="b")
+
+tag = soup.find_previous_sibling()
+tag = soup.find_previous_sibling(id="a")
+string = soup.find_previous_sibling(string="bold")
+
+tags = soup.find_previous_siblings()
+tags = soup.find_previous_siblings(id="a")
+strings = soup.find_previous_siblings(string="b")
+
+tag = soup.find_parent()
+tag = soup.find_parent(id="a")
+tags = soup.find_parents()
+tags = soup.find_parents(id="a")
+
+# This code will work, but mypy and PyLance will both flag it.
+tags = soup.find_all("a", string="b")
+---
 
 * The typing for find_parent() and find_parents() was improved without
   any overloading. Casts should never be necessary, since those
   methods only ever return Tag and ResultSet[Tag], respectively.
 
 * ResultSet now inherits from Sequence. This should make it easier to
-  incorporate ResultSets into your type system without needing to
+  incorporate ResultSet objects into your type system without needing to
   handle ResultSet specially.
 
 * Fixed an unhandled exception when creating the string representation of
