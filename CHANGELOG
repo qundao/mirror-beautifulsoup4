@@ -1,3 +1,10 @@
+= 4.14.2 (20250929)
+
+* Making ResultSet inherit from MutableSequence still resulted in too many
+  breaking changes in users of the library, so I reverted the
+  ResultSet code back to where it was in 4.13.5 and added tests of all known
+  breaking behavior. [bug=2125906]
+
 = 4.14.1 (20250929)
 
 * Made ResultSet inherit from MutableSequence instead of Sequence,

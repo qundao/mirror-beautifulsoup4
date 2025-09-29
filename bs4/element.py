@@ -3184,49 +3184,25 @@ class Tag(PageElement):
 
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
-
-class ResultSet(MutableSequence[_PageElementT], Generic[_PageElementT]):
-    """A ResultSet is a sequence of `PageElement` objects, gathered as the result
+class ResultSet(List[_PageElementT], Generic[_PageElementT]):
+    """A ResultSet is a list of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
     """
 
     source: Optional[ElementFilter]
-    result: MutableSequence[_PageElementT]
 
     def __init__(
-        self, source: Optional[ElementFilter], result: MutableSequence[_PageElementT] = []
+        self, source: Optional[ElementFilter], result: Iterable[_PageElementT] = ()
     ) -> None:
-        self.result = result or []
+        super(ResultSet, self).__init__(result)
         self.source = source
-
-    def insert(self, index, value):
-        return self.result.insert(index, value)
-
-    def __len__(self) -> int:
-        return len(self.result)
-
-    def __getitem__(self, index):
-        return self.result[index]
-
-    def __delitem__(self, key):
-        return self.result.__delitem__(key)
-
-    def __setitem__(self, key, value):
-        return self.result.__setitem__(key, value)
 
     def __getattr__(self, key: str) -> None:
         """Raise a helpful exception to explain a common code fix."""
         raise AttributeError(
-            f"""ResultSet object has no attribute "{key}". You're probably treating a sequence of elements like a single element. Did you call find_all() when you meant to call find()?"""
+            f"""ResultSet object has no attribute "{key}". You're probably treating a list of elements like a single element. Did you call find_all() when you meant to call find()?"""
         )
-
-    def __eq__(self, other: Any) -> bool:
-        """A ResultSet is equal to a list if its results are equal to that list.
-        A ResultSet is equal to another ResultSet if their results are equal,
-        even if the results come from different sources.
-        """
-        return bool(self.result == other)
 
 # Now that all the classes used by SoupStrainer have been defined,
 # import SoupStrainer itself into this module to preserve the
