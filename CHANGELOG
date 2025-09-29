@@ -1,3 +1,9 @@
+= 4.14.1 (20250929)
+
+* Made ResultSet inherit from MutableSequence instead of Sequence,
+  since lots of existing code treats ResultSet as a mutable list.
+  [bug=2125906,2125903]
+
 = 4.14.0 (20250927)
 
 * This version adds function overloading to the find_* methods to make

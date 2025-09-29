@@ -28,9 +28,9 @@ from typing import (
     Iterator,
     List,
     Mapping,
+    MutableSequence,
     Optional,
     Pattern,
-    Sequence,
     Set,
     TYPE_CHECKING,
     Tuple,
@@ -1301,7 +1301,7 @@ class PageElement(object):
         else:
             matcher = SoupStrainer(name, attrs, string, **kwargs)
 
-        result: Iterable[_OneElement]
+        result: MutableSequence[_OneElement]
         if string is None and not limit and not attrs and not kwargs:
             if name is True or name is None:
                 # Optimization to find all tags.
@@ -3185,26 +3185,35 @@ class Tag(PageElement):
 _PageElementT = TypeVar("_PageElementT", bound=PageElement)
 
 
-class ResultSet(Sequence[_PageElementT], Generic[_PageElementT]):
+class ResultSet(MutableSequence[_PageElementT], Generic[_PageElementT]):
     """A ResultSet is a sequence of `PageElement` objects, gathered as the result
     of matching an :py:class:`ElementFilter` against a parse tree. Basically, a list of
     search results.
     """
 
     source: Optional[ElementFilter]
-    result: Sequence[_PageElementT]
+    result: MutableSequence[_PageElementT]
 
     def __init__(
-        self, source: Optional[ElementFilter], result: Sequence[_PageElementT] = ()
+        self, source: Optional[ElementFilter], result: MutableSequence[_PageElementT] = []
     ) -> None:
-        self.result = result
+        self.result = result or []
         self.source = source
+
+    def insert(self, index, value):
+        return self.result.insert(index, value)
 
     def __len__(self) -> int:
         return len(self.result)
 
     def __getitem__(self, index):
         return self.result[index]
+
+    def __delitem__(self, key):
+        return self.result.__delitem__(key)
+
+    def __setitem__(self, key, value):
+        return self.result.__setitem__(key, value)
 
     def __getattr__(self, key: str) -> None:
         """Raise a helpful exception to explain a common code fix."""

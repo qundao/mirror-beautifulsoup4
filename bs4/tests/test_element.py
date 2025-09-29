@@ -164,3 +164,9 @@ class TestResultSet:
 
         # Even if the results come from two different sources, the ResultSets are equal.
         assert ResultSet(ElementFilter(), [1,2,3]) == rs1
+
+    def test_mutability(self):
+        # A ResultSet is mutable. (Lots of external code depends on this.)
+        rs = ResultSet(None, [1,2,3])
+        rs[1] = 4
+        assert rs == [1,4,3]
