@@ -110,9 +110,10 @@ echo "EXPECT HTML ON LINE BELOW"
 pyenv virtualenv-delete -f py3-install-test-virtualenv
 
 # Copy source distro
-scp dist/beautifulsoup4-*.tar.gz crummy.com:public_html/software/BeautifulSoup/bs4/download/4.13/
+scp dist/beautifulsoup4-*.tar.gz crummy.com:public_html/software/BeautifulSoup/bs4/download/4.14/
 
 # Refresh docs
+pyenv activate bs4-test
 cd doc
 make clean; rm -rf _build build
 make html
