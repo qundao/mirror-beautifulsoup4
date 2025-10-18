@@ -161,3 +161,12 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
         markup = "<p>a &nosuchentity; b</p>"
         soup = self.soup(markup)
         assert "<p>a &amp;nosuchentity b</p>" == soup.p.decode()
+
+    def test_surrogate_in_character_reference(self):
+        # These character references are invalid and should be replaced with REPLACEMENT CHARACTER.
+        soup = self.soup("<html><body>&#55357;&#56551;</body></html>")
+        assert soup.body.contents == ['��']
+
+        # Since we do the replacement ourselves, we can set contains_replacement_characters appropriately.
+        # lxml and html5lib do the replacement so all we ever see is REPLACEMENT CHARACTER.
+        assert soup.contains_replacement_characters == True

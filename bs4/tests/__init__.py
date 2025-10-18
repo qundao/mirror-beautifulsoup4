@@ -775,6 +775,7 @@ Hello, world!
         # characters.
         markup = "<p>&#147;Hello&#148; &#45;&#9731;</p>"
         soup = self.soup(markup)
+        import pdb; pdb.set_trace()
         assert "“Hello” -☃" == soup.p.string
 
     def test_entities_in_attributes_converted_to_unicode(self):
@@ -1125,6 +1126,14 @@ Hello, world!
         soup = self.soup(BAD_DOCUMENT)
         self.linkage_validator(soup)
 
+    def test_surrogate_in_character_reference(self):
+        # These character references are invalid and should be replaced with REPLACEMENT CHARACTER.
+        soup = self.soup("<html><body>&#55357;&#56551;</body></html>")
+        assert soup.body.contents == ['��']
+
+        # Only with html.parser (q.v.) do we actually see the invalid character references on the way in. Since
+        # other builders don't see them we don't know the REPLACEMENT CHARACTER wasn't originally there.
+        assert soup.contains_replacement_characters == False
 
 class XMLTreeBuilderSmokeTest(TreeBuilderSmokeTest):
     def test_pickle_and_unpickle_identity(self):

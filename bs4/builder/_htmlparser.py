@@ -242,6 +242,8 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
             real_name = int(name)
 
         data = None
+        replacement = "\N{REPLACEMENT CHARACTER}"
+        contains_replacement = False
         if real_name < 256:
             # HTML numeric entities are supposed to reference Unicode
             # code points, but sometimes they reference code points in
@@ -255,12 +257,23 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
                     data = bytearray([real_name]).decode(encoding)
                 except UnicodeDecodeError:
                     pass
-        if not data:
+            else:
+                if real_name == 0x0d or (real_name >= 0x0000 and real_name <= 0x001f) or (real_name >= 0x007f and real_name <= 0x009f):
+                    pass
+
+        elif real_name >= 0xd800 and real_name <= 0xdfff:
+            # Surrogate characters are forbidden in character references.
+            # https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
+            data = replacement
+            contains_replacement = True
+        else:
             try:
                 data = chr(real_name)
             except (ValueError, OverflowError):
                 pass
-        data = data or "\N{REPLACEMENT CHARACTER}"
+        data = data or replacement
+        if contains_replacement:
+            self.soup.contains_replacement_characters = True
         self.handle_data(data)
 
     def handle_entityref(self, name: str) -> None:

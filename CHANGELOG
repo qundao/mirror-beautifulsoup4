@@ -1,3 +1,12 @@
+= 4.14.3 (Unreleased)
+
+* The html.parser tree builder will replace numeric character
+  references to surrogate characters with REPLACEMENT CHARACTER, and
+  set BeautifulSoup.contains_replacement_characters. The other tree
+  builders already do this replacement, but since Beautiful Soup never
+  sees the original character reference, contains_replacement_characters
+  will not be set. [bug=2126753]
+
 = 4.14.2 (20250929)
 
 * Making ResultSet inherit from MutableSequence still resulted in too many
