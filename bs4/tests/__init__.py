@@ -775,7 +775,6 @@ Hello, world!
         # characters.
         markup = "<p>&#147;Hello&#148; &#45;&#9731;</p>"
         soup = self.soup(markup)
-        import pdb; pdb.set_trace()
         assert "“Hello” -☃" == soup.p.string
 
     def test_entities_in_attributes_converted_to_unicode(self):

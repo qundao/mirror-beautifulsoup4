@@ -442,3 +442,71 @@ class TestEntitySubstitution(object):
     def test_ambiguous_ampersands_escaped(self, markup, expect):
         assert self.sub.substitute_html(markup) == expect
         assert self.sub.substitute_html5_raw(markup) == expect
+
+class TestNumericCharacterReference:
+
+    # Numeric character references that trigger replacement with REPLACEMENT CHARACTER.
+    @pytest.mark.parametrize(
+        "numeric", [0x00,     # Null
+                    0x11ffff, # Out of range
+                    -0x11, # Out of range
+                    0xd800,   # Surrogate
+                    0xda12,   # Surrogate
+                    0xdfff,   # Surrogate
+                    ]
+    )
+    def test_bad_numeric_entities(self, numeric):
+        assert UnicodeDammit.numeric_character_reference(numeric) == ("\N{REPLACEMENT CHARACTER}", True)
+
+    # Numeric character references that are treated as having been mistakenly encoded from Windows-1252.
+    @pytest.mark.parametrize(
+        "numeric,character", [
+            (0x80, "€"),
+            (0x8C, "Œ"),
+            (0x91, "‘"),
+            (0x92, "’"),
+            (0x93, "“"),
+            (0x94, "”"),
+            (0x97, "—"),
+            (0x9F, "Ÿ"),
+        ]
+    )
+    def test_windows_1252_numeric_entities(self, numeric, character):
+        assert UnicodeDammit.numeric_character_reference(numeric) == (character, False)
+
+    # Numeric references that are resolved to the corresponding Unicode characters, even though
+    # some of them also trigger parser error conditions.
+    @pytest.mark.parametrize(
+        "numeric,character", [
+            # Noncharacters
+            (0xfdd0, "﷐"),
+            (0xfdd9, "﷙"),
+            (0xfdef, "﷯"),
+            (0x2fffe, "𯿾"),
+            (0xaffff, "򯿿"),
+            (0x10ffff, "􏿿"),
+
+            # Characters that are the same in Windows-1252 and UTF-8.
+            (0xFE, "þ"),
+            (0xFF, "ÿ"),
+
+            # ASCII whitespace
+            (0x09, "\t"),
+            (0x0a, "\n"),
+            (0x0c, "\x0c"),
+            (0x0d, "\r"),
+            (0x20, " "),
+
+            # The numeric entity for REPLACEMENT CHARACTER is converted
+            # correctly but the boolean part of the return value is false,
+            # because REPLACEMENT CHARACTER wasn't used to replace some other
+            # character--it _is_ the other character.
+            (0xfffd, "�"),
+
+            # Miscellaneous spot checks.
+            (0x61, "a"),
+            (0x2603, "☃"),
+        ]
+    )
+    def test_normal_numeric_entities(self, numeric, character):
+        assert UnicodeDammit.numeric_character_reference(numeric) == (character, False)

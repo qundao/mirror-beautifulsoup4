@@ -234,6 +234,7 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         # HTMLParser. (http://bugs.python.org/issue13633) The bug has
         # been fixed, but removing this code still makes some
         # Beautiful Soup tests fail. This needs investigation.
+        real_name:int
         if name.startswith("x"):
             real_name = int(name.lstrip("x"), 16)
         elif name.startswith("X"):
@@ -241,38 +242,8 @@ class BeautifulSoupHTMLParser(HTMLParser, DetectsXMLParsedAsHTML):
         else:
             real_name = int(name)
 
-        data = None
-        replacement = "\N{REPLACEMENT CHARACTER}"
-        contains_replacement = False
-        if real_name < 256:
-            # HTML numeric entities are supposed to reference Unicode
-            # code points, but sometimes they reference code points in
-            # some other encoding (ahem, Windows-1252). E.g. &#147;
-            # instead of &#201; for LEFT DOUBLE QUOTATION MARK. This
-            # code tries to detect this situation and compensate.
-            for encoding in (self.soup.original_encoding, "windows-1252"):
-                if not encoding:
-                    continue
-                try:
-                    data = bytearray([real_name]).decode(encoding)
-                except UnicodeDecodeError:
-                    pass
-            else:
-                if real_name == 0x0d or (real_name >= 0x0000 and real_name <= 0x001f) or (real_name >= 0x007f and real_name <= 0x009f):
-                    pass
-
-        elif real_name >= 0xd800 and real_name <= 0xdfff:
-            # Surrogate characters are forbidden in character references.
-            # https://html.spec.whatwg.org/multipage/parsing.html#numeric-character-reference-end-state
-            data = replacement
-            contains_replacement = True
-        else:
-            try:
-                data = chr(real_name)
-            except (ValueError, OverflowError):
-                pass
-        data = data or replacement
-        if contains_replacement:
+        data, replacement_added = UnicodeDammit.numeric_character_reference(real_name)
+        if replacement_added:
             self.soup.contains_replacement_characters = True
         self.handle_data(data)
 
