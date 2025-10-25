@@ -199,3 +199,31 @@ class TestLXMLXMLTreeBuilder(XMLTreeBuilderSmokeTest):
         assert "some markup" == unpickled.a.string
         assert unpickled.builder != soup.builder
         assert isinstance(unpickled.builder, self.default_builder)
+
+    def test_huge_tree(self):
+        # Verify that a tree with very large text nodes can be completely parsed
+        # if huge_tree=True.
+        def doc(size):
+            points = 'A'*size
+            input_svg = f'''<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+ <g id="one"/>
+ <g id="two">
+    <polygon points="{points}" id="p1"/>
+ </g>
+ <g id="three"/>
+ <g id="four">
+    <polygon points="{points}" id="p2"/>
+    <polygon id="p3" points="AAA"/>
+ </g>
+ <g id="five"/>
+</svg>
+'''
+            return input_svg
+
+        d = doc(10000000) # libxml2 XML_MAX_TEXT_LENGTH
+        soup = self.soup(d, huge_tree=True)
+
+        # This would be 4 with huge_tree=False, but there's no need to
+        # lock in a test for that, since it's undesirable behavior.
+        assert len(soup.find_all("g")) == 5
