@@ -3,12 +3,19 @@
 * The html.parser tree builder processes numeric character entities
   using the algorithm described in the HTML spec. If this means
   replacing some other character with REPLACEMENT CHARACTER, it will
-  set BeautifulSoup.contains_replacement_characters.
+  set BeautifulSoup.contains_replacement_characters. [bug=2126753]
 
-  The other tree builders already do this sort of replacement, but
-  since Beautiful Soup never sees the original character reference, it
-  doesn't know whether REPLACEMENT_CHARACTER was the original content,
-  so contains_replacement_characters won't get set. [bug=2126753]
+  The other tree builders rely on the underlying parser to do this
+  sort of replacement. That means that Beautiful Soup never sees the
+  original character reference, so it doesn't know whether
+  REPLACEMENT_CHARACTER was the original content; therefore
+  the html.parser tree builder will set contains_replacement_characters in
+  situations where the other tree builders won't.
+
+* Added a general test of the html.parser tree builder's ability to turn any
+  parsing exception from html.parser into a ParserRejectedMarkup
+  exception. This makes it possible to remove version-dependent tests that
+  depended on the existence of specific bugs in html.parser. [bug=2121335]
 
 = 4.14.2 (20250929)
 

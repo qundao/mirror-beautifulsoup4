@@ -8,6 +8,7 @@ from bs4.builder._htmlparser import (
     BeautifulSoupHTMLParser,
     HTMLParserTreeBuilder,
 )
+from bs4 import BeautifulSoup
 from bs4.exceptions import ParserRejectedMarkup
 from typing import Any
 from . import HTMLTreeBuilderSmokeTest
@@ -34,10 +35,28 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
             #
             b"<![n\x00",
             b"<![UNKNOWN[]]>",
+
+            # clusterfuzz test case 5703933063462912
+            b'\n<![ '
         ]
         for markup in bad_markup:
             with pytest.raises(ParserRejectedMarkup):
                 self.soup(markup)
+
+    def test_feed_raises_correct_exception_on_rejected_input(self):
+        # Mock BeautifulSoupHTMLParser so it raises an AssertionError and verify that this is
+        # turned into a ParserRejectedMarkup.
+        #
+        # This is similar to the previous test, but it doesn't rely on any specific behavior of html.parser.
+        class Mock(BeautifulSoupHTMLParser):
+            def feed(self, markup):
+                raise AssertionError("all markup is bad!")
+
+        with pytest.raises(ParserRejectedMarkup):
+            builder = HTMLParserTreeBuilder()
+            builder.soup = BeautifulSoup()
+            builder.feed("any markup", Mock)
+
 
     def test_namespaced_system_doctype(self):
         # html.parser can't handle namespaced doctypes, so skip this one.

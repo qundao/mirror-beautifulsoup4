@@ -430,7 +430,11 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
                 dammit.contains_replacement_characters,
             )
 
-    def feed(self, markup: _RawMarkup) -> None:
+    def feed(self, markup: _RawMarkup, _parser_class:type[HTMLParser] =BeautifulSoupHTMLParser) -> None:
+        """
+        :param markup: The markup to feed into the parser.
+        :param _parser_class: An HTMLParser subclass to use. This is only intended for use in unit tests.
+        """
         args, kwargs = self.parser_args
 
         # HTMLParser.feed will only handle str, but
@@ -445,7 +449,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
         # before calling feed(), so we can assume self.soup
         # is set.
         assert self.soup is not None
-        parser = BeautifulSoupHTMLParser(self.soup, *args, **kwargs)
+        parser = _parser_class(self.soup, *args, **kwargs)
 
         try:
             parser.feed(markup)
