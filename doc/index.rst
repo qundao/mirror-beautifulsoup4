@@ -891,8 +891,8 @@ The ``.self_and_parents`` generator is a variant of ``.parents`` which
 gives you the entire ancestry of an element, including the element
 itself::
 
- for parent in link.parents:
-     print(parent.name)
+ for tag in link.self_and_parents:
+     print(tag.name)
  # link
  # p
  # body
