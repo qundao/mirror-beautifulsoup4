@@ -31,7 +31,7 @@ classifiers = [
 ]
 dependencies = [
     "typing-extensions>=4.0.0",
-    "soupsieve >1.2",
+    "soupsieve>=1.6.1",
 ]
 
 [project.optional-dependencies]
