@@ -16,9 +16,9 @@
 #  bs4/__init__.py
 #  doc/index.rst
 
+# Setup and verify type safety.
 pyenv activate bs4-test
-hatch clean
-tox run-parallel
+mypy bs4 && pyright bs4 && hatch clean && tox run-parallel
 
 # Build sdist and wheel.
 hatch build

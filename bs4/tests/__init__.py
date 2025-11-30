@@ -1125,6 +1125,7 @@ Hello, world!
         soup = self.soup(BAD_DOCUMENT)
         self.linkage_validator(soup)
 
+    @pytest.mark.skipif("sys.version_info < (3, 8)")
     def test_surrogate_in_character_reference(self):
         # These character references are invalid and should be replaced with REPLACEMENT CHARACTER.
         soup = self.soup("<html><body>&#55357;&#56551;</body></html>")
