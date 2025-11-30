@@ -430,7 +430,7 @@ class HTMLParserTreeBuilder(HTMLTreeBuilder):
                 dammit.contains_replacement_characters,
             )
 
-    def feed(self, markup: _RawMarkup, _parser_class:type[HTMLParser] =BeautifulSoupHTMLParser) -> None:
+    def feed(self, markup: _RawMarkup, _parser_class:type[BeautifulSoupHTMLParser] =BeautifulSoupHTMLParser) -> None:
         """
         :param markup: The markup to feed into the parser.
         :param _parser_class: An HTMLParser subclass to use. This is only intended for use in unit tests.

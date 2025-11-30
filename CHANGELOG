@@ -1,4 +1,4 @@
-= 4.14.3 (Unreleased)
+= 4.14.3 (20251130)
 
 * When using one of the lxml tree builders, you can pass in
   huge_tree=True to disable lxml's security restrictions and process
@@ -19,10 +19,11 @@
   the html.parser tree builder will set contains_replacement_characters in
   situations where the other tree builders won't.
 
-* Added a general test of the html.parser tree builder's ability to turn any
-  parsing exception from html.parser into a ParserRejectedMarkup
-  exception. This makes it possible to remove version-dependent tests that
-  depended on the existence of specific bugs in html.parser. [bug=2121335]
+* Added a general test of the html.parser tree builder's ability to
+  turn any parsing exception from html.parser into a
+  ParserRejectedMarkup exception. This makes it possible to remove
+  version-dependent tests that depended on the existence of specific
+  bugs in html.parser. [bug=2121335,2121335]
 
 = 4.14.2 (20250929)
 

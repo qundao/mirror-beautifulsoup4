@@ -17,37 +17,11 @@ from . import HTMLTreeBuilderSmokeTest
 class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
     default_builder = HTMLParserTreeBuilder
 
-    # Fixed in https://github.com/python/cpython/issues/77057
-    @pytest.mark.skipif("sys.version_info >= (3, 13)")
-    def test_rejected_input(self):
-        # Python's html.parser will occasionally reject markup,
-        # especially when there is a problem with the initial DOCTYPE
-        # declaration. Different versions of Python sound the alarm in
-        # different ways, but Beautiful Soup consistently raises
-        # errors as ParserRejectedMarkup exceptions.
-        bad_markup = [
-            # https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=28873
-            # https://github.com/guidovranken/python-library-fuzzers/blob/master/corp-html/519e5b4269a01185a0d5e76295251921da2f0700
-            # https://github.com/python/cpython/issues/81928
-            b"\n<![\xff\xfe\xfe\xcd\x00",
-            # https://github.com/guidovranken/python-library-fuzzers/blob/master/corp-html/de32aa55785be29bbc72a1a8e06b00611fb3d9f8
-            # https://github.com/python/cpython/issues/78661
-            #
-            b"<![n\x00",
-            b"<![UNKNOWN[]]>",
-
-            # clusterfuzz test case 5703933063462912
-            b'\n<![ '
-        ]
-        for markup in bad_markup:
-            with pytest.raises(ParserRejectedMarkup):
-                self.soup(markup)
-
     def test_feed_raises_correct_exception_on_rejected_input(self):
         # Mock BeautifulSoupHTMLParser so it raises an AssertionError and verify that this is
         # turned into a ParserRejectedMarkup.
         #
-        # This is similar to the previous test, but it doesn't rely on any specific behavior of html.parser.
+        # This replaces a test that relied on bugs in html.parser which have been fixed.
         class Mock(BeautifulSoupHTMLParser):
             def feed(self, markup):
                 raise AssertionError("all markup is bad!")
@@ -56,7 +30,6 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
             builder = HTMLParserTreeBuilder()
             builder.soup = BeautifulSoup()
             builder.feed("any markup", Mock)
-
 
     def test_namespaced_system_doctype(self):
         # html.parser can't handle namespaced doctypes, so skip this one.
@@ -67,7 +40,7 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
         pass
 
     def test_builder_is_pickled(self):
-        """Unlike most tree builders, HTMLParserTreeBuilder and will
+        """Unlike most tree builders, HTMLParserTreeBuilder can be pickled and will
         be restored after pickling.
         """
         tree = self.soup("<a><b>foo</a>")
