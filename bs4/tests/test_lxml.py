@@ -7,6 +7,7 @@ from . import LXML_PRESENT, LXML_VERSION
 
 if LXML_PRESENT:
     from bs4.builder._lxml import LXMLTreeBuilder, LXMLTreeBuilderForXML
+    from lxml import etree
 
 from bs4 import (
     BeautifulStoneSoup,
@@ -47,7 +48,6 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
 
     # In lxml < 2.3.5, an empty doctype causes a segfault. Skip this
     # test if an old version of lxml is installed.
-
     @pytest.mark.skipif(
         not LXML_PRESENT or LXML_VERSION < (2, 3, 5, 0),
         reason="Skipping doctype test for old version of lxml to avoid segfault.",
@@ -56,6 +56,18 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
         soup = self.soup("<!DOCTYPE>")
         doctype = soup.contents[0]
         assert "" == doctype.strip()
+
+    # This is a copy of the HTMLTreeBuilderSmokeTest implementation.
+    # For lxml only, we need to skip the test if the libxml2 version doesn't
+    # have the fix from https://gitlab.gnome.org/GNOME/libxml2/-/commit/4dcc2d743eb83b8aaec0d91660d615fdb024dad0. That means any pre-2.13 version.
+    @pytest.mark.skipif(
+        "etree.LIBXML_VERSION < (2, 13, 0)",
+        reason="libxml version doesn't issue REPLACEMENT CHARACTER",
+    )
+    def test_surrogate_in_character_reference(self):
+        # These character references are invalid and should be replaced with REPLACEMENT CHARACTER.
+        soup = self.soup("<html><body>&#55357;&#56551;</body></html>")
+        assert soup.body.contents == ['��']
 
     def test_beautifulstonesoup_is_xml_parser(self):
         # Make sure that the deprecated BSS class uses an xml builder

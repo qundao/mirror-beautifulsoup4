@@ -1,3 +1,9 @@
+= Unreleased
+
+* Skip the lxml tree builder's test_surrogate_in_character_reference test
+  if the libxml2 version is less than 2.13.0. Prior versions of libxml2
+  don't issue the REPLACEMENT CHARACTER we're expecting. [bug=2134346]
+
 = 4.14.3 (20251130)
 
 * When using one of the lxml tree builders, you can pass in
