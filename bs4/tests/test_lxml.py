@@ -61,7 +61,7 @@ class TestLXMLTreeBuilder(HTMLTreeBuilderSmokeTest):
     # For lxml only, we need to skip the test if the libxml2 version doesn't
     # have the fix from https://gitlab.gnome.org/GNOME/libxml2/-/commit/4dcc2d743eb83b8aaec0d91660d615fdb024dad0. That means any pre-2.13 version.
     @pytest.mark.skipif(
-        "etree.LIBXML_VERSION < (2, 13, 0)",
+        "not LXML_PRESENT or etree.LIBXML_VERSION < (2, 13, 0)",
         reason="libxml version doesn't issue REPLACEMENT CHARACTER",
     )
     def test_surrogate_in_character_reference(self):
