@@ -162,3 +162,20 @@ class TestHTMLParserTreeBuilder(HTMLTreeBuilderSmokeTest):
         # Since we do the replacement ourselves, we can set contains_replacement_characters appropriately.
         # lxml and html5lib do the replacement so all we ever see is REPLACEMENT CHARACTER.
         assert soup.contains_replacement_characters == True
+
+class TestBeautifulSoupHTMLParser:
+    def test_dereference_numeric_character_reference(self):
+        m = BeautifulSoupHTMLParser._dereference_numeric_character_reference
+        assert m("64") == ("@", False, "")
+        assert m("x64") == ("d", False, "")
+        assert m("X64") == ("d", False, "")
+        assert m("64andsomeextra") == ("@", False, "andsomeextra")
+        assert m("") == ("", False, "")
+        assert m("00whee") == ("�", True, "whee")
+        assert m("xfffdthatsit") == ("�", False, "thatsit")
+        assert m("xabcdplussomeextra") == ("ꯍ", False, "plussomeextra")
+        assert m("obviouslynotnumeric") == ("", False, "obviouslynotnumeric")
+
+        # These are almost certainly wrong but at least it doesn't crash.
+        assert m("xabcdandsomeextra") == ("\U000abcda", False, "ndsomeextra")
+        assert m("xffffffffffffffffffffffbeep") == ("�", True, "p")
