@@ -118,3 +118,7 @@ cd doc
 make clean; rm -rf _build build
 make html
 rsync -avp _build/html/* crummy.com:public_html/software/BeautifulSoup/bs4/doc/
+
+# Tag Git repo
+git tag [verison number]
+git push --tags

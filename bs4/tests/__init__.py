@@ -220,6 +220,7 @@ class SoupTest(object):
                 )
 
                 if last_child is not None:
+                    assert child.parent is not None
                     assert (
                         child.previous_element is last_child
                     ), "Bad previous_element\nNODE: {}\nPREV {}\nEXPECTED {}\nCONTENTS {}".format(

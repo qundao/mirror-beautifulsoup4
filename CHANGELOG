@@ -1,4 +1,4 @@
-= Unreleased
+= 4.15.0 (Unreleased)
 
 * Change the html.parser tree builder's code for handling numeric
   character references, to avoid a crash when using Python versions
@@ -8,6 +8,19 @@
 * Skip the lxml tree builder's test_surrogate_in_character_reference test
   if the libxml2 version is less than 2.13.0. Prior versions of libxml2
   don't issue the REPLACEMENT CHARACTER we're expecting. [bug=2134346]
+
+* When passed a BeautifulSoup object, Tag.append will return a list of
+  all elements that were appended, not just the first one. Note that
+  this changes the return value type hint for the method, from
+  PageElement to PageElement|List[PageElement].
+
+* Fix an unhandled exception in Tag.append when passed an empty
+  BeautifulSoup object. [bug=2140924]
+
+* No bug was ever filed for this, but it's possible that you could get a
+  bizarre return value by passing BeautifulSoup objects into
+  Tag.extend(). The return value is now consistently the list of
+  elements that were added to the Tag.
 
 = 4.14.3 (20251130)
 

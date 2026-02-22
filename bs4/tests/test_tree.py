@@ -929,6 +929,24 @@ class TestTreeModification(SoupTest):
         assert result == "2"
         assert soup.b.decode() == "<b>12</b>"
 
+    def test_append_another_beautifulsoup_object(self):
+        soup = self.soup("<b>1</b>")
+        soup2 = self.soup("")
+        soup3 = self.soup("<i>2</i><i>3</i>")
+
+        # Since soup2 is empty, nothing happens. The return value is the (empty)
+        # list of appended items.
+        result = soup.b.append(soup2)
+        assert result == []
+        assert soup.b.decode() == "<b>1</b>"
+
+        # The contents of soup3 are appended to the end of soup.b. The return value
+        # is the list of appended items.
+        i_tags = soup3.find_all('i')
+        result = soup.b.append(soup3)
+        assert result == i_tags
+        assert soup.b.decode() == "<b>1<i>2</i><i>3</i></b>"
+
     def test_insert_tag(self):
         builder = self.default_builder()
         soup = self.soup("<a><b>Find</b><c>lady!</c><d></d></a>", builder=builder)
@@ -974,8 +992,23 @@ class TestTreeModification(SoupTest):
         data = "<a><b><c><d><e><f><g></g></f></e></d></c></b></a>"
         soup = self.soup(data)
         elements = [soup.g, soup.f, soup.e, soup.d, soup.c, soup.b]
-        soup.a.extend(elements)
+        result = soup.a.extend(elements)
         assert "<a><g></g><f></f><e></e><d></d><c></c><b></b></a>" == soup.decode()
+        assert elements == result
+
+    def test_extend_with_other_beautifulsoup_objects(self):
+
+        soup1 = self.soup("<y></y>")
+        soup2 = self.soup("<z></z>")
+        y_tag = soup1.y
+        z_tag = soup2.z
+
+        data = "<a><b><c><d><e><f><g></g></f></e></d></c></b></a>"
+        soup = self.soup(data)
+        elements = [soup1, soup2]
+        result = soup.a.extend(elements)
+        assert "<a><b><c><d><e><f><g></g></f></e></d></c></b><y></y><z></z></a>" == soup.decode()
+        assert [y_tag, z_tag] == result
 
     def test_extend_with_a_list_of_strings(self):
         data = "<a></a>"

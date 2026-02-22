@@ -2238,15 +2238,22 @@ class Tag(PageElement):
         ": :meta private:"
         return self.unwrap()
 
-    def append(self, tag: _InsertableElement) -> PageElement:
-        """
-        Appends the given `PageElement` to the contents of this `Tag`.
+    def append(self, tag: _InsertableElement) -> PageElement|List[PageElement]:
+        """Appends the given `PageElement` to the contents of this `Tag`.
 
-        :param tag: A PageElement.
+        :param tag: A PageElement. If this is another BeautifulSoup
+           object, all of its contents will be inserted into this
+           `Tag`, since one BeautifulSoup object can't contain another
+           one.
 
-        :return The newly appended PageElement.
+        :return: The object that was just appended, or (if `tag` was a BeautifulSoup
+           object) all such objects.
         """
-        return self.insert(len(self.contents), tag)[0]
+        inserted = self.insert(len(self.contents), tag)
+        if isinstance(tag, Tag) and tag.name == "[document]": # TODO: can't reference BeautifulSoup class in this module
+            return inserted
+        else:
+            return inserted[0]
 
     def extend(self, tags: Union[Iterable[_InsertableElement], Tag]) -> List[PageElement]:
         """Appends one or more objects to the contents of this
@@ -2281,7 +2288,12 @@ class Tag(PageElement):
 
         results: List[PageElement] = []
         for tag in tag_list:
-            results.append(self.append(tag))
+            appended = self.append(tag)
+            if isinstance(appended, list):
+                # This can happen if you pass in a mixture of Tag and BeautifulSoup objects.
+                results.extend(appended)
+            else:
+                results.append(appended)
 
         return results
 
