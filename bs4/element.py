@@ -76,7 +76,8 @@ _OneOrMoreStringTypes: TypeAlias = Union[
     Type["NavigableString"], Iterable[Type["NavigableString"]]
 ]
 
-_FindMethodName: TypeAlias = Optional[Union["_StrainableElement", "ElementFilter"]]
+_FindMethodName: TypeAlias = Union["_StrainableElement", "ElementFilter"]
+_OptionalFindMethodName: TypeAlias = Optional[_FindMethodName]
 
 # Deprecated module-level attributes.
 # See https://peps.python.org/pep-0562/
@@ -756,7 +757,7 @@ class PageElement(object):
     @overload
     def find_next( # pyright: ignore [reportOverlappingOverload]
             self,
-            name: _FindMethodName = None,
+            name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
@@ -775,7 +776,7 @@ class PageElement(object):
 
     def find_next(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -798,7 +799,7 @@ class PageElement(object):
     @overload
     def find_all_next( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
@@ -821,7 +822,7 @@ class PageElement(object):
 
     def find_all_next(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -856,7 +857,7 @@ class PageElement(object):
     @overload
     def find_next_sibling( # pyright: ignore [reportOverlappingOverload]
             self,
-            name: _FindMethodName = None,
+            name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
@@ -875,7 +876,7 @@ class PageElement(object):
 
     def find_next_sibling(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -900,7 +901,7 @@ class PageElement(object):
     @overload
     def find_next_siblings( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
@@ -923,7 +924,7 @@ class PageElement(object):
 
     def find_next_siblings(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -963,7 +964,7 @@ class PageElement(object):
     @overload
     def find_previous( # pyright: ignore [reportOverlappingOverload]
             self,
-            name: _FindMethodName = None,
+            name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
@@ -982,7 +983,7 @@ class PageElement(object):
 
     def find_previous(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -1005,7 +1006,7 @@ class PageElement(object):
     @overload
     def find_all_previous( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
@@ -1028,7 +1029,7 @@ class PageElement(object):
 
     def find_all_previous(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -1068,7 +1069,7 @@ class PageElement(object):
     @overload
     def find_previous_sibling( # pyright: ignore [reportOverlappingOverload]
             self,
-            name: _FindMethodName = None,
+            name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
@@ -1087,7 +1088,7 @@ class PageElement(object):
 
     def find_previous_sibling(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
@@ -1114,7 +1115,7 @@ class PageElement(object):
     @overload
     def find_previous_siblings( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
@@ -1137,7 +1138,7 @@ class PageElement(object):
 
     def find_previous_siblings(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
@@ -1176,7 +1177,7 @@ class PageElement(object):
 
     def find_parent(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
@@ -1206,7 +1207,7 @@ class PageElement(object):
 
     def find_parents(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
@@ -1252,7 +1253,7 @@ class PageElement(object):
         # as callback types." - So, not sure how to get more
         # specific here.
         method: Callable,
-        name: _FindMethodName,
+        name: _OptionalFindMethodName,
         attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         **kwargs: _StrainableAttribute,
@@ -1265,7 +1266,7 @@ class PageElement(object):
 
     def _find_all(
         self,
-        name: _FindMethodName,
+        name: _OptionalFindMethodName,
         attrs: Optional[_StrainableAttributes],
         string: Optional[_StrainableString],
         limit: Optional[int],
@@ -2439,7 +2440,7 @@ class Tag(PageElement):
     @overload
     def __call__( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: None = None,
@@ -2464,7 +2465,7 @@ class Tag(PageElement):
 
     def __call__(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
@@ -2948,7 +2949,7 @@ class Tag(PageElement):
     @overload
     def find(
             self,
-            name: _FindMethodName = None,
+            name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             recursive: bool = True,
             string: None=None,
@@ -2968,7 +2969,7 @@ class Tag(PageElement):
 
     def find(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
@@ -3010,7 +3011,7 @@ class Tag(PageElement):
     @overload
     def find_all( # pyright: ignore [reportOverlappingOverload]
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: None = None,
@@ -3035,7 +3036,7 @@ class Tag(PageElement):
 
     def find_all(
         self,
-        name: _FindMethodName = None,
+        name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
