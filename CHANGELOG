@@ -1,5 +1,8 @@
 = 4.15.0 (Unreleased)
 
+* Explicitly specify the type hint for the PageElement.text property
+  [bug=2153390]
+
 * Change the html.parser tree builder's code for handling numeric
   character references, to avoid a crash when using Python versions
   that include the fix to Python issue https://bugs.python.org/issue13633

@@ -554,7 +554,10 @@ class PageElement(object):
         return separator.join([s for s in self._all_strings(strip, types=types)])
 
     getText = get_text
-    text = property(get_text)
+
+    @property
+    def text(self) -> str:
+        return self.get_text()
 
     def replace_with(self, *args: _InsertableElement) -> Self:
         """Replace this `PageElement` with one or more other elements,
