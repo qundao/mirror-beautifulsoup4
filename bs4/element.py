@@ -755,26 +755,27 @@ class PageElement(object):
 
         return results
 
-    # For the suppression of this pyright warning, see discussion here:
-    # https://github.com/microsoft/pyright/issues/10929
+    # No name or attrs + string -> string
     @overload
-    def find_next( # pyright: ignore [reportOverlappingOverload]
+    def find_next(
+            self,
+            name: None = None,
+            attrs: None = None,
+            *,
+            string: _StrainableString,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
+    # No string -> tag
+    @overload
+    def find_next(
             self,
             name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
-        ...
-
-    @overload
-    def find_next(
-            self,
-            name: None=None,
-            attrs: None=None,
-            string: _StrainableString="",
-            **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneNavigableString:
         ...
 
     def find_next(
@@ -799,8 +800,23 @@ class PageElement(object):
 
     findNext = _deprecated_function_alias("findNext", "find_next", "4.0.0")
 
+    # No name or attrs + string -> strings
     @overload
-    def find_all_next( # pyright: ignore [reportOverlappingOverload]
+    def find_all_next(
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
+    # No string -> tags
+    @overload
+    def find_all_next(
         self,
         name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
@@ -809,18 +825,6 @@ class PageElement(object):
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
-        ...
-
-    @overload
-    def find_all_next(
-        self,
-        name: None = None,
-        attrs: None = None,
-        string: _StrainableString = "",
-        limit: Optional[int] = None,
-        _stacklevel: int = 2,
-        **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
         ...
 
     def find_all_next(
@@ -857,24 +861,27 @@ class PageElement(object):
 
     findAllNext = _deprecated_function_alias("findAllNext", "find_all_next", "4.0.0")
 
-    @overload
-    def find_next_sibling( # pyright: ignore [reportOverlappingOverload]
-            self,
-            name: _OptionalFindMethodName = None,
-            attrs: Optional[_StrainableAttributes] = None,
-            string: None=None,
-            **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneTag:
-        ...
-
+    # No name or attrs + string -> strings
     @overload
     def find_next_sibling(
-            self,
-            name: None=None,
-            attrs: None=None,
-            string: _StrainableString="",
-            **kwargs: _StrainableAttribute,
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        **kwargs: _StrainableAttribute,
     ) -> _AtMostOneNavigableString:
+        ...
+
+    # No string -> tags
+    @overload
+    def find_next_sibling(
+        self,
+        name: _OptionalFindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
         ...
 
     def find_next_sibling(
@@ -901,8 +908,23 @@ class PageElement(object):
         "findNextSibling", "find_next_sibling", "4.0.0"
     )
 
+    # No name or attrs + string -> strings
     @overload
-    def find_next_siblings( # pyright: ignore [reportOverlappingOverload]
+    def find_next_siblings(
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
+    # No string -> tags
+    @overload
+    def find_next_siblings(
         self,
         name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
@@ -911,18 +933,6 @@ class PageElement(object):
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
-        ...
-
-    @overload
-    def find_next_siblings(
-        self,
-        name: None = None,
-        attrs: None = None,
-        string: _StrainableString = "",
-        limit: Optional[int] = None,
-        _stacklevel: int = 2,
-        **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
         ...
 
     def find_next_siblings(
@@ -964,24 +974,27 @@ class PageElement(object):
         "fetchNextSiblings", "find_next_siblings", "3.0.0"
     )
 
+    # No name or attrs + string -> string
     @overload
-    def find_previous( # pyright: ignore [reportOverlappingOverload]
+    def find_previous(
+            self,
+            name: None = None,
+            attrs: None = None,
+            *,
+            string: _StrainableString,
+            **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
+    # No string -> tag
+    @overload
+    def find_previous(
             self,
             name: _OptionalFindMethodName = None,
             attrs: Optional[_StrainableAttributes] = None,
             string: None=None,
             **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
-        ...
-
-    @overload
-    def find_previous(
-            self,
-            name: None=None,
-            attrs: None=None,
-            string: _StrainableString="",
-           **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneNavigableString:
         ...
 
     def find_previous(
@@ -1006,8 +1019,23 @@ class PageElement(object):
 
     findPrevious = _deprecated_function_alias("findPrevious", "find_previous", "3.0.0")
 
+    # No name or attrs + string -> strings
     @overload
-    def find_all_previous( # pyright: ignore [reportOverlappingOverload]
+    def find_all_previous(
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
+    # No string -> tags
+    @overload
+    def find_all_previous(
         self,
         name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
@@ -1016,18 +1044,6 @@ class PageElement(object):
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
-        ...
-
-    @overload
-    def find_all_previous(
-        self,
-        name: None = None,
-        attrs: None = None,
-        string: _StrainableString = "",
-        limit: Optional[int] = None,
-        _stacklevel: int = 2,
-        **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
         ...
 
     def find_all_previous(
@@ -1069,24 +1085,27 @@ class PageElement(object):
         "fetchAllPrevious", "find_all_previous", "3.0.0"
     )
 
-    @overload
-    def find_previous_sibling( # pyright: ignore [reportOverlappingOverload]
-            self,
-            name: _OptionalFindMethodName = None,
-            attrs: Optional[_StrainableAttributes] = None,
-            string: None=None,
-            **kwargs: _StrainableAttribute,
-    ) -> _AtMostOneTag:
-        ...
-
+    # No name or attrs + string -> string
     @overload
     def find_previous_sibling(
-            self,
-            name: None=None,
-            attrs: None=None,
-            string: _StrainableString="",
-           **kwargs: _StrainableAttribute,
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        **kwargs: _StrainableAttribute,
     ) -> _AtMostOneNavigableString:
+        ...
+
+    # No string -> tag
+    @overload
+    def find_previous_sibling(
+        self,
+        name: _OptionalFindMethodName = None,
+        attrs: Optional[_StrainableAttributes] = None,
+        string: None = None,
+        **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
         ...
 
     def find_previous_sibling(
@@ -1115,8 +1134,23 @@ class PageElement(object):
         "findPreviousSibling", "find_previous_sibling", "4.0.0"
     )
 
+    # No name or attrs + string -> strings
     @overload
-    def find_previous_siblings( # pyright: ignore [reportOverlappingOverload]
+    def find_previous_siblings(
+        self,
+        name: None = None,
+        attrs: None = None,
+        *,
+        string: _StrainableString,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
+    # No string -> tags
+    @overload
+    def find_previous_siblings(
         self,
         name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
@@ -1125,18 +1159,6 @@ class PageElement(object):
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
-        ...
-
-    @overload
-    def find_previous_siblings(
-        self,
-        name: None = None,
-        attrs: None = None,
-        string: _StrainableString = "",
-        limit: Optional[int] = None,
-        _stacklevel: int = 2,
-        **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
         ...
 
     def find_previous_siblings(
@@ -2440,7 +2462,7 @@ class Tag(PageElement):
         "Deleting tag[key] deletes all 'key' attributes for the tag."
         self.attrs.pop(key, None)
 
-    # Since __call__ is effectively the same as find_all(), see find_all() for notes
+    # Since Tag.__call__ is effectively the same as PageElement.find_all, see find_all for notes
     # on these overloads.
 
     @overload
