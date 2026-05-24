@@ -2479,24 +2479,7 @@ class Tag(PageElement):
         """Calling a Tag like a function is the same as calling its
         find_all() method. Eg. tag('a') returns a list of all the A tags
         found within this tag."""
-        if string is not None and (name is not None or attrs is not None or kwargs):
-            # TODO: Using the @overload decorator to express the three ways you
-            # could get into this path is way too much code for a rarely(?) used
-            # feature.
-            return cast(ResultSet[Tag], self.find_all(name, attrs, recursive, string, limit, _stacklevel, **kwargs)) #type: ignore
-
-        if string is None:
-            # If string is None, we're searching for tags.
-            tags:ResultSet[Tag] = self.find_all(
-                name, attrs, recursive, None, limit, _stacklevel, **kwargs
-            )
-            return tags
-
-        # Otherwise, we're searching for strings.
-        strings:ResultSet[NavigableString] = self.find_all(
-            None, None, recursive, string, limit, _stacklevel, **kwargs
-        )
-        return strings
+        return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), _stacklevel=_stacklevel, **kwargs)
 
     def __getattr__(self, subtag: str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
@@ -2949,27 +2932,78 @@ class Tag(PageElement):
 
     # Soup methods
 
+    # NOTE: find() and find_all() are the most commonly used find*
+    # methods and they're the ones I'm using to experiment with
+    # improving the type hints. The challenge is to distinguish
+    # between find* calls that return strings and calls that return
+    # tags. If I had it to do over again I'd design this API
+    # differently (it would look more like ElementFilter), but that's
+    # life.
+
+    # The overloads all look for a clue in the input which restricts
+    # the method to returning either only strings or only tags. Only
+    # the most common cases are covered.
+
+    # e.g. find(string="foo")
+    #   -> string information but no tag information
+    #     -> string
+    @overload
+    def find(
+        self,
+        name: None = None,
+        attrs: None = None,
+        recursive: bool = True,
+        *,
+        string: _StrainableString,
+        **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneNavigableString:
+        ...
+
+    # e.g. find() -> default behavior -> tag
+    #      find(attr="value") -> only tags have attrs -> tag
     @overload
     def find(
             self,
-            name: _OptionalFindMethodName = None,
-            attrs: Optional[_StrainableAttributes] = None,
+            name: None = None,
+            attrs: None = None,
             recursive: bool = True,
-            string: None=None,
+            string: None = None,
             **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
         ...
 
+    # e.g. find_all(attrs=dict(attr="value"))
+    #   -> only tags have attrs
+    #      -> tag
     @overload
     def find(
-            self,
-            name: None=None,
-            attrs: None=None,
-            recursive: bool = True,
-            string: _StrainableString="",
-    ) -> _AtMostOneNavigableString:
+        self,
+        name: None,
+        attrs: _StrainableAttributes,
+        recursive: bool = True,
+        string: None = None,
+        **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
         ...
 
+    # e.g. find(name="a")) -> only tags have names -> tag
+    #
+    # The confusing and controversial case of find(name="a", string="foo")
+    # also hits this overload.
+    @overload
+    def find(
+        self,
+        name: _FindMethodName,
+        attrs: Optional[_StrainableAttributes] = None,
+        recursive: bool = True,
+        string: Optional[_StrainableString] = None,
+        **kwargs: _StrainableAttribute,
+    ) -> _AtMostOneTag:
+        ...
+
+    # Without the clues above, we don't know whether the method will
+    # return a string or a tag. However every common case will trigger one
+    # of the overloads and give us the clue we need.
     def find(
         self,
         name: _OptionalFindMethodName = None,
@@ -2992,30 +3026,45 @@ class Tag(PageElement):
         :param string: A filter on the `Tag.string` attribute.
         :kwargs: Additional filters on attribute values.
         """
-        if string is not None and (name is not None or attrs is not None or kwargs):
-            # TODO: Using the @overload decorator to express the three ways you
-            # could get into this path is way too much code for a rarely(?) used
-            # feature.
-            elements = self.find_all(name, attrs, recursive, string, 1, _stacklevel=3, **kwargs) # type:ignore
-            if elements:
-                return cast(Tag, elements[0])
-        elif string is None:
-            tags = self.find_all(name, attrs, recursive, None, 1, _stacklevel=3, **kwargs)
-            if tags:
-                return cast(Tag, tags[0])
-        else:
-            strings = self.find_all(None, None, recursive, string, 1, _stacklevel=3, **kwargs)
-            if strings:
-                return cast(NavigableString, strings[0])
+        tags = self._find_all(name, attrs, string, 1, self._generator_for_recursive(recursive), _stacklevel=3, **kwargs)
+        if tags:
+            return tags[0]
         return None
 
     findChild = _deprecated_function_alias("findChild", "find", "3.0.0")
 
+    # e.g. find_all(string="foo")
+    #   -> string information but no tag information
+    #     -> strings
+    #
+    # Also covers unlikely cases like find_all(name=None, string="foo")
+    #
+    # "To mark parameters as keyword-only, indicating the parameters
+    #  must be passed by keyword argument, place an * in the arguments
+    #  list just before the first keyword-only parameter."
+    #
+    #    --https://peps.python.org/pep-0570/#keyword-only-arguments
     @overload
-    def find_all( # pyright: ignore [reportOverlappingOverload]
+    def find_all(
         self,
-        name: _OptionalFindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        name: None = None,
+        attrs: None = None,
+        recursive: bool = True,
+        *,
+        string: _StrainableString,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeNavigableStrings:
+        ...
+
+    # e.g. find_all() -> default behavior -> tags
+    #      find_all(attr="value") -> only tags have attrs -> tags
+    @overload
+    def find_all(
+        self,
+        name: None = None,
+        attrs: None = None,
         recursive: bool = True,
         string: None = None,
         limit: Optional[int] = None,
@@ -3024,19 +3073,42 @@ class Tag(PageElement):
     ) -> _SomeTags:
         ...
 
+    # e.g. find_all(attrs=dict(attr="value"))
+    #   -> only tags have attrs
+    #      -> tags
     @overload
     def find_all(
         self,
-        name: None = None,
-        attrs: None = None,
+        name: None,
+        attrs: _StrainableAttributes,
         recursive: bool = True,
-        string: _StrainableString = "",
+        string: None = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
+    ) -> _SomeTags:
         ...
 
+    # e.g. find_all(name="a")) -> only tags have names -> tags
+    #
+    # The confusing and controversial case of find_all(name="a", string="foo")
+    # also hits this overload.
+    @overload
+    def find_all(
+        self,
+        name: _FindMethodName,
+        attrs: Optional[_StrainableAttributes] = None,
+        recursive: bool = True,
+        string: Optional[_StrainableString] = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 2,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    # Without the clues above, we don't know whether the method will
+    # return strings or tags. However every common case will trigger one
+    # of the overloads and give us the clue we need.
     def find_all(
         self,
         name: _OptionalFindMethodName = None,
@@ -3046,7 +3118,7 @@ class Tag(PageElement):
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
-    ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
+    ) -> Union[_SomeTags,_SomeNavigableStrings]:
         """Look in the children of this `PageElement` and find all
         `PageElement` objects that match the given criteria.
 
@@ -3062,9 +3134,7 @@ class Tag(PageElement):
         :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
-        generator = self.descendants
-        if not recursive:
-            generator = self.children
+        generator = self._generator_for_recursive(recursive)
         _stacklevel += 1
 
         if string is not None and (name is not None or attrs is not None or kwargs):
@@ -3120,6 +3190,16 @@ class Tag(PageElement):
             successor = current.next_element
             yield current
             current = successor
+
+    def _generator_for_recursive(self, recursive:bool) -> Iterator[PageElement]:
+        """Helper method to process the boolean `recursive` argument
+        for find* methods.
+
+        :return: the appropriate generator
+        """
+        if recursive:
+            return self.descendants
+        return self.children
 
     # CSS selector code
     def select_one(
