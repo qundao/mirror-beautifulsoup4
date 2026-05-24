@@ -2980,15 +2980,17 @@ class Tag(PageElement):
         return self.encode_contents(indent_level=indentLevel, encoding=encoding)
 
     # Soup methods
+    #
 
-    # NOTE: find() and find_all() are the most commonly used find*
-    # methods and they're the ones I'm using to experiment with
-    # improving the type hints. The challenge is to distinguish
-    # between find* calls that return strings and calls that return
-    # tags. If I had it to do over again I'd design this API
-    # differently (it would look more like ElementFilter), but that's
-    # life.
-
+    # People who call these methods in a type-safe environment
+    # basically want to know whether the call is going to return
+    # NavigableStrings or Tags. It's always one or the other, never
+    # both, but spelling it out requires a number of overloads for
+    # each method.
+    #
+    # If I had it to do over again I'd design this API differently (it
+    # would look more like ElementFilter), but that's life.
+    #
     # The overloads all look for a clue in the input which restricts
     # the method to returning either only strings or only tags. Only
     # the most common cases are covered.
@@ -3050,9 +3052,9 @@ class Tag(PageElement):
     ) -> _AtMostOneTag:
         ...
 
-    # Without the clues above, we don't know whether the method will
-    # return a string or a tag. However every common case will trigger one
-    # of the overloads and give us the clue we need.
+    # Some lesser-used cases are not covered by the overrides. Those
+    # cases will hit this method directly and return a very general
+    # type which will need to be cast after the call.
     def find(
         self,
         name: _OptionalFindMethodName = None,

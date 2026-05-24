@@ -1,5 +1,8 @@
 = 4.15.0 (Unreleased)
 
+* The type hints for the overloaded find* methods have been redone to
+  eliminate type checker overrides. [bug=2122019]
+
 * Explicitly specify the type hint for the PageElement.text property
   [bug=2153390]
 
@@ -24,6 +27,10 @@
   bizarre return value by passing BeautifulSoup objects into
   Tag.extend(). The return value is now consistently the list of
   elements that were added to the Tag.
+
+* The __call__ method doesn't need to take _stacklevel as an
+  argument, because no other internal method calls it. Removing it
+  makes the overload code smaller.
 
 = 4.14.3 (20251130)
 
