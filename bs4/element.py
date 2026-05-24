@@ -2474,7 +2474,6 @@ class Tag(PageElement):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -2487,7 +2486,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -2500,7 +2498,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -2513,7 +2510,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -2525,7 +2521,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Calling a Tag like a function is the same as calling its
@@ -2533,7 +2528,7 @@ class Tag(PageElement):
 
         Eg. tag('a') returns a list of all the A tags found within this tag.
         """
-        return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), _stacklevel=_stacklevel, **kwargs)
+        return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), _stacklevel=3, **kwargs)
 
     def __getattr__(self, subtag: str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
