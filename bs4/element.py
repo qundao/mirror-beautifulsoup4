@@ -2440,17 +2440,21 @@ class Tag(PageElement):
         "Deleting tag[key] deletes all 'key' attributes for the tag."
         self.attrs.pop(key, None)
 
+    # Since __call__ is effectively the same as find_all(), see find_all() for notes
+    # on these overloads.
+
     @overload
-    def __call__( # pyright: ignore [reportOverlappingOverload]
+    def __call__(
         self,
-        name: _OptionalFindMethodName = None,
-        attrs: Optional[_StrainableAttributes] = None,
+        name: None = None,
+        attrs: None = None,
         recursive: bool = True,
-        string: None = None,
+        *,
+        string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
+        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
-    ) -> _SomeTags:
+    ) -> _SomeNavigableStrings:
         ...
 
     @overload
@@ -2459,11 +2463,37 @@ class Tag(PageElement):
         name: None = None,
         attrs: None = None,
         recursive: bool = True,
-        string: _StrainableString = "",
+        string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
+        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
-    ) -> _SomeNavigableStrings:
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def __call__(
+        self,
+        name: None,
+        attrs: _StrainableAttributes,
+        recursive: bool = True,
+        string: None = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 3,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
+        ...
+
+    @overload
+    def __call__(
+        self,
+        name: _FindMethodName,
+        attrs: Optional[_StrainableAttributes] = None,
+        recursive: bool = True,
+        string: Optional[_StrainableString] = None,
+        limit: Optional[int] = None,
+        _stacklevel: int = 3,
+        **kwargs: _StrainableAttribute,
+    ) -> _SomeTags:
         ...
 
     def __call__(
@@ -2473,12 +2503,14 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
+        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Calling a Tag like a function is the same as calling its
-        find_all() method. Eg. tag('a') returns a list of all the A tags
-        found within this tag."""
+        find_all() method.
+
+        Eg. tag('a') returns a list of all the A tags found within this tag.
+        """
         return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), _stacklevel=_stacklevel, **kwargs)
 
     def __getattr__(self, subtag: str) -> Optional[Tag]:

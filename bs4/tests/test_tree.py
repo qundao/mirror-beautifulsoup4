@@ -1456,6 +1456,7 @@ all_find_type_methods = [
     "find_next_siblings",
     "find_previous_sibling",
     "find_previous_siblings",
+    "__call__",
 ]
 
 
