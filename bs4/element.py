@@ -3023,7 +3023,7 @@ class Tag(PageElement):
     ) -> _AtMostOneTag:
         ...
 
-    # e.g. find_all(attrs=dict(attr="value"))
+    # e.g. find(attrs=dict(attr="value"))
     #   -> only tags have attrs
     #      -> tag
     @overload
@@ -3032,7 +3032,7 @@ class Tag(PageElement):
         name: None,
         attrs: _StrainableAttributes,
         recursive: bool = True,
-        string: None = None,
+        string: Optional[_StrainableString] = None,
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneTag:
         ...
@@ -3133,7 +3133,7 @@ class Tag(PageElement):
         name: None,
         attrs: _StrainableAttributes,
         recursive: bool = True,
-        string: None = None,
+        string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
         _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
