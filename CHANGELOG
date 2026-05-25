@@ -20,6 +20,10 @@
 * Fix an unhandled exception in Tag.append when passed an empty
   BeautifulSoup object. [bug=2140924]
 
+* Fix a bug in the html.parser tree builder that triggers if a single
+  document includes both the "<br>" version of a void element and
+  the "<br/>" version. [bug=2154141]
+
 * No bug was ever filed for this, but it's possible that you could get a
   bizarre return value by passing BeautifulSoup objects into
   Tag.extend(). The return value is now consistently the list of

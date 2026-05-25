@@ -803,6 +803,13 @@ Hello, world!
         self.assert_soup("&#x10000000000000;", expect)
         self.assert_soup("&#1000000000;", expect)
 
+    # Verify a fix to [bug=2154141], where a <br> tag reprogrammed a subsequent <br /> tag.
+    def test_self_closing_tags_of_both_types(self):
+        soup = self.soup("""<p>Plain void: X<br>Y</p><p>Self-close: A<br />B<br />C</p>""")
+        p1, p2 = soup.find_all("p")
+        assert 3 == len(list(p1.children)) # "Plain void: X", "br", "y"
+        assert 5 == len(list(p2.children)) # "Self-close: A", "br", "B", "br", "C"
+
     def test_multipart_strings(self):
         "Mostly to prevent a recurrence of a bug in the html5lib treebuilder."
         soup = self.soup("<html><h2>\nfoo</h2><p></p></html>")
