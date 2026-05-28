@@ -37,6 +37,10 @@
   find* method needs to issue a Python warning. Removing an argument makes
   the huge number of overrides more manageable.
 
+* The HTML-related regular expressions and data structures in
+  EntitySubstitution are now instantiated lazily when one of them is
+  first accessed. This makes initial import a bit faster. [bug=2154394]
+
 = 4.14.3 (20251130)
 
 * When using one of the lxml tree builders, you can pass in
