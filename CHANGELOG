@@ -32,9 +32,10 @@
   Tag.extend(). The return value is now consistently the list of
   elements that were added to the Tag.
 
-* The __call__ method doesn't need to take _stacklevel as an
-  argument, because no other internal method calls it. Removing it
-  makes the overload code smaller.
+* Removed the internal _stacklevel argument to the find* methods, in favor of
+  calculating the appropriate stack level in the rare cases where a
+  find* method needs to issue a Python warning. Removing an argument makes
+  the huge number of overrides more manageable.
 
 = 4.14.3 (20251130)
 

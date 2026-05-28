@@ -3,6 +3,7 @@ from __future__ import annotations
 # Use of this source code is governed by the MIT license.
 __license__ = "MIT"
 
+import inspect
 import re
 import warnings
 
@@ -809,7 +810,6 @@ class PageElement(object):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -822,7 +822,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -833,7 +832,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Find all `PageElement` objects that match the given criteria and
@@ -846,7 +844,6 @@ class PageElement(object):
         :param attrs: Additional filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
@@ -855,7 +852,6 @@ class PageElement(object):
             string,
             limit,
             self.next_elements,
-            _stacklevel=_stacklevel + 1,
             **kwargs,
         )
 
@@ -917,7 +913,6 @@ class PageElement(object):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -930,7 +925,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -941,7 +935,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Find all siblings of this `PageElement` that match the given criteria
@@ -954,7 +947,6 @@ class PageElement(object):
         :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
@@ -963,7 +955,6 @@ class PageElement(object):
             string,
             limit,
             self.next_siblings,
-            _stacklevel=_stacklevel + 1,
             **kwargs,
         )
 
@@ -1028,7 +1019,6 @@ class PageElement(object):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -1041,7 +1031,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -1052,7 +1041,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Look backwards in the document from this `PageElement` and find all
@@ -1065,7 +1053,6 @@ class PageElement(object):
         :param attrs: Additional filters on attribute values.
         :param string: A filter for a `NavigableString` with specific text.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
@@ -1074,7 +1061,6 @@ class PageElement(object):
             string,
             limit,
             self.previous_elements,
-            _stacklevel=_stacklevel + 1,
             **kwargs,
         )
 
@@ -1143,7 +1129,6 @@ class PageElement(object):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -1156,7 +1141,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -1167,7 +1151,6 @@ class PageElement(object):
         attrs: Optional[_StrainableAttributes] = None,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings,_QueryResults]:
         """Returns all siblings to this PageElement that match the
@@ -1180,7 +1163,6 @@ class PageElement(object):
         :param attrs: Additional filters on attribute values.
         :param string: A filter for a NavigableString with specific text.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         return self._find_all(
@@ -1189,7 +1171,6 @@ class PageElement(object):
             string,
             limit,
             self.previous_siblings,
-            _stacklevel=_stacklevel + 1,
             **kwargs,
         )
 
@@ -1222,7 +1203,7 @@ class PageElement(object):
         # set of arguments.
         r = None
         results = self.find_parents(
-            name, attrs, 1, _stacklevel=3, **kwargs
+            name, attrs, 1, **kwargs
         )
         if results:
             r = results[0]
@@ -1235,7 +1216,6 @@ class PageElement(object):
         name: _OptionalFindMethodName = None,
         attrs: Optional[_StrainableAttributes] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         """Find all parents of this `PageElement` that match the given criteria.
@@ -1246,14 +1226,13 @@ class PageElement(object):
         :param name: A filter on tag name.
         :param attrs: Additional filters on attribute values.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         iterator = self.parents
         # Only Tags can have children, so this ResultSet will contain
         # nothing but Tags.
         return cast(ResultSet[Tag], self._find_all(
-            name, attrs, None, limit, iterator, _stacklevel=_stacklevel + 1, **kwargs
+            name, attrs, None, limit, iterator, **kwargs
         ))
 
     findParents = _deprecated_function_alias("findParents", "find_parents", "4.0.0")
@@ -1284,10 +1263,35 @@ class PageElement(object):
         **kwargs: _StrainableAttribute,
     ) -> _AtMostOneElement:
         r: _AtMostOneElement = None
-        results: _QueryResults = method(name, attrs, string, 1, _stacklevel=4, **kwargs)
+        results: _QueryResults = method(name, attrs, string, 1, **kwargs)
         if results:
             r = results[0]
         return r
+
+    @property
+    def _warning_stack_level(self) -> int:
+        """Find the appropriate stack level to use when issuing a warning relating to one of the find* methods."""
+        # The find* methods call each other, which makes it
+        # difficult to track how deep we are in the stack
+        # vis-a-vis the caller's entry point into the bs4.element
+        # module. However, we know that all of the find* methods
+        # are in bs4.element, and there's no code in this module
+        # that triggers the warnings we need to issue.
+        #
+        # (There is _test_ code that triggers the warnings, but that's
+        # in bs4.tests.)
+        #
+        # Therefore we can go up the stack until we leave the
+        # bs4.element module, and use the distance between here and
+        # there as the stacklevel.
+        stacklevel = 0
+        for frameinfo in inspect.stack(context=0):
+            if (frameinfo.frame is not None
+                and frameinfo.frame.f_globals is not None
+                and frameinfo.frame.f_globals.get('__name__', '') != "bs4.element"):
+                break
+            stacklevel += 1
+        return stacklevel
 
     def _find_all(
         self,
@@ -1296,7 +1300,6 @@ class PageElement(object):
         string: Optional[_StrainableString],
         limit: Optional[int],
         generator: Iterator[PageElement],
-        _stacklevel: int = 3,
         **kwargs: _StrainableAttribute,
     ) -> _QueryResults:
         """Iterates over a generator looking for things that match."""
@@ -1306,7 +1309,7 @@ class PageElement(object):
             warnings.warn(
                 "The 'text' argument to find()-type methods is deprecated. Use 'string' instead.",
                 DeprecationWarning,
-                stacklevel=_stacklevel,
+                stacklevel=self._warning_stack_level,
             )
 
         if "_class" in kwargs:
@@ -1317,7 +1320,7 @@ class PageElement(object):
                     autocorrect="class_",
                 ),
                 AttributeResemblesVariableWarning,
-                stacklevel=_stacklevel,
+                stacklevel=self._warning_stack_level,
             )
 
         from bs4.filter import ElementFilter
@@ -2528,7 +2531,7 @@ class Tag(PageElement):
 
         Eg. tag('a') returns a list of all the A tags found within this tag.
         """
-        return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), _stacklevel=3, **kwargs)
+        return self._find_all(name, attrs, string, limit, self._generator_for_recursive(recursive), **kwargs)
 
     def __getattr__(self, subtag: str) -> Optional[Tag]:
         """Calling tag.subtag is the same as calling tag.find(name="subtag")"""
@@ -3077,7 +3080,7 @@ class Tag(PageElement):
         :param string: A filter on the `Tag.string` attribute.
         :kwargs: Additional filters on attribute values.
         """
-        tags = self._find_all(name, attrs, string, 1, self._generator_for_recursive(recursive), _stacklevel=3, **kwargs)
+        tags = self._find_all(name, attrs, string, 1, self._generator_for_recursive(recursive), **kwargs)
         if tags:
             return tags[0]
         return None
@@ -3104,7 +3107,6 @@ class Tag(PageElement):
         *,
         string: _StrainableString,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeNavigableStrings:
         ...
@@ -3119,7 +3121,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: None = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -3135,7 +3136,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -3152,7 +3152,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> _SomeTags:
         ...
@@ -3167,7 +3166,6 @@ class Tag(PageElement):
         recursive: bool = True,
         string: Optional[_StrainableString] = None,
         limit: Optional[int] = None,
-        _stacklevel: int = 2,
         **kwargs: _StrainableAttribute,
     ) -> Union[_SomeTags,_SomeNavigableStrings]:
         """Look in the children of this `PageElement` and find all
@@ -3182,11 +3180,9 @@ class Tag(PageElement):
             recursive search of this PageElement's children. Otherwise,
             only the direct children will be considered.
         :param limit: Stop looking after finding this many results.
-        :param _stacklevel: Used internally to improve warning messages.
         :kwargs: Additional filters on attribute values.
         """
         generator = self._generator_for_recursive(recursive)
-        _stacklevel += 1
 
         if string is not None and (name is not None or attrs is not None or kwargs):
             # TODO: Using the @overload decorator to express the three ways you
@@ -3194,18 +3190,17 @@ class Tag(PageElement):
             # feature.
             return cast(ResultSet[Tag],
                         self._find_all(name, attrs, string, limit, generator,
-                                       _stacklevel=_stacklevel, **kwargs)
-                        )
+                                       **kwargs))
 
         if string is None:
             # If string is None, we're searching for tags.
             return cast(ResultSet[Tag], self._find_all(
-                name, attrs, None, limit, generator, _stacklevel=_stacklevel, **kwargs
+                name, attrs, None, limit, generator, **kwargs
             ))
 
         # Otherwise, we're searching for strings.
         return cast(ResultSet[NavigableString], self._find_all(
-            None, None, string, limit, generator, _stacklevel=_stacklevel, **kwargs
+            None, None, string, limit, generator, **kwargs
         ))
 
     findAll = _deprecated_function_alias("findAll", "find_all", "4.0.0")
