@@ -1,5 +1,12 @@
 = 4.15.0 (Unreleased)
 
+* It is now possible to call new_tag() or new_string() directly on an
+  existing Tag or NavigableString object, rather than the associated
+  BeautifulSoup object. Note that this only works if the object is
+  currently inside a parse tree. This means you can't call new_tag()
+  or new_string() on an object that (to take the most obvious example)
+  was itself created with new_tag() or new_string(). [bug=2102119]
+
 * The type hints for the overloaded find* methods have been redone to
   eliminate type checker overrides. [bug=2122019]
 

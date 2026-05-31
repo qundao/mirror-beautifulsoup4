@@ -7,6 +7,7 @@ import warnings
 import pytest # type:ignore
 
 from bs4 import BeautifulSoup
+from bs4.builder import HTMLParserTreeBuilder
 from bs4.element import (
     AttributeValueList,
     Comment,
@@ -435,3 +436,83 @@ class TestEquality(SoupTest):
         # NavigableStrings with the same contents hash to the value of
         # the contents.
         assert hash(first_string) == hash(second_string) == hash("string")
+
+
+class TestElementCreation(SoupTest):
+    """Test the ability to create an element directly from another element."""
+
+    def setup_method(self):
+        # Prepare a BeautifulSoup object with a distinctive
+        # element_classes, whose TreeBuilder has a distinctive
+        # attribute_dict_class.
+        #
+        # We won't have access to the BeautifulSoup or the TreeBuilder from the
+        # new elements, so this is the easiest way to verify that they
+        # were used to create them.
+        class MyDict(dict):
+            pass
+        self.MyDict = MyDict
+        class MyComment(Comment):
+            pass
+        self.MyComment = MyComment
+        self.builder = HTMLParserTreeBuilder(attribute_dict_class = MyDict)
+        self.soup = BeautifulSoup("<a href='foo'>", builder=self.builder, element_classes={Comment: MyComment})
+
+    def test_new_tag(self):
+        a_tag = self.soup.a
+        assert a_tag._root_object is self.soup
+        assert isinstance(a_tag.attrs, self.MyDict)
+
+        tag2 = a_tag.new_tag(name="name", namespace="namespace", nsprefix="nsprefix", attrs=dict(attr1="value1"),
+                             sourceline=10, sourcepos=5, string="contents", attr2="value2")
+        # tag2 is not inside a parse tree, so it has no _root_obect
+        # and there is no way to get to the BeautifulSoup or
+        # TreeBuilder object it was created with.
+        assert tag2._root_object is None
+
+        # But we can verify that that TreeBuilder object was used,
+        # because its attribute_dict_class was used to instantiate the
+        # attribute dict.
+        assert isinstance(tag2.attrs, self.MyDict)
+
+        # Verify that the arguments to new_tag were passed along to
+        # the new tag.
+        assert tag2.namespace == "namespace"
+        assert tag2.prefix == "nsprefix"
+        assert tag2.attrs == dict(attr1="value1", attr2="value2")
+        assert tag2.sourceline == 10
+        assert tag2.sourcepos == 5
+        assert tag2.string == "contents"
+
+        # Since tag2 is not inside a parse tree, you cannot call new_tag() on it.
+        with pytest.raises(ValueError) as exc_info:
+            tag2.new_tag("a")
+        assert (
+            "Cannot call new_tag on a PageElement not contained in a BeautifulSoup object"
+            in str(exc_info.value)
+        )
+
+    def test_new_string(self):
+        a_tag = self.soup.a
+        string = a_tag.new_string("a new string", subclass=Comment)
+
+        # string is not inside a parse tree, so it has no _root_obect
+        # and there is no way to get to the BeautifulSoup or
+        # TreeBuilder object it was created with.
+        #
+        assert string._root_object is None
+
+        # But we can verify that it was created using those objects, because it's
+        # not a regular bs4.element.Comment. It's an instance of the MyComment subclass, as configured
+        # by the BeautifulSoup object.
+        assert isinstance(string, self.MyComment)
+
+        assert string == "a new string"
+
+        # Since string is not inside a parse tree, you cannot call new_string() on it.
+        with pytest.raises(ValueError) as exc_info:
+            string.new_string("another string")
+        assert (
+            "Cannot call new_string on a PageElement not contained in a BeautifulSoup object"
+            in str(exc_info.value)
+        )

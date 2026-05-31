@@ -56,21 +56,23 @@ if TYPE_CHECKING:
     )
     from bs4._typing import (
         _AtMostOneElement,
-        _AtMostOneTag,
         _AtMostOneNavigableString,
+        _AtMostOneTag,
         _AttributeValue,
         _AttributeValues,
         _Encoding,
         _InsertableElement,
         _OneElement,
         _QueryResults,
+        _RawAttributeValue,
+        _RawAttributeValues,
         _RawOrProcessedAttributeValues,
-        _StrainableElement,
-        _StrainableAttribute,
-        _StrainableAttributes,
-        _StrainableString,
         _SomeNavigableStrings,
         _SomeTags,
+        _StrainableAttribute,
+        _StrainableAttributes,
+        _StrainableElement,
+        _StrainableString,
     )
 
 _OneOrMoreStringTypes: TypeAlias = Union[
@@ -755,6 +757,46 @@ class PageElement(object):
             offset += 1
 
         return results
+
+    def new_tag(
+        self,
+        name: str,
+        namespace: Optional[str] = None,
+        nsprefix: Optional[str] = None,
+        attrs: Optional[_RawAttributeValues] = None,
+        sourceline: Optional[int] = None,
+        sourcepos: Optional[int] = None,
+        string: Optional[str] = None,
+        **kwattrs: _RawAttributeValue,
+    ) -> Tag:
+        """Create a new Tag associated with the same BeautifulSoup object as this PageElement is."""
+        root = self._root_object
+        if root is None:
+            raise ValueError("Cannot call new_tag on a PageElement not contained in a BeautifulSoup object")
+        return root.new_tag(name, namespace, nsprefix, attrs, sourceline, sourcepos, string, **kwattrs)
+
+    def new_string(self, s: str, subclass: Optional[Type[NavigableString]] = None
+                   ) -> NavigableString:
+        """Create a new NavigableString associated with the same BeautifulSoup object as this PageElement is."""
+        root = self._root_object
+        if root is None:
+            raise ValueError("Cannot call new_string on a PageElement not contained in a BeautifulSoup object")
+        return root.new_string(s, subclass)
+
+    @property
+    def _root_object(self) -> Optional[BeautifulSoup]:
+        """Find the BeautifulSoup object used to create this PageElement, assuming it's still attached."""
+        parent:Optional[Tag] = self.parent
+        while parent is not None and not parent._is_root:
+            parent = parent.parent
+        if parent is None:
+            return parent
+        return cast('BeautifulSoup', parent)
+
+    @property
+    def _is_root(self) -> bool:
+        """No, this object is not the root of its parse tree; only a BeautifulSoup object can be that."""
+        return False
 
     # No name or attrs + string -> string
     @overload

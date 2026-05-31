@@ -534,6 +534,11 @@ class BeautifulSoup(Tag):
         self.reset()
         self._feed()
 
+    @property
+    def _is_root(self):
+        """Yes, a BeautifulSoup object is the root of its parse tree. Used by the _root_object internal property."""
+        return True
+
     @classmethod
     @_deprecated(
         replaced_by="nothing (private method, will be removed)", version="4.13.0"
