@@ -2991,10 +2991,10 @@ Line numbers
 The ``html.parser`` and ``html5lib`` parsers can keep track of where in
 the original document each :py:class:`Tag` was found. You can access this
 information as ``Tag.sourceline`` (line number) and ``Tag.sourcepos``
-(position of the start tag within a line)::
+(position of the start tag within a line).
 
-Note that the two parsers mean slightly different things by
-``sourcepos``. For html.parser, ``sourcepos`` points to the first character of the
+Note that the two parsers mean slightly different things by ``sourcepos``.
+For html.parser, ``sourcepos`` points to the first character of the
 opening tag::
  
  markup = '<p class="1"\n>Paragraph 1</p>\n    <p class="2">Paragraph 2</p>'

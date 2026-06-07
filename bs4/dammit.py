@@ -1390,6 +1390,7 @@ class UnicodeDammit:
         character corresponding to the numeric reference and `replaced` is
         whether or not an unresolvable character was replaced with REPLACEMENT
         CHARACTER.
+
         """
         replacement = "\ufffd"
 
