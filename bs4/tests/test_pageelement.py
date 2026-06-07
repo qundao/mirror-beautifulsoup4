@@ -7,7 +7,7 @@ import warnings
 import pytest # type:ignore
 
 from bs4 import BeautifulSoup
-from bs4.builder import HTMLParserTreeBuilder
+from bs4.builder._htmlparser import HTMLParserTreeBuilder
 from bs4.element import (
     AttributeValueList,
     Comment,

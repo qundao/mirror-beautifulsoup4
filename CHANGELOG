@@ -1,4 +1,17 @@
-= 4.15.0 (Unreleased)
+= 4.15.0 (20260607)
+
+* This is the last Beautiful Soup release to officially support Python
+  3.7.
+
+* This is also the last release to support the obsolete methods,
+  attributes and classes that were deprecated in 4.13.0. In a
+  subsequent point release, the DeprecationWarning issued when you use
+  these obsolete features will be replaced by NotImplementedError,
+  giving you a final chance to change your code before the
+  implementations are removed entirely. Once the features are removed,
+  code that tries to use them will start behaving strangely, since
+  Beautiful Soup will generally interpret the method and attribute
+  names as tag names.
 
 * It is now possible to call new_tag() or new_string() directly on an
   existing Tag or NavigableString object, rather than the associated
