@@ -1581,7 +1581,7 @@ class NavigableString(str, PageElement):
         """Raise an exception """
         if isinstance(key, str):
             raise TypeError("string indices must be integers, not '{0}'. Are you treating a NavigableString like a Tag?".format(key.__class__.__name__))
-        return super(NavigableString, self).__getitem__(key)
+        return super().__getitem__(key)
 
     @property
     def string(self) -> str:
@@ -3379,7 +3379,7 @@ class ResultSet(List[_PageElementT], Generic[_PageElementT]):
     def __init__(
         self, source: Optional[ElementFilter], result: Iterable[_PageElementT] = ()
     ) -> None:
-        super(ResultSet, self).__init__(result)
+        super().__init__(result)
         self.source = source
 
     def __getattr__(self, key: str) -> None:
