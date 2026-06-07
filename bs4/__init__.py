@@ -1147,7 +1147,7 @@ class BeautifulSoup(Tag):
             warnings.warn(warning, DeprecationWarning, stacklevel=2)
         elif indent_level is False or pretty_print is False:
             indent_level = None
-        return prefix + super(BeautifulSoup, self).decode(
+        return prefix + super().decode(
             indent_level, eventual_encoding, formatter, iterator
         )
 
@@ -1168,7 +1168,7 @@ class BeautifulStoneSoup(BeautifulSoup):
             DeprecationWarning,
             stacklevel=2,
         )
-        super(BeautifulStoneSoup, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 # If this file is run as a script, act as an HTML pretty-printer.
