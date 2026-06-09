@@ -2435,6 +2435,12 @@ class Tag(PageElement):
                 return i
         raise ValueError("Tag.index: element not in tag")
 
+    @overload
+    def get(self, key: str, default: _AttributeValue) -> _AttributeValue:
+        ...
+    @overload
+    def get(self, key: str, default:None=None) -> Optional[_AttributeValue]:
+        ...
     def get(
         self, key: str, default: Optional[_AttributeValue] = None
     ) -> Optional[_AttributeValue]:
