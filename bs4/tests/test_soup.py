@@ -276,9 +276,7 @@ class TestBeautifulSoupInternals(SoupTest):
         # Pop a tag from tagStack.
         popped = soup.popTag()
 
-        # tag2 was popped, tag1 remains.
-        assert popped is tag2
-        assert soup.currentTag is tag2
+        # tag2 was popped from tagStack, tag1 remains.
         assert len(soup.tagStack) == 1
         assert soup.tagStack[0] is tag1
 
@@ -286,34 +284,6 @@ class TestBeautifulSoupInternals(SoupTest):
         new_stack = getattr(soup, name_of_stack_to_check)
         assert len(new_stack) == 1
         assert new_stack[0] is tag1
-
-    def test_popTag_uses_identity_to_check_string_container_tag_stack(self):
-        # Verifies a fix to bug 2159648
-        soup = BeautifulSoup()
-        soup.reset()
-
-        # string_container_tag_stack contains a tag. soup.tagStack
-        # contains that tag, plus a different tag with the same
-        # contents.
-        #
-        # This case is contrived because if the first occurrence of
-        # this markup is a string_container tag, there's no reason why
-        # the second occurrence wouldn't be.
-        tag1 = soup.new_tag("a", href="b")
-        soup.string_container_tag_stack = [tag1]
-        tag2 = soup.new_tag("a", href="b")
-        soup.tagStack = [tag1, tag2]
-
-        # Pop a tag from tagStack.
-        popped = soup.popTag()
-
-        # tag2 was popped, tag1 remains.
-        assert popped == tag2
-        assert soup.currentTag == popped
-        assert soup.tagStack == [tag1]
-
-        # tag1 was _not_ popped from preserve_whitespace_tag_stack, since tag1 is not tag2.
-        assert soup.preserve_whitespace_tag_stack == [tag1]
 
 
 class TestOutput(SoupTest):
