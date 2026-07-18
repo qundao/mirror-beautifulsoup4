@@ -804,10 +804,10 @@ class BeautifulSoup(Tag):
             self.open_tag_counter[tag.name] -= 1
         if (
             self.preserve_whitespace_tag_stack
-            and tag == self.preserve_whitespace_tag_stack[-1]
+            and tag is self.preserve_whitespace_tag_stack[-1]
         ):
             self.preserve_whitespace_tag_stack.pop()
-        if self.string_container_stack and tag == self.string_container_stack[-1]:
+        if self.string_container_stack and tag is self.string_container_stack[-1]:
             self.string_container_stack.pop()
         # print("Pop", tag.name)
         if self.tagStack:

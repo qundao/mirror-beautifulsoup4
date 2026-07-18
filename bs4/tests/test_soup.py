@@ -242,6 +242,79 @@ class TestConstructor(SoupTest):
             in str(exc_info.value)
         )
 
+class TestBeautifulSoupInternals(SoupTest):
+    """Direct tests of BeautifulSoup class internals, where testing with sample markup would be too contrived."""
+
+    @pytest.mark.parametrize(
+        "name_of_stack_to_check",
+        [
+            "preserve_whitespace_tag_stack",
+            "string_container_stack",
+        ],
+    )
+    def test_popTag_uses_tag_identity_when_checking_stacks(self, name_of_stack_to_check):
+        # Verifies a fix to bug 2159648.
+        soup = BeautifulSoup()
+        soup.reset()
+        stack_to_check = getattr(soup, name_of_stack_to_check)
+        assert stack_to_check == []
+
+        # Set up the internal stack we're testing to contain a certain
+        # tag. soup.tagStack contains that tag, plus a distinct tag
+        # with the same contents.
+        #
+        # This case is contrived because if the first occurrence of
+        # this markup ended up in the stack we're testing, there's no
+        # reason why the second occurrence wouldn't end up in the same
+        # stack.
+        tag1 = soup.new_tag("a", href="b")
+
+        setattr(soup, name_of_stack_to_check, [tag1])
+        tag2 = soup.new_tag("a", href="b")
+        soup.tagStack = [tag1, tag2]
+
+        # Pop a tag from tagStack.
+        popped = soup.popTag()
+
+        # tag2 was popped, tag1 remains.
+        assert popped is tag2
+        assert soup.currentTag is tag2
+        assert len(soup.tagStack) == 1
+        assert soup.tagStack[0] is tag1
+
+        # But tag1 was _not_ popped from the stack we're testing, since tag1 is not tag2.
+        new_stack = getattr(soup, name_of_stack_to_check)
+        assert len(new_stack) == 1
+        assert new_stack[0] is tag1
+
+    def test_popTag_uses_identity_to_check_string_container_tag_stack(self):
+        # Verifies a fix to bug 2159648
+        soup = BeautifulSoup()
+        soup.reset()
+
+        # string_container_tag_stack contains a tag. soup.tagStack
+        # contains that tag, plus a different tag with the same
+        # contents.
+        #
+        # This case is contrived because if the first occurrence of
+        # this markup is a string_container tag, there's no reason why
+        # the second occurrence wouldn't be.
+        tag1 = soup.new_tag("a", href="b")
+        soup.string_container_tag_stack = [tag1]
+        tag2 = soup.new_tag("a", href="b")
+        soup.tagStack = [tag1, tag2]
+
+        # Pop a tag from tagStack.
+        popped = soup.popTag()
+
+        # tag2 was popped, tag1 remains.
+        assert popped == tag2
+        assert soup.currentTag == popped
+        assert soup.tagStack == [tag1]
+
+        # tag1 was _not_ popped from preserve_whitespace_tag_stack, since tag1 is not tag2.
+        assert soup.preserve_whitespace_tag_stack == [tag1]
+
 
 class TestOutput(SoupTest):
     @pytest.mark.parametrize(

@@ -53,14 +53,17 @@ class TestEncoding(SoupTest):
         assert "\N{SNOWMAN}".encode("utf8") == soup.b.encode_contents(encoding="utf8")
 
     def test_encode_deeply_nested_document(self):
-        # This test verifies that encoding a string doesn't involve
+        # This test verifies that encoding a tree to a string doesn't involve
         # any recursive function calls. If it did, this test would
         # overflow the Python interpreter stack.
         limit = sys.getrecursionlimit() + 1
-        markup = "<span>" * limit
+        markup = "text"
+        for _ in range(limit):
+            markup = "<div>%stext</div>" % markup
+
         soup = self.soup(markup)
         encoded = soup.encode()
-        assert limit == encoded.count(b"<span>")
+        assert limit == encoded.count(b"<div>")
 
     def test_deprecated_renderContents(self):
         html = "<b>\N{SNOWMAN}</b>"

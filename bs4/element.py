@@ -2814,7 +2814,7 @@ class Tag(PageElement):
             # If the parent of the element we're about to yield is not
             # the tag currently on the stack, it means that the tag on
             # the stack closed before this element appeared.
-            while tag_stack and c.parent != tag_stack[-1]:
+            while tag_stack and c.parent is not tag_stack[-1]:
                 now_closed_tag = tag_stack.pop()
                 yield Tag.END_ELEMENT_EVENT, now_closed_tag
 

@@ -3,6 +3,9 @@
 * Tightened the type hint for the return value of Tag.get() when a default
   is provided. [bug=2156290]
 
+* Fixed a recursion error when creating a string from certain deeply nested
+  parse trees. [bug=2159648]
+
 = 4.15.0 (20260607)
 
 * This is the last Beautiful Soup release to officially support Python
